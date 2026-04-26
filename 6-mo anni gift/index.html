@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Our 6-month Anniversary</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <body>
+
+    <div class="bg-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <div class="doodles-container">
+        <svg class="doodle doodle-1" viewBox="0 0 100 20" width="120">
+            <path d="M0 10 Q 12.5 0, 25 10 T 50 10 T 75 10 T 100 10" fill="none" stroke="#D1BFF0" stroke-width="4" stroke-linecap="round"/>
+        </svg>
+        
+        <svg class="doodle doodle-2" viewBox="0 0 100 20" width="80">
+            <path d="M0 10 Q 12.5 20, 25 10 T 50 10 T 75 10 T 100 10" fill="none" stroke="#D1BFF0" stroke-width="3" stroke-linecap="round"/>
+        </svg>
+        
+        <svg class="doodle doodle-3" viewBox="0 0 24 24" width="40">
+            <path d="M12 2 L14.5 9.5 L22 12 L14.5 14.5 L12 22 L9.5 14.5 L2 12 L9.5 9.5 Z" fill="none" stroke="#A374D5" stroke-width="1.5" stroke-linejoin="round"/>
+        </svg>
+        
+        <svg class="doodle doodle-4" viewBox="0 0 24 24" width="45">
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" fill="none" stroke="#D1BFF0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+    </div>
+
+    <div id="pre-intro-screen" class="active-screen intro-overlay">
+        <div class="intro-content">
+            <div class="envelope-icon">💌</div>
+            <h2 class="title-love" style="font-size: 2.5em;">You have a new message...</h2>
+            <p class="handwriting">From Bibii.</p>
+            <button id="open-letter-btn" class="button-style" style="margin-top: 20px;">Mở thư</button>
+        </div>
+    </div>
+
+    <div id="auth-screen" class="inactive-screen">
+        <div class="auth-box">
+            <h2>Wat iz da Password?</h2>
+            <p class="handwriting">Nhập pass đi xong tui mới cho coi thư.</p>
+            <input type="text" id="password" placeholder="Đố biết đấy, hị.">
+            <button id="auth-btn" class="button-style">Confirm</button>
+            <p id="error-message"></p>
+        </div>
+    </div>
+
+    <div id="main-content" class="inactive-screen">
+        <section id="welcome-section" class="section navigation-section">
+            <img src="/Images/heartcat.jpg" alt="Mèo ôm tim">
+            <h1 style="max-width: 800px;">I prepared a Special Gift for u today. Do u wanna see it?</h1>
+            <div class="btn-group">
+                <button id="yes-btn" class="button-style">Yup, I want to!</button>
+                <button id="no-btn" class="button-style">Nah, I'm good.</button>
+            </div>
+        </section>
+
+        <section id="plead-section" class="section navigation-section">
+            <h1 style="font-size: 3em;">Why? Don't go 🥺</h1>
+            <img src="/Images/cry hello kitty.jpg" alt="Mèo khóc">
+            <p class="handwriting" style="font-size: 1.8em;">I'm sure u'll love it!</p>
+            <button id="go-back-btn" class="button-style">Okay, let me see...</button>
+        </section>
+
+        <section id="menu-section" class="section navigation-section">
+            <div class="menu-container">
+                <div class="menu-left">
+                    <h2 class="title-love">Gửi NhiNhi,</h2>
+                    <p class="handwriting">
+                        24/04/2026 là một ngày khá đặc biệt đấy chứ? Đúng hơm?
+                        <br><br>
+                        Nay anh có một món quà nhỏ muốn dành cho em. Hy vọng em sẽ
+                        thích nó. Yêu em.
+                    </p>
+                </div>
+
+                <div class="menu-right">
+                    <div class="menu-grid">
+                        <a href="#intro" class="jump-link menu-card" data-target="intro-section">
+                            <span class="card-icon">💌</span>
+                            <span class="card-text">Opening</span>
+                        </a>
+                        <a href="#music" class="jump-link menu-card" data-target="music-section">
+                            <span class="card-icon">🎵</span>
+                            <span class="card-text">Music</span>
+                        </a>
+                        <a href="#gallery" class="jump-link menu-card" data-target="gallery-section">
+                            <span class="card-icon">🖼️</span>
+                            <span class="card-text">Memories</span>
+                        </a>
+                        <a href="#pets" class="jump-link menu-card" data-target="pets-section">
+                            <span class="card-icon">🐾</span>
+                            <span class="card-text">Pets</span>
+                        </a>
+                        <a href="#words" class="jump-link menu-card" data-target="words-section">
+                            <span class="card-icon">💬</span>
+                            <span class="card-text">Hứ!</span>
+                        </a>
+                        <a href="#ending" class="jump-link menu-card" data-target="ending-section">
+                            <span class="card-icon">💖</span>
+                            <span class="card-text">Ending</span>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- intro -->
+        <section id="intro-section" class="section navigation-section">
+            <h2 class="title-love">Chin chàoo</h2>
+            <div class="story-container">
+                
+                <div class="photo-column" style="position: relative;">
+                    <img src="/Images/us.jpg" alt="Ảnh kỷ niệm">
+                    
+                    <svg class="photo-doodle" viewBox="0 0 100 100" width="70">
+                        <path d="M50 10 Q 50 50, 90 50 Q 50 50, 50 90 Q 50 50, 10 50 Q 50 50, 50 10 Z" fill="none" stroke="#A374D5" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M25 25 L35 35 M75 25 L65 35 M25 75 L35 65 M75 75 L65 65" stroke="#D1BFF0" stroke-width="3" stroke-linecap="round"/>
+                    </svg>
+                </div>
+
+                <div class="text-column">
+                    <p class="handwriting">
+                        Cũng nhanh phết he, mới ngày nào vẫn còn ngồi ở trên lớp GC mà
+                        giờ cũng đã được nửa năm rồi cơ đấy. Nửa năm nay trôi qua với 
+                        anh thật sự rất vui, rất ý nghĩa khi được học rất nhiều điều mới
+                        từ em, được trải nghiệm nhiều thứ mới cùng em. 
+                        <br><br>
+                        Thoai thế này hoi, còn đoạn sau nữa mà. Enjoy ~~
+                    </p>
+                </div>
+            </div>
+            <button class="jump-link back-to-menu button-style" data-target="menu-section">Go back</button>
+        </section>
+
+        <!-- music -->
+        <section id="music-section" class="section navigation-section">
+            <h2 class="title-love">Our Music before🎵</h2>
+            <p class="handwriting">Biếc sao khôm? Ngày trước thì gu nhạc 2 đứa trông..</p>
+            <div class="album-container">
+                <div class="album-card">
+                    <img src="/Images/albumbibi.jpg" alt="Gu của anh">
+                    <p class="handwriting">Anh thì tạp nham, chả đâu vào đâu.</p>
+                </div>
+                <div class="album-card">
+                    <img src="/Images/albumnhinhi.jpg" alt="Gu của em">
+                    <p class="handwriting">Em thì dân K-Pop đún nghĩa.</p>
+                </div>
+            </div>
+            <button class="jump-link button-style" data-target="music-wait-section" style="margin-top: 40px;">Next</button>
+        </section>
+
+        <section id="music-wait-section" class="section navigation-section">
+            <h2 class="title-love" style="font-size: 3.5em; margin-bottom: 40px;">Cơ mà, biếc sao khôm? </h2>
+            <button class="jump-link button-style" data-target="music-shared-section">Next</button>
+        </section>
+
+        <section id="music-shared-section" class="section navigation-section">
+            <h2 class="title-love">Our Music after🎵</h2>
+            <p class="handwriting">Thế mà sau đấy 2 đứa cũn biết nghe nhạc của nhau òi đấyy.</p>
+            <div class="album-container">
+                <div class="album-card">
+                    <img src="/Images/albumfubigubi.jpg" alt="Album chung 1">
+                    <p class="handwriting">Album fubigubi nề!</p>
+                </div>
+                <div class="album-card">
+                    <img src="/Images/albumtenten.jpg" alt="Album chung 2">
+                    <p class="handwriting">Album cho quán tụi mìn nề!</p>
+                </div>
+            </div>
+            <button class="jump-link button-style" data-target="music-details-section" style="margin-top: 40px;">Còn điều bí mật nữa nè...</button>
+        </section>
+
+        <section id="music-details-section" class="section navigation-section">
+    <h2 class="title-love" style="margin-bottom: 40px;">Our Melody</h2>
+    <p class="handwriting">Cũng có, trong số đó, những giai điệu đặc biệt nữa đó.</p>
+    <div class="gallery-split-container" style="max-width: 1100px; margin-top: 0;">
+        <div class="gallery-half">
+            <h3 class="menu-title" style="font-size: 1.6em;">Songs remind me of u!</h3>
+            <div class="vinyl-list">
+                <div class="vinyl-item">
+                    <div class="vinyl-wrapper" onclick="toggleAudio('audio1', this)">
+                        <img src="/Images/afterlikecover.jpg" alt="Cover" class="vinyl-record">
+                    </div>
+                    <div class="song-info">
+                        <p class="handwriting">After Like</p>
+                        <p class="singer">IVE</p>
+                    </div>
+                    <audio id="audio1" src="/audio/afterlike.mp3"></audio>
+                </div>
+                <div class="vinyl-item">
+                    <div class="vinyl-wrapper" onclick="toggleAudio('audio2', this)">
+                        <img src="/Images/newbeginningscover.jpg" alt="Cover" class="vinyl-record">
+                    </div>
+                    <div class="song-info">
+                        <p class="handwriting">New Beginnings</p>
+                        <p class="singer">NEFFEX</p>
+                    </div>
+                    <audio id="audio2" src="/audio/newbeginnings.mp3"></audio>
+                </div>
+                <div class="vinyl-item">
+                    <div class="vinyl-wrapper" onclick="toggleAudio('audio3', this)">
+                        <img src="/Images/sukidakaracover.png" alt="Cover" class="vinyl-record">
+                    </div>
+                    <div class="song-info">
+                        <p class="handwriting">好きだから</p>
+                        <p class="singer">ユイカ ft. れん</p>
+                    </div>
+                    <audio id="audio3" src="/audio/sukidakara.mp3"></audio>
+                </div>
+            </div>
+        </div>
+
+        <div class="gallery-half">
+            <h3 class="menu-title" style="font-size: 1.6em;">Your fav!</h3>
+            <div class="vinyl-list">
+                <div class="vinyl-item">
+                    <div class="vinyl-wrapper" onclick="toggleAudio('audio4', this)">
+                        <img src="/Images/Escapism_Singles_Cover.jpg" alt="Cover" class="vinyl-record">
+                    </div>
+                    <div class="song-info">
+                        <p class="handwriting">Escapism</p>
+                        <p class="singer">Steven Universe</p>
+                    </div>
+                    <audio id="audio4" src="/audio/escapism.mp3"></audio>
+                </div>
+                <div class="vinyl-item">
+                    <div class="vinyl-wrapper" onclick="toggleAudio('audio5', this)">
+                        <img src="/Images/herecomesathought.jpg" alt="Cover" class="vinyl-record">
+                    </div>
+                    <div class="song-info">
+                        <p class="handwriting">Here Comes A Thought</p>
+                        <p class="singer">Steven Universe</p>
+                    </div>
+                    <audio id="audio5" src="/audio/herecomesathought.mp3"></audio>
+                </div>
+                <div class="vinyl-item">
+                    <div class="vinyl-wrapper" onclick="toggleAudio('audio6', this)">
+                        <img src="/Images/Love_Like_You.jpg" alt="Cover" class="vinyl-record">
+                    </div>
+                    <div class="song-info">
+                        <p class="handwriting">Love Like You</p>
+                        <p class="singer">Steven Universe</p>
+                    </div>
+                    <audio id="audio6" src="/audio/lovelikeyou.mp3"></audio>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <button class="jump-link back-to-menu button-style" data-target="menu-section" style="margin-top: 40px;">Go back</button>
+</section>
+
+        <!-- memories -->
+        <section id="gallery-section" class="section navigation-section">
+            <div class="gallery-split-container">
+                <div class="gallery-half">
+                    <h2 class="title-love">Our Moments</h2>
+                    <div class="gallery-grid">
+                        <div class="gallery-card">
+                            <img src="/Images/us1.jpg" alt="Khoảnh khắc 1">
+                            <p class="handwriting">Biếc hun nhau he</p>
+                        </div>
+                        <div class="gallery-card">
+                            <img src="/Images/us2.jpg" alt="Khoảnh khắc 2">
+                            <p class="handwriting">Cũn gọi là cóa đi chộp ảnh Tết he</p>
+                        </div>
+                        <div class="gallery-card">
+                            <img src="/Images/us3.jpg" alt="Khoảnh khắc 3">
+                            <p class="handwriting">Trông như đang cầu hôn ý nhể?</p>
+                        </div>
+                        <div class="gallery-card">
+                            <img src="/Images/us4.jpg" alt="Khoảnh khắc 4">
+                            <p class="handwriting">Ể, mìn cưới thật á???</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-half">
+                    <h2 class="title-love">Your moments </h2>
+                    <div class="gallery-grid">
+                        <div class="gallery-card">
+                            <img src="/Images/her1.jpg" alt="Nóc nhà 1">
+                            <p class="handwriting">Đòi xoa đầu cơ, làm như là Pía í, hứ</p>
+                        </div>
+                        <div class="gallery-card">
+                            <img src="/Images/her2.jpg" alt="Nóc nhà 2">
+                            <p class="handwriting">Chụp giấu mặt tui đồ</p>
+                        </div>
+                        <div class="gallery-card">
+                            <img src="/Images/her3.jpg" alt="Nóc nhà 3">
+                            <p class="handwriting">Trông nhây phết xDD</p>
+                        </div>
+                        <div class="gallery-card">
+                            <img src="/Images/her4.jpg" alt="Nóc nhà 4">
+                            <p class="handwriting">Tấm này trông okay đấy, hớ hớ</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <button class="jump-link back-to-menu button-style" data-target="menu-section" style="margin-top: 50px;">Go back</button>
+        </section>
+
+        <!-- pets -->
+        <section id="pets-section" class="section navigation-section">
+            <h2 class="title-love">Our Pets 🐾</h2>
+            
+            <div class="pets-grid-container">
+                <div class="pet-column">
+                    <h3 class="menu-title" style="font-size: 1.8em; margin-bottom: 15px;">Pía</h3>
+                    <div class="gallery-card">
+                        <img src="/Images/pia1.jpg" alt="Pía 1">
+                        <p class="handwriting">Pía sao dị tròi?</p>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="/Images/pia2.jpg" alt="Pía 2">
+                        <p class="handwriting">Ô chu choa em Pía iuu.</p>
+                    </div>
+                </div>
+
+                <div class="pet-column">
+                    <h3 class="menu-title" style="font-size: 1.8em; margin-bottom: 15px;">Nyabati</h3>
+                    <div class="gallery-card">
+                        <img src="/Images/nyabati1.jpg" alt="Nyabati 1">
+                        <p class="handwriting">Nyabati ngáo lém.</p>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="/Images/nyabati2.jpg" alt="Nyabati 2">
+                        <p class="handwriting">Ô chu choa em Nyabati</p>
+                    </div>
+                </div>
+
+                <div class="pet-column">
+                    <h3 class="menu-title" style="font-size: 1.8em; margin-bottom: 15px;">2 đứa</h3>
+                    <div class="gallery-card">
+                        <img src="/Images/pyabati.jpg" alt="2 đứa 1">
+                        <p class="handwriting">Làm cái gì đâyy?</p>
+                    </div>
+                    <div class="gallery-card">
+                        <img src="/Images/pyabati2.jpg" alt="2 đứa 2">
+                        <p class="handwriting">2 em này Loafu Loafu.</p>
+                    </div>
+                </div>
+            </div>
+
+            <button class="jump-link back-to-menu button-style" data-target="menu-section" style="margin-top: 40px;">Go back</button>
+        </section>
+
+        <section id="words-section" class="section navigation-section">
+            <h2 class="title-love">Tui, tui có vài điều mún nói..</h2>
+            <ul class="reminders-list">
+                <li>Cái đồ, cái đồ ngủ muộn kìa, khôm dậy sớm chơi ví tui kìa. Hứ!</li>
+                <li>Tui muốn cậu phải, phải, phải tự tin hơn, phải vui hơn nữa, khôm đượt tự ti vì đó là việc của tui!</li>
+                <li>Tui cũn biết tự ái đấy nhá. Nên là đừn nói gì đó sát thương chuẩn quá nhá. Hứ</li>
+                <li>あなたは私の世界です。(∀｀*ゞ)ｴﾍﾍ</li>
+            </ul>
+            <button class="jump-link back-to-menu button-style" data-target="menu-section">Go back</button>
+        </section>
+
+        <section id="ending-section" class="section navigation-section ending-bg">
+            <div class="floating-hearts">
+                <div class="heart">💜</div><div class="heart">💜</div><div class="heart">💜</div>
+                <div class="heart">💜</div><div class="heart">💜</div><div class="heart">💜</div>
+            </div>
+
+            <h2 class="title-love" style="font-size: 3em; position: relative; z-index: 2;">Thank you for everything ✨</h2>
+            
+            <div class="final-card" style="position: relative; z-index: 2;">
+                <div class="gallery-card" style="max-width: 250px; margin: 0 auto 25px;">
+                    <img src="/Images/best.jpg" alt="Our best moment" style="aspect-ratio: 1/1; object-fit: cover; width: 100%; border-radius: 10px;">
+                </div>
+                
+                <p class="handwriting" style="font-size: 1.6em; margin-bottom: 30px;">
+                    This is absolutely beautiful, you guys. I can't believe it comes to an end. <br><br>
+                    Hai đứa mìn sẽ cùng đi lâu hơn nữa nhe, <br>
+                    Đến lúc cưới xong ở ví nhau lun nhe! <br><br>
+                    Yêu em lắm,<br>
+                    Luv u. <br>
+                    <strong>Bibii 💜</strong>
+                </p>
+
+                <div class="btn-group">
+                    <button class="jump-link button-style back-to-menu" data-target="menu-section" style="margin-top: 0;">Xem lại từ đầu</button>
+                    <button class="jump-link button-style" data-target="confirm-end-section">Kết thúc 💖</button>
+                </div>
+            </div>
+        </section>
+
+        <section id="confirm-end-section" class="section navigation-section">
+            <h1 class="title-love" style="font-size: 3.5em;">Khoan đã! Em chắc tưaa?</h1>
+            <p class="handwriting" style="font-size: 1.8em; margin-bottom: 40px;">Đóng cái là hớt cho coi lun nhe!!</p>
+            
+            <div class="btn-group">
+                <button class="jump-link button-style" data-target="real-final-section">Chắc chắn 💜</button>
+                <button class="jump-link button-style back-to-menu" data-target="menu-section" style="margin-top: 0;">Chưa, tui mún xem lại</button>
+            </div>
+        </section>
+
+        <section id="real-final-section" class="section navigation-section ending-bg">
+            <div class="floating-hearts">
+                <div class="heart">💜</div><div class="heart">💜</div><div class="heart">💜</div>
+                <div class="heart">💜</div><div class="heart">💜</div><div class="heart">💜</div>
+            </div>
+
+            <div class="final-card" style="position: relative; z-index: 2; padding: 60px 40px;">
+                <h2 class="title-love" style="font-size: 3.5em; margin-bottom: 20px;">The End.</h2>
+                <p class="handwriting" style="font-size: 1.8em; margin-bottom: 0; line-height: 1.6;">
+                    Cảm ơn em vì đã dành thời gian cho cái này.<br>
+                    Yêu em nhiều.
+                </p>
+            </div>
+        </section>
+
+    </div>
+
+    <div id="loading-screen" class="inactive-screen loading-overlay">
+        <h2>Loading... 💜</h2>
+    </div>
+
+    <script src="scripts.js"></script>
+</body>
+</html>

@@ -1,0 +1,445 @@
+/* =========================================
+   1. RESET & CƠ BẢN (TONE TÍM PASTEL)
+   ========================================= */
+body {
+    margin: 0;
+    font-family: 'Itim', cursive;
+    background-color: #F8F4FF; /* Nền tím cực nhạt */
+    color: #333;
+    overflow-x: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+}
+
+/* =========================================
+   2. TRẠNG THÁI HIỂN THỊ CHUNG & LOADING
+   ========================================= */
+.active-screen { display: flex !important; }
+.inactive-screen { display: none !important; }
+
+.loading-overlay {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    background-color: #F8F4FF;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999; 
+    color: #A374D5; /* Chữ loading màu tím */
+    font-size: 2em;
+    animation: pulse 1s infinite;
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+    100% { transform: scale(1); }
+}
+
+/* =========================================
+   2.5. MÀN HÌNH INTRO (BỨC THƯ TRƯỚC PASS)
+   ========================================= */
+.intro-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100vh;
+    background-color: #F8F4FF;
+    z-index: 10000; 
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+}
+
+.intro-content { text-align: center; animation: fadeIn 1s ease-out; }
+
+.envelope-icon { font-size: 80px; margin-bottom: 20px; animation: bounce 2s infinite; }
+
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+    40% { transform: translateY(-20px); }
+    60% { transform: translateY(-10px); }
+}
+
+.intro-overlay.hide-intro { opacity: 0; transform: translateY(-50px); pointer-events: none; }
+
+/* =========================================
+   3. PHẦN 1: MÀN HÌNH NHẬP MẬT MÃ
+   ========================================= */
+#auth-screen { flex-direction: column; justify-content: center; align-items: center; }
+
+.auth-box {
+    background-color: #FFF; padding: 40px; border-radius: 15px;
+    box-shadow: 0 8px 16px rgba(163, 116, 213, 0.15); /* Bóng tím */
+    text-align: center; width: 320px;
+}
+
+.auth-box h2 { font-size: 1.8em; margin-top: 0; margin-bottom: 20px; color: #A374D5; }
+
+.auth-box input {
+    width: 80%; padding: 12px; margin-bottom: 15px;
+    border: 2px solid #D1BFF0; border-radius: 8px; /* Viền tím nhạt */
+    font-size: 1.1em; outline: none; font-family: inherit;
+}
+.auth-box input:focus { border-color: #A374D5; }
+#error-message { color: #ff4757; font-size: 1em; margin-top: 15px; height: 20px; }
+
+/* =========================================
+   4. PHẦN 2: LAYOUT ĐIỀU HƯỚNG TỪNG TRANG
+   ========================================= */
+#main-content { width: 100%; max-width: 1200px; margin: 0 auto; }
+
+.section {
+    display: none; width: 100%; min-height: 100vh;
+    flex-direction: column; justify-content: center; align-items: center; text-align: center;
+    padding: 20px; box-sizing: border-box;
+}
+
+.section.active { display: flex; animation: fadeIn 0.5s ease-out; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Các tiêu đề và Nút */
+.title-love { color: #A374D5; font-size: 2.8em; margin-bottom: 25px; margin-top: 0; }
+.handwriting { font-size: 1.5em; line-height: 1.6; color: #555; margin: 0; }
+.btn-group { display: flex; gap: 20px; margin-top: 20px; justify-content: center; }
+
+.button-style {
+    background-color: #A374D5; color: white;
+    padding: 12px 25px; border: none; border-radius: 8px;
+    cursor: pointer; font-size: 1.2em; font-family: inherit;
+    transition: all 0.3s ease; text-decoration: none; display: inline-block;
+}
+.button-style:hover { background-color: #8954C2; transform: scale(1.05); } /* Tím đậm khi hover */
+
+.back-to-menu {
+    margin-top: 30px; background-color: #FFF; color: #A374D5; border: 2px solid #D1BFF0;
+}
+.back-to-menu:hover { background-color: #F4EDFF; }
+
+#welcome-section img, #plead-section img { max-width: 300px; height: auto; margin-bottom: 25px; }
+
+/* =========================================
+   5. TRANG MỤC LỤC (MENU)
+   ========================================= */
+.menu-container {
+    display: flex; width: 100%; max-width: 1000px; gap: 50px; align-items: center;
+}
+.menu-left { flex: 1; text-align: left; }
+.menu-left .title-love { font-size: 3.5em; margin-bottom: 20px; }
+.menu-right { flex: 1.2; }
+
+.menu-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+.menu-card {
+    background-color: #FFF; display: flex; align-items: center;
+    padding: 15px 20px; border-radius: 15px; text-decoration: none;
+    box-shadow: 0 4px 10px rgba(163, 116, 213, 0.1);
+    border: 2px solid transparent; transition: all 0.3s ease; gap: 15px;
+}
+.menu-card:hover {
+    transform: translateY(-5px); box-shadow: 0 8px 20px rgba(163, 116, 213, 0.2);
+    border-color: #D1BFF0; background-color: #F4EDFF;
+}
+.menu-card .card-icon { font-size: 2.2em; }
+.menu-card .card-text { font-size: 1.4em; color: #333; font-weight: bold; }
+
+/* =========================================
+   6. TRANG NỘI DUNG MỞ ĐẦU (INTRO)
+   ========================================= */
+.story-container { display: flex; width: 100%; max-width: 900px; gap: 40px; align-items: flex-start; }
+.photo-column { flex: 1; }
+.photo-column img {
+    width: 100%; border: 8px solid #FFF; border-radius: 5px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1); transform: rotate(-2deg);
+}
+.text-column {
+    flex: 2; background-color: #FFF; padding: 40px; border-radius: 15px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05); text-align: left;
+}
+
+/* =========================================
+   7. TRANG ÂM NHẠC (ALBUMS)
+   ========================================= */
+.album-container {
+    display: flex; justify-content: center; gap: 40px;
+    margin-top: 30px; width: 100%; max-width: 800px;
+}
+.album-card {
+    flex: 1; background: #FFF; padding: 20px; border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(163, 116, 213, 0.1); text-align: center;
+    transition: transform 0.3s ease;
+}
+.album-card:hover { transform: translateY(-5px); }
+.album-card img {
+    width: 100%; max-width: 250px; aspect-ratio: 1/1; object-fit: cover;
+    border-radius: 10px; margin-bottom: 15px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* =========================================
+   STYLE CHO ĐĨA THAN (VINYL)
+   ========================================= */
+.vinyl-list {
+    display: flex; flex-direction: column; gap: 20px; width: 100%; align-items: center;
+}
+
+.vinyl-item {
+    display: flex; align-items: center; gap: 20px;
+    background: #FFF; padding: 15px 25px; border-radius: 20px;
+    box-shadow: 0 4px 10px rgba(163, 116, 213, 0.1); width: 85%;
+    transition: transform 0.3s ease; text-align: left;
+}
+
+.vinyl-item:hover { transform: translateY(-3px); box-shadow: 0 6px 15px rgba(163, 116, 213, 0.2); }
+
+/* Khung bọc ngoài đĩa than */
+.vinyl-wrapper {
+    position: relative; width: 60px; height: 60px; cursor: pointer;
+    border-radius: 50%; box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    background-color: #111; /* Màu viền đen của đĩa than */
+    border: 3px solid #222;
+}
+
+/* Ảnh bìa bài hát ép tròn */
+.vinyl-record {
+    width: 100%; height: 100%; object-fit: cover; border-radius: 50%; opacity: 0.9;
+}
+
+.song-info {
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+}
+
+.song-info .singer {
+    font-size: 0.9em;
+    color: #888;
+    margin: 0;
+}
+
+/* Tạo cái lỗ tâm đĩa than màu trắng */
+.vinyl-wrapper::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%); width: 12px; height: 12px;
+    background-color: #F8F4FF; border-radius: 50%; border: 1px solid #ccc;
+}
+
+/* Hiệu ứng xoay tròn khi có class .spinning */
+.vinyl-wrapper.spinning { animation: spin 4s linear infinite; }
+
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+.vinyl-item p { margin: 0; font-size: 1.2em; color: #444; }
+
+/* =========================================
+   8. TRANG GALLERY (CHIA ĐÔI 2X2)
+   ========================================= */
+.gallery-split-container {
+    display: flex; justify-content: center; gap: 50px;
+    width: 100%; max-width: 1100px; margin-top: 20px;
+}
+.gallery-half { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 100%; }
+.gallery-card {
+    background: #FFF; padding: 15px; border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(163, 116, 213, 0.1); display: flex;
+    flex-direction: column; align-items: center; transition: all 0.3s ease;
+}
+.gallery-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(163, 116, 213, 0.2); }
+.gallery-card img {
+    width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+    border-radius: 10px; margin-bottom: 12px;
+}
+
+/* =========================================
+   STYLE CHO CHUYÊN MỤC PETS (CHIA 3 CỘT)
+   ========================================= */
+.pets-grid-container {
+    display: flex; 
+    justify-content: center; 
+    gap: 50px; /* TĂNG: Khoảng cách giữa 3 cột rộng ra */
+    width: 90%; 
+    max-width: 900px; /* GIẢM: Bóp hẹp tổng chiều rộng lại để ép ảnh nhỏ đi */
+    margin-top: 20px;
+}
+
+.pet-column { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    gap: 40px; /* TĂNG: Khoảng cách dọc giữa các ảnh trong cùng 1 cột */
+    align-items: center; 
+}
+.pet-column .gallery-card {
+    width: 100%; background: #FFF; padding: 15px; border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(163, 116, 213, 0.1); transition: transform 0.3s ease;
+}
+.pet-column .gallery-card img {
+    width: 100%; aspect-ratio: 1 / 1; object-fit: cover;
+    border-radius: 10px; margin-bottom: 10px;
+}
+.pet-column .gallery-card:hover { transform: translateY(-5px); }
+
+/* =========================================
+   9. TRANG LỜI NHẮC NHỞ
+   ========================================= */
+.reminders-list {
+    font-size: 1.5em; list-style-type: none; padding: 40px; margin: 0;
+    line-height: 2; background: #fff; border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(163, 116, 213, 0.1); text-align: left; max-width: 600px;
+}
+.reminders-list li { border-bottom: 1px dashed #eee; padding-bottom: 4px; margin-bottom: 5px; }
+.reminders-list li:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0;}
+.reminders-list li:before { content: "💜 "; margin-right: 10px; } /* Đổi icon tim thành tim tím */
+
+/* =========================================
+   10. TRANG LỜI KẾT (GRAND FINALE)
+   ========================================= */
+.ending-bg {
+    position: relative;
+    overflow: hidden; /* Giữ cho tim bay không bị tràn ra ngoài trang */
+}
+
+/* Khung thiệp kết mờ ảo */
+.final-card {
+    background: rgba(255, 255, 255, 0.7);
+    padding: 40px;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(163, 116, 213, 0.2);
+    max-width: 700px;
+    width: 90%;
+    backdrop-filter: blur(10px); /* Hiệu ứng kính mờ xịn xò */
+    border: 2px solid rgba(255, 255, 255, 0.5);
+}
+
+/* --- HIỆU ỨNG TIM BAY (FLOATING HEARTS) --- */
+.floating-hearts {
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    pointer-events: none; /* Đảm bảo tim bay lên không đè vào nút bấm */
+    z-index: 1;
+}
+
+.heart {
+    position: absolute;
+    bottom: -10%;
+    opacity: 0;
+    animation: floatUp 7s linear infinite;
+}
+
+/* Cài đặt vị trí, kích thước và tốc độ bay ngẫu nhiên cho từng trái tim */
+.heart:nth-child(1) { left: 10%; animation-delay: 0s; font-size: 1.5em; }
+.heart:nth-child(2) { left: 25%; animation-delay: 2s; font-size: 2.5em; }
+.heart:nth-child(3) { left: 50%; animation-delay: 4s; font-size: 1.8em; }
+.heart:nth-child(4) { left: 75%; animation-delay: 1s; font-size: 2.2em; }
+.heart:nth-child(5) { left: 85%; animation-delay: 3s; font-size: 1.6em; }
+.heart:nth-child(6) { left: 15%; animation-delay: 5s; font-size: 2em; }
+
+@keyframes floatUp {
+    0% { transform: translateY(0) rotate(0deg); opacity: 0; }
+    10% { opacity: 0.6; } /* Tim hiện rõ dần */
+    80% { opacity: 0.6; }
+    100% { transform: translateY(-120vh) rotate(360deg); opacity: 0; } /* Tim bay lên tít trên và mờ đi */
+}
+
+/* =========================================
+   11. BACKGROUND TRANG TRÍ (LOANG MÀU PASTEL)
+   ========================================= */
+.bg-blobs {
+    position: fixed;
+    top: 0; left: 0; 
+    width: 100vw; height: 100vh;
+    z-index: -1; /* Ép nó nằm dưới cùng mọi thứ */
+    overflow: hidden;
+    pointer-events: none; /* Không cản trở khi bấm nút hay lướt web */
+}
+
+/* Định dạng chung cho vệt sáng: Làm mờ nhòe (blur) đi 90px để tạo độ loang */
+.blob {
+    position: absolute;
+    filter: blur(90px);
+    opacity: 0.6; /* Độ đậm nhạt vừa phải cho đỡ trống */
+    border-radius: 50%;
+    animation: floatBlob 15s infinite alternate ease-in-out;
+}
+
+/* Vệt tím góc trên trái */
+.blob-1 {
+    top: -10%; left: -10%;
+    width: 400px; height: 400px;
+    background-color: #D1BFF0; 
+}
+
+/* Vệt hồng pastel góc dưới phải */
+.blob-2 {
+    bottom: -15%; right: -5%;
+    width: 500px; height: 500px;
+    background-color: #FADCF6; 
+    animation-delay: -5s; /* Chạy lệch nhịp cho tự nhiên */
+}
+
+/* Vệt tím sữa lơ lửng giữa màn hình */
+.blob-3 {
+    top: 40%; left: 60%;
+    width: 300px; height: 300px;
+    background-color: #E2D1F9; 
+    animation-delay: -10s;
+}
+
+/* Hiệu ứng trôi nhè nhẹ bồng bềnh */
+@keyframes floatBlob {
+    0% { transform: translate(0, 0) scale(1); }
+    100% { transform: translate(40px, 50px) scale(1.1); }
+}
+
+/* =========================================
+   12. NÉT VẼ TRANG TRÍ (DOODLES)
+   ========================================= */
+.doodles-container {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    z-index: 0; /* Nằm trên lớp màu loang nhưng dưới nội dung chữ/ảnh */
+    pointer-events: none; /* Tránh việc user lỡ tay bấm nhầm vào nét vẽ */
+}
+
+.doodle {
+    position: absolute;
+    opacity: 0.6; /* Làm mờ đi một chút để không bị tranh spotlight với ảnh */
+    animation: wiggle 5s infinite ease-in-out alternate;
+}
+
+/* Đặt vị trí rải rác ở 4 góc */
+.doodle-1 { top: 18%; left: 8%; transform: rotate(-15deg); }
+.doodle-2 { bottom: 20%; right: 8%; transform: rotate(20deg); animation-delay: -1s; }
+.doodle-3 { top: 25%; right: 12%; transform: rotate(15deg); animation-delay: -2s; }
+.doodle-4 { bottom: 18%; left: 10%; transform: rotate(-25deg); animation-delay: -3s; }
+
+/* Hiệu ứng rung rinh lơ lửng như nét vẽ tay */
+@keyframes wiggle {
+    0% { transform: translateY(0) rotate(-5deg) scale(1); }
+    100% { transform: translateY(-15px) rotate(5deg) scale(1.05); }
+}
+
+/* =========================================
+   NÉT VẼ TRANG TRÍ RIÊNG CHO ẢNH (PHOTO DOODLE)
+   ========================================= */
+.photo-doodle {
+    position: absolute;
+    top: -25px;   /* Nhô lên góc trên một chút */
+    right: -25px; /* Nhô ra góc phải một chút */
+    z-index: 10;  /* Nổi lên trên cùng bức ảnh */
+    opacity: 0.9;
+    animation: popWiggle 3s infinite ease-in-out alternate;
+    pointer-events: none; /* Tránh cản trở nếu lỡ bấm vào */
+}
+
+/* Hiệu ứng rung rinh và to nhỏ nhịp nhàng */
+@keyframes popWiggle {
+    0% { transform: scale(0.95) rotate(-5deg); }
+    100% { transform: scale(1.1) rotate(10deg); }
+}
