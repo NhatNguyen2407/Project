@@ -3,7 +3,7 @@ import React, { createContext, useState } from 'react';
 export const WindowsContext = createContext();
 
 export const WindowsProvider = ({ children }) => {
-  const [openApps, setOpenApps] = useState([]); //seeing which app is opened
+  const [openApps, setOpenApps] = useState([]);
 
   const openApp = (appID) => {
     if (!openApps.includes(appID)) {

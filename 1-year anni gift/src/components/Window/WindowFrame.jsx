@@ -1,5 +1,5 @@
 import React, { useContext } from 'react';
-import { WindowsContext } from '../../context/WindowsContext';
+import { WindowsContext } from '../../context/WindowContext';
 
 const WindowFrame = ({ title, appID, children }) => {
   const { closeApp } = useContext(WindowsContext);

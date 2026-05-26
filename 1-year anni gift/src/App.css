@@ -1,3 +1,56 @@
+/* RESET */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+
+/* DESKTOP BACKGROUND */
+.desktop-environment {
+  width: 100vw;
+  height: 100vh;
+  background-image: url('./assets/kuromitheme.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+
+/* SHORTCUTS ICONS */
+.shortcut-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 20px;
+  align-items: flex-start;
+  flex: 1;
+}
+
+.icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 80px;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 8px;
+  transition: background-color 0.2s;
+}
+
+.icon:hover { background-color: rgba(163, 116, 213, 0.2); }
+
+.icon-img { font-size: 3rem; margin-bottom: 5px; }
+
+.icon-label { 
+  color: white;
+  font-weight: bold; 
+  font-size: 1rem; 
+  /* Tạo viền đen và bóng mờ tím xung quanh chữ để dễ đọc */
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(163, 116, 213, 0.9); 
+  text-align: center; 
+  margin-top: 5px;
+ }
+
+/* WINDOW FRAME 16:9 */
 .window-wrapper {
   position: absolute;
   top: 50%;
@@ -5,7 +58,7 @@
   transform: translate(-50%, -50%);
   width: 80vw;
   max-width: 1600px;
-  aspect-ratio: 16 / 9;
+  aspect-ratio: 16 / 9; /* Tỉ lệ màn hình chơi game */
   background: white;
   border: 2px solid #A374D5;
   border-radius: 8px;
@@ -24,11 +77,44 @@
   align-items: center;
   padding: 0 15px;
   color: white;
-  cursor: grab;
+  user-select: none;
 }
+
+.window-title { font-weight: bold; font-size: 0.9rem; letter-spacing: 1px; }
+
+.close-btn {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 1.5rem;
+  cursor: pointer;
+  line-height: 1;
+}
+.close-btn:hover { color: #ff4757; }
 
 .window-body {
   flex: 1;
   overflow-y: auto;
-  background: #F8F4FF;
+  background: #FFF;
 }
+
+/* TASKBAR */
+.taskbar {
+  height: 50px;
+  background: rgba(255, 255, 255, 0.2); /* Cho trong suốt bớt đi để lộ ảnh nền */
+  backdrop-filter: blur(12px); /* Tăng độ làm mờ kính */
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid rgba(255, 255, 255, 0.5); /* Cạnh kính lấp lánh */
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  z-index: 1000;
+}
+
+.start-btn {
+  font-size: 1.5rem;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+.start-btn:hover { background: rgba(163, 116, 213, 0.2); }
