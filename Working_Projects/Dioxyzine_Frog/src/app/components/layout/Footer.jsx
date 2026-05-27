@@ -82,7 +82,7 @@ export function Footer() {
         {/* Bottom Bar */}
         <div className="pt-8 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-sm text-muted-foreground flex items-center gap-1">
-            © 2026 Dioxyzine Frog. Made with <Heart className="w-4 h-4 text-[var(--primary)] fill-current animate-pulse" /> for creatives.
+            © 2024 Dioxyzine Frog. Made with <Heart className="w-4 h-4 text-[var(--primary)] fill-current animate-pulse" /> for creatives.
           </p>
           <div className="flex items-center gap-6 text-sm text-muted-foreground">
             <Link to="/terms" className="hover:text-[var(--primary)] transition-colors">

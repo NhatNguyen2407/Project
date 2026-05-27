@@ -1,8 +1,7 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import { ProductCard } from '../components/ProductCard';
-import { MarqueeBanner } from '../components/MarqueeBanner';
-import { ArrowRight, CheckCircle, Sparkles, Users, Palette, Package } from 'lucide-react';
+import { ArrowRight, CheckCircle, Sparkles, Palette, Package } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const heroSlides = [
@@ -66,7 +65,7 @@ const testimonials = [
   {
     name: 'Sarah Chen',
     role: 'Independent Artist',
-    content: 'DIFR transformed my character designs into the most adorable plushies! The quality exceeded my expectations.',
+    content: 'Dioxyzine Frog transformed my character designs into the most adorable plushies! The quality exceeded my expectations.',
     avatar: 'https://i.pravatar.cc/150?img=1',
   },
   {
@@ -95,9 +94,6 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen">
-      {/* Marquee Banner */}
-      <MarqueeBanner text="✨ New: Custom plushies from $35 | Free shipping on orders over $500 | 24-hour quote response time" />
-
       {/* Hero Section */}
       <section className="relative h-screen overflow-hidden">
         {heroSlides.map((slide, index) => (
@@ -109,13 +105,13 @@ export function HomePage() {
             className="absolute inset-0"
             style={{ pointerEvents: currentSlide === index ? 'auto' : 'none' }}
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-black/30 to-transparent z-10"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-[#08080C]/90 via-[#08080C]/60 to-transparent z-10"></div>
             <img
               src={slide.image}
               alt={slide.title}
               className="w-full h-full object-cover"
             />
-            <div className="absolute inset-0 z-20 flex items-center">
+            <div className="absolute inset-0 z-20 flex items-center pt-16">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                 <motion.div
                   initial={{ x: -100, opacity: 0 }}
@@ -124,7 +120,7 @@ export function HomePage() {
                   className="max-w-2xl"
                 >
                   <motion.h1
-                    className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight"
+                    className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]"
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.4 }}
@@ -132,7 +128,7 @@ export function HomePage() {
                     {slide.title}
                   </motion.h1>
                   <motion.p
-                    className="text-xl md:text-2xl text-white/90 mb-8"
+                    className="text-xl md:text-2xl text-[var(--silver-gray)] mb-8"
                     initial={{ y: 20, opacity: 0 }}
                     animate={{ y: 0, opacity: 1 }}
                     transition={{ delay: 0.6 }}
@@ -149,7 +145,7 @@ export function HomePage() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-8 py-4 rounded-full bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] text-white font-semibold shadow-2xl hover:shadow-3xl transition-shadow flex items-center gap-2"
+                        className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-semibold shadow-[0_0_20px_rgba(139,114,190,0.5)] hover:shadow-[0_0_30px_rgba(139,114,190,0.8)] transition-shadow flex items-center gap-2"
                       >
                         Browse Products
                         <ArrowRight className="w-5 h-5" />
@@ -159,7 +155,7 @@ export function HomePage() {
                       <motion.button
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
-                        className="px-8 py-4 rounded-full bg-white/10 backdrop-blur-md text-white font-semibold border-2 border-white/30 hover:bg-white/20 transition-colors"
+                        className="px-8 py-4 rounded-full bg-[#171226]/80 backdrop-blur-md text-white font-semibold border border-[var(--primary)] hover:bg-[#2C2144] transition-colors"
                       >
                         Start Inquiry
                       </motion.button>
@@ -179,28 +175,16 @@ export function HomePage() {
               onClick={() => setCurrentSlide(index)}
               className={`w-2 h-2 rounded-full transition-all ${
                 currentSlide === index
-                  ? 'w-8 bg-white'
-                  : 'bg-white/50 hover:bg-white/75'
+                  ? 'w-8 bg-[var(--primary)] shadow-[0_0_10px_rgba(139,114,190,0.8)]'
+                  : 'bg-white/30 hover:bg-white/50'
               }`}
             />
           ))}
         </div>
-
-        {/* Floating Decorative Elements */}
-        <motion.div
-          animate={{ y: [0, -20, 0] }}
-          transition={{ duration: 3, repeat: Infinity }}
-          className="absolute top-1/4 right-1/4 w-20 h-20 bg-[var(--pastel-lavender)]/30 rounded-full blur-2xl"
-        ></motion.div>
-        <motion.div
-          animate={{ y: [0, 20, 0] }}
-          transition={{ duration: 4, repeat: Infinity }}
-          className="absolute bottom-1/3 left-1/3 w-32 h-32 bg-[var(--dusty-pink)]/30 rounded-full blur-3xl"
-        ></motion.div>
       </section>
 
       {/* How It Works */}
-      <section className="py-24 bg-gradient-to-b from-white to-[var(--cream)]">
+      <section className="py-24 bg-transparent relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -208,10 +192,10 @@ export function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-[0_0_10px_rgba(139,114,190,0.3)]">
               How Ordering Works
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
               Simple, transparent, and collaborative process from concept to creation
             </p>
           </motion.div>
@@ -251,18 +235,18 @@ export function HomePage() {
                 transition={{ delay: index * 0.1 }}
                 className="relative"
               >
-                <div className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow h-full">
-                  <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--dusty-pink)] to-[var(--burgundy)] flex items-center justify-center text-white mb-6 shadow-lg">
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 shadow-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.2)] transition-shadow h-full">
+                  <div className="w-16 h-16 rounded-2xl bg-[var(--secondary)] border border-[var(--border)] flex items-center justify-center text-[var(--primary)] mb-6 shadow-[0_0_15px_rgba(139,114,190,0.3)]">
                     {item.icon}
                   </div>
-                  <div className="absolute top-6 right-6 text-6xl font-bold text-[var(--dusty-pink)]/10">
+                  <div className="absolute top-6 right-6 text-6xl font-bold text-white/5">
                     {item.step}
                   </div>
-                  <h3 className="text-xl font-semibold mb-3">{item.title}</h3>
-                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                  <h3 className="text-xl font-semibold mb-3 text-white">{item.title}</h3>
+                  <p className="text-[var(--muted-foreground)] leading-relaxed">{item.description}</p>
                 </div>
                 {index < 3 && (
-                  <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-[var(--dusty-pink)] to-transparent"></div>
+                  <div className="hidden md:block absolute top-1/2 -right-4 w-8 h-0.5 bg-gradient-to-r from-[var(--primary)] to-transparent opacity-50"></div>
                 )}
               </motion.div>
             ))}
@@ -271,7 +255,7 @@ export function HomePage() {
       </section>
 
       {/* Featured Products */}
-      <section className="py-24 bg-[var(--cream)]">
+      <section className="py-24 bg-[var(--background)] relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -279,10 +263,10 @@ export function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-[0_0_10px_rgba(139,114,190,0.3)]">
               Featured Products
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
               Explore our most popular customizable merchandise
             </p>
           </motion.div>
@@ -298,7 +282,7 @@ export function HomePage() {
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-8 py-4 rounded-full bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] text-white font-semibold shadow-lg flex items-center gap-2 mx-auto"
+                className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-semibold shadow-[0_0_15px_rgba(139,114,190,0.4)] flex items-center gap-2 mx-auto"
               >
                 View All Products
                 <ArrowRight className="w-5 h-5" />
@@ -309,7 +293,7 @@ export function HomePage() {
       </section>
 
       {/* Testimonials */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-transparent relative z-10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -317,10 +301,10 @@ export function HomePage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl md:text-5xl font-bold mb-4 bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] bg-clip-text text-transparent">
+            <h2 className="text-4xl md:text-5xl font-bold mb-4 text-white drop-shadow-[0_0_10px_rgba(139,114,190,0.3)]">
               What Creators Say
             </h2>
-            <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+            <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
               Join hundreds of satisfied artists and creators
             </p>
           </motion.div>
@@ -333,20 +317,20 @@ export function HomePage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-gradient-to-br from-white to-[var(--cream)] rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow"
+                className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 shadow-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.2)] transition-shadow"
               >
                 <div className="flex items-center gap-4 mb-6">
                   <img
                     src={testimonial.avatar}
                     alt={testimonial.name}
-                    className="w-14 h-14 rounded-full object-cover ring-4 ring-[var(--dusty-pink)]/30"
+                    className="w-14 h-14 rounded-full object-cover ring-2 ring-[var(--primary)]"
                   />
                   <div>
-                    <h4 className="font-semibold">{testimonial.name}</h4>
-                    <p className="text-sm text-muted-foreground">{testimonial.role}</p>
+                    <h4 className="font-semibold text-white">{testimonial.name}</h4>
+                    <p className="text-sm text-[var(--primary)]">{testimonial.role}</p>
                   </div>
                 </div>
-                <p className="text-muted-foreground leading-relaxed italic">
+                <p className="text-[var(--silver-gray)] leading-relaxed italic">
                   "{testimonial.content}"
                 </p>
               </motion.div>
@@ -356,25 +340,25 @@ export function HomePage() {
       </section>
 
       {/* CTA Section */}
-      <section className="py-24 bg-gradient-to-br from-[var(--burgundy)] to-[var(--dusty-pink)] relative overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-50"></div>
+      <section className="py-24 bg-[var(--card)] border-t border-[var(--border)] relative overflow-hidden z-10">
+        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-10"></div>
         <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
             viewport={{ once: true }}
           >
-            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">
+            <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 drop-shadow-[0_0_15px_rgba(139,114,190,0.6)]">
               Ready to Bring Your Ideas to Life?
             </h2>
-            <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
+            <p className="text-xl text-[var(--silver-gray)] mb-8 max-w-2xl mx-auto">
               Get a custom quote for your project in under 24 hours. No commitments, just possibilities.
             </p>
             <Link to="/about">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                className="px-10 py-5 rounded-full bg-white text-[var(--burgundy)] font-bold text-lg shadow-2xl hover:shadow-3xl transition-shadow"
+                className="px-10 py-5 rounded-full bg-[var(--primary)] text-white font-bold text-lg shadow-[0_0_20px_rgba(139,114,190,0.5)] hover:shadow-[0_0_30px_rgba(139,114,190,0.8)] transition-shadow"
               >
                 Start Your Inquiry
               </motion.button>

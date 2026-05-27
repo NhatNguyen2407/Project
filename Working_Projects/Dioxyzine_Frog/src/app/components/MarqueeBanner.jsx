@@ -1,17 +1,12 @@
 import { motion } from 'motion/react';
 import { Sparkles } from 'lucide-react';
 
-interface MarqueeBannerProps {
-  text: string;
-  variant?: 'primary' | 'secondary';
-}
-
-export function MarqueeBanner({ text, variant = 'primary' }: MarqueeBannerProps) {
+export function MarqueeBanner({ text, variant = 'primary' }) {
   const bgClass =
     variant === 'primary'
-      ? 'bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)]'
-      : 'bg-[var(--pastel-lavender)]/30';
-  const textClass = variant === 'primary' ? 'text-white' : 'text-[var(--burgundy)]';
+      ? 'bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)]'
+      : 'bg-[#1A102B] border-y border-[var(--border)]';
+  const textClass = variant === 'primary' ? 'text-white' : 'text-[var(--primary)]';
 
   const repeatedText = Array(10).fill(text).join(' • ');
 
@@ -27,7 +22,7 @@ export function MarqueeBanner({ text, variant = 'primary' }: MarqueeBannerProps)
           }}
           className="flex whitespace-nowrap"
         >
-          <span className={`${textClass} font-medium flex items-center gap-3 text-sm`}>
+          <span className={`${textClass} font-medium flex items-center gap-3 text-sm tracking-widest`}>
             {repeatedText.split(' • ').map((item, index) => (
               <span key={index} className="flex items-center gap-3">
                 {item}
@@ -45,7 +40,7 @@ export function MarqueeBanner({ text, variant = 'primary' }: MarqueeBannerProps)
           }}
           className="flex whitespace-nowrap absolute left-[1000px]"
         >
-          <span className={`${textClass} font-medium flex items-center gap-3 text-sm`}>
+          <span className={`${textClass} font-medium flex items-center gap-3 text-sm tracking-widest`}>
             {repeatedText.split(' • ').map((item, index) => (
               <span key={index} className="flex items-center gap-3">
                 {item}

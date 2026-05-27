@@ -36,32 +36,11 @@ const faqs = [
 ];
 
 export function AboutPage() {
-  const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [openFaqIndex, setOpenFaqIndex] = useState(null);
 
   return (
     <div className="min-h-screen pt-24 pb-16">
-      {/* Hero Section */}
-      <section className="relative py-24 bg-gradient-to-br from-[var(--burgundy)] to-[var(--dusty-pink)] overflow-hidden">
-        <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMzAiIGN5PSIzMCIgcj0iMiIgZmlsbD0id2hpdGUiIGZpbGwtb3BhY2l0eT0iMC4xIi8+PC9zdmc+')] opacity-50"></div>
-        <div className="relative max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-          >
-            <h1 className="text-5xl md:text-6xl font-bold text-white mb-6">
-              About DIFR Studio
-            </h1>
-            <p className="text-xl text-white/90 leading-relaxed">
-              We're a creative studio specializing in custom handmade merchandise and plushies,
-              bringing your characters and ideas to life with craftsmanship and care.
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
-      {/* Story Section */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-background">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
             <motion.div
@@ -70,21 +49,15 @@ export function AboutPage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] bg-clip-text text-transparent">
+              <h2 className="text-4xl font-bold mb-6 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">
                 Our Story
               </h2>
               <div className="space-y-4 text-muted-foreground leading-relaxed">
                 <p>
-                  Founded by independent artists and makers, DIFR Studio was born from a passion
+                  Founded by independent artists and makers, Dioxyzine Frog was born from a passion
                   for bringing creative visions to life. We understand the challenges creators
                   face when trying to produce high-quality merchandise without massive upfront
                   costs or unreasonable minimum orders.
-                </p>
-                <p>
-                  Our mission is simple: make custom merchandise accessible, affordable, and
-                  delightful. Whether you're an independent artist, content creator, or small
-                  business, we're here to transform your designs into tangible products that
-                  your audience will love.
                 </p>
                 <p>
                   Every plushie, pin, and piece of merchandise is crafted with meticulous
@@ -102,22 +75,20 @@ export function AboutPage() {
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <div className="relative rounded-3xl overflow-hidden shadow-2xl">
+              <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-[var(--border)]">
                 <img
                   src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=800&h=600&fit=crop"
-                  alt="DIFR Studio Workshop"
+                  alt="Dioxyzine Frog Workshop"
                   className="w-full h-auto"
                 />
               </div>
-              <div className="absolute -bottom-6 -left-6 w-32 h-32 bg-[var(--pastel-lavender)]/30 rounded-full blur-3xl"></div>
-              <div className="absolute -top-6 -right-6 w-40 h-40 bg-[var(--dusty-pink)]/30 rounded-full blur-3xl"></div>
             </motion.div>
           </div>
         </div>
       </section>
 
       {/* Values Section */}
-      <section className="py-24 bg-gradient-to-b from-white to-[var(--cream)]">
+      <section className="py-24 bg-gradient-to-b from-background to-[var(--muted)]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -125,7 +96,7 @@ export function AboutPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">
               What We Stand For
             </h2>
           </motion.div>
@@ -159,12 +130,12 @@ export function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-white rounded-3xl p-8 shadow-lg hover:shadow-2xl transition-shadow text-center"
+                className="bg-[#130D1E] rounded-3xl p-8 border border-[var(--border)] shadow-lg hover:shadow-2xl transition-shadow text-center"
               >
-                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--dusty-pink)] to-[var(--burgundy)] flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
+                <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-[var(--primary)] to-[var(--secondary)] flex items-center justify-center text-white mx-auto mb-4 shadow-lg">
                   {value.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-3">{value.title}</h3>
+                <h3 className="text-xl font-semibold mb-3 text-white">{value.title}</h3>
                 <p className="text-muted-foreground leading-relaxed">{value.description}</p>
               </motion.div>
             ))}
@@ -173,7 +144,7 @@ export function AboutPage() {
       </section>
 
       {/* FAQ Section */}
-      <section className="py-24 bg-[var(--cream)]">
+      <section className="py-24 bg-[var(--muted)]">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -181,7 +152,7 @@ export function AboutPage() {
             viewport={{ once: true }}
             className="text-center mb-16"
           >
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] bg-clip-text text-transparent">
+            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[var(--primary)] to-[var(--secondary)] bg-clip-text text-transparent">
               Frequently Asked Questions
             </h2>
             <p className="text-lg text-muted-foreground">
@@ -197,20 +168,20 @@ export function AboutPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
-                className="bg-white rounded-2xl shadow-md overflow-hidden"
+                className="bg-[#130D1E] border border-[var(--border)] rounded-2xl shadow-md overflow-hidden"
               >
                 <button
                   onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)}
-                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-[var(--cream)]/50 transition-colors"
+                  className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-[var(--primary)]/10 transition-colors"
                 >
-                  <h3 className="font-semibold text-lg pr-4">{faq.question}</h3>
+                  <h3 className="font-semibold text-lg pr-4 text-white">{faq.question}</h3>
                   <motion.div
                     animate={{ rotate: openFaqIndex === index ? 180 : 0 }}
                     transition={{ duration: 0.3 }}
                     className="flex-shrink-0"
                   >
                     <svg
-                      className="w-6 h-6 text-[var(--burgundy)]"
+                      className="w-6 h-6 text-[var(--primary)]"
                       fill="none"
                       stroke="currentColor"
                       viewBox="0 0 24 24"
@@ -237,72 +208,6 @@ export function AboutPage() {
                     {faq.answer}
                   </p>
                 </motion.div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section className="py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] bg-clip-text text-transparent">
-              Get in Touch
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              We'd love to hear about your project
-            </p>
-          </motion.div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {[
-              {
-                icon: <Mail className="w-6 h-6" />,
-                title: 'Email Us',
-                content: 'hello@difr.studio',
-                link: 'mailto:hello@difr.studio',
-              },
-              {
-                icon: <MapPin className="w-6 h-6" />,
-                title: 'Visit Us',
-                content: 'Tokyo, Japan',
-                link: null,
-              },
-              {
-                icon: <Clock className="w-6 h-6" />,
-                title: 'Business Hours',
-                content: 'Mon-Fri: 9AM-6PM JST',
-                link: null,
-              },
-            ].map((contact, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.1 }}
-                className="bg-gradient-to-br from-white to-[var(--cream)] rounded-3xl p-8 shadow-lg text-center"
-              >
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[var(--dusty-pink)] to-[var(--burgundy)] flex items-center justify-center text-white mx-auto mb-4">
-                  {contact.icon}
-                </div>
-                <h3 className="font-semibold mb-2">{contact.title}</h3>
-                {contact.link ? (
-                  <a
-                    href={contact.link}
-                    className="text-muted-foreground hover:text-[var(--burgundy)] transition-colors"
-                  >
-                    {contact.content}
-                  </a>
-                ) : (
-                  <p className="text-muted-foreground">{contact.content}</p>
-                )}
               </motion.div>
             ))}
           </div>

@@ -6,110 +6,18 @@ import { Search, SlidersHorizontal } from 'lucide-react';
 const categories = ['All Products', 'Plushies', 'Keychains', 'Pins', 'Figures', 'Accessories'];
 
 const allProducts = [
-  {
-    id: '1',
-    title: 'Custom Character Plushie',
-    image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=400&h=500&fit=crop',
-    basePrice: 35,
-    moq: 10,
-    category: 'Plushies',
-    isPopular: true,
-  },
-  {
-    id: '2',
-    title: 'Anime Keychain Set',
-    image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop',
-    basePrice: 8,
-    moq: 50,
-    category: 'Keychains',
-    isNew: true,
-  },
-  {
-    id: '3',
-    title: 'Enamel Pin Collection',
-    image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=400&h=500&fit=crop',
-    basePrice: 5,
-    moq: 100,
-    category: 'Pins',
-    isPopular: true,
-  },
-  {
-    id: '4',
-    title: 'Mini Standee Figure',
-    image: 'https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=400&h=500&fit=crop',
-    basePrice: 12,
-    moq: 25,
-    category: 'Figures',
-    isNew: true,
-  },
-  {
-    id: '5',
-    title: 'Large Custom Plushie',
-    image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=500&fit=crop',
-    basePrice: 55,
-    moq: 5,
-    category: 'Plushies',
-    isPopular: true,
-  },
-  {
-    id: '6',
-    title: 'Acrylic Charm Set',
-    image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=500&fit=crop',
-    basePrice: 6,
-    moq: 100,
-    category: 'Keychains',
-  },
-  {
-    id: '7',
-    title: 'Chibi Plushie',
-    image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=500&fit=crop',
-    basePrice: 25,
-    moq: 20,
-    category: 'Plushies',
-    isNew: true,
-  },
-  {
-    id: '8',
-    title: 'Metal Pin Badge',
-    image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400&h=500&fit=crop',
-    basePrice: 7,
-    moq: 50,
-    category: 'Pins',
-  },
-  {
-    id: '9',
-    title: 'Rubber Keychain',
-    image: 'https://images.unsplash.com/photo-1555274175-6cbf6f3b137b?w=400&h=500&fit=crop',
-    basePrice: 4,
-    moq: 200,
-    category: 'Keychains',
-  },
-  {
-    id: '10',
-    title: 'Vinyl Sticker Pack',
-    image: 'https://images.unsplash.com/photo-1598300056393-4aac492f4344?w=400&h=500&fit=crop',
-    basePrice: 3,
-    moq: 500,
-    category: 'Accessories',
-    isPopular: true,
-  },
-  {
-    id: '11',
-    title: 'Wooden Charm',
-    image: 'https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=400&h=500&fit=crop',
-    basePrice: 9,
-    moq: 50,
-    category: 'Keychains',
-  },
-  {
-    id: '12',
-    title: 'Tote Bag Custom Print',
-    image: 'https://images.unsplash.com/photo-1515378960530-7c0da6231fb1?w=400&h=500&fit=crop',
-    basePrice: 15,
-    moq: 30,
-    category: 'Accessories',
-    isNew: true,
-  },
+  { id: '1', title: 'Custom Character Plushie', image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=400&h=500&fit=crop', basePrice: 35, moq: 10, category: 'Plushies', isPopular: true },
+  { id: '2', title: 'Anime Keychain Set', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop', basePrice: 8, moq: 50, category: 'Accessories', isNew: true },
+  { id: '3', title: 'Enamel Pin Collection', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=400&h=500&fit=crop', basePrice: 5, moq: 100, category: 'Pins', isPopular: true },
+  { id: '4', title: 'Mini Standee Figure', image: 'https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=400&h=500&fit=crop', basePrice: 12, moq: 25, category: 'Figures', isNew: true },
+  { id: '5', title: 'Large Custom Plushie', image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=500&fit=crop', basePrice: 55, moq: 5, category: 'Plushies', isPopular: true },
+  { id: '6', title: 'Acrylic Charm Set', image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=500&fit=crop', basePrice: 6, moq: 100, category: 'Keychains' },
+  { id: '7', title: 'Chibi Plushie', image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=500&fit=crop', basePrice: 25, moq: 20, category: 'Plushies', isNew: true },
+  { id: '8', title: 'Metal Pin Badge', image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400&h=500&fit=crop', basePrice: 7, moq: 50, category: 'Pins' },
+  { id: '9', title: 'Rubber Keychain', image: 'https://images.unsplash.com/photo-1555274175-6cbf6f3b137b?w=400&h=500&fit=crop', basePrice: 4, moq: 200, category: 'Keychains' },
+  { id: '10', title: 'Vinyl Sticker Pack', image: 'https://images.unsplash.com/photo-1598300056393-4aac492f4344?w=400&h=500&fit=crop', basePrice: 3, moq: 500, category: 'Accessories', isPopular: true },
+  { id: '11', title: 'Wooden Charm', image: 'https://images.unsplash.com/photo-1607083206968-13611e3d76db?w=400&h=500&fit=crop', basePrice: 9, moq: 50, category: 'Keychains' },
+  { id: '12', title: 'Tote Bag Custom Print', image: 'https://images.unsplash.com/photo-1515378960530-7c0da6231fb1?w=400&h=500&fit=crop', basePrice: 15, moq: 30, category: 'Accessories', isNew: true },
 ];
 
 export function ProductsPage() {
@@ -134,7 +42,7 @@ export function ProductsPage() {
     });
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-white via-[var(--cream)] to-white">
+    <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <motion.div
@@ -142,10 +50,10 @@ export function ProductsPage() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-12"
         >
-          <h1 className="text-5xl md:text-6xl font-bold mb-4 bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] bg-clip-text text-transparent">
+          <h1 className="text-5xl md:text-6xl font-bold mb-4 text-white drop-shadow-[0_0_10px_rgba(139,114,190,0.4)]">
             Our Products
           </h1>
-          <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+          <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">
             Explore our full range of customizable merchandise and plushies
           </p>
         </motion.div>
@@ -166,7 +74,7 @@ export function ProductsPage() {
                 placeholder="Search products..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 rounded-full bg-white border border-border focus:outline-none focus:ring-2 focus:ring-[var(--dusty-pink)] shadow-md"
+                className="w-full pl-12 pr-4 py-3 rounded-full bg-[#09090B] border border-[var(--border)] text-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-md transition-all"
               />
             </div>
 
@@ -176,7 +84,7 @@ export function ProductsPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="pl-12 pr-8 py-3 rounded-full bg-white border border-border focus:outline-none focus:ring-2 focus:ring-[var(--dusty-pink)] shadow-md appearance-none cursor-pointer min-w-[200px]"
+                className="pl-12 pr-8 py-3 rounded-full bg-[#09090B] border border-[var(--border)] text-white focus:outline-none focus:ring-2 focus:ring-[var(--primary)] shadow-md appearance-none cursor-pointer min-w-[200px] transition-all"
               >
                 <option value="popular">Most Popular</option>
                 <option value="price-low">Price: Low to High</option>
@@ -194,8 +102,8 @@ export function ProductsPage() {
                 onClick={() => setSelectedCategory(category)}
                 className={`px-6 py-2.5 rounded-full font-medium transition-all ${
                   selectedCategory === category
-                    ? 'bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] text-white shadow-lg scale-105'
-                    : 'bg-white text-foreground border border-border hover:border-[var(--dusty-pink)] hover:scale-105'
+                    ? 'bg-[var(--primary)] text-white shadow-[0_0_15px_rgba(139,114,190,0.5)] scale-105'
+                    : 'bg-[#130D1E] text-muted-foreground border border-[var(--border)] hover:border-[var(--primary)] hover:text-white hover:scale-105'
                 }`}
               >
                 {category}
@@ -212,7 +120,7 @@ export function ProductsPage() {
           className="mb-8"
         >
           <p className="text-muted-foreground">
-            Showing <span className="font-semibold text-foreground">{filteredProducts.length}</span>{' '}
+            Showing <span className="font-semibold text-white">{filteredProducts.length}</span>{' '}
             {filteredProducts.length === 1 ? 'product' : 'products'}
           </p>
         </motion.div>
@@ -240,12 +148,12 @@ export function ProductsPage() {
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="text-center py-24"
+            className="text-center py-24 bg-[#130D1E] rounded-3xl border border-[var(--border)]"
           >
-            <div className="w-24 h-24 rounded-full bg-[var(--cream)] flex items-center justify-center mx-auto mb-6">
-              <Search className="w-12 h-12 text-muted-foreground" />
+            <div className="w-24 h-24 rounded-full bg-[#1A1528] flex items-center justify-center mx-auto mb-6">
+              <Search className="w-12 h-12 text-[var(--primary)]" />
             </div>
-            <h3 className="text-2xl font-semibold mb-3">No products found</h3>
+            <h3 className="text-2xl font-semibold mb-3 text-white">No products found</h3>
             <p className="text-muted-foreground mb-8">
               Try adjusting your search or filter criteria
             </p>
@@ -254,7 +162,7 @@ export function ProductsPage() {
                 setSearchQuery('');
                 setSelectedCategory('All Products');
               }}
-              className="px-6 py-3 rounded-full bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] text-white font-semibold shadow-lg hover:shadow-xl transition-shadow"
+              className="px-6 py-3 rounded-full bg-[var(--primary)] text-white font-semibold shadow-lg hover:shadow-[0_0_15px_rgba(139,114,190,0.5)] transition-shadow"
             >
               Clear Filters
             </button>

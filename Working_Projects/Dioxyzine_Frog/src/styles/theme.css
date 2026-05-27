@@ -3,43 +3,75 @@
 :root {
   --font-size: 16px;
 
-  /* DIOXYZINE FROG - DARK Y2K THEME */
-  --cyber-black: #09090B;
-  --neon-purple: #9D65FF;
-  --dark-purple: #1F1235;
+  /* DIOXYZINE FROG - EXACT COLOR CODES */
+  --cyber-black: #08080C;
+  --neon-purple: #8B72BE;
+  --dark-purple: #171226;
   --silver-gray: #E2E8F0;
 
   --background: var(--cyber-black);
   --foreground: var(--silver-gray);
   
-  --card: #130D1E;
+  --card: var(--dark-purple);
   --card-foreground: var(--silver-gray);
   
-  --popover: #130D1E;
+  --popover: var(--dark-purple);
   --popover-foreground: var(--silver-gray);
   
   --primary: var(--neon-purple);
   --primary-foreground: #FFFFFF;
   
-  --secondary: var(--dark-purple);
+  --secondary: #2C2144;
   --secondary-foreground: var(--silver-gray);
   
-  --muted: #1A102B;
-  --muted-foreground: #A1A1AA;
+  --muted: #1A1528;
+  --muted-foreground: #9CA3AF;
   
-  --accent: var(--dark-purple);
+  --accent: #2C2144;
   --accent-foreground: var(--silver-gray);
   
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
   
-  --border: rgba(157, 101, 255, 0.3);
-  --input: rgba(157, 101, 255, 0.2);
-  --input-background: rgba(9, 9, 11, 0.6);
+  --border: rgba(139, 114, 190, 0.3);
+  --input: rgba(139, 114, 190, 0.2);
+  --input-background: rgba(8, 8, 12, 0.6);
   --switch-background: var(--dark-purple);
   
   --ring: var(--neon-purple);
   --radius: 1.25rem;
+}
+
+@theme inline {
+  /* Định nghĩa tên font cho Tailwind */
+  --font-coiny: "Coiny", system-ui;
+  --font-fredoka: "Fredoka", sans-serif;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-input-background: var(--input-background);
+  --color-switch-background: var(--switch-background);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 @layer base {
@@ -49,12 +81,53 @@
 
   html {
     scroll-behavior: smooth;
+    font-size: var(--font-size);
   }
 
   body {
     @apply bg-background text-foreground;
-    /* Lưới mờ background Y2K */
-    background-image: radial-gradient(rgba(157, 101, 255, 0.15) 1px, transparent 1px);
-    background-size: 24px 24px;
+    /* Gọi thẳng tên font Fredoka cho body */
+    font-family: 'Fredoka', sans-serif; 
+    
+    background-image: 
+      linear-gradient(45deg, rgba(139, 114, 190, 0.03) 25%, transparent 25%),
+      linear-gradient(-45deg, rgba(139, 114, 190, 0.03) 25%, transparent 25%),
+      linear-gradient(45deg, transparent 75%, rgba(139, 114, 190, 0.03) 75%),
+      linear-gradient(-45deg, transparent 75%, rgba(139, 114, 190, 0.03) 75%);
+    background-size: 20px 20px;
+    background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+  }
+
+  /* GỌI THẲNG TÊN FONT COINY CHO CHỮ TO */
+  h1, h2, h3, h4, h5, h6, .font-heading {
+    font-family: 'Coiny', cursive !important;
+    letter-spacing: 0.02em;
+    color: #FFFFFF !important;
+    font-weight: 400 !important; 
+  }
+
+  h1 { font-size: 4rem; line-height: 1.2; }
+  h2 { font-size: 2.5rem; line-height: 1.3; }
+  h3 { font-size: 1.75rem; line-height: 1.3; }
+  h4 { font-size: 1.25rem; line-height: 1.4; }
+
+  p, span, label, input, textarea, button, select, a, table, td, th {
+    font-family: 'Fredoka', sans-serif;
+    color: var(--silver-gray); 
+  }
+
+  p, span { font-weight: 500; }
+
+  .text-muted-foreground, p.text-lg {
+    color: var(--neon-purple) !important; 
+    font-weight: 600;
+    opacity: 0.9;
+  }
+
+  label, button { font-weight: 600; }
+
+  input, textarea {
+    font-weight: 400;
+    color: #FFFFFF !important;
   }
 }
