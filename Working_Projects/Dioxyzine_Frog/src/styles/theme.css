@@ -1,0 +1,60 @@
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --font-size: 16px;
+
+  /* DIOXYZINE FROG - DARK Y2K THEME */
+  --cyber-black: #09090B;
+  --neon-purple: #9D65FF;
+  --dark-purple: #1F1235;
+  --silver-gray: #E2E8F0;
+
+  --background: var(--cyber-black);
+  --foreground: var(--silver-gray);
+  
+  --card: #130D1E;
+  --card-foreground: var(--silver-gray);
+  
+  --popover: #130D1E;
+  --popover-foreground: var(--silver-gray);
+  
+  --primary: var(--neon-purple);
+  --primary-foreground: #FFFFFF;
+  
+  --secondary: var(--dark-purple);
+  --secondary-foreground: var(--silver-gray);
+  
+  --muted: #1A102B;
+  --muted-foreground: #A1A1AA;
+  
+  --accent: var(--dark-purple);
+  --accent-foreground: var(--silver-gray);
+  
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  
+  --border: rgba(157, 101, 255, 0.3);
+  --input: rgba(157, 101, 255, 0.2);
+  --input-background: rgba(9, 9, 11, 0.6);
+  --switch-background: var(--dark-purple);
+  
+  --ring: var(--neon-purple);
+  --radius: 1.25rem;
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    /* Lưới mờ background Y2K */
+    background-image: radial-gradient(rgba(157, 101, 255, 0.15) 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+}
