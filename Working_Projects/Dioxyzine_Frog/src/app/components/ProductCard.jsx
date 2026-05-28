@@ -88,10 +88,15 @@ export function ProductCard({
 
           {/* Content */}
           <div className="p-5 space-y-3">
-            {/* Category */}
-            <span className="inline-block px-3 py-1 rounded-full bg-[#1A102B] text-xs font-medium text-muted-foreground border border-[var(--border)]">
-              {category}
-            </span>
+            {/* Category Tags */}
+            <div className="flex flex-wrap gap-2">
+              {/* Kiểm tra nếu category là mảng thì in ra từng cái, nếu không thì bọc nó thành mảng rồi in */}
+              {(Array.isArray(category) ? category : [category]).map((cat, index) => (
+                <span key={index} className="inline-block px-3 py-1 rounded-full bg-[#1A102B] text-xs font-medium text-muted-foreground border border-[var(--border)]">
+                  {cat}
+                </span>
+              ))}
+            </div>
 
             {/* Title */}
             <h3 className="font-semibold text-lg leading-tight text-white group-hover:text-[var(--primary)] transition-colors">

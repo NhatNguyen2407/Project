@@ -52,8 +52,16 @@ export function Navbar() {
                   className="w-12 h-12 rounded-full border-2 border-[var(--primary)] object-cover shadow-[0_0_15px_rgba(157,101,255,0.5)]" 
                 />
               </motion.div>
-              <span className="text-2xl font-bold text-white drop-shadow-[0_0_8px_rgba(157,101,255,0.8)] tracking-wide">
-                Dioxyzine Frog
+              <span 
+                className="text-3xl tracking-wide drop-shadow-[0_0_8px_rgba(157,101,255,0.6)]"
+                style={{ 
+                  fontFamily: "'Coiny', cursive", 
+                  color: "var(--primary)", 
+                  WebkitTextStroke: "5px white",
+                  paintOrder: "stroke fill"
+                }}
+              >
+                  Dioxyzine Frog
               </span>
             </Link>
 

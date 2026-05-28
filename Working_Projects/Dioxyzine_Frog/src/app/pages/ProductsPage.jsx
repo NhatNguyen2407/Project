@@ -3,15 +3,22 @@ import { motion } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
 import { Search, SlidersHorizontal } from 'lucide-react';
 
-const categories = ['All Products', 'Plushies', 'Keychains', 'Pins', 'Figures', 'Accessories'];
+// Import image of products
+import imgP3_01 from '../../assets/Products/Plushies_3/P3_01.jpg'
+import imgP3_02 from '../../assets/Products/Plushies_3/P3_02.jpg'
+import imgP3_03 from '../../assets/Products/Plushies_3/P3_03.jpg'
+import imgP3_04 from '../../assets/Products/Plushies_3/P3_04.jpg'
+import imgP3_05 from '../../assets/Products/Plushies_3/P3_05.jpg'
+
+import imgP2_01 from '../../assets/Products/Plushies_2/P2_01.jpg'
+
+
+const categories = ['All Products', 'Plushies', 'Doll 2D', 'Customize'];
 
 const allProducts = [
-  { id: '1', title: 'Custom Character Plushie', image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=400&h=500&fit=crop', basePrice: 35, moq: 10, category: 'Plushies', isPopular: true },
-  { id: '2', title: 'Anime Keychain Set', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=500&fit=crop', basePrice: 8, moq: 50, category: 'Accessories', isNew: true },
-  { id: '3', title: 'Enamel Pin Collection', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=400&h=500&fit=crop', basePrice: 5, moq: 100, category: 'Pins', isPopular: true },
-  { id: '4', title: 'Mini Standee Figure', image: 'https://images.unsplash.com/photo-1601924994987-69e26d50dc26?w=400&h=500&fit=crop', basePrice: 12, moq: 25, category: 'Figures', isNew: true },
-  { id: '5', title: 'Large Custom Plushie', image: 'https://images.unsplash.com/photo-1513558161293-cdaf765ed2fd?w=400&h=500&fit=crop', basePrice: 55, moq: 5, category: 'Plushies', isPopular: true },
-  { id: '6', title: 'Acrylic Charm Set', image: 'https://images.unsplash.com/photo-1598300042247-d088f8ab3a91?w=400&h=500&fit=crop', basePrice: 6, moq: 100, category: 'Keychains' },
+  { id: '1', title: 'Custom Character Plushie #01', image: imgP3_01, basePrice: 35, moq: 10, category: 'Plushies', isPopular: true },
+  
+  { id: '6', title: 'Custom Character Plushie #02', image: imgP2_01, basePrice: 6, moq: 100, category: 'Plushies' },
   { id: '7', title: 'Chibi Plushie', image: 'https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?w=400&h=500&fit=crop', basePrice: 25, moq: 20, category: 'Plushies', isNew: true },
   { id: '8', title: 'Metal Pin Badge', image: 'https://images.unsplash.com/photo-1576566588028-4147f3842f27?w=400&h=500&fit=crop', basePrice: 7, moq: 50, category: 'Pins' },
   { id: '9', title: 'Rubber Keychain', image: 'https://images.unsplash.com/photo-1555274175-6cbf6f3b137b?w=400&h=500&fit=crop', basePrice: 4, moq: 200, category: 'Keychains' },
@@ -28,7 +35,7 @@ export function ProductsPage() {
   const filteredProducts = allProducts
     .filter((product) => {
       const matchesCategory =
-        selectedCategory === 'All Products' || product.category === selectedCategory;
+        selectedCategory === 'All Products' || product.category.includes(selectedCategory);
       const matchesSearch =
         searchQuery === '' ||
         product.title.toLowerCase().includes(searchQuery.toLowerCase());

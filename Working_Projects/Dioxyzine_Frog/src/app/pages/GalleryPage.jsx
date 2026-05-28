@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import Masonry from 'react-responsive-masonry';
 import { X, ZoomIn } from 'lucide-react';
 
-const categories = ['All', 'Plushies', 'Pins', 'Keychains', 'Process', 'Packaging'];
+const categories = ['All Products', 'Plushies 2 Mảnh', 'Plushies 3 Mảnh', 'Doll 2D (In)', 'Doll 2D (Thêu)', 'Collection'];
 
 const galleryItems = [
   { id: 1, image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=600&h=800&fit=crop', category: 'Plushies', title: 'Custom Character Plushie' },
@@ -44,7 +44,7 @@ export function GalleryPage() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="flex flex-wrap justify-center gap-3 mb-12"
+          className="flex flex-wrap justify-left gap-3 mb-12"
         >
           {categories.map((category) => (
             <button

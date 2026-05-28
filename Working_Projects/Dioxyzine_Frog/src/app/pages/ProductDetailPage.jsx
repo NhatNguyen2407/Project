@@ -1,7 +1,13 @@
 import { useState } from 'react';
 import { useParams, Link } from 'react-router';
 import { motion } from 'motion/react';
-import { Heart, Share2, ChevronLeft, Upload, Clock, Package, Shield, TrendingDown } from 'lucide-react';
+import { Heart, Share2, ChevronLeft, Upload, Clock, Package, Shield, TrendingDown, ChevronRight } from 'lucide-react';
+
+import imgP3_01 from '../../assets/Products/Plushies_3/P3_01.jpg'
+import imgP3_02 from '../../assets/Products/Plushies_3/P3_02.jpg'
+import imgP3_03 from '../../assets/Products/Plushies_3/P3_03.jpg'
+import imgP3_04 from '../../assets/Products/Plushies_3/P3_04.jpg'
+import imgP3_05 from '../../assets/Products/Plushies_3/P3_05.jpg'
 
 export function ProductDetailPage() {
   const { id } = useParams();
@@ -14,9 +20,16 @@ export function ProductDetailPage() {
   const [printing, setPrinting] = useState('embroidered');
   const [packaging, setPackaging] = useState('standard');
 
+  const nextImage = () => {
+    setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+
+  const prevImage = () => {
+    setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+
   const images = [
-    'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=800&h=1000&fit=crop',
-    'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=800&h=1000&fit=crop',
+    imgP3_01, imgP3_02, imgP3_03, imgP3_04, imgP3_05
   ];
 
   const product = {
@@ -81,28 +94,60 @@ export function ProductDetailPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
           <div className="space-y-4">
+            {/* Main Image - Shopee Style Carousel */}
             <motion.div
               layoutId={`product-${id}`}
-              className="relative aspect-square rounded-3xl overflow-hidden bg-[#130D1E] shadow-[0_0_30px_rgba(157,101,255,0.15)] border border-[var(--border)]"
+              className="relative aspect-square rounded-3xl overflow-hidden bg-[#130D1E] shadow-[0_0_30px_rgba(139,114,190,0.15)] border border-[var(--border)] group"
             >
+              {/* Ảnh chính */}
               <img
                 src={images[currentImage]}
                 alt={product.title}
-                className="w-full h-full object-cover opacity-80"
+                className="w-full h-full object-cover opacity-90 transition-opacity duration-300"
               />
-              <div className="absolute top-4 right-4 flex gap-2">
+
+              {/* Nút Lùi (Prev) - Chỉ hiện khi di chuột vào */}
+              <button
+                onClick={prevImage}
+                className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#08080C]/80 border border-[var(--border)] backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 hover:bg-[var(--primary)] hover:scale-110 transition-all z-10"
+              >
+                <ChevronLeft className="w-5 h-5" />
+              </button>
+
+              {/* Nút Tiến (Next) - Chỉ hiện khi di chuột vào */}
+              <button
+                onClick={nextImage}
+                className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#08080C]/80 border border-[var(--border)] backdrop-blur-sm flex items-center justify-center text-white opacity-0 group-hover:opacity-100 hover:bg-[var(--primary)] hover:scale-110 transition-all z-10"
+              >
+                <ChevronRight className="w-5 h-5" />
+              </button>
+
+              {/* Các nút Action (Tim, Share) */}
+              <div className="absolute top-4 right-4 flex gap-2 z-10">
                 <button
                   onClick={() => setIsFavorited(!isFavorited)}
-                  className="w-12 h-12 rounded-full bg-[#09090B]/80 border border-[var(--border)] backdrop-blur-sm shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
+                  className="w-10 h-10 rounded-full bg-[#08080C]/80 border border-[var(--border)] backdrop-blur-sm shadow-lg flex items-center justify-center hover:scale-110 transition-transform"
                 >
                   <Heart
-                    className={`w-5 h-5 ${
+                    className={`w-4 h-4 ${
                       isFavorited
                         ? 'fill-[var(--primary)] text-[var(--primary)]'
                         : 'text-gray-400'
                     }`}
                   />
                 </button>
+              </div>
+              
+              {/* Dấu chấm báo vị trí ảnh (Dots indicator) */}
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-10">
+                {images.map((_, idx) => (
+                  <div 
+                    key={idx} 
+                    className={`w-2 h-2 rounded-full transition-all ${
+                      currentImage === idx ? 'w-6 bg-[var(--primary)]' : 'bg-white/50'
+                    }`}
+                  />
+                ))}
               </div>
             </motion.div>
           </div>
