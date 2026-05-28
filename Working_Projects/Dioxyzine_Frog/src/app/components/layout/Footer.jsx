@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { Mail, Heart, Facebook } from 'lucide-react';
+import { Mail, Heart, Facebook, Instagram } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -59,6 +59,7 @@ export function Footer() {
           <div>
             <h3 className="font-semibold mb-4 text-white">Get in Touch</h3>
             <div className="space-y-3">
+              {/* Email */}
               <a
                 href="mailto:dioxyzine.frog@gmail.com"
                 className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-[var(--primary)] transition-colors"
@@ -67,6 +68,7 @@ export function Footer() {
                 <span>dioxyzine.frog@gmail.com</span>
               </a>
               <div className="flex items-center space-x-3 pt-2">
+                {/* Facebook */}
                 <a
                   href="https://www.facebook.com/dioxyzine.frog"
                   target="_blank"
@@ -74,6 +76,16 @@ export function Footer() {
                   className="w-9 h-9 rounded-full bg-[#1A102B] border border-[var(--border)] flex items-center justify-center text-foreground hover:text-white hover:bg-[var(--primary)] hover:shadow-[0_0_10px_rgba(157,101,255,0.5)] transition-all"
                 >
                   <Facebook className="w-4 h-4" />
+                </a>
+
+                {/* Instagram */}
+                <a
+                  href="https://www.instagram.com/dioxyzinefrog.print/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-9 h-9 rounded-full bg-[#1A1528] border border-[var(--border)] flex items-center justify-center text-foreground hover:text-white hover:bg-[var(--primary)] hover:shadow-[0_0_10px_rgba(139,114,190,0.5)] transition-all"
+                >
+                  <Instagram className="w-4 h-4" />
                 </a>
               </div>
             </div>
