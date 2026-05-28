@@ -27,6 +27,7 @@ export function Footer() {
               {[
                 { path: '/', label: 'Home' },
                 { path: '/products', label: 'Products' },
+                { path: '/pricing', label: 'Pricing'},
                 { path: '/gallery', label: 'Gallery' },
                 { path: '/about', label: 'About / Contact' },
                 { path: '/terms', label: 'Terms & Shipping' },

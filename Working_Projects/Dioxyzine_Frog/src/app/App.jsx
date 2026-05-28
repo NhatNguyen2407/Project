@@ -4,6 +4,7 @@ import { Footer } from './components/layout/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
 import { HomePage } from './pages/HomePage';
 import { ProductsPage } from './pages/ProductsPage';
+import { PricingPage } from './pages/PricingPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { QuoteRequestPage } from './pages/QuoteRequestPage';
@@ -40,6 +41,7 @@ export default function App() {
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/products" element={<ProductsPage />} />
+          <Route path="/pricing" element={<PricingPage />} />
           <Route path="/product/:id" element={<ProductDetailPage />} />
           <Route path="/gallery" element={<GalleryPage />} />
           <Route path="/quote" element={<QuoteRequestPage />} />
