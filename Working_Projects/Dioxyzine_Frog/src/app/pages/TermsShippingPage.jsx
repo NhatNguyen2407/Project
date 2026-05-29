@@ -11,7 +11,6 @@ const termsData = {
       content: `- Màu in ra sẽ có sự chênh lệch từ 5-10% so với file in, màu tông lạnh và tối sẽ dễ lệch hơn tông nóng.
 - Hệ màu sốp nhận in là CMYK, nếu bạn sử dụng file hệ RGB xin hãy lưu ý về khả năng lệch màu. Nếu sử dụng các phần mềm vẽ trên điện thoại như IbisPaintX, bạn sẽ cần đổi hệ màu trước khi in vì hệ màu mặc định của hầu hết các phần mềm là RGB.
 - Nếu không đổi hệ màu và kéo chỉnh, lưu ý rằng cách màu xanh biển (cobalt blue) sẽ rất dễ ngả tím, ám tím, để tránh tình trạng này hãy pick màu thiên về xanh cyan (xanh miku).
-- Sốp có nhận đổi hệ màu và kéo chỉnh hộ, phụ phí 2k/file.
 - Vải sẽ có thể co rút, xê dịch khi in làm hình in bị ảnh hưởng (kéo dãn hoặc co lại, v.v), nếu bị nặng sốp sẽ in bù free.
 - Một số lỗi vải phổ biến: cấn vải, gấp vải, bụi đốm trắng. Nếu không ảnh hưởng quá 10% hình in hoặc lỗi ở các chi tiết quan trọng và nổi bật, sốp xin phép không in lại.
 - Sốp in bù free đối với các lỗi: in thiếu, in sai, lệch màu nhiều hơn 10%, lỗi vải cấn các vị trí quan trọng và nổi bật.`
@@ -40,7 +39,6 @@ const termsData = {
       content: `- Printed colors may differ by 5-10% from the original file. Cold and dark tones tend to have more color shift than warm tones.
 - We only accept CMYK color mode for printing. If you use RGB files, please be aware of potential color discrepancies. If you design using mobile apps like IbisPaint X, you must convert the color mode before sending the file for printing, as most mobile drawing apps default to RGB.
 - If you do not convert the color mode and adjust it yourself, note that colors like cobalt blue can easily shift to purple or have a purple tint. To avoid this, choose colors closer to cyan blue (Miku blue).
-- We offer color mode conversion and adjustment service for a fee of 2k/file.
 - Fabric may shrink, shift, or stretch during printing, which can affect the printed design. If the distortion is severe, we will reprint for free.
 - Common fabric defects include: creased fabric, folded fabric, and white dust spots. If these defects affect less than 10% of the print or are not on important/noticeable details, we reserve the right not to reprint.
 - We will reprint for free in the following cases: missing print, incorrect print, color deviation over 10%, or fabric creases on important/noticeable areas.`

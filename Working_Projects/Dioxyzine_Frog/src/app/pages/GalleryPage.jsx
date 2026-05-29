@@ -17,30 +17,33 @@ export function GalleryPage() {
   }, [lang]);
 
   // Tự động bóc tách dữ liệu từ productsData theo ngôn ngữ hiện tại
+  // Cập nhật đoạn useMemo trong GalleryPage:
   const { galleryItems, categories } = useMemo(() => {
     const items = [];
-    const cats = [lang === 'vi' ? 'Tất cả' : 'All'];
+    const catsSet = new Set([lang === 'vi' ? 'Tất cả' : 'All']);
     let idCounter = 1;
 
     productsData.forEach((product) => {
-      // Lấy tên sản phẩm theo ngôn ngữ để làm category
+      // Lấy danh mục chung (Plushie, Doll, Customize)
+      product.category.forEach(c => catsSet.add(c));
+      
       const productTitle = product.title?.[lang] || product.title?.vi || 'Unknown';
-      cats.push(productTitle);
       
       if (product.images && product.images.length > 0) {
         product.images.forEach((img) => {
           items.push({
             id: idCounter++,
             image: img,
-            category: productTitle,
+            // Gắn tạm category đầu tiên của sản phẩm làm thẻ lọc cho ảnh này
+            category: product.category[0], 
             title: productTitle,
           });
         });
       }
     });
 
-    return { galleryItems: items, categories: cats };
-  }, [lang]); // Chạy lại khi đổi ngôn ngữ
+    return { galleryItems: items, categories: Array.from(catsSet) };
+  }, [lang]);
 
   const filteredItems =
     (selectedCategory === 'Tất cả' || selectedCategory === 'All')

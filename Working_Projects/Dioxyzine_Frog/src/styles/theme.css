@@ -87,7 +87,7 @@
   body {
     @apply bg-background text-foreground;
     /* Gọi thẳng tên font Fredoka cho body */
-    font-family: 'Fredoka', sans-serif; 
+    font-family: 'Montserrat', sans-serif; 
     
     background-image: 
       linear-gradient(45deg, rgba(139, 114, 190, 0.03) 25%, transparent 25%),
@@ -112,7 +112,7 @@
   h4 { font-size: 1.25rem; line-height: 1.4; }
 
   p, span, label, input, textarea, button, select, a, table, td, th {
-    font-family: 'Fredoka', sans-serif;
+    font-family: 'Montserrat', sans-serif;
     color: var(--silver-gray); 
   }
 
