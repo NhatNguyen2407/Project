@@ -6,6 +6,10 @@ import { useState, useEffect } from 'react';
 import { productsData } from '../data/productsData';
 import { useLanguage } from '../context/LanguageContext';
 
+import doll_in_12 from '../../assets/Products/Doll2D_In/DollIn_12.jpg';
+import doll_in_40 from '../../assets/Products/Doll2D_In/DollIn_40.jpg';
+import p2_collection_01 from '../../assets/Products/Plushies_2/P2_Collection_01.jpg';
+
 const translations = {
   vi: {
     howItWorks: 'Quy Trình Đặt Hàng',
@@ -45,13 +49,13 @@ const translations = {
 
 const heroSlides = {
   vi: [
-    { title: 'Biến mọi ý tưởng của bạn thành hiện thực', subtitle: 'Gấu bông, fanmerch và quà tặng handmade độc quyền', image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=1600&h=900&fit=crop' },
-    { title: 'Gia công chất lượng cao', subtitle: 'Chỉnh sửa tùy ý đến khi ưng, hỗ trợ tối đa cho artist', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop' },
-    { title: 'Sáng tạo không giới hạn', subtitle: 'Phục vụ mọi dự án của bạn từ đơn lẻ đến số lượng lớn', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=1600&h=900&fit=crop' }
+    { title: 'Biến mọi ý tưởng của bạn thành hiện thực', subtitle: 'Gấu bông, fanmerch và quà tặng handmade độc quyền', image: doll_in_12 },
+    { title: 'Gia công chất lượng cao', subtitle: 'Chỉnh sửa tùy ý đến khi ưng, hỗ trợ tối đa cho artist', image: doll_in_40 },
+    { title: 'Sáng tạo không giới hạn', subtitle: 'Phục vụ mọi dự án của bạn từ đơn lẻ đến số lượng lớn', image: p2_collection_01 }
   ],
   en: [
-    { title: 'Turn all your ideas into reality', subtitle: 'Exclusive handmade plushies, fan merch, and gifts', image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=1600&h=900&fit=crop' },
-    { title: 'High-quality manufacturing', subtitle: 'Unlimited revisions until satisfied, full support for artists', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop' },
+    { title: 'Turn all your ideas into reality', subtitle: 'Exclusive handmade plushies, fan merch, and gifts', image: doll_in_12 },
+    { title: 'High-quality manufacturing', subtitle: 'Unlimited revisions until satisfied, full support for artists', image: doll_in_40 },
     { title: 'Unlimited creativity', subtitle: 'Serving all your projects from single pieces to bulk orders', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=1600&h=900&fit=crop' }
   ]
 };
@@ -138,8 +142,8 @@ export function HomePage() {
             {productsData.slice(0, 4).map((product) => (
               <ProductCard 
                 key={product.id} id={product.id} title={product.title} image={product.image}
-                basePrice={product.priceBrackets[0].prices[0]} moq={product.moq}
-                category={product.category[0]} isPopular={true}
+                basePriceObj={product.priceBrackets?.[0]?.prices} moq={product.moq}
+                category={product.category[0]} isPopular={true} pricingType={product.pricingType}
               />
             ))}
           </div>

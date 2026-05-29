@@ -49,11 +49,11 @@ export function InquiryForm() {
         </div>
         <div>
           <label className="block text-sm font-semibold text-[var(--silver-gray)] mb-2">{lang === 'vi' ? 'Số lượng' : 'Quantity'}</label>
-          <input type="text" value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} placeholder="VD: 50" className="w-full px-4 py-3 bg-[#08080C] border border-[var(--border)] rounded-xl text-[var(--primary)] font-semibold" />
+          <input type="text" value={formData.quantity} onChange={e => setFormData({...formData, quantity: e.target.value})} placeholder={lang === 'vi' ? 'VD: 50' : 'E.g: 50'} className="w-full px-4 py-3 bg-[#08080C] border border-[var(--border)] rounded-xl text-[var(--primary)] font-semibold" />
         </div>
         <div>
           <label className="block text-sm font-semibold text-[var(--silver-gray)] mb-2">{lang === 'vi' ? 'Kích thước' : 'Size'}</label>
-          <input type="text" value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} placeholder="VD: 20cm" className="w-full px-4 py-3 bg-[#08080C] border border-[var(--border)] rounded-xl text-[var(--primary)] font-semibold" />
+          <input type="text" value={formData.size} onChange={e => setFormData({...formData, size: e.target.value})} placeholder={lang === 'vi' ? 'VD: 20cm' : 'E.g: 20cm'} className="w-full px-4 py-3 bg-[#08080C] border border-[var(--border)] rounded-xl text-[var(--primary)] font-semibold" />
         </div>
       </div>
 
