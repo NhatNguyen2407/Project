@@ -1,110 +1,86 @@
 import { Link } from 'react-router';
-import { Mail, Heart, Facebook, Instagram } from 'lucide-react';
+import { useLanguage } from '../../context/LanguageContext';
 
 export function Footer() {
+  const { lang } = useLanguage();
+  const currentYear = new Date().getFullYear();
+
   return (
-    <footer className="relative bg-gradient-to-br from-[#09090B] via-[#130D1E] to-[#09090B] border-t border-[var(--border)]">
-      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-12">
-          {/* Brand Logo */}
-          <div className="space-y-4 md:col-span-1">
-            <div className="flex items-center space-x-2">
-              <img 
-                src="/src/assets/logo.png" 
-                alt="Dioxyzine Frog Logo" 
-                className="w-48 h-auto drop-shadow-[0_0_10px_rgba(157,101,255,0.4)]" 
-              />
-            </div>
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              Custom handmade merchandise and plushie manufacturing studio creating unique, personalized creations.
+    <footer className="bg-[#040406] border-t border-[var(--border)] relative z-10 text-[var(--silver-gray)]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+          
+          {/* Brand & Logo */}
+          <div className="space-y-4">
+            <Link to="/" className="flex items-center space-x-3 group w-fit">
+              <div className="relative">
+                <img 
+                  src="/src/assets/avatar.jpeg" 
+                  alt="Dioxyzine Frog" 
+                  className="w-12 h-12 rounded-full border-2 border-[var(--primary)] object-cover shadow-[0_0_15px_rgba(139,114,190,0.5)] group-hover:scale-105 transition-transform" 
+                />
+              </div>
+              <span className="text-2xl tracking-wide" style={{ fontFamily: "'Coiny', cursive", color: "var(--primary)", WebkitTextStroke: "1px white" }}>
+                Dioxyzine Frog
+              </span>
+            </Link>
+            <p className="text-sm leading-relaxed text-[var(--muted-foreground)] mt-2">
+              {lang === 'vi'
+                ? 'Hiện thực hóa mọi ý tưởng thiết kế của bạn thành những sản phẩm nhồi bông thủ công chất lượng cao nhất do chúng tôi tận tâm gia công.'
+                : 'Transforming all your creative layouts and art concepts into premium high-quality handmade plush items.'}
             </p>
+          </div>
+
+          {/* Dịch vụ (Services) */}
+          <div>
+            <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+              {lang === 'vi' ? 'Dịch vụ của chúng tôi' : 'Our Services'}
+            </h4>
+            <ul className="space-y-2 text-sm">
+              <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
+                {lang === 'vi' ? 'Gấu bông custom' : 'Custom made plushies'}
+              </li>
+              <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
+                {lang === 'vi' ? 'Merch fanmade' : 'Fan merchandise'}
+              </li>
+              <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
+                {lang === 'vi' ? 'Sản xuất số lượng lớn' : 'Bulk orders'}
+              </li>
+            </ul>
           </div>
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold mb-4 text-white">Quick Links</h3>
-            <ul className="space-y-2">
-              {[
-                { path: '/', label: 'Home' },
-                { path: '/products', label: 'Products' },
-                { path: '/pricing', label: 'Pricing'},
-                { path: '/gallery', label: 'Gallery' },
-                { path: '/about', label: 'About / Contact' },
-                { path: '/terms', label: 'Terms & Shipping' },
-              ].map((link) => (
-                <li key={link.path}>
-                  <Link
-                    to={link.path}
-                    className="text-sm text-muted-foreground hover:text-[var(--primary)] transition-colors"
-                  >
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Services */}
-          <div>
-            <h3 className="font-semibold mb-4 text-white">Services</h3>
-            <ul className="space-y-2">
-              <li className="text-sm text-muted-foreground">Custom Plushies</li>
-              <li className="text-sm text-muted-foreground">Doll 2D</li>
-              <li className="text-sm text-muted-foreground">Fan Merchandise</li>
-              <li className="text-sm text-muted-foreground">Bulk Orders</li>
-            </ul>
-          </div>
-
-          {/* Contact Details */}
-          <div>
-            <h3 className="font-semibold mb-4 text-white">Get in Touch</h3>
-            <div className="space-y-3">
-              {/* Email */}
-              <a
-                href="mailto:dioxyzine.frog@gmail.com"
-                className="flex items-center space-x-2 text-sm text-muted-foreground hover:text-[var(--primary)] transition-colors"
-              >
-                <Mail className="w-4 h-4" />
-                <span>dioxyzine.frog@gmail.com</span>
-              </a>
-              <div className="flex items-center space-x-3 pt-2">
-                {/* Facebook */}
-                <a
-                  href="https://www.facebook.com/dioxyzine.frog"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-[#1A102B] border border-[var(--border)] flex items-center justify-center text-foreground hover:text-white hover:bg-[var(--primary)] hover:shadow-[0_0_10px_rgba(157,101,255,0.5)] transition-all"
-                >
-                  <Facebook className="w-4 h-4" />
-                </a>
-
-                {/* Instagram */}
-                <a
-                  href="https://www.instagram.com/dioxyzinefrog.print/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-9 h-9 rounded-full bg-[#1A1528] border border-[var(--border)] flex items-center justify-center text-foreground hover:text-white hover:bg-[var(--primary)] hover:shadow-[0_0_10px_rgba(139,114,190,0.5)] transition-all"
-                >
-                  <Instagram className="w-4 h-4" />
-                </a>
-              </div>
+            <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+              {lang === 'vi' ? 'Liên Kết Nhanh' : 'Quick Links'}
+            </h4>
+            <div className="grid grid-cols-2 gap-2 text-sm">
+              <Link to="/products" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                {lang === 'vi' ? 'Sản Phẩm' : 'Products'}
+              </Link>
+              <Link to="/pricing" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                {lang === 'vi' ? 'Bảng Giá' : 'Pricing'}
+              </Link>
+              <Link to="/gallery" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                {lang === 'vi' ? 'Thư Viện' : 'Gallery'}
+              </Link>
+              <Link to="/terms" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                {lang === 'vi' ? 'Điều Khoản' : 'Terms'}
+              </Link>
+              <Link to="/inquiry" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                {lang === 'vi' ? 'Báo Giá' : 'Inquiry'}
+              </Link>
+              <Link to="/about" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                {lang === 'vi' ? 'Liên Hệ' : 'Contact'}
+              </Link>
             </div>
           </div>
+
         </div>
 
-        {/* Bottom Bar */}
-        <div className="pt-8 border-t border-[var(--border)] flex flex-col sm:flex-row items-center justify-between gap-4">
-          <p className="text-sm text-muted-foreground flex items-center gap-1">
-            © 2024 Dioxyzine Frog. Made with <Heart className="w-4 h-4 text-[var(--primary)] fill-current animate-pulse" /> for creatives.
-          </p>
-          <div className="flex items-center gap-6 text-sm text-muted-foreground">
-            <Link to="/terms" className="hover:text-[var(--primary)] transition-colors">
-              Privacy Policy
-            </Link>
-            <Link to="/terms" className="hover:text-[var(--primary)] transition-colors">
-              Terms of Service
-            </Link>
-          </div>
+        {/* Bản Quyền */}
+        <div className="mt-12 pt-8 border-t border-[var(--border)]/30 text-center text-xs text-[var(--muted-foreground)]">
+          <p>&copy; {currentYear} Dioxyzine Frog. All rights reserved.</p>
         </div>
       </div>
     </footer>

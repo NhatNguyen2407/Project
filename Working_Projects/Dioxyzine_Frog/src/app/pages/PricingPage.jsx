@@ -7,7 +7,6 @@ const pricingData = [
     title: 'PLUSHIE 2 MẢNH',
     sizes: ['5cm', '10cm', '15cm', '20cm', '25cm', '30cm', '40cm', '50cm', '60cm'],
     rows: [
-      // { qty: '1-10', prices: { vi: ['20k', '40k', '55k', '70k', '98k', '125k', '150k', '250k', '350k'], en: ['$1.5', '$3.0', '$4.2', '$5.3', '$7.4', '$9.4', '$11.3', '$18.9', '$26.4'] } },
       { qty: '11-50', prices: { vi: ['19k', '37k', '78k', '67k', '94k', '120k', '145k', '245k', '340k'], en: ['$1.4', '$2.8', '$5.9', '$5.1', '$7.1', '$9.1', '$10.9', '$18.5', '$25.7'] } },
       { qty: '51-100', prices: { vi: ['18k', '35k', '73k', '65k', '90k', '115k', '140k', '240k', '330k'], en: ['$1.4', '$2.6', '$5.5', '$4.9', '$6.8', '$8.7', '$10.6', '$18.1', '$24.9'] } },
       { qty: '101-500', prices: { vi: ['17k', '33k', '68k', '60k', '85k', '110k', '130k', '230k', '310k'], en: ['$1.3', '$2.5', '$5.1', '$4.5', '$6.4', '$8.3', '$9.8', '$17.4', '$23.4'] } },
@@ -16,14 +15,12 @@ const pricingData = [
     ],
     addons: [
       { name: 'Phụ kiện', prices: { vi: ['X', '5k', '5k', '7k', '10k', '10k', '15k', '25k', '35k'], en: ['X', '$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1', '$1.9', '$2.6'] } }
-    ],
-    note: { vi: 'In vải velboa 2 chiều.\nThêm phụ kiện: bao gồm tai đuôi, chíp chíp,...', en: 'Printed on 2-way velboa fabric.\nAddons include ears, tails, squeakers...' }
+    ]
   },
   {
     title: 'PLUSHIE 3 MẢNH',
     sizes: ['10cm', '15cm', '20cm', '25cm', '30cm', '40cm'],
     rows: [
-      // { qty: '1-10', prices: { vi: ['65k', '83k', '100k', '123k', '145k', '190k'], en: ['$4.9', '$6.3', '$7.5', '$9.2', '$10.9', '$14.3'] } },
       { qty: '11-50', prices: { vi: ['62k', '78k', '93k', '114k', '135k', '176k'], en: ['$4.7', '$5.9', '$7.0', '$8.6', '$10.2', '$13.3'] } },
       { qty: '51-100', prices: { vi: ['59k', '73k', '87k', '108k', '128k', '168k'], en: ['$4.5', '$5.5', '$6.6', '$8.1', '$9.7', '$12.7'] } },
       { qty: '101-500', prices: { vi: ['55k', '68k', '80k', '100k', '120k', '160k'], en: ['$4.2', '$5.1', '$6.0', '$7.5', '$9.1', '$12.1'] } },
@@ -32,14 +29,12 @@ const pricingData = [
     ],
     addons: [
       { name: 'Phụ kiện', prices: { vi: ['5k', '5k', '7k', '10k', '10k', '15k'], en: ['$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1'] } }
-    ],
-    note: { vi: 'Mặc định nhồi căng bông.\nKhông may nét vụn.\nCheck file với shop trước.', en: 'Fully stuffed by default.\nCannot sew highly intricate fragments.\nCheck file before order.' }
+    ]
   },
   {
     title: 'DOLL 2D (IN)',
     sizes: ['10cm', '15cm', '20cm', '25cm', '30cm', '40cm', '50cm', '60cm'],
     rows: [
-      // { qty: '1-10', prices: { vi: ['65k', '83k', '100k', '123k', '145k', '190k', '280k', '400k'], en: ['$4.9', '$6.3', '$7.5', '$9.2', '$10.9', '$14.3', '$21.1', '$30.2'] } },
       { qty: '11-50', prices: { vi: ['62k', '78k', '93k', '114k', '135k', '176k', '270k', '380k'], en: ['$4.7', '$5.9', '$7.0', '$8.6', '$10.2', '$13.3', '$20.4', '$28.7'] } },
       { qty: '51-100', prices: { vi: ['59k', '73k', '87k', '108k', '128k', '168k', '260k', '360k'], en: ['$4.5', '$5.5', '$6.6', '$8.1', '$9.7', '$12.7', '$19.6', '$27.2'] } },
       { qty: '101-500', prices: { vi: ['55k', '68k', '80k', '100k', '120k', '160k', '250k', '340k'], en: ['$4.2', '$5.1', '$6.0', '$7.5', '$9.1', '$12.1', '$18.9', '$25.7'] } },
@@ -48,14 +43,12 @@ const pricingData = [
     ],
     addons: [
       { name: 'Phụ kiện', prices: { vi: ['5k', '5k', '7k', '10k', '10k', '15k', '25k', '35k'], en: ['$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1', '$1.9', '$2.6'] } }
-    ],
-    note: { vi: 'Mặc định nhồi căng bông.\nKhông may nét vụn.\nCheck file với shop trước.', en: 'Fully stuffed by default.\nCannot sew highly intricate fragments.\nCheck file before order.' }
+    ]
   },
   {
     title: 'DOLL 2D THÊU',
     sizes: ['10cm', '15cm', '20cm', '25cm', '30cm'],
     rows: [
-      // { qty: '1-10', prices: { vi: ['250k', '260k', '270k', '295k', '320k'], en: ['$18.9', '$19.6', '$20.4', '$22.3', '$24.2'] } },
       { qty: '11-50', prices: { vi: ['150k', '175k', '200k', '225k', '250k'], en: ['$11.3', '$13.2', '$15.1', '$17.0', '$18.9'] } },
       { qty: '51-100', prices: { vi: ['110k', '130k', '150k', '160k', '170k'], en: ['$8.3', '$9.8', '$11.3', '$12.1', '$12.8'] } },
       { qty: '101-500', prices: { vi: ['70k', '85k', '100k', '110k', '120k'], en: ['$5.3', '$6.4', '$7.5', '$8.3', '$9.1'] } },
@@ -64,8 +57,7 @@ const pricingData = [
     ],
     addons: [
       { name: 'Phụ kiện', prices: { vi: ['5k', '10k', '15k', '20k', '25k'], en: ['$0.4', '$0.8', '$1.1', '$1.5', '$1.9'] } }
-    ],
-    note: { vi: 'Thêu nhung 1mm, max 3 màu chỉ.\nMặc định nhồi bông.', en: 'Embroidery on 1mm velvet, max 3 colors.\nFully stuffed by default.' }
+    ]
   }
 ];
 
@@ -79,13 +71,14 @@ export function PricingPage() {
           <h1 className="font-heading text-5xl md:text-7xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.6)]">
             {lang === 'vi' ? 'BẢNG GIÁ' : 'PRICING'}
           </h1>
-          <p className="text-lg text-[var(--primary)] font-semibold uppercase tracking-widest mb-6">
-            {lang === 'vi' ? 'Bảng giá tham khảo các hạng mục' : 'Reference pricing for categories'}
-          </p>
+          
+          {/* CẬP NHẬT CÂU LƯU Ý MỚI TRÊN CÙNG TRANG BẢNG GIÁ */}
           <div className="inline-flex items-center gap-3 bg-[var(--primary)]/10 border border-[var(--primary)]/30 px-6 py-3 rounded-full backdrop-blur-sm">
             <Info className="w-5 h-5 text-[var(--primary)]" />
             <span className="text-white font-medium">
-              {lang === 'vi' ? 'Lưu ý: Bảng giá dưới đây là giá ước tính. Vui lòng trao đổi với chúng tôi để nhận báo giá chính xác nhất' : 'Note: The pricing table below is an estimate. Please contact us for most accurate prices'}
+              {lang === 'vi' 
+                ? 'Đây là bảng giá ước tính, vui lòng trao đổi với chúng tôi để nhận báo giá chính xác nhất.' 
+                : 'This is an estimated price list, please contact us for the most accurate quote.'}
             </span>
           </div>
         </motion.div>
@@ -132,8 +125,12 @@ export function PricingPage() {
                   </tbody>
                 </table>
               </div>
+              
+              {/* BỎ TOÀN BỘ LƯU Ý LẺ, ĐỒNG BỘ THÀNH 1 CÂU THEO YÊU CẦU */}
               <div className="mt-8 bg-[var(--cyber-black)] rounded-2xl p-6 border border-[var(--border)]">
-                <p className="text-sm text-[var(--silver-gray)] text-center whitespace-pre-line">{table.note[lang]}</p>
+                <p className="text-sm font-semibold text-[var(--primary)] text-center tracking-wide uppercase">
+                  {lang === 'vi' ? 'Liên hệ ngay để nhận báo giá chính xác nhất' : 'Contact us now to get the most accurate quote'}
+                </p>
               </div>
             </motion.div>
           ))}

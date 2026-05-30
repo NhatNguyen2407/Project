@@ -1,26 +1,18 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import { ProductCard } from '../components/ProductCard';
-import { ArrowRight, CheckCircle, Sparkles, Palette, Package } from 'lucide-react';
+import { ArrowRight, CheckCircle, Sparkles, Palette, Package, Facebook, Instagram } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { productsData } from '../data/productsData';
 import { useLanguage } from '../context/LanguageContext';
 
-import doll_in_12 from '../../assets/Products/Doll2D_In/DollIn_12.jpg';
-import doll_in_40 from '../../assets/Products/Doll2D_In/DollIn_40.jpg';
-import p2_collection_01 from '../../assets/Products/Plushies_2/P2_Collection_01.jpg';
-
 const translations = {
   vi: {
-    howItWorks: 'Quy Trình Đặt Hàng',
-    subHow: 'Đơn giản, minh bạch và hợp tác chặt chẽ từ ý tưởng ban đầu đến thành phẩm',
-    featured: 'Sản Phẩm Nổi Bật',
-    subFeatured: 'Khám phá các dòng sản phẩm gấu bông và merchandise tùy chỉnh phổ biến nhất',
-    viewAll: 'Xem Tất Cả Sản Phẩm',
-    whatCreatorsSay: 'Cộng Đồng Sáng Tác Nói Gì',
-    ctaTitle: 'Sẵn Sàng Biến Ý Tưởng Thành Hiện Thực?',
-    ctaSub: 'Nhận báo giá chi tiết cho dự án của bạn trong vòng 24 giờ. Không ràng buộc, chỉ có cơ hội.',
-    ctaBtn: 'Bắt Đầu Gửi Yêu Cầu',
+    howItWorks: 'Quy Trình Đặt Hàng', subHow: 'Đơn giản, minh bạch và hợp tác chặt chẽ từ ý tưởng ban đầu đến thành phẩm',
+    featured: 'Sản Phẩm Nổi Bật', subFeatured: 'Khám phá các dòng sản phẩm gấu bông và merchandise tùy chỉnh phổ biến nhất',
+    viewAll: 'Xem Tất Cả Sản Phẩm', whatCreatorsSay: 'Cộng Đồng Sáng Tác Nói Gì',
+    ctaTitle: 'Sẵn Sàng Biến Ý Tưởng Thành Hiện Thực?', ctaSub: 'Nhận báo giá chi tiết cho dự án của bạn trong vòng 24 giờ. Không ràng buộc, chỉ có cơ hội.', ctaBtn: 'Bắt Đầu Gửi Yêu Cầu',
+    followUs: 'Theo dõi chúng tôi tại:', browseBtn: 'Xem sản phẩm', quoteBtn: 'Nhận báo giá',
     steps: [
       { title: 'Chia Sẻ Ý Tưởng', desc: 'Nói cho chúng tôi về ý tưởng sản phẩm tùy chỉnh của bạn và tải lên hình ảnh phác thảo tham khảo' },
       { title: 'Nhận Báo Giá', desc: 'Nhận bảng tính phí chi tiết dựa trên số lượng và thông số kích thước của bạn trong vòng 24h' },
@@ -29,15 +21,11 @@ const translations = {
     ]
   },
   en: {
-    howItWorks: 'How Ordering Works',
-    subHow: 'Simple, transparent, and collaborative process from concept to final creation',
-    featured: 'Featured Products',
-    subFeatured: 'Explore our most popular customizable merchandise and handmade plushies',
-    viewAll: 'View All Products',
-    whatCreatorsSay: 'What Creators Say',
-    ctaTitle: 'Ready to Bring Your Ideas to Life?',
-    ctaSub: 'Get a custom quote for your project in under 24 hours. No commitments, just possibilities.',
-    ctaBtn: 'Start Your Inquiry',
+    howItWorks: 'How Ordering Works', subHow: 'Simple, transparent, and collaborative process from concept to final creation',
+    featured: 'Featured Products', subFeatured: 'Explore our most popular customizable merchandise and handmade plushies',
+    viewAll: 'View All Products', whatCreatorsSay: 'What Creators Say',
+    ctaTitle: 'Ready to Bring Your Ideas to Life?', ctaSub: 'Get a custom quote for your project in under 24 hours. No commitments, just possibilities.', ctaBtn: 'Start Your Inquiry',
+    followUs: 'Follow us on:', browseBtn: 'Browse products', quoteBtn: 'Get a quote',
     steps: [
       { title: 'Share Your Idea', desc: 'Tell us about your custom product vision and upload reference sketches or design images' },
       { title: 'Get a Quote', desc: 'Receive detailed pricing based on your exact specifications and quantity within 24 hours' },
@@ -49,13 +37,13 @@ const translations = {
 
 const heroSlides = {
   vi: [
-    { title: 'Biến mọi ý tưởng của bạn thành hiện thực', subtitle: 'Gấu bông, fanmerch và quà tặng handmade độc quyền', image: doll_in_12 },
-    { title: 'Gia công chất lượng cao', subtitle: 'Chỉnh sửa tùy ý đến khi ưng, hỗ trợ tối đa cho artist', image: doll_in_40 },
-    { title: 'Sáng tạo không giới hạn', subtitle: 'Phục vụ mọi dự án của bạn từ đơn lẻ đến số lượng lớn', image: p2_collection_01 }
+    { title: 'Biến mọi ý tưởng của bạn thành hiện thực', subtitle: 'Gấu bông, fanmerch và quà tặng handmade độc quyền', image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=1600&h=900&fit=crop' },
+    { title: 'Gia công chất lượng cao', subtitle: 'Chỉnh sửa tùy ý đến khi ưng, hỗ trợ tối đa cho artist', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop' },
+    { title: 'Sáng tạo không giới hạn', subtitle: 'Phục vụ mọi dự án của bạn từ đơn lẻ đến số lượng lớn', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=1600&h=900&fit=crop' }
   ],
   en: [
-    { title: 'Turn all your ideas into reality', subtitle: 'Exclusive handmade plushies, fan merch, and gifts', image: doll_in_12 },
-    { title: 'High-quality manufacturing', subtitle: 'Unlimited revisions until satisfied, full support for artists', image: doll_in_40 },
+    { title: 'Turn all your ideas into reality', subtitle: 'Exclusive handmade plushies, fan merch, and gifts', image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=1600&h=900&fit=crop' },
+    { title: 'High-quality manufacturing', subtitle: 'Unlimited revisions until satisfied, full support for artists', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop' },
     { title: 'Unlimited creativity', subtitle: 'Serving all your projects from single pieces to bulk orders', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=1600&h=900&fit=crop' }
   ]
 };
@@ -83,23 +71,42 @@ export function HomePage() {
             <img src={slide.image} alt="" className="w-full h-full object-cover" />
             <div className="absolute inset-0 z-20 flex items-center pt-16">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                <motion.div initial={{ x: -100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.8 }} className="max-w-2xl">
+                <motion.div initial={{ x: -100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.8 }} className="max-w-3xl">
                   <h1 className="font-heading text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
                     {slide.title}
                   </h1>
                   <p className="text-xl md:text-2xl text-[var(--silver-gray)] mb-8">{slide.subtitle}</p>
-                  <div className="flex flex-col sm:flex-row gap-4">
-                    <Link to="/products">
-                      <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-semibold shadow-[0_0_20px_rgba(139,114,190,0.5)] flex items-center gap-2 cursor-pointer">
-                        {lang === 'vi' ? 'Xem Sản Phẩm' : 'Browse Products'} <ArrowRight className="w-5 h-5" />
-                      </motion.button>
-                    </Link>
-                    <Link to="/inquiry">
-                      <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-[#171226]/80 backdrop-blur-md text-white font-semibold border border-[var(--primary)] hover:bg-[#2C2144] cursor-pointer">
-                        {lang === 'vi' ? 'Gửi Yêu Cầu' : 'Start Inquiry'}
-                      </motion.button>
-                    </Link>
+                  
+                  {/* HỆ THỐNG 3 CỤM NÚT TRÊN BANNER */}
+                  <div className="flex flex-col gap-6">
+                    {/* Cụm 1: Nút xem sản phẩm và báo giá */}
+                    <div className="flex flex-wrap gap-4">
+                      <Link to="/products">
+                        <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold shadow-[0_0_20px_rgba(139,114,190,0.5)] flex items-center gap-2 cursor-pointer">
+                          {t.browseBtn} <ArrowRight className="w-5 h-5" />
+                        </motion.button>
+                      </Link>
+                      <Link to="/inquiry">
+                        <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-[#171226]/80 backdrop-blur-md text-white font-bold border border-[var(--primary)] hover:bg-[#2C2144] cursor-pointer">
+                          {t.quoteBtn}
+                        </motion.button>
+                      </Link>
+                    </div>
+
+                    {/* Cụm 2 & 3: Nút mạng xã hội */}
+                    <div className="flex items-center gap-4 bg-[var(--cyber-black)]/60 border border-[var(--border)] backdrop-blur-sm px-5 py-3 rounded-full w-fit">
+                      <span className="text-sm font-semibold text-white whitespace-nowrap">{t.followUs}</span>
+                      <div className="flex items-center gap-3">
+                        <a href="https://facebook.com/dioxyzinefrog" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-[#1877F2] hover:scale-110 text-white flex items-center justify-center transition-transform shadow-md">
+                          <Facebook className="w-5 h-5" />
+                        </a>
+                        <a href="https://instagram.com/dioxyzine.frog" target="_blank" rel="noopener noreferrer" className="w-10 h-10 rounded-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] hover:scale-110 text-white flex items-center justify-center transition-transform shadow-md">
+                          <Instagram className="w-5 h-5" />
+                        </a>
+                      </div>
+                    </div>
                   </div>
+
                 </motion.div>
               </div>
             </div>
@@ -143,7 +150,7 @@ export function HomePage() {
               <ProductCard 
                 key={product.id} id={product.id} title={product.title} image={product.image}
                 basePriceObj={product.priceBrackets?.[0]?.prices} moq={product.moq}
-                category={product.category[0]} isPopular={true} pricingType={product.pricingType}
+                category={product.category[0]} pricingType={product.pricingType}
               />
             ))}
           </div>
@@ -166,7 +173,7 @@ export function HomePage() {
             <motion.button whileHover={{ scale: 1.05 }} className="px-10 py-5 rounded-full bg-[var(--primary)] text-white font-bold text-lg shadow-[0_0_20px_rgba(139,114,190,0.5)] cursor-pointer">
               {t.ctaBtn}
             </motion.button>
-          </Link> 
+          </Link>
         </div>
       </section>
     </div>

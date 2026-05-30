@@ -9,27 +9,27 @@ const termsData = {
       id: 'ky-thuat',
       title: '1. Lưu ý về kỹ thuật',
       content: `- Màu in ra sẽ có sự chênh lệch từ 5-10% so với file in, màu tông lạnh và tối sẽ dễ lệch hơn tông nóng.
-- Hệ màu sốp nhận in là CMYK, nếu bạn sử dụng file hệ RGB xin hãy lưu ý về khả năng lệch màu. Nếu sử dụng các phần mềm vẽ trên điện thoại như IbisPaintX, bạn sẽ cần đổi hệ màu trước khi in vì hệ màu mặc định của hầu hết các phần mềm là RGB.
-- Nếu không đổi hệ màu và kéo chỉnh, lưu ý rằng cách màu xanh biển (cobalt blue) sẽ rất dễ ngả tím, ám tím, để tránh tình trạng này hãy pick màu thiên về xanh cyan (xanh miku).
-- Vải sẽ có thể co rút, xê dịch khi in làm hình in bị ảnh hưởng (kéo dãn hoặc co lại, v.v), nếu bị nặng sốp sẽ in bù free.
-- Một số lỗi vải phổ biến: cấn vải, gấp vải, bụi đốm trắng. Nếu không ảnh hưởng quá 10% hình in hoặc lỗi ở các chi tiết quan trọng và nổi bật, sốp xin phép không in lại.
-- Sốp in bù free đối với các lỗi: in thiếu, in sai, lệch màu nhiều hơn 10%, lỗi vải cấn các vị trí quan trọng và nổi bật.`
+- Hệ màu chúng tôi nhận in là CMYK, nếu bạn sử dụng file hệ RGB xin hãy lưu ý về khả năng lệch màu. Nếu sử dụng các phần mềm vẽ trên điện thoại như IbisPaintX, bạn sẽ cần đổi hệ màu trước khi in vì hệ màu mặc định của hầu hết các phần mềm là RGB.
+- Nếu không đổi hệ màu và kéo chỉnh, lưu ý rằng các màu xanh biển (cobalt blue) sẽ rất dễ ngả tím, ám tím, để tránh tình trạng này hãy chọn màu thiên về xanh cyan (xanh miku).
+- Vải sẽ có thể co rút, xê dịch khi in làm hình in bị ảnh hưởng (kéo dãn hoặc co lại, v.v), nếu bị nặng chúng tôi sẽ in bù hoàn toàn miễn phí.
+- Một số lỗi vải phổ biến: cấn vải, gấp vải, bụi đốm trắng. Nếu không ảnh hưởng quá 10% hình in hoặc lỗi không nằm ở các chi tiết quan trọng và nổi bật, chúng tôi xin phép không in lại.
+- Chúng tôi tiến hành in bù miễn phí đối với các lỗi: in thiếu, in sai, lệch màu nhiều hơn 10%, lỗi vải cấn các vị trí quan trọng và nổi bật.`
     },
     {
       id: 'san-xuat',
       title: '2. Lưu ý về sản xuất',
       content: `- Hàng may xong sẽ co size lại khoảng 1-3cm so với hình in ra, hãy lưu ý để size tranh to hơn so với size muốn làm.
-- Sản phẩm 3D sẽ không thể giống y đúc 100% 2D, có những chênh lệch nhất định vì vải còn phồng lên do bông nhồi. Một số form đầu sẽ bị thay đổi ví dụ như tròn thành vuông, nhọn,...
+- Sản phẩm 3D sẽ không thể giống y đúc 100% bản vẽ 2D, có những chênh lệch nhất định vì vải còn phồng lên do bông nhồi. Một số form đầu sẽ bị thay đổi ví dụ như tròn thành vuông, nhọn,...
 - Xin vui lòng chấp nhận lỗi sản xuất mặc định từ 1-5% sản phẩm, ví dụ: chỉ thừa, đính chi tiết lệch dưới 5mm, lộ đường chỉ nhẹ,...
-- Sốp không có dây chuyền sản xuất nhà máy, tất cả đều được may thủ công bằng tay bởi đội ngũ thợ, nếu cần sửa xin hãy báo sốp ngay trong lúc gửi ảnh sản phẩm.`
+- Chúng tôi không có dây chuyền sản xuất nhà máy công nghiệp; tất cả sản phẩm đều được hoàn thiện thủ công bằng tay bởi đội ngũ thợ lành nghề. Nếu cần sửa đổi gì, xin hãy thông báo cho chúng tôi ngay trong lúc gửi ảnh sản phẩm.`
     },
     {
       id: 'doi-tra',
       title: '3. Chính sách đổi trả',
-      content: `- Hoàn tiền theo % lỗi của sản phẩm nếu các lỗi nằm ngoài danh mục đã nêu trên.
-- Sau khi đã nhận hàng từ 48h, không chấp nhận giải quyết các khiếu nại về sản phẩm.
-- Nếu yêu cầu sửa nhiều hơn 50% mẫu ban đầu đã chốt, ví dụ sửa rập, sửa chi tiết đã in ra,... sốp sẽ thu phí như sản xuất mới hoàn toàn.
-- Nếu trong suốt quá trình sản xuất và cập nhật ảnh sản phẩm không phản ánh và yêu cầu chỉnh sửa, sốp sẽ không hỗ trợ sửa sau khi đã nhận hàng nữa. Trong quá trình sản xuất shop sẽ cố gắng chỉnh sửa theo ý khách cho đến khi ưng.`
+      content: `- Hoàn tiền theo % lỗi của sản phẩm nếu các vấn đề nằm ngoài danh mục đã nêu trên.
+- Sau khi đã nhận hàng từ 48h, chúng tôi không chấp nhận giải quyết các khiếu nại về sản phẩm.
+- Nếu yêu cầu sửa nhiều hơn 50% mẫu ban đầu đã chốt (ví dụ sửa rập, sửa chi tiết đã in ra,...), chúng tôi sẽ tính chi phí như sản xuất mới hoàn toàn.
+- Nếu trong suốt quá trình sản xuất và cập nhật ảnh sản phẩm bạn không phản ánh và yêu cầu chỉnh sửa, chúng tôi sẽ không hỗ trợ sửa sau khi đã nhận hàng nữa. Trong quá trình sản xuất, chúng tôi sẽ cố gắng điều chỉnh theo ý muốn của khách hàng cho đến khi bạn ưng ý.`
     }
   ],
   en: [
