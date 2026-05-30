@@ -150,6 +150,12 @@ export function ProductDetailPage() {
                   </div>
                 </div>
 
+                <p className="text-sm italic text-center text-[var(--muted-foreground)]">
+                  {lang === 'vi' 
+                    ? '* Đây là bảng giá ước tính, vui lòng trao đổi với chúng tôi để nhận báo giá chính xác nhất.' 
+                    : '* This is an estimated price list, please contact us for the most accurate quote.'}
+                </p>
+
                 <div className="bg-[var(--card)] rounded-3xl p-6 border border-[var(--border)] shadow-lg space-y-6">
                   {/* Số lượng */}
                   <div>
@@ -199,7 +205,7 @@ export function ProductDetailPage() {
                         <PlusCircle className={`w-6 h-6 ${hasAccessory ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`} />
                         <div>
                           <h4 className="font-semibold text-white">{lang === 'vi' ? 'Thêm phụ kiện' : 'Add Accessories'}</h4>
-                          <p className="text-xs text-[var(--muted-foreground)]">{lang === 'vi' ? 'Tai đuôi rời, chíp chíp' : 'Ears, tails, squeakers'}</p>
+                          {/* <p className="text-xs text-[var(--muted-foreground)]">{lang === 'vi' ? 'Tai đuôi rời, chíp chíp' : 'Ears, tails, squeakers'}</p> */}
                         </div>
                       </div>
                       <div className={`w-12 h-6 rounded-full p-1 transition-colors ${hasAccessory ? 'bg-[var(--primary)]' : 'bg-[#1A1528] border border-[var(--border)]'}`}>
@@ -250,7 +256,7 @@ export function ProductDetailPage() {
               <p className="text-xs text-[var(--muted-foreground)] leading-relaxed whitespace-pre-line">{displayNote}</p>
             </div>
             
-            <Link to="/about" state={{ 
+            <Link to="/inquiry" state={{ 
               passedProduct: displayTitle, 
               passedQty: product.pricingType === 'contact' ? '' : quantity, 
               passedSize: product.pricingType === 'contact' ? '' : (isCustomSize ? customSizeText : product.sizes?.[sizeIndex]?.label),

@@ -7,6 +7,7 @@ import { ProductsPage } from './pages/ProductsPage';
 import { PricingPage } from './pages/PricingPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { GalleryPage } from './pages/GalleryPage';
+import { InquiryPage } from './pages/InquiryPage';
 import { QuoteRequestPage } from './pages/QuoteRequestPage';
 import { AboutContactPage } from './pages/AboutContactPage';
 import { TermsShippingPage } from './pages/TermsShippingPage';
@@ -46,6 +47,7 @@ export default function App() {
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/product/:id" element={<ProductDetailPage />} />
             <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/inquiry" element={<InquiryPage />} />
             <Route path="/quote" element={<QuoteRequestPage />} />
             <Route path="/about" element={<AboutContactPage />} />
             <Route path="/contact" element={<AboutContactPage />} />

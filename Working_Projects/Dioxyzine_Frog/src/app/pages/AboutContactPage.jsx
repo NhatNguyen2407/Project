@@ -93,7 +93,7 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* FORM INQUIRY LÊN ĐẦU */}
+      {/* FORM INQUIRY LÊN ĐẦU
       <section className="py-24 bg-[#09090B] border-b border-[var(--border)] relative z-20">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -102,7 +102,7 @@ export function AboutContactPage() {
           </div>
           <InquiryForm />
         </div>
-      </section>
+      </section> */}
 
       {/* CÂU CHUYỆN SỐP */}
       <section className="py-24 bg-transparent relative z-10">

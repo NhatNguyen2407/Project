@@ -94,7 +94,7 @@ export function HomePage() {
                         {lang === 'vi' ? 'Xem Sản Phẩm' : 'Browse Products'} <ArrowRight className="w-5 h-5" />
                       </motion.button>
                     </Link>
-                    <Link to="/about">
+                    <Link to="/inquiry">
                       <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-[#171226]/80 backdrop-blur-md text-white font-semibold border border-[var(--primary)] hover:bg-[#2C2144] cursor-pointer">
                         {lang === 'vi' ? 'Gửi Yêu Cầu' : 'Start Inquiry'}
                       </motion.button>
@@ -162,11 +162,11 @@ export function HomePage() {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="font-heading text-4xl md:text-5xl text-white mb-6 drop-shadow-[0_0_15px_rgba(139,114,190,0.6)]">{t.ctaTitle}</h2>
           <p className="text-xl text-[var(--silver-gray)] mb-8 max-w-2xl mx-auto">{t.ctaSub}</p>
-          <Link to="/about">
+          <Link to="/inquiry">
             <motion.button whileHover={{ scale: 1.05 }} className="px-10 py-5 rounded-full bg-[var(--primary)] text-white font-bold text-lg shadow-[0_0_20px_rgba(139,114,190,0.5)] cursor-pointer">
               {t.ctaBtn}
             </motion.button>
-          </Link>
+          </Link> 
         </div>
       </section>
     </div>

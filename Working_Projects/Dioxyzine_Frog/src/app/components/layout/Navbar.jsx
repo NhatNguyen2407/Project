@@ -72,7 +72,7 @@ export function Navbar() {
                 <span className="font-bold text-sm">{lang === 'vi' ? 'VI' : 'EN'}</span>
               </button>
 
-              <Link to="/about">
+              <Link to="/inquiry">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-6 py-2.5 rounded-full bg-[var(--primary)] text-white font-semibold shadow-[0_0_15px_rgba(139,114,190,0.4)] hover:shadow-[0_0_20px_rgba(139,114,190,0.6)] transition-shadow cursor-pointer">
                   {lang === 'vi' ? 'Báo Giá' : 'Inquiry'}
                 </motion.button>

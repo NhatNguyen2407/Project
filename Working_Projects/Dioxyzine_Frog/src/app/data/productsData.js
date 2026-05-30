@@ -148,7 +148,7 @@ export const productsData = [
     },
     image: doll_in_01,
     images: [doll_in_01, doll_in_02, doll_in_03, doll_in_04, doll_in_05, doll_in_06, doll_in_07],
-    pricingType: '3-manh-in',
+    pricingType: 'doll-in',
     sizes: [
       { key: '10', label: '10cm' }, { key: '15', label: '15cm' }, { key: '20', label: '20cm' },
       { key: '25', label: '25cm' }, { key: '30', label: '30cm' }, { key: '40', label: '40cm' },
@@ -194,24 +194,215 @@ export const productsData = [
     note: { vi: 'Thêu vải lông nhung 1mm, max 3 màu chỉ.', en: 'Embroidery on 1mm velvet fabric, max 3 colors.' }
   },
   
+  // Customize 
+
+  // {
+  //   id: 'fully-custom',
+  //   title: { vi: 'Sản Phẩm Tùy Chỉnh (Customize)', en: 'Fully Custom Merchandise' },
+  //   category: ['Customize'],
+  //   moq: 30,
+  //   description: { 
+  //     vi: 'Dòng sản phẩm thiết kế riêng biệt (Móc khóa vải, Ví, Túi Tote, Phụ kiện...). Đa dạng chất liệu, kích thước.',
+  //     en: 'Products designed entirely to your specifications (Keychains, Wallets, Tote bags, Accessories...).' 
+  //   },
+  //   image: key_01, 
+  //   images: customImagesArray, 
+  //   pricingType: 'contact', 
+  //   sizes: [],
+  //   priceBrackets: [],
+  //   addons: {},
+  //   note: { 
+  //     vi: 'Giá phụ thuộc vào độ phức tạp. Vui lòng gửi file để xưởng báo giá chính xác.', 
+  //     en: 'Pricing depends on complexity. Please submit your design file for an accurate quote.' 
+  //   }
+  // }
+
   {
-    id: 'fully-custom',
-    title: { vi: 'Sản Phẩm Tùy Chỉnh (Customize)', en: 'Fully Custom Merchandise' },
+    id: 'custom-keychain',
+    title: { vi: 'Móc Khóa Vải Nỉ', en: 'Custom Felt Keychain' },
     category: ['Customize'],
     moq: 30,
     description: { 
-      vi: 'Dòng sản phẩm thiết kế riêng biệt (Móc khóa vải, Ví, Túi Tote, Phụ kiện...). Đa dạng chất liệu, kích thước.',
-      en: 'Products designed entirely to your specifications (Keychains, Wallets, Tote bags, Accessories...).' 
+      vi: 'Móc khóa bằng chất liệu vải nỉ, được thiết kế và cắt may thủ công mô phỏng chi tiết nhân vật của bạn.', 
+      en: 'Handcrafted felt keychains designed based on your characters, meticulously cut and sewn.' 
     },
     image: key_01, 
-    images: customImagesArray, 
+    images: [key_01, key_02, key_03, key_04], 
     pricingType: 'contact', 
-    sizes: [],
-    priceBrackets: [],
-    addons: {},
+    sizes: [], priceBrackets: [], addons: {},
     note: { 
-      vi: 'Giá phụ thuộc vào độ phức tạp. Vui lòng gửi file để xưởng báo giá chính xác.', 
-      en: 'Pricing depends on complexity. Please submit your design file for an accurate quote.' 
+      vi: 'Kích thước và thiết kế đa dạng. Vui lòng liên hệ và gửi mẫu để nhận báo giá.', 
+      en: 'Various sizes and designs available. Please contact us with your artwork for a quote.' 
+    }
+  },
+  {
+    id: 'custom-plush-duoitreo',
+    title: { vi: 'Plushie Tùy Chỉnh - Đuôi Treo', en: 'Custom Plushie - Hanging Tail' },
+    category: ['Customize'],
+    moq: 30,
+    description: {
+      vi: 'Plushie thiết kế đặc biệt với chi tiết đuôi dài có thể treo, móc tiện lợi và tạo điểm nhấn cực kỳ ngộ nghĩnh.',
+      en: 'Special custom plushies featuring a long hanging tail, perfect for dangling or adding a cute unique touch.'
+    },
+    image: p2dt_01,
+    images: [p2dt_01],
+    pricingType: 'contact',
+    sizes: [], priceBrackets: [], addons: {},
+    note: {
+      vi: 'Giá thay đổi tùy theo độ phức tạp và độ dài của đuôi. Vui lòng liên hệ.',
+      en: 'Price varies based on tail length and complexity. Please contact us.'
+    }
+  },
+  {
+    id: 'custom-plush-ruybang',
+    title: { vi: 'Plushie Tùy Chỉnh - Phối Ruy Băng', en: 'Custom Plushie - Ribbon Details' },
+    category: ['Customize'],
+    moq: 30,
+    description: {
+      vi: 'Plushie được kết hợp với các dải ruy băng may viền hoặc làm phụ kiện trang trí tinh xảo, mang lại vẻ ngoài cao cấp.',
+      en: 'Plushies elegantly combined with ribbons for trims or decorative accessories, giving a premium look.'
+    },
+    image: p2rb_01,
+    images: [p2rb_01, p2rb_02, p2rb_03, p2rb_04, p2rb_05],
+    pricingType: 'contact',
+    sizes: [], priceBrackets: [], addons: {},
+    note: {
+      vi: 'Giá thay đổi tùy theo số lượng ruy băng và kỹ thuật may ráp. Vui lòng liên hệ.',
+      en: 'Price varies based on ribbon usage and sewing techniques. Please contact us.'
+    }
+  },
+
+  {
+    id: 'custom-plush-sau',
+    title: { vi: 'Sâu Bông Tùy Chỉnh', en: 'Custom Worm/Caterpillar Plushie' },
+    category: ['Customize'],
+    moq: 30,
+    description: {
+      vi: 'Gấu bông thiết kế dáng sâu dài độc quyền, ngộ nghĩnh, mềm mại và cực kỳ ôm tay.',
+      en: 'Exclusive elongated worm/caterpillar shaped plushies. Super quirky, soft, and extremely huggable.'
+    },
+    image: sau_01,
+    images: [sau_01, sau_02],
+    pricingType: 'contact',
+    sizes: [], priceBrackets: [], addons: {},
+    note: {
+      vi: 'Kích thước và số lượng đốt sâu có thể tùy chỉnh. Vui lòng liên hệ để nhận báo giá.',
+      en: 'Size and number of segments are customizable. Please contact us for a quote.'
+    }
+  },
+
+  {
+    id: 'custom-plush-theu',
+    title: { vi: 'Plushie Tùy Chỉnh - Thêu Đặc Biệt', en: 'Custom Plushie - Extra Embroidery' },
+    category: ['Customize'],
+    moq: 30,
+    description: {
+      vi: 'Dòng plushie tích hợp các mảng thêu hoa văn, chi tiết trang phục hoặc biểu cảm phức tạp ngay trên bề mặt vải.',
+      en: 'Plushies featuring extra intricate embroidery patterns, outfit details, or complex expressions directly on the fabric.'
+    },
+    image: p2t_01,
+    images: [p2t_01, p2t_02, p2t_03],
+    pricingType: 'contact',
+    sizes: [], priceBrackets: [], addons: {},
+    note: {
+      vi: 'Giá phụ thuộc vào mật độ mũi thêu và số màu chỉ. Vui lòng gửi thiết kế để xưởng báo giá.',
+      en: 'Price depends on embroidery density and thread colors. Please send your design for a quote.'
+    }
+  },
+
+  // ================= TÁCH THEU RA 3 CÁI =================
+
+  {
+    id: 'custom-cherry-theu',
+    title: { vi: 'Phụ Kiện Thêu - Cherry', en: 'Embroidered Props - Cherry' },
+    category: ['Customize'],
+    moq: 30,
+    description: {
+      vi: 'Các chi tiết phụ kiện nhỏ thêu rời độc đáo (như quả cherry, logo...) dùng để đính kèm lên sản phẩm chính.',
+      en: 'Unique detached embroidered small props (like cherries, logos...) used to attach to the main products.'
+    },
+    image: cherry_01,
+    images: [cherry_01, cherry_02],
+    pricingType: 'contact',
+    sizes: [], priceBrackets: [], addons: {},
+    note: {
+      vi: 'Có thể tùy chỉnh hình dáng thêu. Vui lòng liên hệ.',
+      en: 'Embroidery shapes can be customized. Please contact us.'
+    }
+  },
+
+  {
+    id: 'custom-doll-outfit',
+    title: { vi: 'Outfit Doll Tùy Chỉnh', en: 'Custom Doll Outfit' },
+    category: ['Customize'],
+    moq: 30,
+    description: {
+      vi: 'Quần áo thiết kế riêng biệt để thay thế cho Doll, cắt may thủ công chuẩn form dáng.',
+      en: 'Custom-designed changeable clothes for dolls, handcrafted to perfectly fit the doll body.'
+    },
+    image: do_01,
+    images: [do_01, do_02],
+    pricingType: 'contact',
+    sizes: [], priceBrackets: [], addons: {},
+    note: {
+      vi: 'Nhận thiết kế rập outfit độc quyền. Hãy gửi mẫu để trao đổi chi tiết.',
+      en: 'Exclusive outfit pattern designs available. Send us your concept to discuss details.'
+    }
+  },
+  {
+    id: 'custom-p3-theu',
+    title: { vi: 'Plushie 3 Mảnh - Thêu Đặc Biệt', en: '3-Piece Plushie - Extra Embroidery' },
+    category: ['Customize'],
+    moq: 30,
+    description: {
+      vi: 'Dòng gấu bông 3 mảnh có tích hợp nhiều mảng thêu chi tiết phức tạp, tạo độ sắc nét cao nhất cho nhân vật.',
+      en: '3-piece structured plushies featuring heavy and complex embroidery details for the sharpest character look.'
+    },
+    image: p3t_01,
+    images: [p3t_01],
+    pricingType: 'contact',
+    sizes: [], priceBrackets: [], addons: {},
+    note: {
+      vi: 'Giá thay đổi dựa trên độ phức tạp của họa tiết thêu. Vui lòng liên hệ.',
+      en: 'Price varies based on the complexity of the embroidery patterns. Please contact us.'
+    }
+  },
+
+  {
+    id: 'custom-tote',
+    title: { vi: 'Túi Tote Custom', en: 'Custom Tote Bag' },
+    category: ['Customize'],
+    moq: 30,
+    description: { 
+      vi: 'Túi Tote vải canvas in hình hoặc thêu logo theo yêu cầu. Form dáng chắc chắn, chất vải dày dặn phù hợp làm fan merch.', 
+      en: 'Custom printed or embroidered canvas tote bags. Sturdy shape and thick fabric, perfect for high-quality fan merch.' 
+    },
+    image: tote_01, 
+    images: [tote_01, tote_02], 
+    pricingType: 'contact', 
+    sizes: [], priceBrackets: [], addons: {},
+    note: { 
+      vi: 'Có nhiều tùy chọn vải và kiểu in ấn/thêu khác nhau. Liên hệ để chọn mẫu.', 
+      en: 'Multiple fabric and printing/embroidery options available. Contact us to select.' 
+    }
+  },
+
+  {
+    id: 'custom-wallet',
+    title: { vi: 'Ví Custom', en: 'Custom Wallet' },
+    category: ['Customize'],
+    moq: 30,
+    description: { 
+      vi: 'Ví cầm tay in hình sắc nét, cắt may và lót bên trong tỉ mỉ với nhiều ngăn tiện dụng. Dòng sản phẩm merchandise cao cấp.', 
+      en: 'High-definition printed wallets, meticulously lined with functional compartments. A premium merchandise option.' 
+    },
+    image: vi_01, 
+    images: [vi_01, vi_02, vi_03, vi_04, vi_05, vi_06, vi_07], 
+    pricingType: 'contact', 
+    sizes: [], priceBrackets: [], addons: {},
+    note: { 
+      vi: 'Kích thước và cấu trúc ngăn ví có thể thay đổi tùy chỉnh. Liên hệ để báo giá chi tiết.', 
+      en: 'Wallet sizes and compartment structures are customizable. Contact for a detailed quote.' 
     }
   }
 ];

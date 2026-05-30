@@ -85,7 +85,7 @@ export function PricingPage() {
           <div className="inline-flex items-center gap-3 bg-[var(--primary)]/10 border border-[var(--primary)]/30 px-6 py-3 rounded-full backdrop-blur-sm">
             <Info className="w-5 h-5 text-[var(--primary)]" />
             <span className="text-white font-medium">
-              {lang === 'vi' ? 'Lưu ý: Bảng giá dưới đây là giá ước tính.' : 'Note: The pricing table below is an estimate.'}
+              {lang === 'vi' ? 'Lưu ý: Bảng giá dưới đây là giá ước tính. Vui lòng trao đổi với chúng tôi để nhận báo giá chính xác nhất' : 'Note: The pricing table below is an estimate. Please contact us for most accurate prices'}
             </span>
           </div>
         </motion.div>
