@@ -4,7 +4,7 @@ import { useLanguage } from '../context/LanguageContext';
 
 const pricingData = [
   {
-    title: 'PLUSHIE 2 MẢNH',
+    title: { vi: 'PLUSHIE 2 MẢNH', en: '2-PIECE PLUSHIE' },
     sizes: ['5cm', '10cm', '15cm', '20cm', '25cm', '30cm', '40cm', '50cm', '60cm'],
     rows: [
       { qty: '11-50', prices: { vi: ['19k', '37k', '78k', '67k', '94k', '120k', '145k', '245k', '340k'], en: ['$1.4', '$2.8', '$5.9', '$5.1', '$7.1', '$9.1', '$10.9', '$18.5', '$25.7'] } },
@@ -18,7 +18,7 @@ const pricingData = [
     ]
   },
   {
-    title: 'PLUSHIE 3 MẢNH',
+    title: { vi: 'PLUSHIE 3 MẢNH', en: '3-PIECE PLUSHIE' },
     sizes: ['10cm', '15cm', '20cm', '25cm', '30cm', '40cm'],
     rows: [
       { qty: '11-50', prices: { vi: ['62k', '78k', '93k', '114k', '135k', '176k'], en: ['$4.7', '$5.9', '$7.0', '$8.6', '$10.2', '$13.3'] } },
@@ -32,7 +32,7 @@ const pricingData = [
     ]
   },
   {
-    title: 'DOLL 2D (IN)',
+    title: { vi: 'DOLL 2D (IN)', en: '2D PRINTED DOLL' },
     sizes: ['10cm', '15cm', '20cm', '25cm', '30cm', '40cm', '50cm', '60cm'],
     rows: [
       { qty: '11-50', prices: { vi: ['62k', '78k', '93k', '114k', '135k', '176k', '270k', '380k'], en: ['$4.7', '$5.9', '$7.0', '$8.6', '$10.2', '$13.3', '$20.4', '$28.7'] } },
@@ -46,7 +46,7 @@ const pricingData = [
     ]
   },
   {
-    title: 'DOLL 2D THÊU',
+    title: { vi: 'DOLL 2D THÊU', en: '2D EMBROIDERED DOLL' },
     sizes: ['10cm', '15cm', '20cm', '25cm', '30cm'],
     rows: [
       { qty: '11-50', prices: { vi: ['150k', '175k', '200k', '225k', '250k'], en: ['$11.3', '$13.2', '$15.1', '$17.0', '$18.9'] } },
