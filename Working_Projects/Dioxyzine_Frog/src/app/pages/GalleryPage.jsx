@@ -1,188 +1,185 @@
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
-import { X, ZoomIn } from 'lucide-react';
-import { productsData } from '../data/productsData';
+import { X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
+import { useProducts } from '../context/ProductContext';
 
 export function GalleryPage() {
   const { lang } = useLanguage();
-  const defaultCategory = lang === 'vi' ? 'Tất cả' : 'All';
-  const [selectedCategory, setSelectedCategory] = useState(defaultCategory);
-  const [lightboxImage, setLightboxImage] = useState(null);
+  const { products, loading } = useProducts();
+  
+  // Quản lý vị trí ảnh đang mở bằng Index trong màng lọc hiện tại
+  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [activeFilter, setActiveFilter] = useState('All');
 
-  // Khi đổi ngôn ngữ, reset bộ lọc về "Tất cả" để tránh lỗi kẹt thẻ cũ
-  useEffect(() => {
-    setSelectedCategory(lang === 'vi' ? 'Tất cả' : 'All');
-  }, [lang]);
-
-  // Tự động bóc tách dữ liệu từ productsData theo ngôn ngữ hiện tại
-  // Cập nhật đoạn useMemo trong GalleryPage:
-  const { galleryItems, categories } = useMemo(() => {
-    const items = [];
-    const catsSet = new Set([lang === 'vi' ? 'Tất cả' : 'All']);
-    let idCounter = 1;
-
-    productsData.forEach((product) => {
-      // Lấy danh mục chung (Plushie, Doll, Customize)
-      product.category.forEach(c => catsSet.add(c));
-      
-      const productTitle = product.title?.[lang] || product.title?.vi || 'Unknown';
-      
+  // Tự động gom tất cả ảnh từ Database của Google Sheets
+  const galleryItems = useMemo(() => {
+    if (!products || products.length === 0) return [];
+    let items = [];
+    products.forEach(product => {
+      // Lấy ảnh bìa
+      if (product.image) {
+        items.push({ src: product.image, alt: product.title[lang] || product.title.vi, category: product.category[0] || 'Customize' });
+      }
+      // Lấy ảnh bộ sưu tập
       if (product.images && product.images.length > 0) {
-        product.images.forEach((img) => {
-          items.push({
-            id: idCounter++,
-            image: img,
-            // Gắn tạm category đầu tiên của sản phẩm làm thẻ lọc cho ảnh này
-            category: product.category[0], 
-            title: productTitle,
-          });
+        product.images.forEach((img, idx) => {
+          if (img !== product.image) {
+            items.push({ src: img, alt: `${product.title[lang] || product.title.vi} - ${idx + 1}`, category: product.category[0] || 'Customize' });
+          }
         });
       }
     });
+    return items;
+  }, [products, lang]);
 
-    return { galleryItems: items, categories: Array.from(catsSet) };
-  }, [lang]);
+  const filters = ['All', ...new Set(galleryItems.map(item => item.category))];
+  
+  // Danh sách ảnh sau khi đã lọc theo Tab
+  const filteredItems = activeFilter === 'All' ? galleryItems : galleryItems.filter(item => item.category === activeFilter);
 
-  const filteredItems =
-    (selectedCategory === 'Tất cả' || selectedCategory === 'All')
-      ? galleryItems
-      : galleryItems.filter((item) => item.category === selectedCategory);
+  // Định nghĩa vật phẩm đang được chọn để phóng to
+  const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null;
+
+  // Hàm chuyển đổi ảnh Tiến / Lùi thông minh
+  const handlePrev = (e) => {
+    e.stopPropagation(); // Ngăn chặn đóng modal ngầm
+    setSelectedIndex((prev) => (prev === 0 ? filteredItems.length - 1 : prev - 1));
+  };
+
+  const handleNext = (e) => {
+    e.stopPropagation(); // Ngăn chặn đóng modal ngầm
+    setSelectedIndex((prev) => (prev === filteredItems.length - 1 ? 0 : prev + 1));
+  };
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header Gallery */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-12"
-        >
-          <h1 className="font-heading text-5xl md:text-6xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
-            {lang === 'vi' ? 'Thư Viện Sản Phẩm' : 'Product Gallery'}
+        
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
+            {lang === 'vi' ? 'Thư Viện Ảnh' : 'Gallery'}
           </h1>
-          <p className="text-lg text-[var(--silver-gray)] max-w-2xl mx-auto">
-            {lang === 'vi' 
-              ? 'Khám phá chi tiết các dự án và sản phẩm thực tế đã được gia công bởi Dioxyzine Frog'
-              : 'Explore the details of real projects and products crafted by Dioxyzine Frog'}
+          <p className="text-lg text-[var(--muted-foreground)]">
+            {lang === 'vi' ? 'Khám phá các sản phẩm thực tế đã được sản xuất tại xưởng' : 'Explore actual products manufactured at our workshop'}
           </p>
-        </motion.div>
+        </div>
 
-        {/* Thanh Lọc Danh Mục */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="flex flex-wrap justify-center gap-3 mb-12"
-        >
-          {categories.map((category) => (
-            <button
-              key={category}
-              onClick={() => setSelectedCategory(category)}
-              className={`px-6 py-2.5 rounded-full font-medium transition-all ${
-                selectedCategory === category
-                  ? 'bg-[var(--primary)] text-white shadow-[0_0_15px_rgba(139,114,190,0.5)] scale-105'
-                  : 'bg-[var(--cyber-black)] text-[var(--silver-gray)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-white hover:scale-105'
-              }`}
-            >
-              {category}
-            </button>
-          ))}
-        </motion.div>
+        {loading ? (
+          <div className="text-center py-24 text-[var(--primary)] font-bold text-xl animate-pulse">
+            Đang đồng bộ thư viện ảnh... (Loading gallery...)
+          </div>
+        ) : (
+          <>
+            {/* Bộ Lọc */}
+            <div className="flex flex-wrap justify-center gap-4 mb-12">
+              {filters.map((filter) => (
+                <button
+                  key={filter}
+                  onClick={() => {
+                    setActiveFilter(filter);
+                    setSelectedIndex(null); // Reset ảnh đang phóng to nếu đổi bộ lọc
+                  }}
+                  className={`px-6 py-2 rounded-full font-medium transition-all cursor-pointer ${
+                    activeFilter === filter
+                      ? 'bg-[var(--primary)] text-white shadow-md'
+                      : 'bg-[var(--card)] text-[var(--silver-gray)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-white'
+                  }`}
+                >
+                  {filter === 'All' ? (lang === 'vi' ? 'Tất Cả' : 'All') : filter}
+                </button>
+              ))}
+            </div>
 
-        {/* Lưới hiển thị ảnh (Masonry Layout) */}
-        <AnimatePresence mode="wait">
+            {/* Lưới Ảnh Thu Nhỏ */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {filteredItems.map((item, index) => (
+                <motion.div
+                  key={index}
+                  layoutId={`gallery-${index}`}
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ duration: 0.3 }}
+                  className="group relative aspect-square rounded-2xl overflow-hidden bg-[var(--cyber-black)] cursor-pointer shadow-lg"
+                  onClick={() => setSelectedIndex(index)}
+                >
+                  <img
+                    src={item.src}
+                    alt={item.alt}
+                    className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500"
+                    loading="lazy"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <ZoomIn className="w-8 h-8 text-white" />
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+
+      {/* MODAL PHÓNG TO ẢNH NÂNG CẤP SLIDER & FIX NÚT X ĐÈ NAVBAR */}
+      <AnimatePresence>
+        {selectedItem && (
           <motion.div
-            key={selectedCategory}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.3 }}
+            onClick={() => setSelectedIndex(null)} // Click vào vùng trống nền đen để tắt modal
+            // Nâng z-index lên [150] để đè bẹp hoàn toàn Navbar, tăng padding dọc để đẩy ảnh xuống cân đối
+            className="fixed inset-0 z-[150] flex items-center justify-center bg-black/95 p-6 md:p-24 backdrop-blur-sm cursor-pointer select-none"
           >
-            <ResponsiveMasonry columnsCountBreakPoints={{ 350: 1, 750: 2, 900: 3, 1200: 4 }}>
-              <Masonry gutter="1.5rem">
-                {filteredItems.map((item, index) => (
-                  <motion.div
-                    key={item.id}
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: (index % 10) * 0.05 }}
-                    className="group relative cursor-pointer"
-                    onClick={() => setLightboxImage(item.id)}
-                  >
-                    <div className="relative rounded-3xl overflow-hidden shadow-lg border border-[var(--border)] hover:border-[var(--primary)] transition-all duration-300">
-                      <img
-                        src={item.image}
-                        alt={item.title}
-                        className="w-full h-auto object-cover group-hover:scale-110 transition-transform duration-700"
-                        loading="lazy"
-                      />
-                      
-                      <div className="absolute inset-0 bg-gradient-to-t from-[#08080C]/90 via-[#08080C]/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                        <div className="absolute bottom-0 left-0 right-0 p-6">
-                          <span className="inline-block px-3 py-1 rounded-full bg-[var(--primary)]/20 backdrop-blur-md text-white text-xs font-medium mb-2 border border-[var(--primary)]/50">
-                            {item.category}
-                          </span>
-                        </div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
-                          <div className="w-16 h-16 rounded-full bg-[var(--primary)]/20 backdrop-blur-md flex items-center justify-center border border-[var(--primary)]/50 scale-0 group-hover:scale-100 transition-transform duration-300 delay-100">
-                            <ZoomIn className="w-8 h-8 text-white" />
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </motion.div>
-                ))}
-              </Masonry>
-            </ResponsiveMasonry>
-          </motion.div>
-        </AnimatePresence>
-
-        {/* Chế độ xem toàn màn hình (Lightbox) */}
-        <AnimatePresence>
-          {lightboxImage !== null && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-[100] bg-[#08080C]/95 backdrop-blur-xl flex items-center justify-center p-4 md:p-8"
-              onClick={() => setLightboxImage(null)}
+            {/* NÚT X ĐÃ ĐƯỢC ĐẨY THẤP XUỐNG DƯỚI NAVBAR (An toàn tuyệt đối) */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation(); // Chặn sự kiện tắt modal lan truyền vào div nền
+                setSelectedIndex(null);
+              }}
+              // Đổi thành top-28 md:top-32 để đẩy nút xuống dưới Navbar, thêm cursor-pointer hiển thị ngón tay
+              className="absolute top-28 right-6 md:right-12 p-3 rounded-full bg-white/10 hover:bg-[var(--primary)] text-white transition-colors z-[170] cursor-pointer shadow-xl border border-white/5"
             >
-              <button
-                onClick={() => setLightboxImage(null)}
-                className="absolute top-6 right-6 w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white hover:bg-[var(--primary)] transition-colors z-[110]"
-              >
-                <X className="w-6 h-6" />
-              </button>
+              <X className="w-7 h-7 md:w-8 md:h-8" />
+            </button>
 
-              <motion.div
-                initial={{ scale: 0.8, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.8, opacity: 0 }}
-                transition={{ type: 'spring', damping: 25 }}
-                onClick={(e) => e.stopPropagation()}
-                className="relative max-w-5xl max-h-[90vh] w-full flex flex-col items-center justify-center"
-              >
-                {galleryItems.find((item) => item.id === lightboxImage) && (
-                  <>
-                    <img
-                      src={galleryItems.find((item) => item.id === lightboxImage)?.image}
-                      alt={galleryItems.find((item) => item.id === lightboxImage)?.title}
-                      className="w-auto h-auto max-w-full max-h-[80vh] object-contain rounded-2xl shadow-[0_0_30px_rgba(139,114,190,0.3)] border border-[var(--border)]"
-                    />
-                    <div className="text-center mt-6">
-                      <span className="inline-block px-4 py-1.5 rounded-full bg-[var(--primary)] text-white text-sm font-medium shadow-[0_0_15px_rgba(139,114,190,0.5)]">
-                        {galleryItems.find((item) => item.id === lightboxImage)?.category}
-                      </span>
-                    </div>
-                  </>
-                )}
-              </motion.div>
+            {/* HỆ THỐNG NÚT QUAY ẢNH NEXT / PREV Ở HAI BÊN RÌA MÀN HÌNH */}
+            <button
+              onClick={handlePrev}
+              className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/5 hover:bg-[var(--primary)] hover:scale-110 text-white transition-all z-[170] cursor-pointer shadow-lg border border-white/5"
+            >
+              <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
+            </button>
+
+            <button
+              onClick={handleNext}
+              className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/5 hover:bg-[var(--primary)] hover:scale-110 text-white transition-all z-[170] cursor-pointer shadow-lg border border-white/5"
+            >
+              <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
+            </button>
+
+            {/* Khung chứa ảnh phóng to */}
+            <motion.div
+              layoutId={`gallery-${selectedIndex}`}
+              className="relative w-full max-w-5xl flex items-center justify-center cursor-default"
+              onClick={(e) => e.stopPropagation()} // Click vào ảnh không bị tắt modal
+            >
+              <img
+                src={selectedItem.src}
+                alt={selectedItem.alt}
+                className="max-w-full max-h-[55vh] md:max-h-[60vh] object-contain rounded-xl drop-shadow-[0_0_30px_rgba(139,114,190,0.3)]"
+              />
+              
+              {/* Dòng chữ mô tả ảnh */}
+              <div className="absolute -bottom-12 left-0 right-0 text-center pointer-events-none">
+                <span className="bg-black/60 backdrop-blur-sm text-white px-5 py-2 rounded-full text-sm font-medium border border-white/10 tracking-wide inline-block">
+                  {selectedItem.alt}
+                </span>
+              </div>
             </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

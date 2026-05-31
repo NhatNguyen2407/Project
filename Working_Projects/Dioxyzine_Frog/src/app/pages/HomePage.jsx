@@ -3,14 +3,14 @@ import { Link } from 'react-router';
 import { ProductCard } from '../components/ProductCard';
 import { ArrowRight, CheckCircle, Sparkles, Palette, Package, Facebook, Instagram } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import { productsData } from '../data/productsData';
 import { useLanguage } from '../context/LanguageContext';
+import { useProducts } from '../context/ProductContext';
 
 const translations = {
   vi: {
     howItWorks: 'Quy Trình Đặt Hàng', subHow: 'Đơn giản, minh bạch và hợp tác chặt chẽ từ ý tưởng ban đầu đến thành phẩm',
     featured: 'Sản Phẩm Nổi Bật', subFeatured: 'Khám phá các dòng sản phẩm gấu bông và merchandise tùy chỉnh phổ biến nhất',
-    viewAll: 'Xem Tất Cả Sản Phẩm', whatCreatorsSay: 'Cộng Đồng Sáng Tác Nói Gì',
+    viewAll: 'Xem Tất Cả Sản Phẩm', 
     ctaTitle: 'Sẵn Sàng Biến Ý Tưởng Thành Hiện Thực?', ctaSub: 'Nhận báo giá chi tiết cho dự án của bạn trong vòng 24 giờ. Không ràng buộc, chỉ có cơ hội.', ctaBtn: 'Bắt Đầu Gửi Yêu Cầu',
     followUs: 'Theo dõi chúng tôi tại:', browseBtn: 'Xem sản phẩm', quoteBtn: 'Nhận báo giá',
     steps: [
@@ -23,7 +23,7 @@ const translations = {
   en: {
     howItWorks: 'How Ordering Works', subHow: 'Simple, transparent, and collaborative process from concept to final creation',
     featured: 'Featured Products', subFeatured: 'Explore our most popular customizable merchandise and handmade plushies',
-    viewAll: 'View All Products', whatCreatorsSay: 'What Creators Say',
+    viewAll: 'View All Products', 
     ctaTitle: 'Ready to Bring Your Ideas to Life?', ctaSub: 'Get a custom quote for your project in under 24 hours. No commitments, just possibilities.', ctaBtn: 'Start Your Inquiry',
     followUs: 'Follow us on:', browseBtn: 'Browse products', quoteBtn: 'Get a quote',
     steps: [
@@ -50,6 +50,7 @@ const heroSlides = {
 
 export function HomePage() {
   const { lang } = useLanguage();
+  const { products, loading } = useProducts();
   const [currentSlide, setCurrentSlide] = useState(0);
   const t = translations[lang];
   const slides = heroSlides[lang];
@@ -72,14 +73,10 @@ export function HomePage() {
             <div className="absolute inset-0 z-20 flex items-center pt-16">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
                 <motion.div initial={{ x: -100, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ delay: 0.2, duration: 0.8 }} className="max-w-3xl">
-                  <h1 className="font-heading text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
-                    {slide.title}
-                  </h1>
+                  <h1 className="font-heading text-5xl md:text-7xl font-bold text-white mb-6 leading-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">{slide.title}</h1>
                   <p className="text-xl md:text-2xl text-[var(--silver-gray)] mb-8">{slide.subtitle}</p>
                   
-                  {/* HỆ THỐNG 3 CỤM NÚT TRÊN BANNER */}
                   <div className="flex flex-col gap-6">
-                    {/* Cụm 1: Nút xem sản phẩm và báo giá */}
                     <div className="flex flex-wrap gap-4">
                       <Link to="/products">
                         <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold shadow-[0_0_20px_rgba(139,114,190,0.5)] flex items-center gap-2 cursor-pointer">
@@ -93,7 +90,6 @@ export function HomePage() {
                       </Link>
                     </div>
 
-                    {/* Cụm 2 & 3: Nút mạng xã hội */}
                     <div className="flex items-center gap-4 bg-[var(--cyber-black)]/60 border border-[var(--border)] backdrop-blur-sm px-5 py-3 rounded-full w-fit">
                       <span className="text-sm font-semibold text-white whitespace-nowrap">{t.followUs}</span>
                       <div className="flex items-center gap-3">
@@ -106,7 +102,6 @@ export function HomePage() {
                       </div>
                     </div>
                   </div>
-
                 </motion.div>
               </div>
             </div>
@@ -146,13 +141,19 @@ export function HomePage() {
             <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">{t.subFeatured}</p>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {productsData.slice(0, 4).map((product) => (
-              <ProductCard 
-                key={product.id} id={product.id} title={product.title} image={product.image}
-                basePriceObj={product.priceBrackets?.[0]?.prices} moq={product.moq}
-                category={product.category[0]} pricingType={product.pricingType}
-              />
-            ))}
+            {loading ? (
+              <div className="col-span-4 text-center py-10 text-[var(--primary)] font-bold animate-pulse text-lg">
+                Đang tải dữ liệu từ máy chủ (Loading database)...
+              </div>
+            ) : (
+              products.slice(0, 4).map((product) => (
+                <ProductCard 
+                  key={product.id} id={product.id} title={product.title} image={product.image}
+                  basePriceObj={product.priceBrackets?.[0]?.prices} moq={product.moq}
+                  category={product.category[0]} pricingType={product.pricingType}
+                />
+              ))
+            )}
           </div>
           <div className="text-center mt-12">
             <Link to="/products">

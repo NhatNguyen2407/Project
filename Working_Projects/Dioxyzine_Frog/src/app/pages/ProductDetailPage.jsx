@@ -1,34 +1,75 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, Info } from 'lucide-react';
-import { productsData } from '../data/productsData';
 import { useLanguage } from '../context/LanguageContext';
+import { useProducts } from '../context/ProductContext';
 
 export function ProductDetailPage() {
   const { id } = useParams();
   const { lang } = useLanguage();
+  const { products, loading } = useProducts();
+  
   const [currentImage, setCurrentImage] = useState(0);
 
-  const product = productsData.find((p) => p.id === id) || productsData[0];
-  const images = product.images || [];
-  const currentMoq = product.moq || 11;
-
-  const [quantity, setQuantity] = useState(currentMoq);
+  // States tính giá
+  const [quantity, setQuantity] = useState(11);
   const [sizeIndex, setSizeIndex] = useState(0);
   const [isCustomSize, setIsCustomSize] = useState(false);
   const [customSizeText, setCustomSizeText] = useState('');
   const [hasAccessory, setHasAccessory] = useState(false);
-  const [accessoryQuantity, setAccessoryQuantity] = useState(currentMoq);
+  const [accessoryQuantity, setAccessoryQuantity] = useState(11);
+
+  // RESET STATE KHI ĐỔI SẢN PHẨM (Để tránh mang cấu hình cũ sang sp mới)
+  useEffect(() => {
+    const currentProduct = products.find((p) => p.id === id);
+    if (currentProduct) {
+      setCurrentImage(0);
+      setQuantity(currentProduct.moq || 11);
+      setSizeIndex(0);
+      setIsCustomSize(false);
+      setCustomSizeText('');
+      setHasAccessory(false);
+      setAccessoryQuantity(currentProduct.moq || 11);
+    }
+  }, [id, products]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen pt-32 text-center text-2xl text-[var(--primary)] font-bold animate-pulse bg-transparent relative z-10">
+        Đang kết nối dữ liệu sản phẩm... (Loading...)
+      </div>
+    );
+  }
+
+  // TÌM VỊ TRÍ SẢN PHẨM HIỆN TẠI ĐỂ LÀM NÚT NEXT / PREV
+  const currentIndex = products.findIndex((p) => p.id === id);
+  if (currentIndex === -1) {
+    return (
+      <div className="min-h-screen pt-32 text-center text-white bg-transparent relative z-10 text-2xl">
+        Sản phẩm không tồn tại (Product not found).
+      </div>
+    );
+  }
+
+  const product = products[currentIndex];
+  // Thuật toán vòng lặp: Nếu đang ở đầu thì lùi về cuối, ở cuối thì tiến lên đầu
+  const prevProduct = currentIndex > 0 ? products[currentIndex - 1] : products[products.length - 1];
+  const nextProduct = currentIndex < products.length - 1 ? products[currentIndex + 1] : products[0];
+
+  const images = product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []);
+  const currentMoq = product.moq || 11;
 
   const nextImage = () => setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   const prevImage = () => setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
 
   const calculateLivePrice = () => {
     if (isCustomSize || product.pricingType === 'contact') return { unitPrice: 0, productTotal: 0, accUnitPrice: 0, accTotal: 0, totalPrice: 0 };
-    const bracket = product.priceBrackets?.find(b => quantity >= b.min && quantity <= b.max) 
-                     || product.priceBrackets?.[product.priceBrackets.length - 1] || { prices: { vi: [], en: [] } };
-    const langPrices = bracket.prices?.[lang] || [];
+    
+    let bracket = product.priceBrackets?.find(b => quantity >= b.min && quantity <= b.max);
+    if (!bracket && product.priceBrackets?.length > 0) bracket = product.priceBrackets[0];
+    
+    const langPrices = bracket?.prices?.[lang] || [];
     const baseUnitPrice = langPrices[sizeIndex] || langPrices[langPrices.length - 1] || 0;
     const productTotal = baseUnitPrice * quantity;
 
@@ -49,19 +90,32 @@ export function ProductDetailPage() {
   };
 
   const pricing = calculateLivePrice();
-  const displayTitle = product.title?.[lang] || product.title || '';
-  const displayDesc = product.description?.[lang] || product.description || '';
-  const displayNote = product.note?.[lang] || product.note || '';
+  const displayTitle = product.title?.[lang] || product.title?.vi || '';
+  const displayDesc = product.description?.[lang] || product.description?.vi || '';
+  const displayNote = product.note?.[lang] || product.note?.vi || '';
   const displayPrice = (val) => (isCustomSize || product.pricingType === 'contact') ? (lang === 'vi' ? 'Liên hệ' : 'Inquiry') : formatCurrency(val);
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        
+        {/* THANH ĐIỀU HƯỚNG NEXT / PREV SẢN PHẨM */}
+        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <Link to="/products" className="inline-flex items-center gap-2 text-[var(--silver-gray)] hover:text-[var(--primary)] transition-colors font-medium">
             <ChevronLeft className="w-4 h-4" />
             {lang === 'vi' ? 'Trở về Sản Phẩm' : 'Back to Products'}
           </Link>
+
+          <div className="flex items-center gap-3">
+            <Link to={`/product/${prevProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--card)] border border-[var(--border)] text-[var(--silver-gray)] hover:text-white hover:border-[var(--primary)] transition-all">
+              <ChevronLeft className="w-4 h-4" />
+              <span className="hidden sm:inline text-sm font-medium">{lang === 'vi' ? 'Sản phẩm trước' : 'Previous'}</span>
+            </Link>
+            <Link to={`/product/${nextProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--card)] border border-[var(--border)] text-[var(--silver-gray)] hover:text-white hover:border-[var(--primary)] transition-all">
+              <span className="hidden sm:inline text-sm font-medium">{lang === 'vi' ? 'Sản phẩm tiếp' : 'Next'}</span>
+              <ChevronRight className="w-4 h-4" />
+            </Link>
+          </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
@@ -94,18 +148,17 @@ export function ProductDetailPage() {
           {/* CẤU HÌNH */}
           <div className="space-y-6">
             <div>
-              <span className="inline-block px-3 py-1 rounded-full bg-[#1A1528] border border-[var(--border)] text-xs font-medium text-[var(--primary)] mb-3">
+              <span className="inline-block px-3 py-1 rounded-full bg-[#1A1528] border border-[var(--border)] text-xs font-medium text-[var(--primary)] mb-3 uppercase tracking-wider">
                 {product.category?.join(' • ')}
               </span>
-              <h1 className="font-heading mb-4 text-white drop-shadow-[0_0_8px_rgba(139,114,190,0.4)]">{displayTitle}</h1>
+              <h1 className="font-heading mb-4 text-white drop-shadow-[0_0_8px_rgba(139,114,190,0.4)] text-3xl md:text-4xl">{displayTitle}</h1>
               <p className="text-lg text-[var(--silver-gray)] leading-relaxed">{displayDesc}</p>
               
-              {/* DÒNG LƯU Ý KHI ẤN VÀO CÁC SẢN PHẨM CUSTOM HOẶC THƯỜNG */}
               <div className="mt-4 p-4 rounded-2xl bg-[var(--primary)]/10 border border-[var(--primary)]/30">
                 <p className="text-sm font-semibold text-white">
                   {product.pricingType === 'contact' 
                     ? (lang === 'vi' ? '✨ Đây là sản phẩm được cá nhân hóa riêng theo ý tưởng của bạn mà không sử dụng template mẫu.' : '✨ This is a personalized product crafted uniquely from your ideas without using any standard templates.')
-                    : (lang === 'vi' ? '💡 Vui lòng liên hệ để lấy template vẽ!' : '💡 Inquiry to get the design template!')
+                    : (lang === 'vi' ? '💡 Inquiry để lấy template vẽ' : '💡 Inquiry to get the design template')
                   }
                 </p>
               </div>
@@ -134,7 +187,6 @@ export function ProductDetailPage() {
                   </div>
                 </div>
 
-                {/* DÒNG CHỮ LƯU Ý ƯỚC TÍNH DƯỚI KHỐI GIÁ SẢN PHẨM */}
                 <p className="text-sm italic text-center text-[var(--muted-foreground)]">
                   {lang === 'vi' 
                     ? '* Đây là bảng giá ước tính, vui lòng trao đổi với chúng tôi để nhận báo giá chính xác nhất.' 
@@ -146,7 +198,7 @@ export function ProductDetailPage() {
                     <div className="flex items-center justify-between mb-3">
                       <label className="font-semibold text-white">{lang === 'vi' ? 'Số lượng đặt hàng' : 'Order Quantity'}</label>
                       <div className="flex items-center gap-2">
-                        <input type="number" min={currentMoq} max="1000" value={quantity} onChange={(e) => setQuantity(Number(e.target.value))} className="w-20 px-2 py-1 bg-[#1A1528] border border-[var(--border)] text-[var(--primary)] font-bold text-center rounded-lg" />
+                        <input type="number" min={currentMoq} max="1000" value={quantity} onChange={(e) => setQuantity(Number(e.target.value) || currentMoq)} className="w-20 px-2 py-1 bg-[#1A1528] border border-[var(--border)] text-[var(--primary)] font-bold text-center rounded-lg" />
                         <span className="text-sm font-medium text-[var(--silver-gray)]">{lang === 'vi' ? 'cái' : 'pcs'}</span>
                       </div>
                     </div>
@@ -180,7 +232,7 @@ export function ProductDetailPage() {
                         <PlusCircle className={`w-6 h-6 ${hasAccessory ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)]'}`} />
                         <div>
                           <h4 className="font-semibold text-white">{lang === 'vi' ? 'Thêm phụ kiện' : 'Add Accessories'}</h4>
-                          {/* <p className="text-xs text-[var(--muted-foreground)]">{lang === 'vi' ? 'Tai đuôi rời, chíp chíp' : 'Ears, tails, squeakers'}</p> */}
+                          <p className="text-xs text-[var(--muted-foreground)]">{lang === 'vi' ? 'Tai đuôi rời, chíp chíp' : 'Ears, tails, squeakers'}</p>
                         </div>
                       </div>
                       <div className={`w-12 h-6 rounded-full p-1 transition-colors ${hasAccessory ? 'bg-[var(--primary)]' : 'bg-[#1A1528] border border-[var(--border)]'}`}>
@@ -194,7 +246,7 @@ export function ProductDetailPage() {
                           <div className="flex items-center justify-between mb-3">
                             <label className="font-semibold text-white">{lang === 'vi' ? 'Số lượng phụ kiện' : 'Accessory Qty'}</label>
                             <div className="flex items-center gap-2">
-                              <input type="number" min="1" max="1000" value={accessoryQuantity} onChange={(e) => setAccessoryQuantity(Number(e.target.value))} className="w-20 px-2 py-1 bg-[#1A1528] border border-[var(--border)] text-[var(--primary)] font-bold text-center rounded-lg" />
+                              <input type="number" min="1" max="1000" value={accessoryQuantity} onChange={(e) => setAccessoryQuantity(Number(e.target.value) || 1)} className="w-20 px-2 py-1 bg-[#1A1528] border border-[var(--border)] text-[var(--primary)] font-bold text-center rounded-lg" />
                               <span className="text-sm font-medium text-[var(--silver-gray)]">{lang === 'vi' ? 'cái' : 'pcs'}</span>
                             </div>
                           </div>

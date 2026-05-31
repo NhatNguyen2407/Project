@@ -14,7 +14,7 @@ const pricingData = [
       { qty: '>1000', prices: { vi: ['15k', '30k', '60k', '50k', '70k', '90k', '110k', '200k', '270k'], en: ['$1.1', '$2.3', '$4.5', '$3.8', '$5.3', '$6.8', '$8.3', '$15.1', '$20.4'] } }
     ],
     addons: [
-      { name: 'Phụ kiện', prices: { vi: ['X', '5k', '5k', '7k', '10k', '10k', '15k', '25k', '35k'], en: ['X', '$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1', '$1.9', '$2.6'] } }
+      { name: { vi: 'Phụ kiện', en: 'Addons' }, prices: { vi: ['X', '5k', '5k', '7k', '10k', '10k', '15k', '25k', '35k'], en: ['X', '$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1', '$1.9', '$2.6'] } }
     ]
   },
   {
@@ -28,7 +28,7 @@ const pricingData = [
       { qty: '>1000', prices: { vi: ['50k', '60k', '70k', '90k', '110k', '150k'], en: ['$3.8', '$4.5', '$5.3', '$6.8', '$8.3', '$11.3'] } }
     ],
     addons: [
-      { name: 'Phụ kiện', prices: { vi: ['5k', '5k', '7k', '10k', '10k', '15k'], en: ['$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1'] } }
+      { name: { vi: 'Phụ kiện', en: 'Addons' }, prices: { vi: ['5k', '5k', '7k', '10k', '10k', '15k'], en: ['$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1'] } }
     ]
   },
   {
@@ -42,7 +42,7 @@ const pricingData = [
       { qty: '>1000', prices: { vi: ['50k', '60k', '70k', '90k', '110k', '150k', '230k', '300k'], en: ['$3.8', '$4.5', '$5.3', '$6.8', '$8.3', '$11.3', '$17.4', '$22.6'] } }
     ],
     addons: [
-      { name: 'Phụ kiện', prices: { vi: ['5k', '5k', '7k', '10k', '10k', '15k', '25k', '35k'], en: ['$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1', '$1.9', '$2.6'] } }
+      { name: { vi: 'Phụ kiện', en: 'Addons' }, prices: { vi: ['5k', '5k', '7k', '10k', '10k', '15k', '25k', '35k'], en: ['$0.4', '$0.4', '$0.5', '$0.8', '$0.8', '$1.1', '$1.9', '$2.6'] } }
     ]
   },
   {
@@ -56,7 +56,7 @@ const pricingData = [
       { qty: '>1000', prices: { vi: ['50k', '60k', '70k', '80k', '90k'], en: ['$3.8', '$4.5', '$5.3', '$6.0', '$6.8'] } }
     ],
     addons: [
-      { name: 'Phụ kiện', prices: { vi: ['5k', '10k', '15k', '20k', '25k'], en: ['$0.4', '$0.8', '$1.1', '$1.5', '$1.9'] } }
+      { name: { vi: 'Phụ kiện', en: 'Addons' }, prices: { vi: ['5k', '10k', '15k', '20k', '25k'], en: ['$0.4', '$0.8', '$1.1', '$1.5', '$1.9'] } }
     ]
   }
 ];
@@ -72,7 +72,6 @@ export function PricingPage() {
             {lang === 'vi' ? 'BẢNG GIÁ' : 'PRICING'}
           </h1>
           
-          {/* CẬP NHẬT CÂU LƯU Ý MỚI TRÊN CÙNG TRANG BẢNG GIÁ */}
           <div className="inline-flex items-center gap-3 bg-[var(--primary)]/10 border border-[var(--primary)]/30 px-6 py-3 rounded-full backdrop-blur-sm">
             <Info className="w-5 h-5 text-[var(--primary)]" />
             <span className="text-white font-medium">
@@ -87,7 +86,9 @@ export function PricingPage() {
           {pricingData.map((table, tIndex) => (
             <motion.div key={tIndex} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 md:p-10 shadow-[0_0_40px_rgba(139,114,190,0.15)] overflow-hidden">
               <div className="text-center mb-10">
-                <h2 className="font-heading text-3xl md:text-4xl text-white drop-shadow-[0_0_8px_rgba(139,114,190,0.5)] bg-[var(--cyber-black)] inline-block px-8 py-3 rounded-full border border-[var(--border)]">{table.title}</h2>
+                <h2 className="font-heading text-3xl md:text-4xl text-white drop-shadow-[0_0_8px_rgba(139,114,190,0.5)] bg-[var(--cyber-black)] inline-block px-8 py-3 rounded-full border border-[var(--border)]">
+                  {table.title[lang]}
+                </h2>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-center border-collapse">
@@ -116,7 +117,7 @@ export function PricingPage() {
                         </tr>
                         {table.addons.map((addon, aIndex) => (
                           <tr key={`addon-${aIndex}`} className="bg-[#1A1528]">
-                            <td className="p-4 border-y border-[var(--border)] text-[var(--primary)] font-semibold whitespace-nowrap">{lang === 'vi' ? addon.name : 'Accessory'}</td>
+                            <td className="p-4 border-y border-[var(--border)] text-[var(--primary)] font-semibold whitespace-nowrap">{addon.name[lang] || (lang === 'vi' ? 'Phụ kiện' : 'Accessory')}</td>
                             {addon.prices[lang].map((price, pIndex) => <td key={pIndex} className="p-4 border-y border-[var(--border)] text-[var(--silver-gray)] whitespace-nowrap">{price}</td>)}
                           </tr>
                         ))}
@@ -126,7 +127,6 @@ export function PricingPage() {
                 </table>
               </div>
               
-              {/* BỎ TOÀN BỘ LƯU Ý LẺ, ĐỒNG BỘ THÀNH 1 CÂU THEO YÊU CẦU */}
               <div className="mt-8 bg-[var(--cyber-black)] rounded-2xl p-6 border border-[var(--border)]">
                 <p className="text-sm font-semibold text-[var(--primary)] text-center tracking-wide uppercase">
                   {lang === 'vi' ? 'Liên hệ ngay để nhận báo giá chính xác nhất' : 'Contact us now to get the most accurate quote'}
