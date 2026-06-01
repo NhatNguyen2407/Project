@@ -9,7 +9,7 @@ export function ProductProvider({ children }) {
 
   useEffect(() => {
     // API Link từ Google Sheets của bro
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzDoxrWrrPwn_2iS65EdPw72lKentmC5nbNjydR1E80W9Ph-9nPpv3m4EJGjR8nkX1P/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbyH0YC_0k5BqYHW1gvftYAjvxmu3CNoBLzHmDur9-s92EIUcePQpSU43tfXgpLs-CiA/exec';
 
     fetch(API_URL)
       .then(res => res.json())

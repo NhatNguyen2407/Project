@@ -1,25 +1,21 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-// API
-const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPdjfVw18jsrTB2nyW6D68ZkfHX1MokS_1zC9Qa3uVqPJ4uu4wDW62CH56XXrw3QpU/exec';
+// ĐÃ CẬP NHẬT THEO LINK MỚI NHẤT BRO GỬI SÁNG NAY:
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyH0YC_0k5BqYHW1gvftYAjvxmu3CNoBLzHmDur9-s92EIUcePQpSU43tfXgpLs-CiA/exec';
 
 export function InquiryPage() {
   const { lang } = useLanguage();
   const location = useLocation();
   const state = location.state || {};
 
-  const defaultSubject = state.passedProduct 
-    ? (lang === 'vi' ? `[Inquiry] Yêu cầu báo giá: ${state.passedProduct}` : `[Inquiry] Quote Request: ${state.passedProduct}`) 
-    : (lang === 'vi' ? '[Inquiry] Yêu cầu báo giá sản phẩm' : '[Inquiry] Product Quote Request');
-
   const [formData, setFormData] = useState({
-    subject: defaultSubject,
+    subject: '',
     customerName: '',
-    customerEmail: '', // State lưu trữ email khách hàng
+    customerEmail: '',
     contactInfo: '',
     productName: state.passedProduct || '',
     quantity: state.passedQty || '',
@@ -29,7 +25,19 @@ export function InquiryPage() {
     note: ''
   });
 
+  const [isSubjectEdited, setIsSubjectEdited] = useState(false);
   const [status, setStatus] = useState('idle');
+
+  // VŨ KHÍ BẮT BUỘC ĐỂ ĐỒNG BỘ TIÊU ĐỀ MAIL THEO NGÔN NGỮ KHI CHUYỂN TAB EN/VI
+  useEffect(() => {
+    if (!isSubjectEdited) {
+      const dynamicSubject = state.passedProduct 
+        ? (lang === 'vi' ? `[Inquiry] Yêu cầu báo giá: ${state.passedProduct}` : `[Inquiry] Quote Request: ${state.passedProduct}`) 
+        : (lang === 'vi' ? '[Inquiry] Yêu cầu báo giá sản phẩm' : '[Inquiry] Product Quote Request');
+      
+      setFormData(prev => ({ ...prev, subject: dynamicSubject }));
+    }
+  }, [lang, isSubjectEdited, state.passedProduct]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -48,8 +56,9 @@ export function InquiryPage() {
       });
       
       setStatus('success');
+      setIsSubjectEdited(false);
       setFormData({
-        subject: defaultSubject, customerName: '', customerEmail: '', contactInfo: '', productName: '', quantity: '', size: '', accessoryQty: '0', imageLink: '', note: ''
+        subject: '', customerName: '', customerEmail: '', contactInfo: '', productName: '', quantity: '', size: '', accessoryQty: '0', imageLink: '', note: ''
       });
     } catch (error) {
       console.error('Lỗi khi gửi form:', error);
@@ -90,25 +99,38 @@ export function InquiryPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
+              {/* Ô Tiêu đề Email */}
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Tiêu đề yêu cầu / Email Subject *' : 'Inquiry Subject / Email Subject *'}</label>
-                <input required type="text" name="subject" value={formData.subject} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl text-white font-medium focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder="[Inquiry]..." />
+                <input 
+                  required 
+                  type="text" 
+                  name="subject" 
+                  value={formData.subject} 
+                  onChange={(e) => {
+                    setIsSubjectEdited(true); // Đánh dấu là khách đã tự gõ sửa để không bị tự động dịch đè nữa
+                    handleChange(e);
+                  }} 
+                  className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl text-white font-medium focus:outline-none focus:border-[var(--primary)] transition-colors" 
+                />
               </div>
 
+              {/* Tên Khách Hàng */}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Tên của bạn *' : 'Your Name *'}</label>
                 <input required type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder={lang === 'vi' ? 'Nguyễn Văn A' : 'John Doe'} />
               </div>
 
+              {/* Email Khách Hàng */}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Địa chỉ Email *' : 'Email Address *'}</label>
                 <input required type="email" name="customerEmail" value={formData.customerEmail} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder="example@gmail.com" />
               </div>
 
-              {/* THAY ĐỔI Ô LIÊN HỆ THEO NGÔN NGỮ */}
+              {/* Ô Liên hệ linh hoạt theo ngôn ngữ */}
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-semibold text-white">
-                  {lang === 'vi' ? 'Số điện thoại / Link Facebook / Zalo *' : 'Facebook / Instagram Link *'}
+                  {lang === 'vi' ? 'Số điện thoại / Facebook / Zalo *' : 'Facebook / Instagram *'}
                 </label>
                 <input 
                   required 
@@ -117,7 +139,7 @@ export function InquiryPage() {
                   value={formData.contactInfo} 
                   onChange={handleChange} 
                   className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" 
-                  placeholder={lang === 'vi' ? 'Nhập SDT/Link Facebook...' : 'Enter your Facebook/Instagram Link...'} 
+                  placeholder={lang === 'vi' ? 'Nhập SDT/Facebook/Zalo...' : 'Enter Facebook/Instagram Link...'} 
                 />
               </div>
               
@@ -128,7 +150,7 @@ export function InquiryPage() {
 
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Kích thước dự kiến' : 'Expected Size'}</label>
-                <input type="text" name="size" value={formData.size} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder={lang === 'vi' ? '10cm, 20cm...' : '10cm, 20cm...'} />
+                <input type="text" name="size" value={formData.size} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder="10cm, 20cm..." />
               </div>
               
               <div className="grid grid-cols-2 gap-4">
@@ -148,7 +170,7 @@ export function InquiryPage() {
               </div>
               
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Ghi chú thêm cho xưởng' : 'Additional Notes for Workshop'}</label>
+                <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Ghi chú thêm cho xưởng' : 'Additional Notes'}</label>
                 <textarea name="note" value={formData.note} onChange={handleChange} rows="4" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors resize-none" placeholder={lang === 'vi' ? 'Yêu cầu đặc biệt về chất liệu, đường may...' : 'Special requirements for materials, stitching...'}></textarea>
               </div>
             </div>
