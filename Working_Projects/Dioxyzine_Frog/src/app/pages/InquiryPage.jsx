@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-// ⚠️ BRO DÁN CÁI LINK API MỚI VỪA COPY Ở BƯỚC 2 VÀO ĐÂY:
+// API
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwPdjfVw18jsrTB2nyW6D68ZkfHX1MokS_1zC9Qa3uVqPJ4uu4wDW62CH56XXrw3QpU/exec';
 
 export function InquiryPage() {
@@ -117,7 +117,7 @@ export function InquiryPage() {
                   value={formData.contactInfo} 
                   onChange={handleChange} 
                   className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" 
-                  placeholder={lang === 'vi' ? '0987654321 hoặc facebook.com/...' : 'https://facebook.com/... or https://instagram.com/...'} 
+                  placeholder={lang === 'vi' ? 'Nhập SDT/Link Facebook...' : 'Enter your Facebook/Instagram Link...'} 
                 />
               </div>
               
