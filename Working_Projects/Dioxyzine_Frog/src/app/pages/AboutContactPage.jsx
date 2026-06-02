@@ -3,6 +3,9 @@ import { Heart, Sparkles, Users, Award, Mail, MapPin, Clock, Facebook, Instagram
 import { useState } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 
+// import image
+import jobsite_01 from '../../assets/Products/Banner/JobSite_01.jpg'
+
 const translations = {
   vi: {
     heroTitle: 'Về Dioxyzine Frog',
@@ -114,8 +117,12 @@ export function AboutContactPage() {
               <p>{t.storyP2}</p>
             </div>
           </div>
-          <div className="rounded-3xl overflow-hidden border border-[var(--border)]">
-            <img src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=800&h=600&fit=crop" alt="" className="w-full h-auto opacity-80" />
+          <div className="relative aspect-[4/3] rounded-3xl overflow-hidden border border-[var(--border)] shadow-lg">
+            <img 
+              src={jobsite_01} 
+              alt="Dioxyzine Story" 
+              className="absolute inset-0 w-full h-full object-cover opacity-90 hover:opacity-100 transition-opacity duration-300" 
+            />
           </div>
         </div>
       </section>
@@ -172,7 +179,7 @@ export function AboutContactPage() {
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8">
               <Mail className="w-10 h-10 text-[var(--primary)] mx-auto mb-4" />
               <h3 className="font-semibold mb-2 text-white">Email</h3>
-              <a href="mailto:dioxyzine.frog@gmail.com" className="text-[var(--primary)] font-medium">dioxyzine.frog@gmail.com</a>
+              <a href="mailto:dioxyzinefrog@gmail.com" className="text-[var(--primary)] font-medium">dioxyzinefrog@gmail.com</a>
             </div>
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8">
               <MapPin className="w-10 h-10 text-[var(--primary)] mx-auto mb-4" />

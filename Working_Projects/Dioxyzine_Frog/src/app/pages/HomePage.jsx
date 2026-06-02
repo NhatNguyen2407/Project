@@ -9,7 +9,8 @@ import { useProducts } from '../context/ProductContext';
 
 // import banner image
 import doll2d_banner from '../../assets/Products/Banner/Doll2D_Banner.jpg'
-
+import doll2d_banner02 from '../../assets/Products/Banner/Doll2D_Banner02.jpg'
+import doll2d_banner03 from '../../assets/Products/Banner/Doll2D_Banner03.jpg'
 
 const translations = {
   vi: {
@@ -43,13 +44,13 @@ const translations = {
 const heroSlides = {
   vi: [
     { title: 'Biến mọi ý tưởng của bạn thành hiện thực', subtitle: 'Gấu bông, fanmerch và quà tặng handmade độc quyền', image: doll2d_banner },
-    { title: 'Gia công chất lượng cao', subtitle: 'Chỉnh sửa tùy ý đến khi ưng, hỗ trợ tối đa cho artist', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop' },
-    { title: 'Sáng tạo không giới hạn', subtitle: 'Phục vụ mọi dự án của bạn từ đơn lẻ đến số lượng lớn', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=1600&h=900&fit=crop' }
+    { title: 'Gia công chất lượng cao', subtitle: 'Chỉnh sửa tùy ý đến khi ưng, hỗ trợ tối đa cho artist', image: doll2d_banner02 },
+    { title: 'Sáng tạo không giới hạn', subtitle: 'Phục vụ mọi dự án của bạn từ đơn lẻ đến số lượng lớn', image: doll2d_banner03 }
   ],
   en: [
     { title: 'Turn all your ideas into reality', subtitle: 'Exclusive handmade plushies, fan merch, and gifts', image: doll2d_banner },
-    { title: 'High-quality manufacturing', subtitle: 'Unlimited revisions until satisfied, full support for artists', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop' },
-    { title: 'Unlimited creativity', subtitle: 'Serving all your projects from single pieces to bulk orders', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=1600&h=900&fit=crop' }
+    { title: 'High-quality manufacturing', subtitle: 'Unlimited revisions until satisfied, full support for artists', image: doll2d_banner02 },
+    { title: 'Unlimited creativity', subtitle: 'Serving all your projects from single pieces to bulk orders', image: doll2d_banner03 }
   ]
 };
 

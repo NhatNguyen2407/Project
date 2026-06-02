@@ -2,6 +2,8 @@ import { motion } from 'motion/react';
 import { Heart, Sparkles, Users, Award, Mail, MapPin, Clock } from 'lucide-react';
 import { useState } from 'react';
 
+import jobsite_01 from '../../assets/Products/Banner/JobSite_01.jpg'
+
 const faqs = [
   {
     question: 'What is your minimum order quantity (MOQ)?',
@@ -77,7 +79,7 @@ export function AboutPage() {
             >
               <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-[var(--border)]">
                 <img
-                  src="https://images.unsplash.com/photo-1556740738-b6a63e27c4df?w=800&h=600&fit=crop"
+                  src="../../assets/Products/Banner/JobSite_01.jpg"
                   alt="Dioxyzine Frog Workshop"
                   className="w-full h-auto"
                 />
