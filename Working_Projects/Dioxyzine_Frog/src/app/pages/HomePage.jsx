@@ -6,6 +6,11 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
 import { useProducts } from '../context/ProductContext';
 
+
+// import banner image
+import doll2d_banner from '../../assets/Products/Banner/Doll2D_Banner.jpg'
+
+
 const translations = {
   vi: {
     howItWorks: 'Quy Trình Đặt Hàng', subHow: 'Đơn giản, minh bạch và hợp tác chặt chẽ từ ý tưởng ban đầu đến thành phẩm',
@@ -37,12 +42,12 @@ const translations = {
 
 const heroSlides = {
   vi: [
-    { title: 'Biến mọi ý tưởng của bạn thành hiện thực', subtitle: 'Gấu bông, fanmerch và quà tặng handmade độc quyền', image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=1600&h=900&fit=crop' },
+    { title: 'Biến mọi ý tưởng của bạn thành hiện thực', subtitle: 'Gấu bông, fanmerch và quà tặng handmade độc quyền', image: doll2d_banner },
     { title: 'Gia công chất lượng cao', subtitle: 'Chỉnh sửa tùy ý đến khi ưng, hỗ trợ tối đa cho artist', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop' },
     { title: 'Sáng tạo không giới hạn', subtitle: 'Phục vụ mọi dự án của bạn từ đơn lẻ đến số lượng lớn', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=1600&h=900&fit=crop' }
   ],
   en: [
-    { title: 'Turn all your ideas into reality', subtitle: 'Exclusive handmade plushies, fan merch, and gifts', image: 'https://images.unsplash.com/photo-1530325553241-4f6e7690cf36?w=1600&h=900&fit=crop' },
+    { title: 'Turn all your ideas into reality', subtitle: 'Exclusive handmade plushies, fan merch, and gifts', image: doll2d_banner },
     { title: 'High-quality manufacturing', subtitle: 'Unlimited revisions until satisfied, full support for artists', image: 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&h=900&fit=crop' },
     { title: 'Unlimited creativity', subtitle: 'Serving all your projects from single pieces to bulk orders', image: 'https://images.unsplash.com/photo-1586165368502-1bad197a6461?w=1600&h=900&fit=crop' }
   ]

@@ -84,8 +84,8 @@ export function ProductDetailPage() {
   };
 
   const formatCurrency = (val) => {
-    if (!val) return lang === 'vi' ? '0 VND' : '$0.00 USD';
-    if (lang === 'en') return `$${Number(val).toFixed(2)} USD`;
+    if (!val) return lang === 'vi' ? '0 VND' : '$0.00';
+    if (lang === 'en') return `$${Number(val).toFixed(2)}`;
     return new Intl.NumberFormat('vi-VN').format(val * 1000) + ' VND';
   };
 

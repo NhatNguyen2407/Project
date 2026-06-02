@@ -38,8 +38,7 @@ export function NotFoundPage() {
         >
           <h2 className="text-3xl md:text-4xl font-bold mb-4">Page Not Found</h2>
           <p className="text-lg text-muted-foreground leading-relaxed">
-            Oops! Looks like this page wandered off into the craft studio. Let's get you back on
-            track.
+            Oops! Looks like this page wandered off into the craft studio. Let's get you back on track.
           </p>
         </motion.div>
 

@@ -4,7 +4,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
-// ĐÃ CẬP NHẬT THEO LINK MỚI NHẤT BRO GỬI SÁNG NAY:
+// API
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyH0YC_0k5BqYHW1gvftYAjvxmu3CNoBLzHmDur9-s92EIUcePQpSU43tfXgpLs-CiA/exec';
 
 export function InquiryPage() {
@@ -28,7 +28,7 @@ export function InquiryPage() {
   const [isSubjectEdited, setIsSubjectEdited] = useState(false);
   const [status, setStatus] = useState('idle');
 
-  // VŨ KHÍ BẮT BUỘC ĐỂ ĐỒNG BỘ TIÊU ĐỀ MAIL THEO NGÔN NGỮ KHI CHUYỂN TAB EN/VI
+  //ĐỒNG BỘ TIÊU ĐỀ MAIL THEO NGÔN NGỮ KHI CHUYỂN TAB EN/VI
   useEffect(() => {
     if (!isSubjectEdited) {
       const dynamicSubject = state.passedProduct 
