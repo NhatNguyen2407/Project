@@ -27,8 +27,9 @@ export function InquiryPage() {
 
   const [isSubjectEdited, setIsSubjectEdited] = useState(false);
   const [status, setStatus] = useState('idle');
+  const [errorMsg, setErrorMsg] = useState(''); // State lưu thông báo lỗi custom
 
-  //ĐỒNG BỘ TIÊU ĐỀ MAIL THEO NGÔN NGỮ KHI CHUYỂN TAB EN/VI
+  // ĐỒNG BỘ TIÊU ĐỀ MAIL THEO NGÔN NGỮ KHI CHUYỂN TAB EN/VI
   useEffect(() => {
     if (!isSubjectEdited) {
       const dynamicSubject = state.passedProduct 
@@ -45,8 +46,31 @@ export function InquiryPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setStatus('loading');
+    setErrorMsg(''); // Xóa lỗi cũ mỗi lần bấm gửi
 
+    // 1. TỰ KIỂM TRA LỖI TRƯỚC KHI GỬI
+    // Kiểm tra xem đã điền đủ thông tin chưa
+    if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.productName || !formData.imageLink || !formData.quantity) {
+      setErrorMsg(lang === 'vi' ? 'Vui lòng điền đầy đủ các thông tin có dấu *' : 'Please fill in all required fields *');
+      return; 
+    }
+
+    // KIỂM TRA ĐỊNH DẠNG LINK (URL VALIDATION)
+    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/i;
+    if (!urlPattern.test(formData.imageLink)) {
+      setErrorMsg(lang === 'vi' ? 'Đường dẫn ảnh phác thảo không hợp lệ! Vui lòng nhập link đúng định dạng (VD: https://...)' : 'Invalid sketch link! Please enter a valid URL (E.g., https://...)');
+      return;
+    }
+
+    // Kiểm tra số lượng tối thiểu
+    const minQty = formData.productName.toLowerCase().includes('custom') ? 30 : 11;
+    if (Number(formData.quantity) < minQty) {
+      setErrorMsg(lang === 'vi' ? `Số lượng tối thiểu cho sản phẩm này là ${minQty} chiếc!` : `Minimum quantity for this product is ${minQty}!`);
+      return;
+    }
+
+    // 2. NẾU KHÔNG CÓ LỖI THÌ MỚI GỬI ĐI
+    setStatus('loading');
     try {
       await fetch(SCRIPT_URL, {
         method: 'POST',
@@ -96,51 +120,28 @@ export function InquiryPage() {
             ) : null}
           </AnimatePresence>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Dùng noValidate để tắt popup báo lỗi mặc định của trình duyệt */}
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              {/* Ô Tiêu đề Email */}
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Tiêu đề yêu cầu / Email Subject *' : 'Inquiry Subject / Email Subject *'}</label>
-                <input 
-                  required 
-                  type="text" 
-                  name="subject" 
-                  value={formData.subject} 
-                  onChange={(e) => {
-                    setIsSubjectEdited(true); // Đánh dấu là khách đã tự gõ sửa để không bị tự động dịch đè nữa
-                    handleChange(e);
-                  }} 
-                  className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl text-white font-medium focus:outline-none focus:border-[var(--primary)] transition-colors" 
-                />
+                <input required type="text" name="subject" value={formData.subject} onChange={(e) => { setIsSubjectEdited(true); handleChange(e); }} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl text-white font-medium focus:outline-none focus:border-[var(--primary)] transition-colors" />
               </div>
 
-              {/* Tên Khách Hàng */}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Tên của bạn *' : 'Your Name *'}</label>
                 <input required type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder={lang === 'vi' ? 'Nguyễn Văn A' : 'John Doe'} />
               </div>
 
-              {/* Email Khách Hàng */}
               <div className="space-y-2">
                 <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Địa chỉ Email *' : 'Email Address *'}</label>
                 <input required type="email" name="customerEmail" value={formData.customerEmail} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder="example@gmail.com" />
               </div>
 
-              {/* Ô Liên hệ linh hoạt theo ngôn ngữ */}
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-white">
-                  {lang === 'vi' ? 'Số điện thoại / Facebook / Zalo *' : 'Facebook / Instagram *'}
-                </label>
-                <input 
-                  required 
-                  type="text" 
-                  name="contactInfo" 
-                  value={formData.contactInfo} 
-                  onChange={handleChange} 
-                  className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" 
-                  placeholder={lang === 'vi' ? 'Nhập SDT/Facebook/Zalo...' : 'Enter Facebook/Instagram Link...'} 
-                />
+                <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Số điện thoại / Facebook / Zalo *' : 'Facebook / Instagram *'}</label>
+                <input required type="text" name="contactInfo" value={formData.contactInfo} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder={lang === 'vi' ? 'Nhập SDT/Facebook/Zalo...' : 'Enter Facebook/Instagram Link...'} />
               </div>
               
               <div className="space-y-2 md:col-span-2">
@@ -155,8 +156,13 @@ export function InquiryPage() {
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Số lượng *' : 'Quantity *'}</label>
-                  <input required type="number" min="1" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" />
+                  <label className="text-sm font-semibold text-white">
+                    {lang === 'vi' ? 'Số lượng *' : 'Quantity *'} 
+                    <span className="text-[var(--primary)] ml-1 text-xs font-normal">
+                      (Min: {formData.productName.toLowerCase().includes('custom') ? '30' : '11'})
+                    </span>
+                  </label>
+                  <input required type="number" min={formData.productName.toLowerCase().includes('custom') ? 30 : 11} name="quantity" value={formData.quantity} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" />
                 </div>
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Phụ kiện' : 'Accessories'}</label>
@@ -165,8 +171,8 @@ export function InquiryPage() {
               </div>
 
               <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Link ảnh phác thảo/thiết kế (Google Drive, Imgur...)' : 'Design/Sketch Link (Google Drive, Imgur...)'}</label>
-                <input type="url" name="imageLink" value={formData.imageLink} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder="https://..." />
+                <label className="text-sm font-semibold text-white">{lang === 'vi' ? 'Link ảnh phác thảo/thiết kế (Google Drive, Imgur...) *' : 'Design/Sketch Link (Google Drive...) *'}</label>
+                <input required type="url" name="imageLink" value={formData.imageLink} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors" placeholder="https://..." />
               </div>
               
               <div className="space-y-2 md:col-span-2">
@@ -175,11 +181,20 @@ export function InquiryPage() {
               </div>
             </div>
 
+            {/* BẢNG THÔNG BÁO LỖI KHI GỬI API */}
             {status === 'error' && (
               <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/50 flex items-center gap-3 text-red-500">
-                <AlertCircle className="w-5 h-5" />
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
                 <span className="text-sm font-medium">{lang === 'vi' ? 'Có lỗi xảy ra. Vui lòng thử lại sau!' : 'An error occurred. Please try again later!'}</span>
               </div>
+            )}
+
+            {/* BẢNG THÔNG BÁO LỖI CUSTOM KHI NGƯỜI DÙNG ĐIỀN THIẾU HOẶC SAI THÔNG TIN */}
+            {errorMsg && (
+              <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-xl bg-[#2C1A29] border border-red-500/50 flex items-center gap-3 text-red-400">
+                <AlertCircle className="w-5 h-5 flex-shrink-0" />
+                <span className="text-sm font-medium">{errorMsg}</span>
+              </motion.div>
             )}
 
             <button type="submit" disabled={status === 'loading'} className="w-full py-4 rounded-xl bg-[var(--primary)] text-white font-bold text-lg shadow-[0_0_20px_rgba(139,114,190,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:scale-100 disabled:cursor-not-allowed cursor-pointer">

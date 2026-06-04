@@ -100,7 +100,7 @@ export function AboutContactPage() {
             <a href="https://facebook.com/dioxyzinefrog" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-8 py-4 rounded-full bg-[#1877F2] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg">
               <Facebook className="w-6 h-6" /> Facebook
             </a>
-            <a href="https://instagram.com/dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg">
+            <a href="https://www.instagram.com/dioxyzinefrog.print/" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg">
               <Instagram className="w-6 h-6" /> Instagram
             </a>
           </div>

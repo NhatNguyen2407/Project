@@ -6,6 +6,7 @@ import { useProducts } from '../context/ProductContext';
 
 // ==========================================
 // COMPONENT ẢNH THÔNG MINH: Tự động tải lại (Retry) khi Google Drive bị nghẽn
+// Đồng thời thêm thuộc tính loading="lazy" giúp web load nhanh hơn
 // ==========================================
 const SmartImage = ({ src, alt, className }) => {
   const [currentSrc, setCurrentSrc] = useState(src);
@@ -114,7 +115,7 @@ export function GalleryPage() {
               ))}
             </div>
 
-            {/* Layout */}
+            {/* GIAO DIỆN PINTEREST (MASONRY LAYOUT) */}
             <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
               {filteredItems.map((item, index) => (
                 <motion.div
@@ -126,6 +127,7 @@ export function GalleryPage() {
                   className="group relative rounded-2xl overflow-hidden bg-[var(--cyber-black)] cursor-pointer shadow-lg break-inside-avoid inline-block w-full"
                   onClick={() => setSelectedIndex(index)}
                 >
+                  {/* ĐÃ THAY BẰNG SMARTIMAGE */}
                   <SmartImage
                     src={item.src}
                     alt={item.alt}
@@ -172,6 +174,7 @@ export function GalleryPage() {
               className="relative w-full max-w-5xl flex items-center justify-center cursor-default"
               onClick={(e) => e.stopPropagation()}
             >
+              {/* ĐÃ THAY BẰNG SMARTIMAGE TRONG POPUP */}
               <SmartImage
                 src={selectedItem.src}
                 alt={selectedItem.alt}
