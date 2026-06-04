@@ -55,6 +55,13 @@ export function InquiryPage() {
       return; 
     }
 
+    // KIỂM TRA ĐỊNH DẠNG EMAIL (Do noValidate đã tắt bộ check mặc định)
+    const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailPattern.test(formData.customerEmail)) {
+      setErrorMsg(lang === 'vi' ? 'Địa chỉ Email không hợp lệ! Vui lòng kiểm tra lại (Ví dụ: abc@gmail.com)' : 'Invalid email address! Please check again.');
+      return;
+    }
+
     // KIỂM TRA ĐỊNH DẠNG LINK (URL VALIDATION)
     const urlPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,6})(\/.*)?$/i;
     if (!urlPattern.test(formData.imageLink)) {
