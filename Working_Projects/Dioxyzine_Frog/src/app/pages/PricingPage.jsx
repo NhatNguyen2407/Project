@@ -82,6 +82,22 @@ export function PricingPage() {
           </div>
         </motion.div>
 
+        {/* ========================================== */}
+        {/* LỜI NHẮC CUỘN NGANG (HIỂN THỊ MỌI THIẾT BỊ) */}
+        {/* ========================================== */}
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-start gap-3 mb-6 text-[var(--primary)] bg-[var(--primary)]/10 p-4 rounded-xl border border-[var(--primary)]/20"
+        >
+          <span className="text-lg shrink-0">💡</span>
+          <p className="text-sm font-medium leading-relaxed italic">
+            {lang === 'vi' 
+              ? 'Nếu bạn đang truy cập website bằng điện thoại, hãy cuộn sang ngang để có thể xem đầy đủ bảng giá.' 
+              : 'If you are accessing the website on a mobile phone, please scroll horizontally to view the full pricing table.'}
+          </p>
+        </motion.div>
+
         <div className="space-y-20">
           {pricingData.map((table, tIndex) => (
             <motion.div key={tIndex} initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 md:p-10 shadow-[0_0_40px_rgba(139,114,190,0.15)] overflow-hidden">
