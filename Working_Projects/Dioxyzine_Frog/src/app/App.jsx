@@ -16,6 +16,9 @@ import { motion } from 'motion/react';
 import { LanguageProvider } from './context/LanguageContext';
 import { ProductProvider } from './context/ProductContext';
 
+//import image
+import elements from '../assets/Elements.PNG'
+
 export default function App() {
   return (
     <LanguageProvider>
@@ -26,15 +29,15 @@ export default function App() {
           {/* Hiệu ứng Floating Elements mờ ảo (Ngôi sao/Tim) chạy nền cho toàn web */}
           <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20 mix-blend-screen">
             <motion.img 
-              src="/src/assets/elements.png" 
-              alt=""
+              src={elements} 
+              alt="Elements"
               animate={{ y: [0, -30, 0], rotate: [0, 5, 0] }}
               transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
               className="absolute top-20 -left-20 w-96 h-auto blur-[1px]"
             />
             <motion.img 
-              src="/src/assets/elements.png" 
-              alt=""
+              src={elements} 
+              alt="Elements"
               animate={{ y: [0, 40, 0], rotate: [0, -5, 0] }}
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
               className="absolute bottom-10 -right-10 w-[500px] h-auto blur-[1px]"
