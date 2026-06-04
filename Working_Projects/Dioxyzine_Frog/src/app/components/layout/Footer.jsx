@@ -1,6 +1,9 @@
 import { Link } from 'react-router';
 import { useLanguage } from '../../context/LanguageContext';
 
+//import image
+import Logo from '../../../assets/Logo.png';
+
 export function Footer() {
   const { lang } = useLanguage();
   const currentYear = new Date().getFullYear();
@@ -15,7 +18,7 @@ export function Footer() {
             <Link to="/" className="flex items-center space-x-3 group w-fit">
               <div className="relative">
                 <img 
-                  src="/src/assets/avatar.jpeg" 
+                  src={Logo} 
                   alt="Dioxyzine Frog" 
                   className="w-12 h-12 rounded-full border-2 border-[var(--primary)] object-cover shadow-[0_0_15px_rgba(139,114,190,0.5)] group-hover:scale-105 transition-transform" 
                 />
@@ -80,7 +83,7 @@ export function Footer() {
 
         {/* Bản Quyền */}
         <div className="mt-12 pt-8 border-t border-[var(--border)]/30 text-center text-xs text-[var(--muted-foreground)]">
-          <p>&copy; {currentYear} Dioxyzine Frog. All rights reserved.</p>
+          <p>&copy; {/*currentYear*/}2023 Dioxyzine Frog. All rights reserved.</p>
         </div>
       </div>
     </footer>
