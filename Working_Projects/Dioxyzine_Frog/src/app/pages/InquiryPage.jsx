@@ -56,14 +56,14 @@ export function InquiryPage() {
     }
 
     // KIỂM TRA ĐỊNH DẠNG LINK (URL VALIDATION)
-    const urlPattern = /^(https?:\/\/)?([\da-z.-]+)\.([a-z.]{2,6})([\/\w .-]*)*\/?$/i;
+    const urlPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,6})(\/.*)?$/i;
     if (!urlPattern.test(formData.imageLink)) {
       setErrorMsg(lang === 'vi' ? 'Đường dẫn ảnh phác thảo không hợp lệ! Vui lòng nhập link đúng định dạng (VD: https://...)' : 'Invalid sketch link! Please enter a valid URL (E.g., https://...)');
       return;
     }
 
     // Kiểm tra số lượng tối thiểu
-    const minQty = formData.productName.toLowerCase().includes('custom') ? 30 : 11;
+    const minQty = (formData.productName || '').toLowerCase().includes('custom') ? 30 : 11;
     if (Number(formData.quantity) < minQty) {
       setErrorMsg(lang === 'vi' ? `Số lượng tối thiểu cho sản phẩm này là ${minQty} chiếc!` : `Minimum quantity for this product is ${minQty}!`);
       return;
