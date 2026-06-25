@@ -27,9 +27,9 @@ export function InquiryPage() {
 
   const [isSubjectEdited, setIsSubjectEdited] = useState(false);
   const [status, setStatus] = useState('idle');
-  const [errorMsg, setErrorMsg] = useState(''); // State lưu thông báo lỗi custom
+  const [errorMsg, setErrorMsg] = useState('');
 
-  // ĐỒNG BỘ TIÊU ĐỀ MAIL THEO NGÔN NGỮ KHI CHUYỂN TAB EN/VI
+
   useEffect(() => {
     if (!isSubjectEdited) {
       const dynamicSubject = state.passedProduct 
@@ -46,37 +46,36 @@ export function InquiryPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg(''); // Xóa lỗi cũ mỗi lần bấm gửi
+    setErrorMsg('');
 
-    // 1. TỰ KIỂM TRA LỖI TRƯỚC KHI GỬI
-    // Kiểm tra xem đã điền đủ thông tin chưa
+    // đủ thông tin chưa
     if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.productName || !formData.imageLink || !formData.quantity) {
       setErrorMsg(lang === 'vi' ? 'Vui lòng điền đầy đủ các thông tin có dấu *' : 'Please fill in all required fields *');
       return; 
     }
 
-    // KIỂM TRA ĐỊNH DẠNG EMAIL (Do noValidate đã tắt bộ check mặc định)
+    // mail
     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailPattern.test(formData.customerEmail)) {
       setErrorMsg(lang === 'vi' ? 'Địa chỉ Email không hợp lệ! Vui lòng kiểm tra lại (Ví dụ: abc@gmail.com)' : 'Invalid email address! Please check again.');
       return;
     }
 
-    // KIỂM TRA ĐỊNH DẠNG LINK (URL VALIDATION)
+    // link
     const urlPattern = /^(https?:\/\/)?([\w.-]+)\.([a-z]{2,6})(\/.*)?$/i;
     if (!urlPattern.test(formData.imageLink)) {
       setErrorMsg(lang === 'vi' ? 'Đường dẫn ảnh phác thảo không hợp lệ! Vui lòng nhập link đúng định dạng (VD: https://...)' : 'Invalid sketch link! Please enter a valid URL (E.g., https://...)');
       return;
     }
 
-    // Kiểm tra số lượng tối thiểu
+    // minimum qty
     const minQty = (formData.productName || '').toLowerCase().includes('custom') ? 30 : 11;
     if (Number(formData.quantity) < minQty) {
       setErrorMsg(lang === 'vi' ? `Số lượng tối thiểu cho sản phẩm này là ${minQty} chiếc!` : `Minimum quantity for this product is ${minQty}!`);
       return;
     }
 
-    // 2. NẾU KHÔNG CÓ LỖI THÌ MỚI GỬI ĐI
+    // check for errors b4 submit
     setStatus('loading');
     try {
       await fetch(SCRIPT_URL, {
@@ -127,7 +126,6 @@ export function InquiryPage() {
             ) : null}
           </AnimatePresence>
 
-          {/* Dùng noValidate để tắt popup báo lỗi mặc định của trình duyệt */}
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
@@ -188,7 +186,7 @@ export function InquiryPage() {
               </div>
             </div>
 
-            {/* BẢNG THÔNG BÁO LỖI KHI GỬI API */}
+            {/* error when send API */}
             {status === 'error' && (
               <div className="p-4 rounded-xl bg-red-500/10 border border-red-500/50 flex items-center gap-3 text-red-500">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />
@@ -196,7 +194,7 @@ export function InquiryPage() {
               </div>
             )}
 
-            {/* BẢNG THÔNG BÁO LỖI CUSTOM KHI NGƯỜI DÙNG ĐIỀN THIẾU HOẶC SAI THÔNG TIN */}
+            {/* error from users */}
             {errorMsg && (
               <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} className="p-4 rounded-xl bg-[#2C1A29] border border-red-500/50 flex items-center gap-3 text-red-400">
                 <AlertCircle className="w-5 h-5 flex-shrink-0" />

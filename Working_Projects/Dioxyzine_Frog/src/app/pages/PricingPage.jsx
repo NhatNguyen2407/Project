@@ -82,9 +82,6 @@ export function PricingPage() {
           </div>
         </motion.div>
 
-        {/* ========================================== */}
-        {/* LỜI NHẮC CUỘN NGANG (HIỂN THỊ MỌI THIẾT BỊ) */}
-        {/* ========================================== */}
         <motion.div 
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}

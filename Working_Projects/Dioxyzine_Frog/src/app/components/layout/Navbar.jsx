@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Menu, X, Globe } from 'lucide-react';
+import { Menu, X, Globe, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useLanguage } from '../../context/LanguageContext';
 
@@ -46,7 +46,6 @@ export function Navbar() {
           <div className="flex items-center justify-between h-20">
             <Link to="/" className="flex items-center space-x-3 group">
               <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                {/* 2. TRUYỀN BIẾN shopLogo VÀO ĐÂY, PHÓNG TO VÀ BỎ VIỀN */}
                 <img 
                   src={Logo} 
                   alt="Dioxyzine Frog" 
@@ -61,17 +60,41 @@ export function Navbar() {
             <div className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => {
                 const isActive = location.pathname === link.path;
+                
+                // HIỆU ỨNG DROPDOWN CHO NÚT "SẢN PHẨM"
+                if (link.path === '/products') {
+                  return (
+                    <div key={link.path} className="relative group py-6">
+                      <Link to={link.path} className={`flex items-center gap-1 transition-colors ${isActive ? 'text-[var(--primary)] font-medium' : 'text-foreground hover:text-[var(--primary)]'}`}>
+                        {link.label}
+                        <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
+                        <span className={`absolute bottom-5 left-0 h-0.5 bg-gradient-to-r from-[var(--primary)] to-transparent transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                      </Link>
+                      
+                      {/* Menu Con */}
+                      <div className="absolute left-0 top-full -mt-2 w-56 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 bg-[#1A1528] border border-[var(--primary)]/30 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
+                        <Link to="/products" state={{ tab: 'custom' }} className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">
+                          {lang === 'vi' ? 'Sản xuất Custom' : 'Custom Products'}
+                        </Link>
+                        <Link to="/products" state={{ tab: 'ready' }} className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium border-t border-[var(--border)] transition-colors">
+                          {lang === 'vi' ? 'Sản phẩm Sẵn Hàng' : 'Ready-made Products'}
+                        </Link>
+                      </div>
+                    </div>
+                  );
+                }
+
+                // CÁC NÚT BÌNH THƯỜNG KHÁC
                 return (
-                  <Link key={link.path} to={link.path} className={`relative group transition-colors ${isActive ? 'text-[var(--primary)] font-medium' : 'text-foreground hover:text-[var(--primary)]'}`}>
+                  <Link key={link.path} to={link.path} className={`relative group transition-colors py-6 ${isActive ? 'text-[var(--primary)] font-medium' : 'text-foreground hover:text-[var(--primary)]'}`}>
                     {link.label}
-                    <span className={`absolute -bottom-1 left-0 h-0.5 bg-gradient-to-r from-[var(--primary)] to-transparent transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
+                    <span className={`absolute bottom-5 left-0 h-0.5 bg-gradient-to-r from-[var(--primary)] to-transparent transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
                   </Link>
                 );
               })}
             </div>
 
             <div className="hidden md:flex items-center space-x-4">
-              {/* Nút chuyển đổi ngôn ngữ */}
               <button 
                 onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')}
                 className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#1A1528] border border-[var(--border)] text-[var(--silver-gray)] hover:text-white hover:border-[var(--primary)] transition-all cursor-pointer"
@@ -97,7 +120,7 @@ export function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div initial={{ opacity: 0, x: '100%' }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: '100%' }} transition={{ type: 'spring', damping: 25 }} className="fixed inset-y-0 right-0 z-40 w-full max-w-sm bg-[var(--card)] border-l border-[var(--border)] shadow-2xl md:hidden">
-            <div className="flex flex-col h-full pt-24 pb-8 px-6 space-y-6">
+            <div className="flex flex-col h-full pt-24 pb-8 px-6 space-y-6 overflow-y-auto">
               <div className="flex justify-end mb-4">
                 <button onClick={() => setLang(lang === 'vi' ? 'en' : 'vi')} className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#1A1528] border border-[var(--border)] text-white cursor-pointer">
                   <Globe className="w-4 h-4" />
@@ -111,6 +134,17 @@ export function Navbar() {
                     <Link to={link.path} onClick={() => setIsMobileMenuOpen(false)} className={`block text-2xl font-medium transition-colors ${isActive ? 'text-[var(--primary)]' : 'text-foreground hover:text-[var(--primary)]'}`}>
                       {link.label}
                     </Link>
+                    {/* Thêm link phụ cho mobile nếu là menu Sản Phẩm */}
+                    {link.path === '/products' && (
+                      <div className="mt-3 ml-4 flex flex-col gap-3 border-l-2 border-[var(--border)] pl-4">
+                        <Link to="/products" state={{ tab: 'custom' }} onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">
+                          {lang === 'vi' ? 'Custom' : 'Custom'}
+                        </Link>
+                        <Link to="/products" state={{ tab: 'ready' }} onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">
+                          {lang === 'vi' ? 'Sẵn Hàng' : 'Ready-made'}
+                        </Link>
+                      </div>
+                    )}
                   </motion.div>
                 );
               })}

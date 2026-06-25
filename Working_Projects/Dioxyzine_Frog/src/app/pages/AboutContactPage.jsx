@@ -92,7 +92,6 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* ĐƯA NÚT SOCIAL MEDIA LÊN ĐẦU TIÊN CỦA THÂN TRANG THEO YÊU CẦU */}
       <section className="py-12 bg-[#09090B] border-b border-[var(--border)] text-center">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-white mb-6 font-heading tracking-wide">{t.socialHead}</h2>
@@ -107,7 +106,7 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* CÂU CHUYỆN */}
+      {/* STORY */}
       <section className="py-24 bg-transparent relative z-10">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <div>
@@ -127,7 +126,7 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* CÁC BƯỚC QUY TRÌNH */}
+      {/* STEPS */}
       <section className="py-24 bg-transparent border-t border-[var(--border)]">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-16">

@@ -8,7 +8,7 @@ export function ProductProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // API Link từ Google Sheets của bro
+    // API Link
     const API_URL = 'https://script.google.com/macros/s/AKfycbyH0YC_0k5BqYHW1gvftYAjvxmu3CNoBLzHmDur9-s92EIUcePQpSU43tfXgpLs-CiA/exec';
 
     fetch(API_URL)

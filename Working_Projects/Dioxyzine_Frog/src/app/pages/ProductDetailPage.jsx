@@ -99,7 +99,7 @@ export function ProductDetailPage() {
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* THANH ĐIỀU HƯỚNG NEXT / PREV SẢN PHẨM */}
+        {/* next/prev navbar */}
         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
           <Link to="/products" className="inline-flex items-center gap-2 text-[var(--silver-gray)] hover:text-[var(--primary)] transition-colors font-medium">
             <ChevronLeft className="w-4 h-4" />
@@ -119,7 +119,7 @@ export function ProductDetailPage() {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          {/* ẢNH */}
+          {/* image */}
           <div className="space-y-4">
             <motion.div layoutId={`product-${id}`} className="relative aspect-square rounded-3xl overflow-hidden bg-[var(--card)] shadow-[0_0_30px_rgba(139,114,190,0.15)] border border-[var(--border)] group">
               {images.length > 0 ? (
@@ -145,7 +145,7 @@ export function ProductDetailPage() {
             )}
           </div>
 
-          {/* CẤU HÌNH */}
+          {/* details */}
           <div className="space-y-6">
             <div>
               <span className="inline-block px-3 py-1 rounded-full bg-[#1A1528] border border-[var(--border)] text-xs font-medium text-[var(--primary)] mb-3 uppercase tracking-wider">

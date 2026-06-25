@@ -26,7 +26,7 @@ export default function App() {
         <BrowserRouter>
           <ScrollToTop />
           
-          {/* Hiệu ứng Floating Elements mờ ảo (Ngôi sao/Tim) chạy nền cho toàn web */}
+          {/* floating elements */}
           <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20 mix-blend-screen">
             <motion.img 
               src={elements} 
