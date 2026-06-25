@@ -1,12 +1,24 @@
-/* RESET */
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: hidden; }
+/* =========================================
+   1. RESET & CƠ BẢN
+   ========================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-/* DESKTOP BACKGROUND */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  overflow: hidden; /* Ẩn thanh cuộn của trình duyệt để giống Desktop thật */
+}
+
+/* =========================================
+   2. DESKTOP & HÌNH NỀN
+   ========================================= */
 .desktop-environment {
   width: 100vw;
   height: 100vh;
-  background-image: url('./assets/kuromitheme.png');
+  background-image: url('./assets/kuromitheme.png'); /* Đảm bảo file ảnh ở đúng thư mục này */
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
@@ -15,7 +27,9 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: h
   flex-direction: column;
 }
 
-/* SHORTCUTS ICONS */
+/* =========================================
+   3. ICONS (SHORTCUTS) TRÊN MÀN HÌNH
+   ========================================= */
 .shortcut-grid {
   display: flex;
   flex-direction: column;
@@ -36,79 +50,38 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: h
   transition: background-color 0.2s;
 }
 
-.icon:hover { background-color: rgba(163, 116, 213, 0.2); }
+.icon:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
 
-.icon-img { font-size: 3rem; margin-bottom: 5px; }
+.icon-img {
+  font-size: 3rem;
+  margin-bottom: 5px;
+}
 
-.icon-label { 
+.icon-label {
   color: white;
-  font-weight: bold; 
-  font-size: 1rem; 
-  /* Tạo viền đen và bóng mờ tím xung quanh chữ để dễ đọc */
-  text-shadow: 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(163, 116, 213, 0.9); 
-  text-align: center; 
+  font-weight: bold;
+  font-size: 1rem;
+  /* Viền và bóng mờ giúp chữ nổi bần bật trên nền nhiều chi tiết */
+  text-shadow: 1px 1px 3px rgba(0,0,0,0.8), 0 0 8px rgba(163, 116, 213, 0.9);
+  text-align: center;
   margin-top: 5px;
- }
-
-/* WINDOW FRAME 16:9 */
-.window-wrapper {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 80vw;
-  max-width: 1600px;
-  aspect-ratio: 16 / 9; /* Tỉ lệ màn hình chơi game */
-  background: white;
-  border: 2px solid #A374D5;
-  border-radius: 8px;
-  box-shadow: 0 15px 35px rgba(0,0,0,0.2);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  z-index: 100;
 }
 
-.window-header {
-  height: 35px;
-  background: #A374D5;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0 15px;
-  color: white;
-  user-select: none;
-}
-
-.window-title { font-weight: bold; font-size: 0.9rem; letter-spacing: 1px; }
-
-.close-btn {
-  background: none;
-  border: none;
-  color: white;
-  font-size: 1.5rem;
-  cursor: pointer;
-  line-height: 1;
-}
-.close-btn:hover { color: #ff4757; }
-
-.window-body {
-  flex: 1;
-  overflow-y: auto;
-  background: #FFF;
-}
-
-/* TASKBAR */
+/* =========================================
+   4. TASKBAR (THANH TÁC VỤ KÍNH MỜ)
+   ========================================= */
 .taskbar {
   height: 50px;
-  background: rgba(255, 255, 255, 0.2); /* Cho trong suốt bớt đi để lộ ảnh nền */
-  backdrop-filter: blur(12px); /* Tăng độ làm mờ kính */
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-top: 1px solid rgba(255, 255, 255, 0.5); /* Cạnh kính lấp lánh */
+  border-top: 1px solid rgba(255, 255, 255, 0.5);
   display: flex;
   align-items: center;
   padding: 0 20px;
-  z-index: 1000;
+  z-index: 1000; /* Đảm bảo Taskbar luôn nằm trên cùng */
 }
 
 .start-btn {
@@ -116,5 +89,167 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; overflow: h
   cursor: pointer;
   padding: 5px 10px;
   border-radius: 5px;
+  transition: background 0.2s;
 }
-.start-btn:hover { background: rgba(163, 116, 213, 0.2); }
+
+.start-btn:hover {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+/* =========================================
+   5. GIAO DIỆN CỬA SỔ (WINDOW SHELL)
+   ========================================= */
+.window-wrapper {
+  position: absolute;
+  width: 80vw;
+  max-width: 1200px;
+  aspect-ratio: 16 / 9;
+  background: #181818; /* Nền viền màu tối ngầu */
+  border: 1px solid #333;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: box-shadow 0.2s, border-color 0.2s;
+}
+
+/* Hiệu ứng phát sáng nhẹ khi click vào App */
+.window-wrapper.focused {
+  border-color: #A374D5;
+  box-shadow: 0 15px 40px rgba(163, 116, 213, 0.4);
+}
+
+.window-header {
+  height: 40px;
+  background: #2D2D2D;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0 0 15px; /* Bỏ padding bên phải để nút chạm viền */
+  color: #E0E0E0;
+  user-select: none;
+  cursor: grab;
+}
+
+.window-header:active {
+  cursor: grabbing;
+}
+
+.window-title-container {
+  display: flex;
+  align-items: center;
+}
+
+.window-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+}
+
+/* =========================================
+   6. CỤM 3 NÚT ĐIỀU KHIỂN (MACOS STYLE)
+   ========================================= */
+.window-controls-win {
+  display: flex;
+  height: 100%;
+}
+
+.control-btn-win {
+  background: transparent;
+  border: none;
+  color: #E0E0E0;
+  width: 45px;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  /* Chỉnh size chữ lớn hơn một tí để icon Windows hiện rõ */
+  font-size: 1.1rem; 
+  transition: background-color 0.1s; /* Windows thường đổi màu rất nhanh */
+}
+
+/* Hiệu ứng hover cho nút Thu nhỏ & Phóng to */
+.control-btn-win.minimize:hover,
+.control-btn-win.maximize:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Hiệu ứng hover riên cho nút X: Phải đỏ chót mới chuẩn Windows! */
+.control-btn-win.close:hover {
+  background-color: #E81123; 
+  color: white;
+}
+
+.control-btn-win.maximize {
+  font-size: 0.9rem;
+}
+
+
+/* =========================================
+   7. PHẦN RUỘT MÀN HÌNH ĐEN CHỜ NỘI DUNG
+   ========================================= */
+.window-body {
+  flex: 1;
+  background-color: #0F0F0F; /* Đen tuyền */
+  color: #888;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: monospace;
+}
+
+/* =========================================
+   8. HIỆU ỨNG PHÓNG TO (MAXIMIZE)
+   ========================================= */
+/* Khi class maximized được gọi, nó sẽ ghi đè đống style cũ */
+.window-wrapper.maximized {
+  width: 100vw !important;
+  height: calc(100vh - 50px) !important; 
+  max-width: none !important;
+  top: 0 !important;
+  left: 0 !important;
+  transform: none !important; 
+  border-radius: 0;
+  border: none;
+  z-index: 500 !important; /* Thấp hơn Taskbar (1000) */
+}
+
+/* =========================================
+   9. TASKBAR ITEMS
+   ========================================= */
+.taskbar-apps {
+  display: flex;
+  gap: 10px;
+  margin-left: 20px;
+  height: 100%;
+  align-items: center;
+}
+
+.taskbar-item {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: all 0.2s;
+  border-bottom: 3px solid transparent; /* Viền dưới trong suốt */
+}
+
+.taskbar-item:hover {
+  background-color: rgba(255, 255, 255, 0.3);
+}
+
+/* App nào đang Focus thì Taskbar sáng lên, hiện vạch dưới đáy */
+.taskbar-item.active {
+  background-color: rgba(255, 255, 255, 0.4);
+  border-bottom: 3px solid #A374D5;
+}
+
+.taskbar-icon-small {
+  font-size: 1.5rem;
+}

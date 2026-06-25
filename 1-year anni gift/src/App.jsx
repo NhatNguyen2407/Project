@@ -4,7 +4,7 @@ import WindowFrame from './components/Window/WindowFrame.jsx';
 import './App.css';
 
 const DesktopEnvironment = () => {
-  const { openApps, openApp } = useContext(WindowsContext);
+  const { openApps, openApp, focusedApp, minimizedApps, minimizeApp } = useContext(WindowsContext);
 
   const shortcuts = [
     { id: 'intro', title: 'Opening', icon: '💌' },
@@ -28,10 +28,7 @@ const DesktopEnvironment = () => {
       {/* Render các cửa sổ đang mở */}
       {openApps.includes('intro') && (
         <WindowFrame title="Opening Message" appID="intro">
-          <div style={{ padding: '20px' }}>
-            <h2>Thư mở đầu...</h2>
-            <p>Nội dung bức thư sẽ nằm ở đây.</p>
-          </div>
+          <p>Loading module intro...</p>
         </WindowFrame>
       )}
 
@@ -49,6 +46,35 @@ const DesktopEnvironment = () => {
       {/* Taskbar ở dưới cùng */}
       <div className="taskbar">
         <div className="start-btn">💜</div>
+        
+        {/* KHU VỰC HIỆN APP ĐANG MỞ (WINDOWS TASKBAR STYLE) */}
+        <div className="taskbar-apps">
+          {openApps.map(appID => {
+            // Lấy thông tin app từ mảng shortcuts để lấy icon
+            const appInfo = shortcuts.find(s => s.id === appID);
+            if (!appInfo) return null;
+
+            const isFocused = focusedApp === appID;
+            const isMinimized = minimizedApps.includes(appID);
+
+            return (
+              <div 
+                key={appID}
+                className={`taskbar-item ${(isFocused && !isMinimized) ? 'active' : ''}`}
+                onClick={() => {
+                  if (isFocused && !isMinimized) {
+                    minimizeApp(appID); // Đang mở thì thu nhỏ
+                  } else {
+                    openApp(appID); // Bị thu nhỏ hoặc chìm xuống dưới thì gọi lên
+                  }
+                }}
+                title={appInfo.title}
+              >
+                <span className="taskbar-icon-small">{appInfo.icon}</span>
+              </div>
+            );
+          })}
+        </div>
       </div>
     </div>
   );
