@@ -1,26 +1,22 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
 
 export function ProductCard({ id, title, image, basePriceObj, moq, category, isPopular, isNew, pricingType }) {
-  const { lang } = useLanguage();
+  // Ưu tiên lấy title tiếng Anh (nếu DB cũ vẫn còn object title.en), ngược lại lấy chuỗi title luôn
+  const displayTitle = title?.en || title || '';
 
-  const displayTitle = title?.[lang] || title || '';
-
+  // Format tiền tệ chỉ hiển thị giá trị USD
   const formatCurrency = (val) => {
-    if (!val) return lang === 'vi' ? '0đ' : '$0.00';
-    if (lang === 'en') {
-      return `$${Number(val).toFixed(2)}`;
-    }
-    return new Intl.NumberFormat('vi-VN').format(val * 1000) + 'đ';
+    if (!val) return '$0.00';
+    return `$${Number(val).toFixed(2)}`;
   };
 
-  // Trích xuất giá gốc dựa trên ngôn ngữ hiện tại
-  const basePrice = basePriceObj?.[lang]?.[0] || 0;
+  // Trích xuất giá gốc dựa trên dữ liệu hiện tại từ Google Sheets (chỉ cần lấy index 0)
+  const basePrice = basePriceObj?.[0] || 0;
 
   const displayPrice = (pricingType === 'contact' || !basePrice) 
-    ? (lang === 'vi' ? 'Liên hệ' : 'Inquiry') 
+    ? 'Inquiry' 
     : formatCurrency(basePrice);
 
   return (
@@ -41,7 +37,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, isP
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           {isPopular && (
             <span className="px-3 py-1 bg-[var(--primary)] text-white text-xs font-bold rounded-full shadow-[0_0_10px_rgba(139,114,190,0.5)]">
-              {lang === 'vi' ? 'Phổ biến' : 'Popular'}
+              Popular
             </span>
           )}
         </div>
@@ -61,7 +57,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, isP
         <div className="mt-auto pt-4 border-t border-[var(--border)] flex items-end justify-between">
           <div>
             <p className="text-xs text-[var(--muted-foreground)] mb-1">
-              {lang === 'vi' ? 'Giá chỉ từ' : 'Starts at'}
+              Starts at
             </p>
             <p className="text-xl font-bold text-[var(--primary)]">
               {displayPrice}
@@ -70,14 +66,14 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, isP
           <div className="text-right">
             <p className="text-xs text-[var(--muted-foreground)] mb-1">MOQ</p>
             <p className="text-sm font-medium text-white">
-              {moq} {lang === 'vi' ? 'cái' : 'pcs'}
+              {moq} pcs
             </p>
           </div>
         </div>
 
         <Link to={`/product/${id}`} className="mt-6">
           <button className="w-full py-3 rounded-xl bg-[var(--cyber-black)] border border-[var(--border)] text-white font-semibold flex items-center justify-center gap-2 group-hover:bg-[var(--primary)] group-hover:border-[var(--primary)] transition-all cursor-pointer">
-            {lang === 'vi' ? 'Xem Chi Tiết' : 'View Details'}
+            View Details
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         </Link>

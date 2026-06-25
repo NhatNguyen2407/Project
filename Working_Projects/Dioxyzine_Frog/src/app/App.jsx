@@ -13,7 +13,6 @@ import { AboutContactPage } from './pages/AboutContactPage';
 import { TermsShippingPage } from './pages/TermsShippingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { motion } from 'motion/react';
-import { LanguageProvider } from './context/LanguageContext';
 import { ProductProvider } from './context/ProductContext';
 
 //import image
@@ -21,7 +20,6 @@ import elements from '../assets/Elements.PNG'
 
 export default function App() {
   return (
-    <LanguageProvider>
       <ProductProvider>
         <BrowserRouter>
           <ScrollToTop />
@@ -63,6 +61,5 @@ export default function App() {
           </div>
         </BrowserRouter>
       </ProductProvider>
-    </LanguageProvider>
   );
 }

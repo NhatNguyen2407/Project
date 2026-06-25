@@ -1,10 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ZoomIn, ChevronLeft, ChevronRight } from 'lucide-react';
-import { useLanguage } from '../context/LanguageContext';
 import { useProducts } from '../context/ProductContext';
-
-
 
 const SmartImage = ({ src, alt, className }) => {
   const [currentSrc, setCurrentSrc] = useState(src);
@@ -36,7 +33,6 @@ const SmartImage = ({ src, alt, className }) => {
 };
 
 export function GalleryPage() {
-  const { lang } = useLanguage();
   const { products, loading } = useProducts();
   
   const [selectedIndex, setSelectedIndex] = useState(null);
@@ -46,19 +42,21 @@ export function GalleryPage() {
     if (!products || products.length === 0) return [];
     let items = [];
     products.forEach(product => {
+      const displayTitle = product.title || 'Product';
+      
       if (product.image) {
-        items.push({ src: product.image, alt: product.title[lang] || product.title.vi, category: product.category[0] || 'Customize' });
+        items.push({ src: product.image, alt: displayTitle, category: product.category[0] || 'Customize' });
       }
       if (product.images && product.images.length > 0) {
         product.images.forEach((img, idx) => {
           if (img !== product.image) {
-            items.push({ src: img, alt: `${product.title[lang] || product.title.vi} - ${idx + 1}`, category: product.category[0] || 'Customize' });
+            items.push({ src: img, alt: `${displayTitle} - ${idx + 1}`, category: product.category[0] || 'Customize' });
           }
         });
       }
     });
     return items;
-  }, [products, lang]);
+  }, [products]);
 
   const filters = ['All', ...new Set(galleryItems.map(item => item.category))];
   const filteredItems = activeFilter === 'All' ? galleryItems : galleryItems.filter(item => item.category === activeFilter);
@@ -80,16 +78,16 @@ export function GalleryPage() {
         
         <div className="text-center mb-12">
           <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
-            {lang === 'vi' ? 'Thư Viện Ảnh' : 'Gallery'}
+            Gallery
           </h1>
           <p className="text-lg text-[var(--muted-foreground)]">
-            {lang === 'vi' ? 'Khám phá các sản phẩm thực tế đã được sản xuất tại xưởng' : 'Explore actual products manufactured at our workshop'}
+            Explore actual products manufactured at our workshop
           </p>
         </div>
 
         {loading ? (
           <div className="text-center py-24 text-[var(--primary)] font-bold text-xl animate-pulse">
-            Đang đồng bộ thư viện ảnh... (Loading gallery...)
+            Loading gallery...
           </div>
         ) : (
           <>
@@ -107,7 +105,7 @@ export function GalleryPage() {
                       : 'bg-[var(--card)] text-[var(--silver-gray)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-white'
                   }`}
                 >
-                  {filter === 'All' ? (lang === 'vi' ? 'Tất Cả' : 'All') : filter}
+                  {filter}
                 </button>
               ))}
             </div>

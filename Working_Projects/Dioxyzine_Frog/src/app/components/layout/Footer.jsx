@@ -1,11 +1,9 @@
 import { Link } from 'react-router';
-import { useLanguage } from '../../context/LanguageContext';
 
 //import image
 import Logo from '../../../assets/Logo.png';
 
 export function Footer() {
-  const { lang } = useLanguage();
   const currentYear = new Date().getFullYear();
 
   return (
@@ -28,26 +26,24 @@ export function Footer() {
               </span>
             </Link>
             <p className="text-sm leading-relaxed text-[var(--muted-foreground)] mt-2">
-              {lang === 'vi'
-                ? 'Hiện thực hóa mọi ý tưởng thiết kế của bạn thành những sản phẩm nhồi bông thủ công chất lượng cao nhất do chúng tôi tận tâm gia công.'
-                : 'Transforming all your creative layouts and art concepts into premium high-quality handmade plush items.'}
+              Transforming all your creative layouts and art concepts into premium high-quality handmade plush items.
             </p>
           </div>
 
-          {/* Dịch vụ (Services) */}
+          {/* Services */}
           <div>
             <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
-              {lang === 'vi' ? 'Dịch vụ của chúng tôi' : 'Our Services'}
+              Our Services
             </h4>
             <ul className="space-y-2 text-sm">
               <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
-                {lang === 'vi' ? 'Gấu bông custom' : 'Custom made plushies'}
+                Custom made plushies
               </li>
               <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
-                {lang === 'vi' ? 'Merch fanmade' : 'Fan merchandise'}
+                Fan merchandise
               </li>
               <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
-                {lang === 'vi' ? 'Sản xuất số lượng lớn' : 'Bulk orders'}
+                Bulk orders
               </li>
             </ul>
           </div>
@@ -55,33 +51,33 @@ export function Footer() {
           {/* Quick Links */}
           <div>
             <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
-              {lang === 'vi' ? 'Liên Kết Nhanh' : 'Quick Links'}
+              Quick Links
             </h4>
             <div className="grid grid-cols-2 gap-2 text-sm">
               <Link to="/products" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                {lang === 'vi' ? 'Sản Phẩm' : 'Products'}
+                Products
               </Link>
               <Link to="/pricing" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                {lang === 'vi' ? 'Bảng Giá' : 'Pricing'}
+                Pricing
               </Link>
               <Link to="/gallery" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                {lang === 'vi' ? 'Thư Viện' : 'Gallery'}
+                Gallery
               </Link>
               <Link to="/terms" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                {lang === 'vi' ? 'Điều Khoản' : 'Terms'}
+                Terms
               </Link>
               <Link to="/inquiry" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                {lang === 'vi' ? 'Báo Giá' : 'Inquiry'}
+                Inquiry
               </Link>
               <Link to="/about" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                {lang === 'vi' ? 'Liên Hệ' : 'Contact'}
+                Contact
               </Link>
             </div>
           </div>
 
         </div>
 
-        {/* Bản Quyền */}
+        {/* Copyright */}
         <div className="mt-12 pt-8 border-t border-[var(--border)]/30 text-center text-xs text-[var(--muted-foreground)]">
           <p>&copy; {/*currentYear*/}2023 Dioxyzine Frog. All rights reserved.</p>
         </div>

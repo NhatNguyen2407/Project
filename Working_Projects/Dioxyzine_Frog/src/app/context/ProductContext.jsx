@@ -19,12 +19,13 @@ export function ProductProvider({ children }) {
           
           return {
             id: item.id,
-            title: { vi: item.title_vi, en: item.title_en },
+            // Ưu tiên lấy text tiếng Anh, nếu rỗng thì dự phòng lấy các trường cũ
+            title: item.title_en || item.title_vi || item.title || '',
             category: item.category ? item.category.split(',').map(c => c.trim()) : [],
             moq: Number(item.moq) || 11,
             pricingType: item.pricingType,
-            description: { vi: item.desc_vi, en: item.desc_en },
-            note: { vi: item.note_vi, en: item.note_en },
+            description: item.desc_en || item.desc_vi || item.desc || '',
+            note: item.note_en || item.note_vi || item.note || '',
             image: item.image_cover,
             images: item.images_gallery ? item.images_gallery.split(',').map(i => i.trim()).filter(i => i) : [],
             sizes: pricing.sizes,
@@ -36,7 +37,7 @@ export function ProductProvider({ children }) {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Lỗi tải dữ liệu từ Google Sheets:", err);
+        console.error("Error fetching data from Google Sheets:", err);
         setLoading(false);
       });
   }, []);
