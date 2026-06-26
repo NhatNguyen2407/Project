@@ -1,5 +1,5 @@
 import { motion } from 'motion/react';
-import { Heart, Sparkles, Users, Award, Mail, MapPin, Clock, Facebook, Instagram } from 'lucide-react';
+import { Heart, Sparkles, Users, Award, Mail, MapPin, Clock } from 'lucide-react';
 import { useState } from 'react';
 
 // import image
@@ -35,15 +35,19 @@ export function AboutContactPage() {
         </div>
       </section>
 
+      {/* SOCIAL SECTION - Đã xóa icon, giữ khung màu */}
       <section className="py-12 bg-[#09090B] border-b border-[var(--border)] text-center">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-white mb-6 font-heading tracking-wide">Follow us now on:</h2>
           <div className="flex flex-wrap justify-center gap-6">
-            <a href="https://facebook.com/dioxyzinefrog" target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 px-8 py-4 rounded-full bg-[#1877F2] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg">
-              <Facebook className="w-6 h-6" /> Facebook
+            <a href="https://facebook.com/dioxyzinefrog" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center px-10 py-4 rounded-full bg-[#1877F2] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg min-w-[160px]">
+              Facebook
             </a>
-            <a href="https://instagram.com/dioxyzinefrog.print/" className="flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg">
-              <Instagram className="w-6 h-6" /> Instagram
+            <a href="https://instagram.com/dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center px-10 py-4 rounded-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg min-w-[160px]">
+              Instagram
+            </a>
+            <a href="https://www.threads.net/@dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center px-10 py-4 rounded-full bg-[#101010] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg border border-white/20 min-w-[160px]">
+              Threads
             </a>
           </div>
         </div>
@@ -128,10 +132,11 @@ export function AboutContactPage() {
               <h3 className="font-semibold mb-2 text-white">Location</h3>
               <p className="font-medium text-[var(--muted-foreground)]">Hanoi, Vietnam</p>
             </div>
-            <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 flex flex-col items-center justify-center">
               <Clock className="w-10 h-10 text-[var(--primary)] mx-auto mb-4" />
               <h3 className="font-semibold mb-2 text-white">Business Hours</h3>
-              <p className="font-medium text-[var(--muted-foreground)]">Mon - Fri: 9AM - 6PM</p>
+              <p className="font-medium text-[var(--muted-foreground)]">Mon - Sat: 10:00 AM - 10:00 PM</p>
+              <p className="text-sm text-[var(--silver-gray)] italic mt-1">Sun: Flexible (Online when available)</p>
             </div>
           </div>
         </div>

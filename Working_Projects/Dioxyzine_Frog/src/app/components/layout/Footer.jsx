@@ -11,7 +11,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           
-          {/* Brand & Logo */}
+          {/* CỘT 1: Brand & Logo */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-3 group w-fit">
               <div className="relative">
@@ -30,56 +30,94 @@ export function Footer() {
             </p>
           </div>
 
-          {/* Services */}
-          <div>
-            <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
-              Our Services
-            </h4>
-            <ul className="space-y-2 text-sm">
-              <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
-                Custom made plushies
-              </li>
-              <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
-                Fan merchandise
-              </li>
-              <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
-                Bulk orders
-              </li>
-            </ul>
+          {/* CỘT 2: Our Services & Business Hours */}
+          <div className="space-y-8">
+            <div>
+              <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+                Our Services
+              </h4>
+              <ul className="space-y-2 text-sm">
+                <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
+                  Custom made plushies
+                </li>
+                <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
+                  Fan merchandise
+                </li>
+                <li className="text-[var(--muted-foreground)] hover:text-white transition-colors cursor-pointer">
+                  Bulk orders
+                </li>
+              </ul>
+            </div>
+
+            <div>
+              <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+                Business Hours
+              </h4>
+              <ul className="space-y-3 text-sm text-[var(--muted-foreground)]">
+                <li className="flex justify-between items-center border-b border-[var(--border)]/50 pb-2">
+                  <span>Mon - Sat:</span>
+                  <span className="text-white font-medium">10:00 AM - 10:00 PM</span>
+                </li>
+                <li className="flex justify-between items-center pt-1">
+                  <span>Sunday:</span>
+                  <span className="text-white font-medium">Flexible</span>
+                </li>
+              </ul>
+            </div>
           </div>
 
-          {/* Quick Links */}
-          <div>
-            <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
-              Quick Links
-            </h4>
-            <div className="grid grid-cols-2 gap-2 text-sm">
-              <Link to="/products" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                Products
-              </Link>
-              <Link to="/pricing" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                Pricing
-              </Link>
-              <Link to="/gallery" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                Gallery
-              </Link>
-              <Link to="/terms" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                Terms
-              </Link>
-              <Link to="/inquiry" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                Inquiry
-              </Link>
-              <Link to="/about" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                Contact
-              </Link>
+          {/* CỘT 3: Quick Links & Media (Đã nâng cấp nút Media) */}
+          <div className="space-y-8">
+            <div>
+              <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+                Quick Links
+              </h4>
+              <div className="grid grid-cols-2 gap-2 text-sm">
+                <Link to="/products" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                  Products
+                </Link>
+                <Link to="/pricing" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                  Pricing
+                </Link>
+                <Link to="/gallery" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                  Gallery
+                </Link>
+                <Link to="/terms" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                  Terms
+                </Link>
+                <Link to="/inquiry" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                  Inquiry
+                </Link>
+                <Link to="/about" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
+                  Contact
+                </Link>
+              </div>
+            </div>
+
+            {/* Cột Media: Nút vuông vắn đồng bộ với About Page */}
+            <div>
+              <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
+                Media
+              </h4>
+              <div className="flex flex-col gap-3">
+                <a href="https://facebook.com/dioxyzinefrog" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center py-2.5 px-4 rounded-full bg-[#1877F2] text-white font-bold text-sm hover:scale-105 transition-transform shadow-md w-36">
+                  Facebook
+                </a>
+                <a href="https://instagram.com/dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center py-2.5 px-4 rounded-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white font-bold text-sm hover:scale-105 transition-transform shadow-md w-36">
+                  Instagram
+                </a>
+                <a href="https://www.threads.net/@dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center py-2.5 px-4 rounded-full bg-[#101010] text-white font-bold text-sm border border-white/20 hover:scale-105 transition-transform shadow-md w-36">
+                  Threads
+                </a>
+              </div>
             </div>
           </div>
 
         </div>
 
-        {/* Copyright */}
+        {/* Bản Quyền */}
         <div className="mt-12 pt-8 border-t border-[var(--border)]/30 text-center text-xs text-[var(--muted-foreground)]">
-          <p>&copy; {/*currentYear*/}2023 Dioxyzine Frog. All rights reserved.</p>
+          <p>&copy; {currentYear} Dioxyzine Frog. All rights reserved.</p>
         </div>
       </div>
     </footer>
