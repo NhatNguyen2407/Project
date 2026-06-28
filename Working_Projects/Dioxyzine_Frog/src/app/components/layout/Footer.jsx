@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import Logo from '../../../assets/Logo.png';
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
+
 
   return (
     <footer className="bg-[#040406] border-t border-[var(--border)] relative z-10 text-[var(--silver-gray)]">
@@ -56,7 +56,7 @@ export function Footer() {
               <ul className="space-y-3 text-sm text-[var(--muted-foreground)]">
                 <li className="flex justify-between items-center border-b border-[var(--border)]/50 pb-2">
                   <span>Mon - Sat:</span>
-                  <span className="text-white font-medium">10:00 AM - 10:00 PM</span>
+                  <span className="text-white font-medium">10:00 AM - 10:00 PM (GMT+7)</span>
                 </li>
                 <li className="flex justify-between items-center pt-1">
                   <span>Sunday:</span>
@@ -106,9 +106,6 @@ export function Footer() {
                 <a href="https://instagram.com/dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center py-2.5 px-4 rounded-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white font-bold text-sm hover:scale-105 transition-transform shadow-md w-36">
                   Instagram
                 </a>
-                <a href="https://www.threads.net/@dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center py-2.5 px-4 rounded-full bg-[#101010] text-white font-bold text-sm border border-white/20 hover:scale-105 transition-transform shadow-md w-36">
-                  Threads
-                </a>
               </div>
             </div>
           </div>
@@ -117,7 +114,7 @@ export function Footer() {
 
         {/* Bản Quyền */}
         <div className="mt-12 pt-8 border-t border-[var(--border)]/30 text-center text-xs text-[var(--muted-foreground)]">
-          <p>&copy; {currentYear} Dioxyzine Frog. All rights reserved.</p>
+          <p>&copy; 2024 Dioxyzine Frog. All rights reserved.</p>
         </div>
       </div>
     </footer>

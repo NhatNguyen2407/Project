@@ -14,7 +14,7 @@ import { TermsShippingPage } from './pages/TermsShippingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { motion } from 'motion/react';
 import { ProductProvider } from './context/ProductContext';
-import { FeedbackModal } from './components/FeedbackModal';
+import { FeedbackPage } from './pages/FeedbackPage';
 
 //import image
 import elements from '../assets/Elements.PNG'
@@ -46,8 +46,6 @@ export default function App() {
           <div className="min-h-screen relative z-10 bg-transparent text-foreground">
             <Navbar />
 
-            <FeedbackModal />
-
             <Routes>
               <Route path="/" element={<HomePage />} />
               <Route path="/products" element={<ProductsPage />} />
@@ -59,6 +57,7 @@ export default function App() {
               <Route path="/about" element={<AboutContactPage />} />
               <Route path="/contact" element={<AboutContactPage />} />
               <Route path="/terms" element={<TermsShippingPage />} />
+              <Route path="/feedback" element={<FeedbackPage />} />
               <Route path="*" element={<NotFoundPage />} />
             </Routes>
             <Footer />

@@ -9,7 +9,7 @@ export function ProductProvider({ children }) {
 
   useEffect(() => {
     // API Link
-    const API_URL = 'https://script.google.com/macros/s/AKfycbyH0YC_0k5BqYHW1gvftYAjvxmu3CNoBLzHmDur9-s92EIUcePQpSU43tfXgpLs-CiA/exec';
+    const API_URL = 'https://script.google.com/macros/s/AKfycbxx1R4bXW-lA-POuINT2ZMsSBwyB4MLvJX-LOMnnKO0SXjROEODheVkxO2W7mdkGBQR/exec';
 
     fetch(API_URL)
       .then(res => res.json())

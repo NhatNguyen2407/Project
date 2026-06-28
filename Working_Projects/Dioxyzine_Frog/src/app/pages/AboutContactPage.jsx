@@ -46,9 +46,6 @@ export function AboutContactPage() {
             <a href="https://instagram.com/dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center px-10 py-4 rounded-full bg-gradient-to-r from-[#F58529] via-[#DD2A7B] to-[#8134AF] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg min-w-[160px]">
               Instagram
             </a>
-            <a href="https://www.threads.net/@dioxyzinefrog.print" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center px-10 py-4 rounded-full bg-[#101010] text-white font-bold text-lg hover:scale-105 transition-transform shadow-lg border border-white/20 min-w-[160px]">
-              Threads
-            </a>
           </div>
         </div>
       </section>
@@ -135,7 +132,7 @@ export function AboutContactPage() {
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 flex flex-col items-center justify-center">
               <Clock className="w-10 h-10 text-[var(--primary)] mx-auto mb-4" />
               <h3 className="font-semibold mb-2 text-white">Business Hours</h3>
-              <p className="font-medium text-[var(--muted-foreground)]">Mon - Sat: 10:00 AM - 10:00 PM</p>
+              <p className="font-medium text-[var(--muted-foreground)]">Mon - Sat: 10:00 AM - 10:00 PM (GMT+7)</p>
               <p className="text-sm text-[var(--silver-gray)] italic mt-1">Sun: Flexible (Online when available)</p>
             </div>
           </div>
