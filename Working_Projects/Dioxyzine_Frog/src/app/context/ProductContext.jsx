@@ -3,13 +3,19 @@ import { pricingMatrix } from '../data/pricingMatrix';
 
 const ProductContext = createContext();
 
+const optimizeCloudinaryUrl = (url) => {
+  if (!url || typeof url !== 'string' || !url.includes('cloudinary.com')) return url;
+  if (url.includes('q_auto')) return url; 
+  return url.replace('/image/upload/', '/image/upload/q_auto,f_auto,w_600,c_limit/');
+};
+
 export function ProductProvider({ children }) {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // API Link
-    const API_URL = 'https://script.google.com/macros/s/AKfycbxx1R4bXW-lA-POuINT2ZMsSBwyB4MLvJX-LOMnnKO0SXjROEODheVkxO2W7mdkGBQR/exec';
+    // API
+    const API_URL = 'https://script.google.com/macros/s/AKfycbwuex1g0XqvFfM1lf79CqmZ_oBzRGTGBTt27pjduIw7ZeIROJmU6AA2oRfVXGW3JD-P/exec';
 
     fetch(API_URL)
       .then(res => res.json())
@@ -19,7 +25,6 @@ export function ProductProvider({ children }) {
           
           return {
             id: item.id,
-            // Ưu tiên lấy text tiếng Anh, nếu rỗng thì dự phòng lấy các trường cũ
             title: item.title_en || item.title_vi || item.title || '',
             category: item.category ? String(item.category).split(',').map(c => c.trim()) : [],
             moq: Number(item.moq) || 11,
@@ -27,11 +32,11 @@ export function ProductProvider({ children }) {
             description: item.desc_en || item.desc_vi || item.desc || '',
             note: item.note_en || item.note_vi || item.note || '',
             
-            // ĐÃ SỬA: Lấy đúng cột "image" từ Sheets, bọc dự phòng an toàn
-            image: item.image || '', 
+            //cover photo for poducts
+            image: optimizeCloudinaryUrl(item.image_cover || item.image || ''),
             
-            // ĐÃ SỬA: Ép kiểu về String trước khi split để chống lỗi sập web
-            images: item.images_gallery ? String(item.images_gallery).split(',').map(i => i.trim()).filter(i => i) : [],
+            // sub images in product
+            images: item.images_gallery ? String(item.images_gallery).split(',').map(i => optimizeCloudinaryUrl(i.trim())).filter(i => i) : [],
             
             sizes: pricing.sizes,
             priceBrackets: pricing.priceBrackets,

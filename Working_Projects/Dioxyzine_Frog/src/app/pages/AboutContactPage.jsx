@@ -35,7 +35,7 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* SOCIAL SECTION - Đã xóa icon, giữ khung màu */}
+      {/* SOCIAL SECTION*/}
       <section className="py-12 bg-[#09090B] border-b border-[var(--border)] text-center">
         <div className="max-w-4xl mx-auto px-4">
           <h2 className="text-2xl font-bold text-white mb-6 font-heading tracking-wide">Follow us now on:</h2>

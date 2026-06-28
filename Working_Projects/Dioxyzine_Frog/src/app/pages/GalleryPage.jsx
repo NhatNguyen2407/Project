@@ -16,7 +16,8 @@ const SmartImage = ({ src, alt, className }) => {
     if (retryCount < 3) {
       setTimeout(() => {
         setRetryCount((prev) => prev + 1);
-        setCurrentSrc(`${src}&retry=${retryCount + 1}`);
+        const separator = src.includes('?') ? '&' : '?';
+        setCurrentSrc(`${src}${separator}retry=${retryCount + 1}`);
       }, 1000);
     }
   };
@@ -37,20 +38,21 @@ export function GalleryPage() {
   
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [activeFilter, setActiveFilter] = useState('All');
+  
+  const [visibleCount, setVisibleCount] = useState(12);
 
   const galleryItems = useMemo(() => {
     if (!products || products.length === 0) return [];
     let items = [];
     products.forEach(product => {
       const displayTitle = product.title || 'Product';
-      
       if (product.image) {
-        items.push({ src: product.image, alt: displayTitle, category: product.category[0] || 'Customize' });
+        items.push({ src: product.image, alt: displayTitle, category: product.category?.[0] || 'Customize' });
       }
       if (product.images && product.images.length > 0) {
         product.images.forEach((img, idx) => {
           if (img !== product.image) {
-            items.push({ src: img, alt: `${displayTitle} - ${idx + 1}`, category: product.category[0] || 'Customize' });
+            items.push({ src: img, alt: `${displayTitle} - ${idx + 1}`, category: product.category?.[0] || 'Customize' });
           }
         });
       }
@@ -60,6 +62,9 @@ export function GalleryPage() {
 
   const filters = ['All', ...new Set(galleryItems.map(item => item.category))];
   const filteredItems = activeFilter === 'All' ? galleryItems : galleryItems.filter(item => item.category === activeFilter);
+  
+  const visibleItems = filteredItems.slice(0, visibleCount);
+  
   const selectedItem = selectedIndex !== null ? filteredItems[selectedIndex] : null;
 
   const handlePrev = (e) => {
@@ -70,6 +75,10 @@ export function GalleryPage() {
   const handleNext = (e) => {
     e.stopPropagation();
     setSelectedIndex((prev) => (prev === filteredItems.length - 1 ? 0 : prev + 1));
+  };
+
+  const handleLoadMore = () => {
+    setVisibleCount(prev => prev + 12); //add 12 images on load more click
   };
 
   return (
@@ -98,6 +107,7 @@ export function GalleryPage() {
                   onClick={() => {
                     setActiveFilter(filter);
                     setSelectedIndex(null);
+                    setVisibleCount(12); // visible only 12 images if change tab
                   }}
                   className={`px-6 py-2 rounded-full font-medium transition-all cursor-pointer ${
                     activeFilter === filter
@@ -110,9 +120,9 @@ export function GalleryPage() {
               ))}
             </div>
 
-            {/*MASONRY LAYOUT*/}
+            {/* MASONRY LAYOUT - Render visibleItems thay vì filteredItems */}
             <div className="columns-2 md:columns-3 lg:columns-4 gap-4 space-y-4">
-              {filteredItems.map((item, index) => (
+              {visibleItems.map((item, index) => (
                 <motion.div
                   key={index}
                   layoutId={`gallery-${index}`}
@@ -133,6 +143,18 @@ export function GalleryPage() {
                 </motion.div>
               ))}
             </div>
+            
+            {/* Load More */}
+            {visibleCount < filteredItems.length && (
+              <div className="mt-12 flex justify-center">
+                <button 
+                  onClick={handleLoadMore}
+                  className="px-8 py-3 rounded-full bg-transparent border-2 border-[var(--primary)] text-[var(--primary)] hover:bg-[var(--primary)] hover:text-white font-bold transition-all duration-300 shadow-[0_0_15px_rgba(139,114,190,0.3)] hover:shadow-[0_0_25px_rgba(139,114,190,0.6)] cursor-pointer"
+                >
+                  Load More
+                </button>
+              </div>
+            )}
           </>
         )}
       </div>

@@ -3,10 +3,8 @@ import { Link } from 'react-router';
 import { ArrowRight } from 'lucide-react';
 
 export function ProductCard({ id, title, image, basePriceObj, moq, category, isPopular, isNew, pricingType }) {
-  // Ưu tiên lấy title tiếng Anh (nếu DB cũ vẫn còn object title.en), ngược lại lấy chuỗi title luôn
   const displayTitle = title?.en || title || '';
 
-  // Format tiền tệ chỉ hiển thị giá trị USD
   const formatCurrency = (val) => {
     if (!val) return '$0.00';
     return `$${Number(val).toFixed(2)}`;
@@ -29,6 +27,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, isP
           <img
             src={image}
             alt={displayTitle}
+            loading="lazy"
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
           />
         ) : (
