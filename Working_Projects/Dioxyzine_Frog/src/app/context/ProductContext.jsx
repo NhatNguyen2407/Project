@@ -21,13 +21,18 @@ export function ProductProvider({ children }) {
             id: item.id,
             // Ưu tiên lấy text tiếng Anh, nếu rỗng thì dự phòng lấy các trường cũ
             title: item.title_en || item.title_vi || item.title || '',
-            category: item.category ? item.category.split(',').map(c => c.trim()) : [],
+            category: item.category ? String(item.category).split(',').map(c => c.trim()) : [],
             moq: Number(item.moq) || 11,
             pricingType: item.pricingType,
             description: item.desc_en || item.desc_vi || item.desc || '',
             note: item.note_en || item.note_vi || item.note || '',
-            image: item.image_cover,
-            images: item.images_gallery ? item.images_gallery.split(',').map(i => i.trim()).filter(i => i) : [],
+            
+            // ĐÃ SỬA: Lấy đúng cột "image" từ Sheets, bọc dự phòng an toàn
+            image: item.image || '', 
+            
+            // ĐÃ SỬA: Ép kiểu về String trước khi split để chống lỗi sập web
+            images: item.images_gallery ? String(item.images_gallery).split(',').map(i => i.trim()).filter(i => i) : [],
+            
             sizes: pricing.sizes,
             priceBrackets: pricing.priceBrackets,
             addons: pricing.addons
