@@ -1,11 +1,14 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, CheckCircle, Loader2, Star, MessageSquareQuote } from 'lucide-react';
+import { CheckCircle, Loader2, Star, MessageSquareQuote, AlertCircle, CheckCircle2 } from 'lucide-react';
 
 export function FeedbackPage() {
   const [status, setStatus] = useState('idle');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
+  
+  // Floating Toast
+  const [toast, setToast] = useState({ show: false, msg: '', type: '' });
 
   const [formData, setFormData] = useState({
     topic: 'Products / Plushies',
@@ -14,14 +17,50 @@ export function FeedbackPage() {
     email: ''
   });
 
-  const handleSubmit = (e) => {
+  const showToast = (msg, type) => {
+    setToast({ show: true, msg, type });
+    setTimeout(() => setToast({ show: false, msg: '', type: '' }), 3500);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // alert
+    if (rating === 0) {
+      showToast('Please select a star rating before submitting!', 'error');
+      return;
+    }
+    
+    if (!formData.message.trim()) {
+      showToast('Please fill in your feedback details!', 'error');
+      return;
+    }
+
     setStatus('loading');
     
-    // Nơi gắn API Google Sheets sau này
-    setTimeout(() => {
+    const payload = {
+      type: 'feedback',
+      name: formData.name,
+      email: formData.email,
+      rating: rating,
+      message: `[${formData.topic}] - ${formData.message}`
+    };
+
+    try {
+      await fetch('https://script.google.com/macros/s/AKfycbwuex1g0XqvFfM1lf79CqmZ_oBzRGTGBTt27pjduIw7ZeIROJmU6AA2oRfVXGW3JD-P/exec', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'text/plain;charset=utf-8',
+        },
+        body: JSON.stringify(payload),
+      });
+      showToast('Feedback submitted successfully! Thank you!', 'success');
       setStatus('success');
-    }, 1500);
+    } catch (error) {
+      console.error('Error sending feedback:', error);
+      showToast('Connection error. Please try again later!', 'error');
+      setStatus('idle');
+    }
   };
 
   const resetForm = () => {
@@ -32,8 +71,26 @@ export function FeedbackPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
+      
+      {/* Toast */}
+      <AnimatePresence>
+        {toast.show && (
+          <motion.div
+            initial={{ opacity: 0, y: -50, x: '-50%' }}
+            animate={{ opacity: 1, y: 0, x: '-50%' }}
+            exit={{ opacity: 0, y: -20, x: '-50%' }}
+            className={`fixed top-24 left-1/2 z-[200] flex items-center gap-3 border px-6 py-3 rounded-full shadow-2xl font-semibold backdrop-blur-md whitespace-nowrap
+              ${toast.type === 'error' 
+                ? 'bg-[#2A1116] border-[#ff4d4d] text-[#ff4d4d] shadow-[0_0_20px_rgba(255,77,77,0.3)]' 
+                : 'bg-[#0f291e] border-[#10b981] text-[#10b981] shadow-[0_0_20px_rgba(16,185,129,0.3)]'}`}
+          >
+            {toast.type === 'error' ? <AlertCircle className="w-5 h-5" /> : <CheckCircle2 className="w-5 h-5" />}
+            {toast.msg}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        
         <div className="text-center mb-12">
           <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
             Send Feedback
@@ -60,10 +117,10 @@ export function FeedbackPage() {
             ) : null}
           </AnimatePresence>
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            {/* 1. Rating Sao */}
-            <div className="text-center bg-[#1A1528] p-6 rounded-2xl border border-[var(--border)]">
-              <label className="block text-sm font-semibold text-white mb-4 uppercase tracking-wider">How would you rate your experience?</label>
+          <form onSubmit={handleSubmit} noValidate className="space-y-6">
+            {/* Rating */}
+            <div className="text-center bg-[#1A1528] p-6 rounded-2xl border border-[var(--border)] relative">
+              <label className="block text-sm font-semibold text-white mb-4 uppercase tracking-wider">How would you rate your experience? *</label>
               <div className="flex justify-center gap-3">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button
@@ -79,7 +136,7 @@ export function FeedbackPage() {
               </div>
             </div>
 
-            {/* 2. Chủ đề */}
+            {/* Topic */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">What is this regarding? *</label>
               <select 
@@ -94,18 +151,17 @@ export function FeedbackPage() {
               </select>
             </div>
 
-            {/* 3. Nội dung */}
+            {/* Message */}
             <div>
               <label className="block text-sm font-semibold text-white mb-2">Tell us the details *</label>
               <textarea 
-                required
                 value={formData.message} onChange={(e) => setFormData({...formData, message: e.target.value})}
                 className="w-full h-32 px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:outline-none focus:border-[var(--primary)] transition-colors resize-none" 
                 placeholder="Share your thoughts, suggestions, or issues..."
               ></textarea>
             </div>
 
-            {/* 4. Thông tin (Optional) */}
+            {/* Optional Info */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-semibold text-[var(--muted-foreground)] mb-2">Your Name (Optional)</label>
@@ -125,12 +181,23 @@ export function FeedbackPage() {
               </div>
             </div>
 
-            {/* Submit Btn */}
+            <div className="flex items-start gap-3 bg-[var(--cyber-black)] p-4 rounded-xl border border-[var(--border)] mt-6">
+              <AlertCircle className="w-5 h-5 text-[var(--primary)] flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-[var(--silver-gray)] leading-relaxed">
+                <span className="font-semibold text-white">Privacy Note:</span> Your feedback is securely processed and strictly used to help us improve Dioxyzine Frog's products and services.
+              </p>
+            </div>
+
             <button 
-              type="submit" disabled={status === 'loading'}
-              className="w-full py-4 mt-4 bg-[var(--primary)] text-white font-bold rounded-xl text-lg shadow-[0_0_20px_rgba(139,114,190,0.4)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70 disabled:hover:scale-100 cursor-pointer"
+              type="submit" 
+              disabled={status === 'loading'} 
+              className={`w-full flex items-center justify-center gap-2 py-4 rounded-full font-bold text-lg transition-all ${status !== 'loading' ? 'bg-[var(--primary)] text-white hover:shadow-[0_0_20px_rgba(139,114,190,0.5)] cursor-pointer' : 'bg-[#1A1528] text-gray-500 cursor-not-allowed'}`}
             >
-              {status === 'loading' ? <><Loader2 className="w-6 h-6 animate-spin" /> Sending...</> : <><MessageSquareQuote className="w-6 h-6" /> Submit Feedback</>}
+              {status === 'loading' ? (
+                <><Loader2 className="w-6 h-6 animate-spin" /> Sending...</>
+              ) : (
+                <><MessageSquareQuote className="w-6 h-6" /> Submit Feedback</>
+              )}
             </button>
           </form>
         </motion.div>

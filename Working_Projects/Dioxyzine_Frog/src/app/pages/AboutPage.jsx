@@ -8,7 +8,7 @@ const faqs = [
   {
     question: 'What is your minimum order quantity (MOQ)?',
     answer:
-      'Our MOQ varies by product type. For custom plushies, we typically start at 10 pieces, while accessories like pins and keychains may have higher MOQs (50-100 pieces). Contact us for specific product requirements.',
+      'Our MOQ varies by product type. For custom plushies, we typically start at 11 pieces, while accessories like pins and keychains may have higher MOQs (50-100 pieces). Contact us for specific product requirements.',
   },
   {
     question: 'How long does production take?',

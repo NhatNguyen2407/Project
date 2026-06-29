@@ -114,7 +114,7 @@ export function Footer() {
 
         {/* Bản Quyền */}
         <div className="mt-12 pt-8 border-t border-[var(--border)]/30 text-center text-xs text-[var(--muted-foreground)]">
-          <p>&copy; 2024 Dioxyzine Frog. All rights reserved.</p>
+          <p>&copy; 2023 Dioxyzine Frog. All rights reserved.</p>
         </div>
       </div>
     </footer>
