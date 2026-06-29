@@ -25,7 +25,7 @@ const values = [
 const faqs = [
   { question: 'What is your minimum order quantity (MOQ)?', answer: 'We support production from 11 pieces/model for listed products, and 30 pieces/model for completely custom layouts. We occasionally open slots for 1 piece/model orders on our social media, stay tuned!' },
   { question: 'How long does production take?', answer: 'Average production time is 2 to 6 weeks after design finalization. Large volume orders may require more time.' },
-  { question: 'Do you provide samples before full production?', answer: 'Yes! We always provide digital mockups and can create physical samples for an additional fee. We want to ensure you love the product before we start mass production.' },
+  // { question: 'Do you provide samples before full production?', answer: 'Yes! We always provide digital mockups and can create physical samples for an additional fee. We want to ensure you love the product before we start mass production.' },
   { question: 'What file formats do you accept for designs?', answer: 'We accept PNG, JPG, PDF, AI, and PSD files. High-resolution images work best. If you only have sketches or low-res images, our design team can help refine them.' },
   { question: 'Can I make changes after receiving a quote?', answer: 'Absolutely! Quotes are flexible until production begins. We encourage collaboration and will work with you to adjust specifications, materials, or quantities as needed.' },
   { question: 'Do you ship internationally?', answer: 'Yes, we provide Worldwide Shipping to all destination countries. Shipping costs and timelines vary by location, and international orders may be subject to customs duties.' }
