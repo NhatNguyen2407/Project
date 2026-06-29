@@ -31,7 +31,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, isP
             className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 opacity-90 group-hover:opacity-100"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-[var(--muted-foreground)]">No Image</div>
+          <div className="w-full h-full flex items-center justify-center text-[var(--muted-foreground)]">No Image Yet</div>
         )}
         <div className="absolute top-4 left-4 flex flex-col gap-2">
           {isPopular && (
