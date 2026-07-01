@@ -1,17 +1,13 @@
 import { Link } from 'react-router';
-
-//import image
 import Logo from '../../../assets/Logo.png';
 
 export function Footer() {
-
-
   return (
-    <footer className="bg-[#040406] border-t border-[var(--border)] relative z-10 text-[var(--silver-gray)]">
+    <footer className="bg-[#040406] border-t border-[var(--border)] relative z-10 text-[var(--silver-gray)] pb-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           
-          {/* CỘT 1: Brand & Logo */}
+          {/* CỘT 1: Brand, Logo & ĐÃ DI CHUYỂN COPYRIGHT LÊN ĐÂY */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-3 group w-fit">
               <div className="relative">
@@ -28,6 +24,13 @@ export function Footer() {
             <p className="text-sm leading-relaxed text-[var(--muted-foreground)] mt-2">
               Transforming all your creative layouts and art concepts into premium high-quality handmade plush items.
             </p>
+            
+            {/* ĐÃ CHUYỂN DÒNG COPYRIGHT LÊN ĐÂY THEO YÊU CẦU */}
+            <div className="pt-8">
+              <p className="text-xs text-[var(--muted-foreground)]">
+                &copy; 2023 Dioxyzine Frog. All rights reserved.
+              </p>
+            </div>
           </div>
 
           {/* CỘT 2: Our Services & Business Hours */}
@@ -66,35 +69,22 @@ export function Footer() {
             </div>
           </div>
 
-          {/* CỘT 3: Quick Links & Media (Đã nâng cấp nút Media) */}
+          {/* CỘT 3: Quick Links (Cập nhật đường dẫn URL mới) & Media */}
           <div className="space-y-8">
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
                 Quick Links
               </h4>
               <div className="grid grid-cols-2 gap-2 text-sm">
-                <Link to="/products" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                  Products
-                </Link>
-                <Link to="/pricing" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                  Pricing
-                </Link>
-                <Link to="/gallery" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                  Gallery
-                </Link>
-                <Link to="/terms" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                  Terms
-                </Link>
-                <Link to="/inquiry" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                  Inquiry
-                </Link>
-                <Link to="/about" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">
-                  Contact
-                </Link>
+                <Link to="/products" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Products</Link>
+                <Link to="/pricing" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Pricing</Link>
+                <Link to="/gallery" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Gallery</Link>
+                <Link to="/tutorial" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Tutorials</Link>
+                <Link to="/about/terms" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Terms</Link>
+                <Link to="/about/contact" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Contact</Link>
               </div>
             </div>
 
-            {/* Cột Media: Nút vuông vắn đồng bộ với About Page */}
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
                 Media
@@ -110,11 +100,6 @@ export function Footer() {
             </div>
           </div>
 
-        </div>
-
-        {/* Bản Quyền */}
-        <div className="mt-12 pt-8 border-t border-[var(--border)]/30 text-center text-xs text-[var(--muted-foreground)]">
-          <p>&copy; 2023 Dioxyzine Frog. All rights reserved.</p>
         </div>
       </div>
     </footer>

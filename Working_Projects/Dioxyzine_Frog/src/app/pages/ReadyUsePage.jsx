@@ -67,10 +67,9 @@ export function ReadyUsePage() {
                     <span className="text-white">{product.rating?.toFixed(1)}</span>
                   </div>
                   <span className="text-[var(--border)]">|</span>
-                  <span>Đã bán {product.sold}</span>
+                  <span>{product.sold} sold</span>
                 </div>
                 
-                {/* ĐÃ SỬA MÀU CHỖ NÀY SANG MÀU TÍM PRIMARY */}
                 <span className="text-lg md:text-xl font-bold text-[var(--primary)] drop-shadow-[0_0_8px_rgba(139,114,190,0.5)]">
                   ${product.price.toFixed(2)}
                 </span>

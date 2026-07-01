@@ -1,9 +1,7 @@
-// src/app/services/api.js
-
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuex1g0XqvFfM1lf79CqmZ_oBzRGTGBTt27pjduIw7ZeIROJmU6AA2oRfVXGW3JD-P/exec';
 
 export const api = {
-  // Hàm tải dữ liệu sản phẩm Custom từ Sheets
+  // fetch products
   fetchProducts: async () => {
     try {
       const response = await fetch(SCRIPT_URL);
@@ -15,7 +13,7 @@ export const api = {
     }
   },
 
-  // Hàm gửi form Inquiry
+  //form Inquiry
   submitInquiry: async (data) => {
     const payload = { type: 'inquiry', ...data };
     return fetch(SCRIPT_URL, {
@@ -25,7 +23,7 @@ export const api = {
     });
   },
 
-  // Hàm gửi Feedback
+  //Feedback
   submitFeedback: async (data) => {
     const payload = { type: 'feedback', ...data };
     return fetch(SCRIPT_URL, {

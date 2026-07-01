@@ -1,5 +1,9 @@
+// src/app/context/ProductContext.jsx
 import { createContext, useContext, useState, useEffect } from 'react';
 import { pricingMatrix } from '../data/pricingMatrix';
+
+// ĐÃ THÊM: Import hàm gọi API vừa xây
+import { api } from '../service/api';
 
 const ProductContext = createContext();
 
@@ -14,11 +18,8 @@ export function ProductProvider({ children }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // API
-    const API_URL = 'https://script.google.com/macros/s/AKfycbwuex1g0XqvFfM1lf79CqmZ_oBzRGTGBTt27pjduIw7ZeIROJmU6AA2oRfVXGW3JD-P/exec';
-
-    fetch(API_URL)
-      .then(res => res.json())
+    // SỬ DỤNG HÀM API SIÊU GỌN GÀNG
+    api.fetchProducts()
       .then(data => {
         const formattedProducts = data.map(item => {
           const pricing = pricingMatrix[item.pricingType] || pricingMatrix['contact'];
@@ -31,13 +32,8 @@ export function ProductProvider({ children }) {
             pricingType: item.pricingType,
             description: item.desc_en || item.desc_vi || item.desc || '',
             note: item.note_en || item.note_vi || item.note || '',
-            
-            //cover photo for poducts
             image: optimizeCloudinaryUrl(item.image_cover || item.image || ''),
-            
-            // sub images in product
             images: item.images_gallery ? String(item.images_gallery).split(',').map(i => optimizeCloudinaryUrl(i.trim())).filter(i => i) : [],
-            
             sizes: pricing.sizes,
             priceBrackets: pricing.priceBrackets,
             addons: pricing.addons
@@ -47,7 +43,7 @@ export function ProductProvider({ children }) {
         setLoading(false);
       })
       .catch(err => {
-        console.error("Error fetching data from Google Sheets:", err);
+        console.error("Error formatting product data:", err);
         setLoading(false);
       });
   }, []);
