@@ -4,6 +4,7 @@ import { ProductCard } from '../components/ProductCard';
 import { ArrowRight, CheckCircle, Sparkles, Palette, Package, Facebook, Instagram } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useProducts } from '../context/ProductContext';
+import { SEO } from '../components/common_components/SEO';
 
 // import banner image
 import doll2d_banner from '../../assets/Products/Banner/Doll2D_Banner.jpg'
@@ -36,6 +37,10 @@ export function HomePage() {
 
   return (
     <div className="min-h-screen">
+      <SEO 
+        title="Home" 
+        description="Dioxyzine Frog - The leading manufacturer of premium custom plushies, fan merchandise, and high-quality handmade crafts."
+      />
       {/* Hero Section */}
       <section className="relative h-screen overflow-hidden">
         {slides.map((slide, index) => (

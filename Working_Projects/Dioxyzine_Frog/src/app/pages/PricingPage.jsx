@@ -1,6 +1,8 @@
 import { motion } from 'motion/react';
 import { Sparkles, Info } from 'lucide-react';
 
+import { SEO } from '../components/common_components/SEO';
+
 const pricingData = [
   {
     title: '2-PIECE PLUSHIE',
@@ -63,6 +65,11 @@ const pricingData = [
 export function PricingPage() {
   return (
     <div className="min-h-screen pt-24 pb-20 bg-transparent relative z-10">
+      <SEO 
+        title="Pricing Matrix" 
+        description="View our estimated wholesale price brackets and sizing options for custom plushies and 2D dolls." 
+      />
+      
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
           <h1 className="font-heading text-5xl md:text-7xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.6)]">

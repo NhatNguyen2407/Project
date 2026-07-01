@@ -2,7 +2,8 @@
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Paintbrush, Scissors, Palette, Wrench } from 'lucide-react';
 
-// ĐÃ SỬA LỖI: Import chính xác từ react-router
+import { SEO } from '../components/common_components/SEO';
+
 import { useParams, useNavigate } from 'react-router';
 
 // Cấu hình danh sách bài học
@@ -25,6 +26,10 @@ export function TutorialPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
+      <SEO 
+        title={currentTutorial ? `${currentTutorial.label} | Creator Academy` : 'Creator Academy'} 
+        description="Step-by-step design blueprints and template specifications for our workshop assets." 
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* TIÊU ĐỀ CHÍNH */}

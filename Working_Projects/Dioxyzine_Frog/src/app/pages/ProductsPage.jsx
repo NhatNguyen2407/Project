@@ -6,6 +6,7 @@ import { ProductCard } from '../components/ProductCard';
 import { Search, Filter, Paintbrush, ShoppingBag } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { ReadyUsePage } from './ReadyUsePage';
+import { SEO } from '../components/common_components/SEO';
 
 // --- ĐÃ THÊM: Dùng useParams và useNavigate để chạy URL Paths ---
 import { useParams, useNavigate } from 'react-router';
@@ -49,6 +50,10 @@ export function ProductsPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
+      <SEO 
+        title="Our Products" 
+        description="Explore our full range of high-quality customizable merchandise and ready-to-ship items." 
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-10">

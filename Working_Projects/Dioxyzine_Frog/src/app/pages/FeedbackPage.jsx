@@ -2,9 +2,9 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, Loader2, Star, MessageSquareQuote, AlertCircle } from 'lucide-react';
 
-// IMPORT SERVICE VÀ TOAST CHUNG
 import { api } from '../service/api';
 import { ToastNotification } from '../components/common_components/ToastNotification';
+import { SEO } from '../components/common_components/SEO';
 
 export function FeedbackPage() {
   const [status, setStatus] = useState('idle');
@@ -64,7 +64,10 @@ export function FeedbackPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
-      
+      <SEO 
+        title="Send Feedback" 
+        description="Share your thoughts, suggestions, or workshop experience to help us improve our ecosystem." 
+      />
       {/* Gọi Toast Component dùng chung */}
       <ToastNotification toast={toast} />
 

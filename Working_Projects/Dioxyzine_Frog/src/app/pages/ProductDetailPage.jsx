@@ -8,6 +8,7 @@ import { useCart } from '../context/CartContext';
 import { MOCK_PRODUCTS } from '../data/storeData';
 import { CartDrawer } from '../components/store/CartDrawer';
 import { CheckoutModal } from '../components/store/CheckoutModal';
+import { SEO } from '../components/common_components/SEO';
 
 export function ProductDetailPage() {
   const { id } = useParams();
@@ -101,8 +102,13 @@ export function ProductDetailPage() {
   return (
     <>
       <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
+        <SEO 
+          title={displayTitle} 
+          description={displayDesc} 
+          image={images[0]} 
+        />
+        
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
             <Link to={`/products/${isReadyUse ? 'readyuse' : 'custom'}`} className="inline-flex items-center gap-2 text-[var(--silver-gray)] hover:text-[var(--primary)] transition-colors font-medium">
               <ChevronLeft className="w-4 h-4" />

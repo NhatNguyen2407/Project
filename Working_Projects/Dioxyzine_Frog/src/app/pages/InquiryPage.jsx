@@ -3,10 +3,10 @@ import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle, Loader2 } from 'lucide-react';
 
-// IMPORT SERVICE VÀ COMPONENTS
 import { api } from '../service/api';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { TermsModal } from '../components/common_components/TermsModal';
+import { SEO } from '../components/common_components/SEO';
 
 export function InquiryPage() {
   const location = useLocation();
@@ -71,6 +71,10 @@ export function InquiryPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
+      <SEO 
+        title="Submit Inquiry" 
+        description="Fill in the details for us to provide the most accurate consultation and custom quote for your project." 
+      />
       
       {/*Components*/}
       <ToastNotification toast={toast} />
