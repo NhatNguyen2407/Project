@@ -1,4 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
+import { HelmetProvider } from 'react-helmet-async';
+import { motion } from 'motion/react';
+
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { ScrollToTop } from './components/ScrollToTop';
@@ -12,13 +15,12 @@ import { QuoteRequestPage } from './pages/QuoteRequestPage';
 import { AboutContactPage } from './pages/AboutContactPage';
 import { TermsShippingPage } from './pages/TermsShippingPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { motion } from 'motion/react';
 import { ProductProvider } from './context/ProductContext';
 import { FeedbackPage } from './pages/FeedbackPage';
 import { CartProvider } from './context/CartContext';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { TutorialPage } from './pages/TutorialPage';
-import { HelmetProvider } from 'react-helmet-async';
+import { PixelTracker } from './components/common_components/PixelTracker';
 
 import elements from '../assets/Elements.PNG'
 
@@ -28,6 +30,7 @@ export default function App() {
       <ProductProvider>
         <CartProvider>
           <BrowserRouter>
+            <PixelTracker />
             <ScrollToTop />
             
             {/* floating elements */}
