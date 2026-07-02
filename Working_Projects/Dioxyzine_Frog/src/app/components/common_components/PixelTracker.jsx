@@ -6,7 +6,6 @@ export function PixelTracker() {
   const hasInitialized = useRef(false);
 
   useEffect(() => {
-    // Chỉ khởi tạo Pixel 1 lần duy nhất khi web vừa load
     if (!hasInitialized.current) {
       import('react-facebook-pixel')
         .then((x) => x.default)
@@ -19,7 +18,6 @@ export function PixelTracker() {
   }, []);
 
   useEffect(() => {
-    // Mỗi khi URL thay đổi (khách chuyển trang), bắn tín hiệu View trang mới
     if (hasInitialized.current) {
       import('react-facebook-pixel')
         .then((x) => x.default)
@@ -27,7 +25,7 @@ export function PixelTracker() {
           ReactPixel.pageView();
         });
     }
-  }, [location.pathname]); // Theo dõi sự thay đổi của đường dẫn URL
+  }, [location.pathname]);
 
-  return null; // Component này chạy ngầm, không hiển thị gì lên giao diện
+  return null;
 }

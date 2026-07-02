@@ -7,7 +7,7 @@ export function Footer() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
           
-          {/* CỘT 1: Brand, Logo & ĐÃ DI CHUYỂN COPYRIGHT LÊN ĐÂY */}
+          {/*Brand, Logo & Copyright*/}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-3 group w-fit">
               <div className="relative">
@@ -25,7 +25,6 @@ export function Footer() {
               Transforming all your creative layouts and art concepts into premium high-quality handmade plush items.
             </p>
             
-            {/* ĐÃ CHUYỂN DÒNG COPYRIGHT LÊN ĐÂY THEO YÊU CẦU */}
             <div className="pt-8">
               <p className="text-xs text-[var(--muted-foreground)]">
                 &copy; 2023 Dioxyzine Frog. All rights reserved.
@@ -33,7 +32,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* CỘT 2: Our Services & Business Hours */}
+          {/*Our Services & Business Hours*/}
           <div className="space-y-8">
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
@@ -69,7 +68,7 @@ export function Footer() {
             </div>
           </div>
 
-          {/* CỘT 3: Quick Links (Cập nhật đường dẫn URL mới) & Media */}
+          {/*Quick Links*/}
           <div className="space-y-8">
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">

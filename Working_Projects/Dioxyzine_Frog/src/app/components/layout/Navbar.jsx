@@ -19,7 +19,6 @@ export function Navbar() {
     setIsMobileMenuOpen(false);
   }, [location]);
 
-  // ĐÃ SỬA: Cấu trúc Menu mới bao gồm Tutorial và nhóm About
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/products', label: 'Products' },
@@ -50,10 +49,8 @@ export function Navbar() {
 
             <div className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => {
-                // Kiểm tra xem đường dẫn hiện tại có khớp gốc không để sáng đèn Menu
                 const isActive = location.pathname.startsWith(link.path) && link.path !== '/' || location.pathname === link.path;
                 
-                // NẾU LÀ DROPDOWN MENU (Products hoặc About)
                 if (link.label === 'Products' || link.label === 'About') {
                   const isProducts = link.label === 'Products';
                   const basePath = isProducts ? '/products' : '/about/contact';
@@ -95,7 +92,6 @@ export function Navbar() {
                   );
                 }
 
-                // MENU BÌNH THƯỜNG
                 return (
                   <Link key={link.path} to={link.path} className={`relative group transition-colors py-6 ${isActive ? 'text-[var(--primary)] font-medium' : 'text-foreground hover:text-[var(--primary)]'}`}>
                     {link.label}

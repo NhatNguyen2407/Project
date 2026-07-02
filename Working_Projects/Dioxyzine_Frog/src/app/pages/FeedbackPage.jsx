@@ -1,12 +1,16 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, Loader2, Star, MessageSquareQuote, AlertCircle } from 'lucide-react';
+// 👉 Đã Import reCAPTCHA
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'; 
 
 import { api } from '../service/api';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { SEO } from '../components/common_components/SEO';
 
 export function FeedbackPage() {
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
   const [status, setStatus] = useState('idle');
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -31,22 +35,29 @@ export function FeedbackPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (rating === 0) return showToast('Please select a star rating before submitting! ⭐', 'error');
-    if (!formData.message.trim()) return showToast('Please fill in your feedback details! 📝', 'error');
+    if (rating === 0) return showToast('Please select a star rating before submitting!', 'error');
+    if (!formData.message.trim()) return showToast('Please fill in your feedback details!', 'error');
+
+    if (!executeRecaptcha) {
+      return showToast('reCAPTCHA is not ready. Please try again!', 'error');
+    }
 
     setStatus('loading');
     
-    // Gom dữ liệu cần gửi
-    const feedbackData = {
-      name: formData.name || 'Anonymous',
-      email: formData.email || 'not-provided@email.com',
-      rating: rating,
-      message: `[${formData.topic}] - ${formData.message}`
-    };
-
     try {
-      // --- ĐÃ SỬA: Sử dụng Service API tập trung ---
+      const token = await executeRecaptcha('feedback_submit');
+
+      const feedbackData = {
+        name: formData.name || 'Anonymous',
+        email: formData.email || 'not-provided@email.com',
+        rating: rating,
+        message: `[${formData.topic}] - ${formData.message}`,
+        token: token
+      };
+
+      // Gọi API để chuyển qua sang Google Sheets
       await api.submitFeedback(feedbackData);
+      
       showToast('Feedback submitted successfully! Thank you 💜', 'success');
       setStatus('success');
     } catch (error) {
@@ -68,7 +79,6 @@ export function FeedbackPage() {
         title="Send Feedback" 
         description="Share your thoughts, suggestions, or workshop experience to help us improve our ecosystem." 
       />
-      {/* Gọi Toast Component dùng chung */}
       <ToastNotification toast={toast} />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">

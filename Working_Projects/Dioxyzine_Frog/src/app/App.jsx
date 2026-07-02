@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { HelmetProvider } from 'react-helmet-async';
 import { motion } from 'motion/react';
+import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
@@ -27,59 +28,61 @@ import elements from '../assets/Elements.PNG'
 export default function App() {
   return (
     <HelmetProvider>
-      <ProductProvider>
-        <CartProvider>
-          <BrowserRouter>
-            <PixelTracker />
-            <ScrollToTop />
-            
-            {/* floating elements */}
-            <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20 mix-blend-screen">
-              <motion.img 
-                src={elements} alt="Elements"
-                animate={{ y: [0, -30, 0], rotate: [0, 5, 0] }}
-                transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute top-20 -left-20 w-96 h-auto blur-[1px]"
-              />
-              <motion.img 
-                src={elements} alt="Elements"
-                animate={{ y: [0, 40, 0], rotate: [0, -5, 0] }}
-                transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
-                className="absolute bottom-10 -right-10 w-[500px] h-auto blur-[1px]"
-              />
-            </div>
+      <GoogleReCaptchaProvider reCaptchaKey={import.meta.env.VITE_RECAPTCHA_SITE_KEY}>
+        <ProductProvider>
+          <CartProvider>
+            <BrowserRouter>
+              <PixelTracker />
+              <ScrollToTop />
+              
+              {/* floating elements */}
+              <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-20 mix-blend-screen">
+                <motion.img 
+                  src={elements} alt="Elements"
+                  animate={{ y: [0, -30, 0], rotate: [0, 5, 0] }}
+                  transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute top-20 -left-20 w-96 h-auto blur-[1px]"
+                />
+                <motion.img 
+                  src={elements} alt="Elements"
+                  animate={{ y: [0, 40, 0], rotate: [0, -5, 0] }}
+                  transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+                  className="absolute bottom-10 -right-10 w-[500px] h-auto blur-[1px]"
+                />
+              </div>
 
-            <div className="min-h-screen relative z-10 bg-transparent text-foreground">
-              <Navbar />
+              <div className="min-h-screen relative z-10 bg-transparent text-foreground">
+                <Navbar />
 
-              <Routes>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/products" element={<ProductsPage />} />
-                <Route path="/products/:activeTab" element={<ProductsPage />} />
-                <Route path="/product/:id" element={<ProductDetailPage />} />
-                <Route path="/pricing" element={<PricingPage />} />
-                <Route path="/gallery" element={<GalleryPage />} />
-                <Route path="/inquiry" element={<InquiryPage />} />
-                <Route path="/quote" element={<QuoteRequestPage />} />
-                <Route path="/checkout" element={<CheckoutPage />} />
+                <Routes>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/products" element={<ProductsPage />} />
+                  <Route path="/products/:activeTab" element={<ProductsPage />} />
+                  <Route path="/product/:id" element={<ProductDetailPage />} />
+                  <Route path="/pricing" element={<PricingPage />} />
+                  <Route path="/gallery" element={<GalleryPage />} />
+                  <Route path="/inquiry" element={<InquiryPage />} />
+                  <Route path="/quote" element={<QuoteRequestPage />} />
+                  <Route path="/checkout" element={<CheckoutPage />} />
 
-                {/*about and sub-about*/}
-                <Route path="/about" element={<Navigate to="/about/contact" replace />} />
-                <Route path="/about/contact" element={<AboutContactPage />} />
-                <Route path="/about/terms" element={<TermsShippingPage />} />
-                <Route path="/about/feedback" element={<FeedbackPage />} />
+                  {/*about and sub-about*/}
+                  <Route path="/about" element={<Navigate to="/about/contact" replace />} />
+                  <Route path="/about/contact" element={<AboutContactPage />} />
+                  <Route path="/about/terms" element={<TermsShippingPage />} />
+                  <Route path="/about/feedback" element={<FeedbackPage />} />
 
-                {/*tutorial and sub-tutorial*/}
-                <Route path="/tutorial" element={<TutorialPage />} />
-                <Route path="/tutorial/:tutorialSlug" element={<TutorialPage />} />
+                  {/*tutorial and sub-tutorial*/}
+                  <Route path="/tutorial" element={<TutorialPage />} />
+                  <Route path="/tutorial/:tutorialSlug" element={<TutorialPage />} />
 
-                <Route path="*" element={<NotFoundPage />} />
-              </Routes>
-              <Footer />
-            </div>
-          </BrowserRouter>
-        </CartProvider>
-      </ProductProvider>
+                  <Route path="*" element={<NotFoundPage />} />
+                </Routes>
+                <Footer />
+              </div>
+            </BrowserRouter>
+          </CartProvider>
+        </ProductProvider>
+      </GoogleReCaptchaProvider>
     </HelmetProvider>
   );
 }

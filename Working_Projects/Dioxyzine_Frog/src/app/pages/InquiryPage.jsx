@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle, Loader2 } from 'lucide-react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
 import { ToastNotification } from '../components/common_components/ToastNotification';
@@ -9,6 +10,8 @@ import { TermsModal } from '../components/common_components/TermsModal';
 import { SEO } from '../components/common_components/SEO';
 
 export function InquiryPage() {
+  const { executeRecaptcha } = useGoogleReCaptcha();
+
   const location = useLocation();
   const state = location.state || {};
 
@@ -41,23 +44,34 @@ export function InquiryPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     // Validation
     if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.productName || !formData.imageLink || !formData.quantity) {
-      return showToast('Please fill in all required fields! 📝', 'error');
+      return showToast('Please fill in all required fields!', 'error');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
-      return showToast('Invalid email address! Please check again. ✉️', 'error');
+      return showToast('Invalid email address! Please check again.', 'error');
     }
-    if (!acceptedTerms) return showToast('Please agree to the Terms of Service before submitting! ⚠️', 'error');
+    if (!acceptedTerms) return showToast('Please agree to the Terms of Service before submitting!', 'error');
+
+    // Kiểm tra xem reCAPTCHA đã tải xong chưa
+    if (!executeRecaptcha) {
+      return showToast('reCAPTCHA is not ready. Please try again!', 'error');
+    }
 
     setStatus('loading');
     
     try {
-      //Service API
-      await api.submitInquiry(formData);
+      const token = await executeRecaptcha('inquiry_submit');
       
-      showToast('Inquiry Sent Successfully! 🚀', 'success');
+      const finalData = { 
+        ...formData, 
+        token: token 
+      };
+
+      //Service API
+      await api.submitInquiry(finalData);
+      
+      showToast('Inquiry Sent Successfully!', 'success');
       setStatus('success');
       // Reset form
       setAcceptedTerms(false);
