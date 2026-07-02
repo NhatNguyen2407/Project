@@ -1,10 +1,14 @@
 import { motion } from 'motion/react';
 import { Link } from 'react-router';
-import { Home, Search, ArrowLeft } from 'lucide-react';
+import { Home, Search } from 'lucide-react';
 
 export function NotFoundPage() {
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-gradient-to-b from-white via-[var(--cream)] to-white flex items-center justify-center px-4">
+    <div className="min-h-screen pt-24 pb-16 bg-transparent flex items-center justify-center px-4 relative z-10">
+      
+      {/* Hiệu ứng mờ ảo phía sau */}
+      <div className="absolute top-[20%] right-[20%] w-96 h-96 bg-[var(--primary)]/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
+
       <div className="max-w-2xl w-full text-center">
         {/* Animated 404 */}
         <motion.div
@@ -13,7 +17,7 @@ export function NotFoundPage() {
           transition={{ type: 'spring', damping: 15 }}
           className="mb-8"
         >
-          <h1 className="text-9xl md:text-[12rem] font-bold bg-gradient-to-r from-[var(--burgundy)] via-[var(--dusty-pink)] to-[var(--pastel-lavender)] bg-clip-text text-transparent leading-none">
+          <h1 className="text-9xl md:text-[12rem] font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-[var(--primary)] leading-none drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
             404
           </h1>
         </motion.div>
@@ -24,8 +28,8 @@ export function NotFoundPage() {
           transition={{ duration: 3, repeat: Infinity }}
           className="relative mb-8"
         >
-          <div className="w-32 h-32 mx-auto rounded-full bg-gradient-to-br from-[var(--dusty-pink)]/20 to-[var(--pastel-lavender)]/20 backdrop-blur-sm flex items-center justify-center">
-            <Search className="w-16 h-16 text-[var(--burgundy)]" />
+          <div className="w-32 h-32 mx-auto rounded-full bg-[var(--card)] border border-[var(--border)] flex items-center justify-center shadow-[0_0_30px_rgba(139,114,190,0.15)]">
+            <Search className="w-16 h-16 text-[var(--primary)]" />
           </div>
         </motion.div>
 
@@ -36,8 +40,8 @@ export function NotFoundPage() {
           transition={{ delay: 0.2 }}
           className="mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4">Page Not Found</h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Page Not Found</h2>
+          <p className="text-lg text-[var(--muted-foreground)] leading-relaxed">
             Oops! Looks like this page wandered off into the craft studio. Let's get you back on track.
           </p>
         </motion.div>
@@ -53,7 +57,7 @@ export function NotFoundPage() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 rounded-full bg-gradient-to-r from-[var(--burgundy)] to-[var(--dusty-pink)] text-white font-semibold shadow-lg hover:shadow-xl transition-shadow flex items-center gap-2 mx-auto sm:mx-0"
+              className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold shadow-[0_0_20px_rgba(139,114,190,0.4)] flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               <Home className="w-5 h-5" />
               Go Home
@@ -64,7 +68,7 @@ export function NotFoundPage() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="px-8 py-4 rounded-full bg-white border-2 border-[var(--burgundy)] text-[var(--burgundy)] font-semibold hover:bg-[var(--burgundy)] hover:text-white transition-colors flex items-center gap-2 mx-auto sm:mx-0"
+              className="px-8 py-4 rounded-full bg-transparent border-2 border-[var(--primary)] text-[var(--primary)] font-bold hover:bg-[var(--primary)] hover:text-white transition-colors flex items-center justify-center gap-2 w-full sm:w-auto"
             >
               Browse Products
             </motion.button>
@@ -76,9 +80,9 @@ export function NotFoundPage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.6 }}
-          className="mt-16 pt-8 border-t border-border"
+          className="mt-16 pt-8 border-t border-[var(--border)]"
         >
-          <p className="text-sm text-muted-foreground mb-4">Popular pages:</p>
+          <p className="text-sm text-[var(--muted-foreground)] mb-4">Popular pages:</p>
           <div className="flex flex-wrap justify-center gap-4">
             {[
               { path: '/gallery', label: 'Gallery' },
@@ -88,17 +92,13 @@ export function NotFoundPage() {
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-sm text-[var(--burgundy)] hover:underline"
+                className="text-sm font-medium text-[var(--silver-gray)] hover:text-white hover:underline transition-colors"
               >
                 {link.label}
               </Link>
             ))}
           </div>
         </motion.div>
-
-        {/* Decorative Background Elements */}
-        <div className="absolute top-1/4 left-1/4 w-40 h-40 bg-[var(--pastel-mint)]/20 rounded-full blur-3xl -z-10"></div>
-        <div className="absolute bottom-1/4 right-1/4 w-48 h-48 bg-[var(--dusty-pink)]/20 rounded-full blur-3xl -z-10"></div>
       </div>
     </div>
   );

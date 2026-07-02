@@ -1,19 +1,21 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, CheckCircle, Loader2 } from 'lucide-react';
+import { Send, CheckCircle, Loader2, Lock } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { TermsModal } from '../components/common_components/TermsModal';
 import { SEO } from '../components/common_components/SEO';
+import { useAuth } from '../context/AuthContext';
 
 export function InquiryPage() {
   const { executeRecaptcha } = useGoogleReCaptcha();
-
   const location = useLocation();
   const state = location.state || {};
+
+  const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     subject: '', customerName: '', customerEmail: '', contactInfo: '', 
@@ -27,6 +29,16 @@ export function InquiryPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
+
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        customerName: user.user_metadata?.full_name || prev.customerName,
+        customerEmail: user.email || prev.customerEmail
+      }));
+    }
+  }, [user]);
 
   useEffect(() => {
     if (!isSubjectEdited) {
@@ -44,7 +56,6 @@ export function InquiryPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Validation
     if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.productName || !formData.imageLink || !formData.quantity) {
       return showToast('Please fill in all required fields!', 'error');
     }
@@ -53,29 +64,21 @@ export function InquiryPage() {
     }
     if (!acceptedTerms) return showToast('Please agree to the Terms of Service before submitting!', 'error');
 
-    // Kiểm tra xem reCAPTCHA đã tải xong chưa
-    if (!executeRecaptcha) {
-      return showToast('reCAPTCHA is not ready. Please try again!', 'error');
-    }
-
     setStatus('loading');
     
     try {
-      const token = await executeRecaptcha('inquiry_submit');
-      
-      const finalData = { 
-        ...formData, 
-        token: token 
-      };
-
-      //Service API
-      await api.submitInquiry(finalData);
+      await api.submitInquiry(formData);
       
       showToast('Inquiry Sent Successfully!', 'success');
       setStatus('success');
-      // Reset form
       setAcceptedTerms(false);
-      setFormData({ subject: '', customerName: '', customerEmail: '', contactInfo: '', productName: '', quantity: '', size: '', accessoryQty: '0', imageLink: '', note: '' });
+      
+      setFormData({ 
+        subject: '', 
+        customerName: user ? user.user_metadata?.full_name : '', 
+        customerEmail: user ? user.email : '', 
+        contactInfo: '', productName: '', quantity: '', size: '', accessoryQty: '0', imageLink: '', note: '' 
+      });
     } catch (error) {
       console.error('Error:', error);
       showToast('Connection error. Please try again later!', 'error');
@@ -122,12 +125,26 @@ export function InquiryPage() {
                 <input required type="text" name="subject" value={formData.subject} onChange={(e) => { setIsSubjectEdited(true); handleChange(e); }} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl text-white font-medium outline-none" />
               </div>
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-white">Your Name *</label>
-                <input required type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none" placeholder="John Doe" />
+                <label className="text-sm font-semibold text-white flex items-center justify-between">
+                  Your Name *
+                  {user && <span className="text-xs text-[var(--primary)] font-normal">Editable</span>}
+                </label>
+                <input required type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" placeholder="John Doe" />
               </div>
-              <div className="space-y-2">
+
+              <div className="space-y-2 relative">
                 <label className="text-sm font-semibold text-white">Email Address *</label>
-                <input required type="email" name="customerEmail" value={formData.customerEmail} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none" placeholder="example@gmail.com" />
+                <input 
+                  required 
+                  type="email" 
+                  name="customerEmail" 
+                  value={formData.customerEmail} 
+                  onChange={handleChange} 
+                  readOnly={!!user}
+                  className={`w-full px-4 py-3 rounded-xl text-white outline-none border ${user ? 'bg-[#130F1D] border-transparent text-gray-400 cursor-not-allowed' : 'bg-[#1A1528] border-[var(--border)] focus:border-[var(--primary)]'}`} 
+                  placeholder="example@gmail.com" 
+                />
+                {user && <Lock className="absolute right-4 top-[38px] w-4 h-4 text-gray-500" />}
               </div>
               <div className="space-y-2 md:col-span-2">
                 <label className="text-sm font-semibold text-white">Facebook / Instagram *</label>

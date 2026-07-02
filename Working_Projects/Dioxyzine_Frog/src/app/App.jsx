@@ -21,6 +21,9 @@ import { FeedbackPage } from './pages/FeedbackPage';
 import { CartProvider } from './context/CartContext';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { TutorialPage } from './pages/TutorialPage';
+import { LoginPage } from './pages/LoginPage';
+import { RegisterPage } from './pages/RegisterPage';
+import { ProfilePage } from './pages/ProfilePage';
 import { PixelTracker } from './components/common_components/PixelTracker';
 
 import elements from '../assets/Elements.PNG'
@@ -64,6 +67,9 @@ export default function App() {
                   <Route path="/inquiry" element={<InquiryPage />} />
                   <Route path="/quote" element={<QuoteRequestPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
+                  <Route path="/login" element={<LoginPage />} />
+                  <Route path="/register" element={<RegisterPage />} />
+                  <Route path="/profile" element={<ProfilePage />} />
 
                   {/*about and sub-about*/}
                   <Route path="/about" element={<Navigate to="/about/contact" replace />} />

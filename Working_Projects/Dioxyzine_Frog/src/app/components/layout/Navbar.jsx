@@ -1,13 +1,18 @@
 import { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router';
-import { Menu, X, ChevronDown } from 'lucide-react';
+import { Link, useLocation, useNavigate } from 'react-router';
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from '../../../assets/Logo.png';
+import { useAuth } from '../../context/AuthContext';
+import { supabase } from '../../service/supabase';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const { user } = useAuth();
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -27,6 +32,13 @@ export function Navbar() {
     { path: '/tutorial', label: 'Tutorial' },
     { path: '/about', label: 'About' },
   ];
+  
+  // logout
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <>
@@ -47,6 +59,7 @@ export function Navbar() {
               </span>
             </Link>
 
+            {/* Desktop Menu Links */}
             <div className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => {
                 const isActive = location.pathname.startsWith(link.path) && link.path !== '/' || location.pathname === link.path;
@@ -63,7 +76,7 @@ export function Navbar() {
                         <span className={`absolute bottom-5 left-0 h-0.5 bg-gradient-to-r from-[var(--primary)] to-transparent transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
                       </Link>
                       
-                      {/* Box Dropdown */}
+                      {/* Dropdown Desktop */}
                       <div className="absolute left-0 top-full -mt-2 w-56 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 bg-[#1A1528] border border-[var(--primary)]/30 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
                         {isProducts ? (
                           <>
@@ -101,7 +114,35 @@ export function Navbar() {
               })}
             </div>
 
+            {/* User Auth & Actions (Desktop) */}
             <div className="hidden md:flex items-center space-x-4">
+              {user ? (
+                <div className="relative group py-6 cursor-pointer z-50">
+                  <div className="flex items-center gap-2 bg-[#1A1528] border border-[var(--primary)]/30 px-3 py-1.5 rounded-full hover:border-[var(--primary)] transition-colors">
+                    <div className="w-7 h-7 bg-[var(--primary)] rounded-full flex items-center justify-center">
+                      <User className="w-4 h-4 text-white" />
+                    </div>
+                    <span className="text-sm font-medium text-white max-w-[100px] truncate">
+                      {user.user_metadata?.full_name?.split(' ')[0] || 'User'}
+                    </span>
+                    <ChevronDown className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform" />
+                  </div>
+
+                  <div className="absolute right-0 top-full -mt-2 w-48 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 bg-[#1A1528] border border-[var(--primary)]/30 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
+                    <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">
+                      <LayoutDashboard className="w-4 h-4 text-[var(--primary)]" /> My Dashboard
+                    </Link>
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 text-red-400 text-sm font-medium border-t border-[var(--border)] transition-colors text-left cursor-pointer">
+                      <LogOut className="w-4 h-4" /> Sign Out
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <Link to="/login">
+                  <span className="text-foreground hover:text-[var(--primary)] font-medium transition-colors">Sign In</span>
+                </Link>
+              )}
+
               <Link to="/inquiry">
                 <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="px-6 py-2.5 rounded-full bg-[var(--primary)] text-white font-semibold shadow-[0_0_15px_rgba(139,114,190,0.4)] hover:shadow-[0_0_20px_rgba(139,114,190,0.6)] transition-shadow cursor-pointer">
                   Inquiry
@@ -109,7 +150,8 @@ export function Navbar() {
               </Link>
             </div>
 
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-foreground cursor-pointer">
+            {/* mobile hamburger button */}
+            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-foreground cursor-pointer z-50 relative">
               {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
           </div>
@@ -120,33 +162,81 @@ export function Navbar() {
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div initial={{ opacity: 0, x: '100%' }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: '100%' }} transition={{ type: 'spring', damping: 25 }} className="fixed inset-y-0 right-0 z-40 w-full max-w-sm bg-[var(--card)] border-l border-[var(--border)] shadow-2xl md:hidden">
-            <div className="flex flex-col h-full pt-24 pb-8 px-6 space-y-6 overflow-y-auto">
-              {navLinks.map((link, index) => {
-                const isActive = location.pathname.startsWith(link.path) && link.path !== '/' || location.pathname === link.path;
-                
-                return (
-                  <motion.div key={link.path} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }}>
-                    <Link to={link.label === 'Products' ? '/products/custom' : (link.label === 'About' ? '/about/contact' : link.path)} onClick={() => { if (link.label !== 'Products' && link.label !== 'About') setIsMobileMenuOpen(false) }} className={`block text-2xl font-medium transition-colors ${isActive ? 'text-[var(--primary)]' : 'text-foreground hover:text-[var(--primary)]'}`}>
-                      {link.label}
+            <div className="flex flex-col h-full pt-24 pb-8 px-6 overflow-y-auto">
+              
+              {/* Profile Block on Mobile */}
+              <div className="mb-8 pb-8 border-b border-[var(--border)]">
+                {user ? (
+                   <div className="space-y-4">
+                     <div className="flex items-center gap-3">
+                       <div className="w-12 h-12 bg-[var(--primary)] rounded-full flex items-center justify-center border-2 border-[var(--border)]">
+                          <User className="w-6 h-6 text-white" />
+                       </div>
+                       <div>
+                         <p className="text-white font-bold">{user.user_metadata?.full_name || 'Froggy Member'}</p>
+                         <p className="text-sm text-[var(--muted-foreground)] truncate">{user.email}</p>
+                       </div>
+                     </div>
+                     <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-[#1A1528] rounded-xl text-[var(--primary)] font-medium border border-[var(--border)] hover:border-[var(--primary)] transition-colors">
+                       <LayoutDashboard className="w-4 h-4" /> Go to Dashboard
+                     </Link>
+                   </div>
+                ) : (
+                  <div className="flex gap-3">
+                    <Link to="/login" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 py-3 text-center bg-[#1A1528] rounded-xl text-white font-medium border border-[var(--border)]">
+                      Sign In
                     </Link>
-                    
-                    {/* Sub-menu Mobile */}
-                    {link.label === 'Products' && (
-                      <div className="mt-3 ml-4 flex flex-col gap-3 border-l-2 border-[var(--border)] pl-4">
-                        <Link to="/products/custom" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Custom Orders</Link>
-                        <Link to="/products/readyuse" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Ready-made</Link>
-                      </div>
-                    )}
-                    {link.label === 'About' && (
-                      <div className="mt-3 ml-4 flex flex-col gap-3 border-l-2 border-[var(--border)] pl-4">
-                        <Link to="/about/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Contact Us</Link>
-                        <Link to="/about/terms" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Terms of Service</Link>
-                        <Link to="/about/feedback" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Feedback</Link>
-                      </div>
-                    )}
-                  </motion.div>
-                );
-              })}
+                    <Link to="/register" onClick={() => setIsMobileMenuOpen(false)} className="flex-1 py-3 text-center bg-[var(--primary)] rounded-xl text-white font-medium">
+                      Sign Up
+                    </Link>
+                  </div>
+                )}
+              </div>
+
+              {/* Link Menu */}
+              <div className="space-y-6 flex-1">
+                {navLinks.map((link, index) => {
+                  const isActive = location.pathname.startsWith(link.path) && link.path !== '/' || location.pathname === link.path;
+                  
+                  return (
+                    <motion.div key={link.path} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }}>
+                      <Link to={link.label === 'Products' ? '/products/custom' : (link.label === 'About' ? '/about/contact' : link.path)} onClick={() => { if (link.label !== 'Products' && link.label !== 'About') setIsMobileMenuOpen(false) }} className={`block text-2xl font-medium transition-colors ${isActive ? 'text-[var(--primary)]' : 'text-foreground hover:text-[var(--primary)]'}`}>
+                        {link.label}
+                      </Link>
+                      
+                      {/* Sub-menu Mobile */}
+                      {link.label === 'Products' && (
+                        <div className="mt-3 ml-4 flex flex-col gap-3 border-l-2 border-[var(--border)] pl-4">
+                          <Link to="/products/custom" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Custom Orders</Link>
+                          <Link to="/products/readyuse" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Ready-made</Link>
+                        </div>
+                      )}
+                      {link.label === 'About' && (
+                        <div className="mt-3 ml-4 flex flex-col gap-3 border-l-2 border-[var(--border)] pl-4">
+                          <Link to="/about/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Contact Us</Link>
+                          <Link to="/about/terms" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Terms of Service</Link>
+                          <Link to="/about/feedback" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Feedback</Link>
+                        </div>
+                      )}
+                    </motion.div>
+                  );
+                })}
+              </div>
+
+              {/* Action Buttons Mobile */}
+              <div className="mt-8 space-y-4">
+                <Link to="/inquiry" onClick={() => setIsMobileMenuOpen(false)}>
+                  <button className="w-full py-4 rounded-full bg-[var(--primary)] text-white font-bold shadow-[0_0_15px_rgba(139,114,190,0.4)]">
+                    Submit Inquiry
+                  </button>
+                </Link>
+                {user && (
+                   <button onClick={handleLogout} className="w-full py-4 rounded-full bg-red-500/10 text-red-400 font-bold border border-red-500/20 flex items-center justify-center gap-2">
+                     <LogOut className="w-5 h-5" /> Sign Out
+                   </button>
+                )}
+              </div>
+
             </div>
           </motion.div>
         )}
