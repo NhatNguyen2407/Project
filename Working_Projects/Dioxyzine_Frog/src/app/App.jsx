@@ -1,11 +1,10 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
+//import react
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router';
 import { HelmetProvider } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
 
-import { Navbar } from './components/layout/Navbar';
-import { Footer } from './components/layout/Footer';
-import { ScrollToTop } from './components/ScrollToTop';
+//import pages
 import { HomePage } from './pages/HomePage';
 import { ProductsPage } from './pages/ProductsPage';
 import { PricingPage } from './pages/PricingPage';
@@ -14,19 +13,48 @@ import { GalleryPage } from './pages/GalleryPage';
 import { InquiryPage } from './pages/InquiryPage';
 import { QuoteRequestPage } from './pages/QuoteRequestPage';
 import { AboutContactPage } from './pages/AboutContactPage';
-import { TermsShippingPage } from './pages/TermsShippingPage';
+import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
-import { ProductProvider } from './context/ProductContext';
 import { FeedbackPage } from './pages/FeedbackPage';
-import { CartProvider } from './context/CartContext';
 import { CheckoutPage } from './pages/CheckoutPage';
 import { TutorialPage } from './pages/TutorialPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
+import { AdminPage } from './pages/AdminPage';
+
+//import componenets
+import { ScrollToTop } from './components/ScrollToTop';
+import { Navbar } from './components/layout/Navbar';
+import { Footer } from './components/layout/Footer';
 import { PixelTracker } from './components/common_components/PixelTracker';
 
+//import context
+import { CartProvider } from './context/CartContext';
+import { ProductProvider } from './context/ProductContext';
+import { useAuth } from './context/AuthContext';
+
 import elements from '../assets/Elements.PNG'
+
+
+//ROUTES
+const ProtectedRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+  
+  if (loading) return null;
+  if (!user) return <Navigate to="/login" replace />;
+  
+  return children;
+};
+
+const PublicRoute = ({ children }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) return null;
+  if (user) return <Navigate to="/" replace />; 
+  
+  return children;
+};
 
 export default function App() {
   return (
@@ -67,15 +95,49 @@ export default function App() {
                   <Route path="/inquiry" element={<InquiryPage />} />
                   <Route path="/quote" element={<QuoteRequestPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
-                  <Route path="/login" element={<LoginPage />} />
-                  <Route path="/register" element={<RegisterPage />} />
-                  <Route path="/profile" element={<ProfilePage />} />
+                  <Route path="/admin" element={<AdminPage />} />
+
+                  {/* PublicRoute for Login and Register */}
+                  <Route 
+                    path="/login" 
+                    element={
+                      <PublicRoute>
+                        <LoginPage />
+                      </PublicRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/register" 
+                    element={
+                      <PublicRoute>
+                        <RegisterPage />
+                      </PublicRoute>
+                    } 
+                  />
+
+                  {/* ProtectedRoute for Profile */}
+                  <Route 
+                    path="/profile" 
+                    element={
+                      <ProtectedRoute>
+                        <ProfilePage />
+                      </ProtectedRoute>
+                    } 
+                  />
 
                   {/*about and sub-about*/}
                   <Route path="/about" element={<Navigate to="/about/contact" replace />} />
                   <Route path="/about/contact" element={<AboutContactPage />} />
-                  <Route path="/about/terms" element={<TermsShippingPage />} />
                   <Route path="/about/feedback" element={<FeedbackPage />} />
+                    {/* sub-terms */}
+                  <Route path="/about/terms" element={<TermsPage />}>
+                    {/* Khi khách vào /about/terms thì tự động đá sang /about/terms/printing */}
+                    <Route index element={<Navigate to="printing" replace />} />
+                    <Route path="printing" element={null} />
+                    <Route path="shipping" element={null} />
+                    <Route path="refund" element={null} />
+                    <Route path="membership" element={null} />
+                  </Route>
 
                   {/*tutorial and sub-tutorial*/}
                   <Route path="/tutorial" element={<TutorialPage />} />

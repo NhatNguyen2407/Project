@@ -157,6 +157,21 @@ export function RegisterPage() {
     }
   };
 
+  const handleSocialLogin = async (provider) => {
+    try {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider: provider,
+        options: {
+          redirectTo: 'http://localhost:5173/profile' 
+        }
+      });
+      if (error) throw error;
+    } catch (error) {
+      console.error(`Lỗi đăng nhập ${provider}:`, error.message);
+      setErrors({ form: `Không thể kết nối với ${provider}. Vui lòng thử lại!` });
+    }
+  };
+
   return (
     <div className="min-h-screen bg-transparent flex items-center justify-center p-4 sm:p-6 relative overflow-hidden z-10 pt-24 pb-16">
       
@@ -264,9 +279,18 @@ export function RegisterPage() {
               </div>
             </div>
 
+            {/*Social Logins*/}
             <div className="mt-6 flex gap-4">
-              <SocialButton icon={Chrome} label="Google" onClick={() => console.log('Google signup')} />
-              <SocialButton icon={Facebook} label="Facebook" onClick={() => console.log('Facebook signup')} />
+              <SocialButton 
+                icon={Chrome} 
+                label="Google" 
+                onClick={() => handleSocialLogin('google')} 
+              />
+              <SocialButton 
+                icon={Facebook} 
+                label="Facebook" 
+                onClick={() => handleSocialLogin('facebook')} 
+              />
             </div>
           </div>
         </div>
