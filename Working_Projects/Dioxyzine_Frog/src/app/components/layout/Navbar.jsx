@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard } from 'lucide-react';
+import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from '../../../assets/Logo.png';
 import { useAuth } from '../../context/AuthContext';
@@ -12,7 +12,8 @@ export function Navbar() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  const { user } = useAuth();
+  const { user, role } = useAuth();
+  // const ADMIN_EMAIL = 'dioxyzinefrog@gmail.com';
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -33,7 +34,6 @@ export function Navbar() {
     { path: '/about', label: 'About' },
   ];
   
-  // logout
   const handleLogout = async () => {
     await supabase.auth.signOut();
     navigate('/login');
@@ -62,7 +62,7 @@ export function Navbar() {
             {/* Desktop Menu Links */}
             <div className="hidden md:flex items-center space-x-8">
               {navLinks.map((link) => {
-                const isActive = location.pathname.startsWith(link.path) && link.path !== '/' || location.pathname === link.path;
+                const isActive = (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path;
                 
                 if (link.label === 'Products' || link.label === 'About') {
                   const isProducts = link.label === 'Products';
@@ -129,6 +129,13 @@ export function Navbar() {
                   </div>
 
                   <div className="absolute right-0 top-full -mt-2 w-48 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 bg-[#1A1528] border border-[var(--primary)]/30 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
+                    {/* 🛡️ MỤC CHỌN CHO TÀI KHOẢN ADMIN TRÊN DESKTOP */}
+                    {role === 'admin' && (
+                      <Link to="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors border-b border-[var(--border)]">
+                        <Shield className="w-4 h-4 text-[var(--primary)]" /> Admin Control
+                      </Link>
+                    )}
+                    
                     <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">
                       <LayoutDashboard className="w-4 h-4 text-[var(--primary)]" /> My Dashboard
                     </Link>
@@ -177,7 +184,15 @@ export function Navbar() {
                          <p className="text-sm text-[var(--muted-foreground)] truncate">{user.email}</p>
                        </div>
                      </div>
-                     <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-[#1A1528] rounded-xl text-[var(--primary)] font-medium border border-[var(--border)] hover:border-[var(--primary)] transition-colors">
+                     
+                     {/* 🛡️ MỤC CHỌN CHO TÀI KHOẢN ADMIN TRÊN MOBILE */}
+                     {role === 'admin' && (
+                       <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-[var(--primary)]/10 text-[var(--primary)] font-medium border border-[var(--primary)]/30 rounded-xl hover:bg-[var(--primary)]/20 transition-colors">
+                         <Shield className="w-4 h-4" /> Admin Control
+                       </Link>
+                     )}
+
+                     <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-[#1A1528] rounded-xl text-white font-medium border border-[var(--border)] hover:border-[var(--primary)] transition-colors">
                        <LayoutDashboard className="w-4 h-4" /> Go to Dashboard
                      </Link>
                    </div>
@@ -196,7 +211,7 @@ export function Navbar() {
               {/* Link Menu */}
               <div className="space-y-6 flex-1">
                 {navLinks.map((link, index) => {
-                  const isActive = location.pathname.startsWith(link.path) && link.path !== '/' || location.pathname === link.path;
+                  const isActive = (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path;
                   
                   return (
                     <motion.div key={link.path} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }}>

@@ -6,21 +6,21 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
 
 export function AdminPage() {
-  const { user } = useAuth();
+  const { user, role } = useAuth();
   const navigate = useNavigate();
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
-  const ADMIN_EMAIL = 'dioxyzinefrog@gmail.com';
+  // const ADMIN_EMAIL = 'dioxyzinefrog@gmail.com';
 
   useEffect(() => {
     if (user === null) {
       navigate('/login');
-    } else if (user && user.email !== ADMIN_EMAIL) {
+    } else if (user && role !== 'admin') {
       navigate('/profile');
     }
-  }, [user, navigate]);
+  }, [user, role, navigate]);
 
   const STATUS_FLOW = [
     { value: 'Pending', label: 'Pending (Chờ xác nhận)', color: 'text-yellow-500 bg-yellow-500/10 border-yellow-500/20' },
@@ -97,7 +97,7 @@ export function AdminPage() {
     return found ? found.color : 'text-gray-400 bg-gray-400/10 border-gray-400/20';
   };
 
-  if (!user || user.email !== ADMIN_EMAIL) {
+  if (!user || role !== 'admin') {
     return (
       <div className="min-h-screen pt-28 flex justify-center items-center">
         <div className="text-[var(--primary)] animate-pulse font-bold text-xl">Đang kiểm tra phân quyền...</div>

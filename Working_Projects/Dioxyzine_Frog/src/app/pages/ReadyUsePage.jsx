@@ -1,16 +1,19 @@
-// src/app/pages/ReadyUsePage.jsx
 import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Filter, ArrowDownUp, Star } from 'lucide-react';
 import { Link } from 'react-router';
-
-import { MOCK_PRODUCTS } from '../data/storeData';
+import { useProducts } from '../context/ProductContext'; // Lấy kho sản phẩm tổng
 
 export function ReadyUsePage() {
+  const { products } = useProducts();
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('newest');
 
-  let displayedProducts = MOCK_PRODUCTS.filter(p => activeCategory === 'All' || p.category === activeCategory);
+  // Lọc lấy đúng hàng Có sẵn (Ready Use)
+  const readyUseProducts = products.filter(p => p.type === 'readyuse');
+
+  let displayedProducts = readyUseProducts.filter(p => activeCategory === 'All' || p.category.includes(activeCategory));
+  
   if (sortBy === 'price_asc') displayedProducts.sort((a, b) => a.price - b.price);
   if (sortBy === 'price_desc') displayedProducts.sort((a, b) => b.price - a.price);
 
@@ -49,7 +52,7 @@ export function ReadyUsePage() {
             className="bg-[var(--card)] border border-[var(--border)] rounded-2xl md:rounded-3xl overflow-hidden group hover:border-[var(--primary)] transition-colors flex flex-col z-20 relative shadow-sm hover:shadow-[0_0_20px_rgba(139,114,190,0.2)] block"
           >
             <div className="relative aspect-square overflow-hidden bg-black">
-              <img src={product.image} alt={product.name} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-700" />
+              <img src={product.image} alt={product.title} className="w-full h-full object-cover opacity-90 group-hover:opacity-100 group-hover:scale-110 transition-transform duration-700" />
               {product.stock === 0 && (
                 <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
                   <span className="bg-white/10 backdrop-blur-md text-white font-bold text-xs md:text-sm px-4 py-1.5 rounded-full border border-white/20 tracking-wider">SOLD OUT</span>
@@ -58,7 +61,7 @@ export function ReadyUsePage() {
             </div>
             
             <div className="p-4 md:p-5 flex flex-col flex-grow">
-              <h3 className="text-white text-sm md:text-base font-semibold mb-2 line-clamp-2 leading-snug">{product.name}</h3>
+              <h3 className="text-white text-sm md:text-base font-semibold mb-2 line-clamp-2 leading-snug">{product.title}</h3>
               
               <div className="mt-auto pt-2">
                 <div className="flex items-center gap-2 mb-2 text-xs text-[var(--silver-gray)] font-medium">

@@ -121,9 +121,17 @@ export function LoginPage() {
       });
 
       if (error) throw error;
-
       console.log('Đăng nhập thành công:', data);
-      navigate('/profile');
+      
+      if (data.user) {
+        setTimeout(() => {
+          if (formData.email === 'dioxyzinefrog@gmail.com') {
+            navigate('/admin');
+          } else {
+            navigate('/profile');
+          }
+        }, 500);
+      }
       
     } catch (error) {
       console.error(error);
