@@ -147,7 +147,7 @@ export function AdminPage() {
                       </td>
                       
                       <td className="p-5 text-gray-300 text-sm truncate max-w-[150px]">
-                        {order.user_email || 'Unknown'}
+                        {order.customer_email || 'Unknown'}
                       </td>
                       
                       <td className="p-5">

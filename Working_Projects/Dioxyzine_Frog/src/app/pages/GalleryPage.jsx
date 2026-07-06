@@ -1,53 +1,64 @@
-import { useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Expand, X, Filter, Loader2 } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
 import { SEO } from '../components/common_components/SEO';
 import { SmartImage } from '../components/common_components/SmartImage';
 
-const categories = ['All', 'Plushies', 'Dolls', 'Accessories', 'Bags'];
-const ITEMS_PER_PAGE = 12;
+// Đồng bộ chuẩn với danh mục mới
+const categories = ['All', 'Plushie', 'Doll', 'Customize'];
+const ITEMS_PER_PAGE = 16; 
 
 export function GalleryPage() {
   const { products, loading } = useProducts();
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedImage, setSelectedImage] = useState(null);
   
-  const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
+  // Trạng thái Phân Trang
+  const [currentPage, setCurrentPage] = useState(1);
 
+  // Bốc toàn bộ ảnh từ mảng images_gallery ra 
   const galleryItems = useMemo(() => {
     let items = [];
     products.forEach(product => {
-      const isPlushieOrDoll = product.category.some(c => ['Plushies', 'Dolls'].includes(c));
-      const displayCategory = isPlushieOrDoll ? 'Plushies' : product.category[0];
+      // Vì category trong Database giờ chỉ có 1 tag (Plushie, Doll, Customize)
+      const displayCategory = product.category[0] || 'Customize';
 
       if (product.images && product.images.length > 0) {
         product.images.forEach((img, idx) => {
-          items.push({ id: `${product.id}-${idx}`, image: img, title: product.title, category: displayCategory });
+          items.push({ 
+            id: `${product.id}-${idx}`, 
+            image: img, 
+            title: product.title, 
+            category: displayCategory 
+          });
         });
-      } else if (product.image) {
-        items.push({ id: product.id, image: product.image, title: product.title, category: displayCategory });
       }
     });
     return items;
   }, [products]);
 
+  // Lọc theo Tab
   const filteredItems = galleryItems.filter(item => selectedCategory === 'All' || item.category === selectedCategory);
   
-  const visibleItems = filteredItems.slice(0, visibleCount);
+  // Tính toán phân trang
+  const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const currentItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    setVisibleCount(ITEMS_PER_PAGE);
+    setCurrentPage(1); // Đổi tab thì về lại trang 1
   };
 
-  const handleLoadMore = () => {
-    setVisibleCount(prev => prev + ITEMS_PER_PAGE);
+  const goToPage = (page) => {
+    setCurrentPage(page);
+    window.scrollTo({ top: 0, behavior: 'smooth' }); // Tự cuộn lên đầu khi sang trang
   };
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
-      <SEO title="Product Gallery" description="Explore the real-life premium plushies and custom merchandise manufactured at our workshop." />
+      <SEO title="Product Gallery" description="Explore the real-life premium plushies and custom merchandise." />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
@@ -55,13 +66,14 @@ export function GalleryPage() {
           <p className="text-lg text-[var(--muted-foreground)]">Realized concepts and final products from our workshop</p>
         </div>
 
-        <div className="flex flex-wrap justify-center gap-2 mb-12">
+        {/* NÚT LỌC TAB */}
+        <div className="flex flex-wrap justify-center gap-3 mb-12">
           {categories.map((category) => (
             <button
               key={category} onClick={() => handleCategoryChange(category)}
-              className={`px-6 py-2 rounded-full font-medium transition-all cursor-pointer ${
+              className={`px-6 py-2 rounded-full font-bold transition-all cursor-pointer ${
                 selectedCategory === category
-                  ? 'bg-[var(--primary)] text-white shadow-[0_0_15px_rgba(139,114,190,0.4)]'
+                  ? 'bg-[var(--primary)] text-white shadow-[0_0_15px_rgba(139,114,190,0.4)] scale-105'
                   : 'bg-[var(--card)] text-[var(--silver-gray)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-white'
               }`}
             >
@@ -76,29 +88,59 @@ export function GalleryPage() {
           </div>
         ) : filteredItems.length > 0 ? (
           <>
-            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {visibleItems.map((item) => (
-                <motion.div
-                  layout key={item.id} initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.3 }}
-                  className="relative aspect-square group rounded-2xl overflow-hidden cursor-pointer bg-[var(--card)] border border-[var(--border)] hover:border-[var(--primary)]"
-                  onClick={() => setSelectedImage(item)}
-                >
-                  <SmartImage src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 opacity-90 group-hover:opacity-100" />
-                  <div className="absolute inset-0 bg-[var(--cyber-black)]/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[2px]">
-                    <Expand className="w-8 h-8 text-white drop-shadow-[0_0_10px_rgba(139,114,190,0.8)]" />
-                  </div>
-                </motion.div>
-              ))}
+            <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
+              <AnimatePresence mode="popLayout">
+                {currentItems.map((item) => (
+                  <motion.div
+                    layout key={item.id} 
+                    initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.3 }}
+                    className="relative aspect-square group rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer bg-black shadow-lg"
+                    onClick={() => setSelectedImage(item)}
+                  >
+                    <SmartImage src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 opacity-80 group-hover:opacity-100 transition-all duration-500" />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
             </motion.div>
 
-            {visibleCount < filteredItems.length && (
-              <div className="mt-12 text-center">
+            {/* BỘ ĐIỀU KHIỂN PHÂN TRANG */}
+            {totalPages > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-16">
                 <button
-                  onClick={handleLoadMore}
-                  className="px-8 py-3 rounded-full bg-[#1A1528] border border-[var(--primary)] text-white font-bold hover:bg-[var(--primary)] hover:shadow-[0_0_15px_rgba(139,114,190,0.5)] transition-all cursor-pointer flex items-center justify-center gap-2 mx-auto"
+                  onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}
+                  className="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-white disabled:opacity-30 hover:bg-white/10 transition cursor-pointer"
                 >
-                  <Loader2 className="w-5 h-5" />
-                  Load More
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                
+                <div className="flex gap-2">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
+                    if (totalPages > 6) {
+                      if (page !== 1 && page !== totalPages && Math.abs(currentPage - page) > 1) {
+                        if (page === 2 || page === totalPages - 1) return <span key={page} className="text-gray-500 self-end">...</span>;
+                        return null;
+                      }
+                    }
+                    return (
+                      <button
+                        key={page} onClick={() => goToPage(page)}
+                        className={`w-11 h-11 rounded-xl font-bold transition-all flex items-center justify-center cursor-pointer ${
+                          currentPage === page 
+                            ? 'bg-[var(--primary)] text-white shadow-[0_0_15px_rgba(139,114,190,0.5)] scale-110' 
+                            : 'bg-[var(--card)] border border-[var(--border)] text-gray-400 hover:bg-white/10 hover:text-white'
+                        }`}
+                      >
+                        {page}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                <button
+                  onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}
+                  className="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-white disabled:opacity-30 hover:bg-white/10 transition cursor-pointer"
+                >
+                  <ChevronRight className="w-5 h-5" />
                 </button>
               </div>
             )}
@@ -113,18 +155,16 @@ export function GalleryPage() {
 
       <AnimatePresence>
         {selectedImage && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm" onClick={() => setSelectedImage(null)}>
-            <button className="absolute top-6 right-6 text-[var(--silver-gray)] hover:text-white bg-[#1A1528] rounded-full p-2 border border-[var(--border)] transition-colors cursor-pointer" onClick={(e) => { e.stopPropagation(); setSelectedImage(null); }}>
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4">
+            <button onClick={() => setSelectedImage(null)} className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors cursor-pointer">
               <X className="w-6 h-6" />
             </button>
-            <motion.div initial={{ scale: 0.9, y: 20 }} animate={{ scale: 1, y: 0 }} exit={{ scale: 0.9, y: 20 }} className="relative max-w-5xl w-full max-h-[85vh] rounded-2xl overflow-hidden shadow-[0_0_40px_rgba(139,114,190,0.3)] bg-black" onClick={(e) => e.stopPropagation()}>
-              <img src={selectedImage.image} alt={selectedImage.title} className="w-full h-full max-h-[85vh] object-contain" />
-              <div className="absolute bottom-0 inset-x-0 p-6 bg-gradient-to-t from-black/90 to-transparent">
-                <h3 className="text-2xl font-bold text-white mb-1 drop-shadow-md">{selectedImage.title}</h3>
-                <p className="text-[var(--primary)] font-medium">{selectedImage.category}</p>
-              </div>
-            </motion.div>
-          </motion.div>
+            <motion.img
+              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+              src={selectedImage.image} alt={selectedImage.title}
+              className="max-w-full max-h-[90vh] rounded-2xl object-contain shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+            />
+          </div>
         )}
       </AnimatePresence>
     </div>

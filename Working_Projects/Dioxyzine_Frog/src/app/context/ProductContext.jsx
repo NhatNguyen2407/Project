@@ -31,7 +31,7 @@ export function ProductProvider({ children }) {
           return {
             id: item.id,
             title: item.title || '',
-            category: item.category ? String(item.category).split(',').map(c => c.trim()) : [],
+            category: item.category ? String(item.category).split('|').map(c => c.trim()) : [],
             type: item.type || 'custom', // Phân loại readyuse hay custom
             moq: Number(item.moq) || 11,
             pricingType: item.pricing_type,
@@ -42,7 +42,7 @@ export function ProductProvider({ children }) {
             description: item.description || '',
             note: item.note || '',
             image: optimizeCloudinaryUrl(item.image_cover || ''),
-            images: item.images_gallery ? String(item.images_gallery).split(',').map(i => optimizeCloudinaryUrl(i.trim())).filter(i => i) : [],
+            images: item.images_gallery ? String(item.images_gallery).split('|').map(i => optimizeCloudinaryUrl(i.trim())).filter(i => i) : [],
             sizes: pricing.sizes,
             priceBrackets: pricing.priceBrackets,
             addons: pricing.addons

@@ -9,8 +9,11 @@ import { useCart } from '../context/CartContext';
 import { COUNTRY_LIST } from '../data/storeData';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { TermsModal } from '../components/common_components/TermsModal';
+import { supabase } from '../service/supabase';
+import { useAuth } from '../../app/context/AuthContext';
 
 export function CheckoutPage() {
+  const { user } = useAuth();
   const { cart, cartTotal, clearCart } = useCart();
   const [orderComplete, setOrderComplete] = useState(false);
   
@@ -41,10 +44,10 @@ export function CheckoutPage() {
     setShippingForm({ ...shippingForm, [e.target.name]: e.target.value });
   };
 
-  const handlePlaceOrder = (e) => {
+  const handlePlaceOrder = async (e) => {
     e.preventDefault();
     
-    const { email, firstName, lastName, address, city, phoneNumber } = shippingForm;
+    const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
     if (!email.trim() || !firstName.trim() || !lastName.trim() || !address.trim() || !city.trim() || !phoneNumber.trim()) {
       return showToast('Please fill out all required information columns! 📝', 'error');
     }
@@ -57,15 +60,47 @@ export function CheckoutPage() {
       return showToast('You must agree to the Terms of Service before checkout! ⚠️', 'error');
     }
 
-    setOrderComplete(true);
-    setTimeout(() => {
-      setOrderComplete(false);
-      setAcceptedStoreTerms(false);
-      clearCart(); // Xóa sạch giỏ hàng sau khi chốt đơn thành công
-      setShippingForm({
-        email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '', countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
-      });
-    }, 3000);
+    try {
+      // 1. Đóng gói thông tin giỏ hàng và địa chỉ
+      const orderSummary = cart.map(item => `${item.qty}x ${item.name}`).join(' | ');
+      const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+      const fullAddress = `${firstName} ${lastName} - ${address}, ${city}, ${postalCode} (${countryCode})`;
+      const fullPhone = `${phoneCode} ${phoneNumber}`;
+      const finalPrice = cartTotal + 15; // Cộng 15$ ship
+
+      // 2. Bắn thẳng đơn hàng vào bảng inquiries trên Supabase
+      const { error } = await supabase.from('inquiries').insert([{
+        user_id: user ? user.id : null, 
+        customer_email: email,          
+        customer_name: `${firstName} ${lastName}`,
+        subject: '[READY-MADE] Store Order',
+        contact_info: fullPhone,
+        image_link: cart[0]?.image || 'N/A', 
+        product_name: `[READY-MADE] ${orderSummary}`,
+        quantity: totalQty,
+        status: 'Pending',
+        shipping_address: fullAddress,
+        phone_number: fullPhone,
+        total_amount: finalPrice
+      }]);
+
+      if (error) throw error;
+
+      // 3. Thành công -> Hiện hiệu ứng và dọn giỏ hàng
+      setOrderComplete(true);
+      setTimeout(() => {
+        setOrderComplete(false);
+        setAcceptedStoreTerms(false);
+        clearCart(); 
+        setShippingForm({
+          email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '', countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
+        });
+      }, 3000);
+
+    } catch (error) {
+      console.error('Lỗi khi chốt đơn:', error);
+      showToast('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!', 'error');
+    }
   };
 
   return (

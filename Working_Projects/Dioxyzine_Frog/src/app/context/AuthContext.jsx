@@ -15,7 +15,7 @@ export const AuthProvider = ({ children }) => {
         .from('user_roles')
         .select('role')
         .eq('user_id', userId)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
       if (data) setRole(data.role);
