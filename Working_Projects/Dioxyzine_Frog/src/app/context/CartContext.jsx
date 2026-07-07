@@ -11,7 +11,7 @@ export function CartProvider({ children }) {
 
   const [isCartOpen, setIsCartOpen] = useState(false);
 
-  // Mỗi khi giỏ hàng thay đổi, lưu ngay vào localStorage
+  // Mỗi khi giỏ hàng thay đổi, lưu ngay vào lo calStorage
   useEffect(() => {
     localStorage.setItem('dioxyzine_cart', JSON.stringify(cart));
   }, [cart]);

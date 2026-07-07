@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, Info, ShoppingCart } from 'lucide-react';
+// Bổ sung Star và MessageSquare vào đây
+import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, Info, ShoppingCart, Star, MessageSquare } from 'lucide-react';
 
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
@@ -9,6 +10,8 @@ import { MOCK_PRODUCTS } from '../data/storeData';
 import { CartDrawer } from '../components/store/CartDrawer';
 import { CheckoutModal } from '../components/store/CheckoutModal';
 import { SEO } from '../components/common_components/SEO';
+// Bổ sung import supabase để lấy reviews
+import { supabase } from '../service/supabase';
 
 export function ProductDetailPage() {
   const { id } = useParams();
@@ -30,6 +33,8 @@ export function ProductDetailPage() {
 
   // States quản lý Modal Giỏ hàng / Thanh toán
   const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [reviews, setReviews] = useState([]);
+  const [liveRating, setLiveRating] = useState(0);
 
   // Tìm thông tin sản phẩm dựa trên loại hàng
   const product = isReadyUse 
@@ -48,6 +53,35 @@ export function ProductDetailPage() {
     }
   }, [id, product, isReadyUse]);
 
+  // 🚀 FETCH REVIEWS THỰC TẾ TỪ DATABASE
+  useEffect(() => {
+    const fetchLiveReviews = async () => {
+      if (!product?.title) return;
+      try {
+        const { data, error } = await supabase
+          .from('inquiries')
+          .select('customer_name, rating, review_comment, created_at')
+          .not('rating', 'is', null) // Chỉ lấy đơn đã có đánh giá
+          .ilike('product_name', `%${product.title}%`) // Tìm tên sản phẩm trong giỏ hàng
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        
+        if (data && data.length > 0) {
+          setReviews(data);
+          // Tính trung bình cộng số sao
+          const avg = data.reduce((acc, curr) => acc + curr.rating, 0) / data.length;
+          setLiveRating(avg);
+        } else {
+          setLiveRating(product.rating || 5); // Nếu chưa ai đánh giá thì lấy mặc định
+        }
+      } catch (err) {
+        console.error("Lỗi tải reviews:", err);
+      }
+    };
+    fetchLiveReviews();
+  }, [product]);
+
   if (loading && !isReadyUse) {
     return <div className="min-h-screen pt-32 text-center text-2xl text-[var(--primary)] font-bold animate-pulse">Loading product data...</div>;
   }
@@ -56,13 +90,27 @@ export function ProductDetailPage() {
     return <div className="min-h-screen pt-32 text-center text-white text-2xl">Product not found.</div>;
   }
 
+  let images = [];
+  if (product.images && product.images.length > 0) {
+    images = product.images; // Đọc data cứng (MOCK_PRODUCTS)
+  } else {
+    // Đọc data từ Database (Mini CMS)
+    const cover = product.image_cover || product.image;
+    if (cover) images.push(cover);
+    
+    if (product.images_gallery) {
+      // Cắt chuỗi ảnh phụ bằng dấu | và ghép nối vào mảng ảnh chính
+      const gallery = product.images_gallery.split('|').map(img => img.trim()).filter(img => img !== '');
+      images = [...images, ...gallery];
+    }
+  }
+
   // Khởi tạo các mảng để làm nút Next/Prev
   const listToUse = isReadyUse ? MOCK_PRODUCTS : products;
   const currentIndex = listToUse.findIndex((p) => p.id === id);
   const prevProduct = currentIndex > 0 ? listToUse[currentIndex - 1] : listToUse[listToUse.length - 1];
   const nextProduct = currentIndex < listToUse.length - 1 ? listToUse[currentIndex + 1] : listToUse[0];
 
-  const images = product.images && product.images.length > 0 ? product.images : (product.image ? [product.image] : []);
   const currentMoq = isReadyUse ? 1 : (product.moq || 11);
   const maxQty = isReadyUse ? product.stock : 1000;
 
@@ -158,6 +206,18 @@ export function ProductDetailPage() {
               ) : (
                 <div className="bg-[var(--card)] rounded-3xl p-6 border border-[var(--border)] shadow-lg space-y-6">
                   
+                  {/* HIỂN THỊ SỐ SAO THỰC TẾ */}
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="flex items-center gap-1">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star key={star} className={`w-5 h-5 ${star <= Math.round(liveRating) ? 'fill-yellow-500 text-yellow-500' : 'text-gray-600'}`} />
+                      ))}
+                    </div>
+                    <span className="text-[var(--silver-gray)] font-bold text-sm ml-2">
+                      {liveRating.toFixed(1)} / 5.0 ({reviews.length} reviews)
+                    </span>
+                  </div>
+
                   <div className="flex items-baseline justify-between mb-4 border-b border-[var(--border)] pb-6">
                     <div>
                       <span className="text-sm text-[var(--muted-foreground)]">Unit Price</span>
@@ -210,7 +270,6 @@ export function ProductDetailPage() {
                       <AnimatePresence>
                         {hasAccessory && (
                           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="pt-6 overflow-hidden">
-                            {/* ĐÃ SỬA: Phục hồi thanh trượt slider cho phụ kiện */}
                             <div className="flex items-center justify-between mb-3">
                               <label className="font-semibold text-white">Accessory Qty</label>
                               <div className="flex items-center gap-2">
@@ -232,7 +291,7 @@ export function ProductDetailPage() {
                 <motion.button 
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} 
                   disabled={product.stock === 0}
-                  onClick={() => addToCart({...product, qty: quantity, selectedSize: product.sizes[sizeIndex].label})} 
+                  onClick={() => addToCart({...product, qty: quantity, selectedSize: product.sizes?.[sizeIndex]?.label})} 
                   className={`w-full py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all ${product.stock === 0 ? 'bg-white/10 text-gray-400 cursor-not-allowed' : 'bg-[var(--primary)] text-white shadow-[0_0_20px_rgba(139,114,190,0.5)] cursor-pointer'}`}
                 >
                   <ShoppingCart className="w-6 h-6" /> {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
@@ -252,6 +311,38 @@ export function ProductDetailPage() {
       {/* GỌI CART VÀ CHECKOUT VÀO ĐÂY ĐỂ HOẠT ĐỘNG KHI CLICK */}
       <CartDrawer onProceedToCheckout={() => setIsCheckoutOpen(true)} />
       <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
+
+      {/* 🚀 KHU VỰC HIỂN THỊ BÌNH LUẬN CỦA KHÁCH HÀNG */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-24">
+        <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2 font-heading">
+          <MessageSquare className="text-[var(--primary)]" /> Customer Reviews
+        </h3>
+        
+        {reviews.length === 0 ? (
+          <div className="bg-[#1A1528] rounded-3xl p-8 border border-[var(--border)] text-center text-[var(--muted-foreground)]">
+            Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên trải nghiệm nhé!
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {reviews.map((rev, idx) => (
+              <div key={idx} className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--border)] shadow-sm">
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <p className="text-white font-bold text-sm">{rev.customer_name || 'Khách hàng ẩn danh'}</p>
+                    <p className="text-xs text-gray-500 mt-0.5">{new Date(rev.created_at).toLocaleDateString('vi-VN')}</p>
+                  </div>
+                  <div className="flex">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <Star key={star} className={`w-3.5 h-3.5 ${star <= rev.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-700'}`} />
+                    ))}
+                  </div>
+                </div>
+                <p className="text-[var(--silver-gray)] text-sm italic">"{rev.review_comment}"</p>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </>
   );
 }

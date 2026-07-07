@@ -1,15 +1,17 @@
-export const COUNTRY_LIST = [
-  { code: 'AU', name: 'Australia', dialCode: '+61' },
-  { code: 'BE', name: 'Belgium', dialCode: '+32' },
-  { code: 'CA', name: 'Canada', dialCode: '+1' },
-  { code: 'FR', name: 'France', dialCode: '+33' },
-  { code: 'DE', name: 'Germany', dialCode: '+49' },
-  { code: 'JP', name: 'Japan', dialCode: '+81' },
-  { code: 'SG', name: 'Singapore', dialCode: '+65' },
-  { code: 'GB', name: 'United Kingdom', dialCode: '+44' },
-  { code: 'US', name: 'United States', dialCode: '+1' },
-  { code: 'VN', name: 'Vietnam', dialCode: '+84' },
-];
+import { customList } from 'country-codes-list';
+
+const rawCountryData = customList('countryCode', '{countryCode}|{countryNameEn}|{countryCallingCode}|{flag}');
+
+// 2. Biến đổi dữ liệu thành mảng Object và sắp xếp theo bảng chữ cái ABC
+export const COUNTRY_LIST = Object.values(rawCountryData).map(item => {
+  const [code, name, dial, flag] = item.split('|');
+  return {
+    code: code,
+    name: name,
+    dialCode: `+${dial.split(',')[0]}`, // Lấy mã vùng đầu tiên nếu 1 nước có nhiều mã
+    flag: flag
+  };
+}).sort((a, b) => a.name.localeCompare(b.name));
 
 export const MOCK_PRODUCTS = [
   { 

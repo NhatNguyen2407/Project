@@ -1,9 +1,9 @@
 // src/app/pages/ProductsPage.jsx
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
-import { Search, Filter, Paintbrush, ShoppingBag } from 'lucide-react';
+import { Search, Filter, Paintbrush, ShoppingBag, SlidersHorizontal } from 'lucide-react'; 
 import { useProducts } from '../context/ProductContext';
 import { ReadyUsePage } from './ReadyUsePage';
 import { SEO } from '../components/common_components/SEO';
@@ -27,6 +27,9 @@ export function ProductsPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
+  // 🚀 THÊM STATE CHO BỘ LỌC CẮT VIỀN
+  const [cutStyleFilter, setCutStyleFilter] = useState('All');
+
   // Xử lý đồng bộ nếu từ trang khác nhảy qua có truyền kèm state
   useEffect(() => {
     if (location.state?.tab) {
@@ -39,13 +42,22 @@ export function ProductsPage() {
     navigate(`/products/${tabName}`);
     setSelectedCategory('All');
     setSearchQuery('');
+    setCutStyleFilter('All'); // Đổi tab reset luôn bộ lọc
   };
 
+  // Cập nhật hàm lọc để xử lý thêm Cut Style
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === 'All' || product.category.includes(selectedCategory);
     const titleEn = (product.title || '').toLowerCase();
     const matchesSearch = titleEn.includes(searchQuery.toLowerCase());
-    return matchesCategory && matchesSearch;
+    
+    // 🚀 Lọc theo kiểu cắt viền (Chỉ áp dụng khi đang ở tab Plushie)
+    let matchesCutStyle = true;
+    if (selectedCategory === 'Plushie' && cutStyleFilter !== 'All') {
+      matchesCutStyle = product.cut_style === cutStyleFilter;
+    }
+
+    return matchesCategory && matchesSearch && matchesCutStyle;
   });
 
   return (
@@ -91,12 +103,15 @@ export function ProductsPage() {
         {/* RENDER NỘI DUNG THEO PATH HIỆN TẠI */}
         {activeTab === 'custom' ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
-            <div className="flex flex-col md:flex-row gap-6 mb-12 items-center justify-between">
+            <div className="flex flex-col md:flex-row gap-6 mb-6 items-center justify-between">
               <div className="flex flex-wrap justify-center gap-2">
                 {categories.map((category) => (
                   <button
                     key={category}
-                    onClick={() => setSelectedCategory(category)}
+                    onClick={() => {
+                      setSelectedCategory(category);
+                      setCutStyleFilter('All'); // Bấm chọn category thì reset lọc viền
+                    }}
                     className={`px-6 py-2 rounded-full font-medium transition-all cursor-pointer ${
                       selectedCategory === category
                         ? 'bg-[var(--primary)] text-white shadow-md'
@@ -116,10 +131,47 @@ export function ProductsPage() {
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full pl-12 pr-4 py-3 rounded-full bg-[var(--card)] border border-[var(--border)] text-white focus:outline-none focus:border-[var(--primary)] transition-colors shadow-sm"
                 />
-                <Search className="absolute left-4top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted-foreground)]" />
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted-foreground)]" />
               </div>
             </div>
- 
+
+            {/* 🚀 BỘ LỌC PHỤ CHO KIỂU CẮT VIỀN (CHỈ HIỆN KHI Ở TAB PLUSHIE) */}
+            <AnimatePresence>
+              {selectedCategory === 'Plushie' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: -10, height: 0 }}
+                  animate={{ opacity: 1, y: 0, height: 'auto' }}
+                  exit={{ opacity: 0, y: -10, height: 0 }}
+                  className="flex flex-wrap items-center gap-3 mb-10 bg-[#1A1528]/50 border border-[var(--border)] p-3 rounded-2xl w-fit mx-auto md:mx-0 overflow-hidden"
+                >
+                  <span className="text-xs font-bold text-gray-400 flex items-center gap-1 uppercase tracking-wider ml-1">
+                    <SlidersHorizontal className="w-3.5 h-3.5 text-[var(--primary)]" /> Cut Style:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      { key: 'All', label: 'All Styles' },
+                      { key: 'borderless', label: 'Không sát viền (Borderless)' },
+                      { key: 'bordered', label: 'Sát viền (Bordered)' }
+                    ].map(style => (
+                      <button
+                        key={style.key}
+                        onClick={() => setCutStyleFilter(style.key)}
+                        className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                          cutStyleFilter === style.key
+                            ? 'bg-white/10 text-[var(--primary)] border border-[var(--primary)]/30'
+                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                        }`}
+                      >
+                        {style.label}
+                      </button>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+            {/* Thêm margin-bottom nếu không hiển thị bộ lọc để giữ khoảng cách */}
+            {selectedCategory !== 'Plushie' && <div className="mb-10"></div>}
+
             {loading ? (
               <div className="text-center py-24 text-[var(--primary)] font-bold text-xl animate-pulse">
                 Fetching data...

@@ -1,16 +1,20 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { Menu, X, ChevronDown, User, LogOut, LayoutDashboard, Shield } from 'lucide-react';
+import { Menu, ShoppingCart, X, ChevronDown, User, LogOut, LayoutDashboard, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from '../../../assets/Logo.png';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../service/supabase';
+import { useCart } from '../../context/CartContext';
 
 export function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+
+  const { cart, setIsCartOpen } = useCart();
+  const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
 
   const { user, role } = useAuth();
   // const ADMIN_EMAIL = 'dioxyzinefrog@gmail.com';
@@ -28,8 +32,8 @@ export function Navbar() {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/products', label: 'Products' },
-    { path: '/pricing', label: 'Pricing' },
     { path: '/gallery', label: 'Gallery' },
+    { path: '/pricing', label: 'Pricing' },
     { path: '/tutorial', label: 'Tutorial' },
     { path: '/about', label: 'About' },
   ];
@@ -116,6 +120,20 @@ export function Navbar() {
 
             {/* User Auth & Actions (Desktop) */}
             <div className="hidden md:flex items-center space-x-4">
+              
+              {/* 🚀 ĐÃ BỔ SUNG: NÚT GIỎ HÀNG */}
+              <button 
+                onClick={() => setIsCartOpen(true)} 
+                className="relative p-2 text-white hover:text-[var(--primary)] transition-colors cursor-pointer"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-lg">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+
               {user ? (
                 <div className="relative group py-6 cursor-pointer z-50">
                   <div className="flex items-center gap-2 bg-[#1A1528] border border-[var(--primary)]/30 px-3 py-1.5 rounded-full hover:border-[var(--primary)] transition-colors">
@@ -157,10 +175,26 @@ export function Navbar() {
               </Link>
             </div>
 
-            {/* mobile hamburger button */}
-            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-foreground cursor-pointer z-50 relative">
-              {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+            {/* mobile hamburger button & Cụm icon mobile */}
+            <div className="md:hidden flex items-center gap-4 z-50 relative">
+              {/* 🚀 BỔ SUNG NÚT GIỎ HÀNG CHO MOBILE */}
+              <button 
+                onClick={() => setIsCartOpen(true)} 
+                className="relative p-2 text-white hover:text-[var(--primary)] transition-colors cursor-pointer"
+              >
+                <ShoppingCart className="w-6 h-6" />
+                {totalItems > 0 && (
+                  <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-lg">
+                    {totalItems}
+                  </span>
+                )}
+              </button>
+
+              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-foreground cursor-pointer">
+                {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              </button>
+            </div>
+            
           </div>
         </div>
       </motion.nav>

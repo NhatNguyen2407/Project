@@ -28,6 +28,7 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { PixelTracker } from './components/common_components/PixelTracker';
+import { CartDrawer } from './components/store/CartDrawer';
 
 //import context
 import { CartProvider } from './context/CartContext';
@@ -124,6 +125,7 @@ export default function App() {
                       </ProtectedRoute>
                     } 
                   />
+                  
 
                   {/*about and sub-about*/}
                   <Route path="/about" element={<Navigate to="/about/contact" replace />} />
@@ -145,6 +147,9 @@ export default function App() {
 
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>
+                
+                <CartDrawer />
+
                 <Footer />
               </div>
             </BrowserRouter>

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Mail, LogOut, Package, Calendar, Clock, Tag, CreditCard, Crown, Check, Star, MessageSquare, Truck, AlertCircle, PlusCircle, RotateCcw } from 'lucide-react';
+import { User, Mail, LogOut, Package, Calendar, Tag, CreditCard, Crown, Check, Star, MessageSquare, Truck, AlertCircle, PlusCircle, Settings, Save, Lock, Camera, Trash2, Heart } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../service/supabase';
@@ -8,10 +8,16 @@ import { supabase } from '../service/supabase';
 export function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
+  
+  const [activeView, setActiveView] = useState('orders'); // 'orders', 'settings', hoặc 'wishlist'
+
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
-  // Popup States
+  // 🚀 STATE CHO WISHLIST
+  const [wishlist, setWishlist] = useState([]);
+  const [loadingWishlist, setLoadingWishlist] = useState(true);
+
   const [reviewOrder, setReviewOrder] = useState(null);
   const [returnOrder, setReturnOrder] = useState(null);
   
@@ -19,11 +25,36 @@ export function ProfilePage() {
   const [comment, setComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
 
+  // STATE QUẢN LÝ FORM SETTINGS
+  const [profileForm, setProfileForm] = useState({
+    fullName: '',
+    avatarUrl: '',
+    email: ''
+  });
+  const [newPassword, setNewPassword] = useState('');
+  
+  const [avatarFile, setAvatarFile] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [updatingProfile, setUpdatingProfile] = useState(false);
+
   const STEPS = ['Pending', 'Confirmed', 'Processing', 'Shipping', 'Completed'];
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
+  // HÀM LẤY DANH SÁCH WISHLIST
+  const fetchMyWishlist = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('wishlists')
+        .select('product_id, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setWishlist(data || []);
+    } catch (error) {
+      console.error('Lỗi khi lấy Wishlist:', error.message);
+    } finally {
+      setLoadingWishlist(false);
+    }
   };
 
   const fetchMyOrders = async () => {
@@ -44,24 +75,28 @@ export function ProfilePage() {
 
   useEffect(() => {
     if (user) {
+      setProfileForm({
+        fullName: user.user_metadata?.full_name || '',
+        avatarUrl: user.user_metadata?.avatar_url || '',
+        email: user.email || ''
+      });
       fetchMyOrders();
+      fetchMyWishlist(); // Gọi thêm data wishlist khi load trang
     }
   }, [user]);
 
-  const completedCount = orders.filter(
-    (order) => order.status?.toLowerCase() === 'completed'
-  ).length;
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate('/login');
+  };
+
+  const completedCount = orders.filter((order) => order.status?.toLowerCase() === 'completed').length;
 
   const getMembershipDetails = () => {
-    if (completedCount >= 10) {
-      return { tierName: 'GOLD VIP MEMBER', perks: 'Free Shipping + 10% OFF Total Bill', gradient: 'from-[#4A154B] via-[#2C1654] to-[#120C1F]' };
-    } else if (completedCount >= 7) {
-      return { tierName: 'SILVER MEMBER', perks: 'Free Shipping + 5% OFF Total Bill', gradient: 'from-[#3A1C6E] via-[#211343] to-[#100A21]' };
-    } else if (completedCount >= 5) {
-      return { tierName: 'BRONZE MEMBER', perks: 'Free Shipping on All Orders', gradient: 'from-[#2D1B54] via-[#1C1236] to-[#0A0614]' };
-    } else {
-      return { tierName: 'STANDARD MEMBER', perks: 'Standard Shipping Rates Apply', gradient: 'from-[#1E1135] via-[#130B22] to-[#08040F]' };
-    }
+    if (completedCount >= 10) return { tierName: 'GOLD VIP MEMBER', perks: 'Free Shipping + 10% OFF Total Bill', gradient: 'from-[#4A154B] via-[#2C1654] to-[#120C1F]' };
+    if (completedCount >= 7) return { tierName: 'SILVER MEMBER', perks: 'Free Shipping + 5% OFF Total Bill', gradient: 'from-[#3A1C6E] via-[#211343] to-[#100A21]' };
+    if (completedCount >= 5) return { tierName: 'BRONZE MEMBER', perks: 'Free Shipping on All Orders', gradient: 'from-[#2D1B54] via-[#1C1236] to-[#0A0614]' };
+    return { tierName: 'STANDARD MEMBER', perks: 'Standard Shipping Rates Apply', gradient: 'from-[#1E1135] via-[#130B22] to-[#08040F]' };
   };
 
   const currentTier = getMembershipDetails();
@@ -77,25 +112,62 @@ export function ProfilePage() {
     
     setSubmittingReview(true);
     try {
-      const { error } = await supabase
-        .from('inquiries')
-        .update({ 
-          status: 'Completed',
-          rating: rating,
-          review_comment: comment
-        })
-        .eq('id', reviewOrder.id);
-
+      const { error } = await supabase.from('inquiries').update({ status: 'Completed', rating: rating, review_comment: comment }).eq('id', reviewOrder.id);
       if (error) throw error;
+      setReviewOrder(null); setRating(5); setComment(''); await fetchMyOrders();
+    } catch (error) { alert('Lỗi khi hoàn thành đơn hàng: ' + error.message); } finally { setSubmittingReview(false); }
+  };
 
-      setReviewOrder(null);
-      setRating(5);
-      setComment('');
-      await fetchMyOrders();
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setAvatarFile(file);
+      setAvatarPreview(URL.createObjectURL(file));
+    }
+  };
+
+  const handleUpdateProfile = async (e) => {
+    e.preventDefault();
+    setUpdatingProfile(true);
+
+    try {
+      let finalAvatarUrl = profileForm.avatarUrl;
+
+      if (avatarFile) {
+        const fileExt = avatarFile.name.split('.').pop();
+        const fileName = `${user.id}-${Math.random()}.${fileExt}`;
+        
+        const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, avatarFile);
+        if (uploadError) throw uploadError;
+
+        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
+        finalAvatarUrl = publicUrl;
+      }
+
+      const { error: metaError } = await supabase.auth.updateUser({
+        data: { full_name: profileForm.fullName, avatar_url: finalAvatarUrl }
+      });
+      if (metaError) throw metaError;
+
+      if (newPassword.trim() !== '') {
+        const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
+        if (pwError) throw pwError;
+      }
+
+      if (profileForm.email !== user.email) {
+        const { error: emailError } = await supabase.auth.updateUser({ email: profileForm.email });
+        if (emailError) throw emailError;
+        alert('Cập nhật thành công! Supabase đã gửi link xác nhận đến CẢ EMAIL CŨ VÀ MỚI. Vui lòng check cả 2 hộp thư để hoàn tất đổi Email.');
+      } else {
+        alert('Đã lưu cấu hình tài khoản thành công! 🐸');
+      }
+      
+      window.location.reload();
+
     } catch (error) {
-      alert('Lỗi khi hoàn thành đơn hàng: ' + error.message);
+      alert('Lỗi cập nhật: ' + error.message);
     } finally {
-      setSubmittingReview(false);
+      setUpdatingProfile(false);
     }
   };
 
@@ -109,158 +181,312 @@ export function ProfilePage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="md:col-span-1 bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 h-fit shadow-[0_0_30px_rgba(139,114,190,0.05)]">
-            <div className="flex flex-col items-center text-center">
-              <div className="w-24 h-24 bg-[#1A1528] rounded-full flex items-center justify-center border-2 border-[var(--primary)] mb-4">
-                <User className="w-10 h-10 text-[var(--primary)]" />
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          
+          {/* CỘT TRÁI: MENU */}
+          <div className="md:col-span-1 space-y-4">
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
+              <div className="flex flex-col items-center text-center">
+                <div className="w-24 h-24 bg-[#1A1528] rounded-full flex items-center justify-center border-2 border-[var(--primary)] mb-4 overflow-hidden relative">
+                  {user.user_metadata?.avatar_url ? (
+                    <img src={user.user_metadata.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <User className="w-10 h-10 text-[var(--primary)]" />
+                  )}
+                </div>
+                <h2 className="text-xl font-bold text-[var(--primary)] truncate w-full">{user.user_metadata?.full_name || 'Froggy Member'}</h2>
+                <div className="flex items-center gap-2 text-[var(--primary)] opacity-80 mt-2">
+                  <Mail className="w-4 h-4" />
+                  <span className="text-xs truncate">{user.email}</span>
+                </div>
               </div>
-              <h2 className="text-xl font-bold text-[var(--primary)] truncate w-full">{user.user_metadata?.full_name || 'Froggy Member'}</h2>
-              <div className="flex items-center gap-2 text-[var(--primary)] opacity-80 mt-2">
-                <Mail className="w-4 h-4" />
-                <span className="text-sm truncate">{user.email}</span>
-              </div>
-              <div className="w-full border-t border-[var(--border)] my-6"></div>
-              <button onClick={handleLogout} className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-[var(--primary)]/5 text-[var(--primary)] font-bold hover:bg-[var(--primary)]/10 transition-colors cursor-pointer">
+            </div>
+
+            <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-3 shadow-sm space-y-2">
+              <button onClick={() => setActiveView('orders')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all cursor-pointer ${activeView === 'orders' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                <Package className="w-5 h-5" /> My Orders
+              </button>
+              
+              {/* NÚT TAB WISHLIST */}
+              <button onClick={() => setActiveView('wishlist')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all cursor-pointer ${activeView === 'wishlist' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                <Heart className="w-5 h-5" /> My Wishlist
+              </button>
+
+              <button onClick={() => setActiveView('settings')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all cursor-pointer ${activeView === 'settings' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
+                <Settings className="w-5 h-5" /> Settings
+              </button>
+              
+              <div className="border-t border-[var(--border)] my-2"></div>
+              
+              <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-400 hover:bg-red-400/10 transition-colors cursor-pointer">
                 <LogOut className="w-5 h-5" /> Sign Out
               </button>
             </div>
           </div>
 
-          <div className="md:col-span-2 space-y-6">
-            <div className={`bg-gradient-to-br ${currentTier.gradient} border border-white/5 rounded-3xl p-6 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.4)]`}>
-              <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
-              <div className="flex justify-between items-start mb-10">
-                <div className="space-y-1">
-                  <p className="text-xs font-mono text-[var(--primary)] tracking-widest opacity-60">DIOXYZINE FROG LOYALTY</p>
-                  <h3 className="text-xl font-black text-[var(--primary)] tracking-wider">{currentTier.tierName}</h3>
+          {/* CỘT PHẢI: NỘI DUNG TƯƠNG ỨNG VỚI TAB ĐANG CHỌN */}
+          <div className="md:col-span-3 space-y-6">
+            
+            {/* VIEW 1: MY ORDERS */}
+            {activeView === 'orders' && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
+                {/* THẺ THÀNH VIÊN LOYALTY */}
+                <div className={`bg-gradient-to-br ${currentTier.gradient} border border-white/5 rounded-3xl p-6 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.4)]`}>
+                  <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
+                  <div className="flex justify-between items-start mb-10">
+                    <div className="space-y-1">
+                      <p className="text-xs font-mono text-[var(--primary)] tracking-widest opacity-60">DIOXYZINE FROG LOYALTY</p>
+                      <h3 className="text-xl font-black text-[var(--primary)] tracking-wider">{currentTier.tierName}</h3>
+                    </div>
+                    <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-[var(--primary)]"><CreditCard className="w-6 h-6" /></div>
+                  </div>
+                  <div className="flex justify-between items-end">
+                    <div className="space-y-1">
+                      <p className="text-[10px] font-mono text-[var(--primary)] uppercase tracking-wider opacity-60">Current Benefits</p>
+                      <p className="text-sm font-bold text-[var(--primary)] flex items-center gap-1.5"><Crown className="w-4 h-4" /> {currentTier.perks}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-[10px] font-mono text-[var(--primary)] uppercase tracking-wider opacity-60">Completed</p>
+                      <p className="text-lg font-bold font-mono text-[var(--primary)]">{completedCount} Orders</p>
+                    </div>
+                  </div>
                 </div>
-                <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-[var(--primary)]"><CreditCard className="w-6 h-6" /></div>
-              </div>
-              <div className="flex justify-between items-end">
-                <div className="space-y-1">
-                  <p className="text-[10px] font-mono text-[var(--primary)] uppercase tracking-wider opacity-60">Current Benefits</p>
-                  <p className="text-sm font-bold text-[var(--primary)] flex items-center gap-1.5"><Crown className="w-4 h-4" /> {currentTier.perks}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-[10px] font-mono text-[var(--primary)] uppercase tracking-wider opacity-60">Completed</p>
-                  <p className="text-lg font-bold font-mono text-[var(--primary)]">{completedCount} Orders</p>
-                </div>
-              </div>
-            </div>
 
-            <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
-              <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2"><Package /> My Orders ({orders.length})</h3>
+                {/* DANH SÁCH ĐƠN HÀNG */}
+                <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
+                  <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2"><Package /> My Orders ({orders.length})</h3>
 
-              {loadingOrders ? (
-                <div className="text-center py-8 text-[var(--primary)] opacity-60">Loading your orders...</div>
-              ) : orders.length === 0 ? (
-                <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[var(--border)] border-dashed">
-                  <p className="text-[var(--primary)] opacity-70">You don't have any orders yet.</p>
-                </div>
-              ) : (
-                <div className="space-y-6">
-                  {orders.map((order) => {
-                    const currentStepIdx = getStepIndex(order.status);
-                    const isReturned = order.status?.toLowerCase() === 'returned';
+                  {loadingOrders ? (
+                    <div className="text-center py-8 text-[var(--primary)] opacity-60">Loading your orders...</div>
+                  ) : orders.length === 0 ? (
+                    <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[var(--border)] border-dashed">
+                      <p className="text-[var(--primary)] opacity-70">You don't have any orders yet.</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-6">
+                      {orders.map((order) => {
+                        const currentStepIdx = getStepIndex(order.status);
+                        const isReturned = order.status?.toLowerCase() === 'returned';
 
-                    return (
-                      <div key={order.id} className="bg-[#1A1528] border border-[var(--border)] rounded-2xl p-5 space-y-5 hover:border-[var(--primary)]/30 transition-colors">
-                        
-                        <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
-                          <div className="space-y-1.5 flex-1">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-[var(--primary)] opacity-50">#{order.id.slice(0, 8)}</span>
-                              <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20 font-semibold">{order.status || 'Pending'}</span>
-                            </div>
-                            <h4 className="text-lg font-bold text-[var(--primary)]">{order.product_name}</h4>
+                        return (
+                          <div key={order.id} className="bg-[#1A1528] border border-[var(--border)] rounded-2xl p-5 space-y-5 hover:border-[var(--primary)]/30 transition-colors">
                             
-                            <div className="flex flex-col gap-1 text-xs text-[var(--primary)] opacity-80 mt-2">
-                              <span className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" /> Qty: {order.quantity}</span>
-                              <span className="flex items-center gap-1.5"><PlusCircle className="w-3.5 h-3.5" /> Addons: {order.addons || 0}</span>
-                              <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Date Submitted: {new Date(order.created_at).toLocaleDateString('vi-VN')}</span>
-                              <span className="flex items-center gap-1.5 font-semibold"><Truck className="w-3.5 h-3.5" /> Estimated Shipping: {order.estimated_shipping_date ? new Date(order.estimated_shipping_date).toLocaleDateString('vi-VN') : 'TBD'}</span>
-                            </div>
-                          </div>
-                          
-                          {/* KHU VỰC NÚT BẤM CẬP NHẬT MỚI */}
-                          <div className="flex flex-wrap gap-2 w-full sm:w-auto mt-2 sm:mt-0 justify-start sm:justify-end">
-                            
-                            {/* Nút Xác nhận và Hoàn hàng (Chỉ hiện lúc Shipping) */}
-                            {order.status?.toLowerCase() === 'shipping' && (
-                              <>
-                                <button onClick={() => setReviewOrder(order)} className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-green-600 hover:bg-green-700 text-white text-xs font-bold transition-colors flex items-center justify-center gap-1 shadow-lg shadow-green-900/20 cursor-pointer">
-                                  <Check className="w-4 h-4" /> Received
-                                </button>
-                                <button onClick={() => setReturnOrder(order)} className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-red-500/10 text-red-400 border border-red-500/20 hover:bg-red-500/20 text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer">
-                                  <RotateCcw className="w-4 h-4" /> Return
-                                </button>
-                              </>
-                            )}
-
-                            {/* Nút Đánh giá (Hiện lúc Completed mà chưa có rating) */}
-                            {order.status?.toLowerCase() === 'completed' && !order.rating && (
-                              <button onClick={() => setReviewOrder(order)} className="flex-1 sm:flex-none px-4 py-2 rounded-xl bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border border-yellow-500/20 text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer">
-                                <Star className="w-4 h-4" /> Leave Review
-                              </button>
-                            )}
-
-                            <a href={order.image_link} target="_blank" rel="noreferrer" className="flex-1 sm:flex-none text-center px-4 py-2 rounded-xl bg-[var(--primary)]/10 text-[var(--primary)] text-xs font-bold hover:bg-[var(--primary)]/20 transition-colors">View Design</a>
-                          </div>
-                        </div>
-
-                        {/* HIỂN THỊ ĐÁNH GIÁ (NẾU CÓ) */}
-                        {order.status?.toLowerCase() === 'completed' && order.rating && (
-                          <div className="p-4 bg-black/20 rounded-xl border border-white/5 mt-2">
-                            <div className="flex items-center gap-1 mb-1.5">
-                              {[1, 2, 3, 4, 5].map((star) => (
-                                <Star key={star} className={`w-3.5 h-3.5 ${star <= order.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-600'}`} />
-                              ))}
-                              <span className="text-xs text-yellow-500 font-bold ml-2">My Review</span>
-                            </div>
-                            {order.review_comment && (
-                              <p className="text-xs text-gray-400 italic">"{order.review_comment}"</p>
-                            )}
-                          </div>
-                        )}
-
-                        {/* THANH TIẾN ĐỘ */}
-                        {!isReturned ? (
-                          <div className="pt-2">
-                            <div className="relative flex justify-between items-center w-full">
-                              <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/5 -translate-y-1/2 z-0"></div>
-                              <div className="absolute top-1/2 left-0 h-0.5 bg-[var(--primary)] -translate-y-1/2 z-0 transition-all duration-500" style={{ width: `${(currentStepIdx / (STEPS.length - 1)) * 100}%` }}></div>
-
-                              {STEPS.map((step, index) => {
-                                const isPassed = index <= currentStepIdx;
-                                const isCurrent = index === currentStepIdx;
-                                return (
-                                  <div key={step} className="flex flex-col items-center relative z-10">
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center border text-[10px] font-bold transition-all duration-300 ${isPassed ? 'bg-[var(--primary)] border-[var(--primary)] text-black' : 'bg-[#1A1528] border-white/10 text-gray-500'} ${isCurrent ? 'ring-4 ring-[var(--primary)]/20 scale-110' : ''}`}>{index + 1}</div>
-                                    <span className={`text-[10px] mt-1.5 font-medium tracking-wide transition-colors ${isPassed ? 'text-[var(--primary)]' : 'text-gray-600'} ${isCurrent ? 'font-bold' : ''}`}>{step}</span>
+                            <div className="flex flex-col sm:flex-row justify-between items-start gap-4">
+                              <div className="space-y-1.5 flex-1">
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs font-mono text-[var(--primary)] opacity-50">#{order.id.slice(0, 8)}</span>
+                                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20 font-semibold">{order.status || 'Pending'}</span>
+                                </div>
+                                <h4 className="text-lg font-bold text-[var(--primary)]">{order.product_name}</h4>
+                                
+                                <div className="flex flex-col gap-1 text-xs text-[var(--primary)] opacity-80 mt-2">
+                                  <span className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" /> Qty: {order.quantity}</span>
+                                  <span className="flex items-center gap-1.5"><PlusCircle className="w-3.5 h-3.5" /> Addons: {order.addons || 0}</span>
+                                  <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Date Submitted: {new Date(order.created_at).toLocaleDateString('vi-VN')}</span>
+                                  <span className="flex items-center gap-1.5 font-semibold"><Truck className="w-3.5 h-3.5" /> Estimated Shipping: {order.estimated_shipping_date ? new Date(order.estimated_shipping_date).toLocaleDateString('vi-VN') : 'TBD'}</span>
+                                </div>
+                              </div>
+                              
+                              <div className="flex flex-col w-full sm:w-auto mt-4 sm:mt-0 gap-3">
+                                {order.status?.toLowerCase() === 'shipping' && (
+                                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 w-full sm:w-[280px]">
+                                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
+                                      <div className="flex items-center gap-2">
+                                        <div className="w-8 h-8 rounded-full bg-[#EE0033]/20 flex items-center justify-center">
+                                          <Truck className="w-4 h-4 text-[#EE0033]" />
+                                        </div>
+                                        <div>
+                                          <p className="text-[10px] text-[var(--silver-gray)] uppercase tracking-wider">Vận chuyển</p>
+                                          <p className="text-sm font-bold text-white">Viettel Post</p>
+                                        </div>
+                                      </div>
+                                      <div className="text-right">
+                                        <p className="text-[10px] text-[var(--silver-gray)] uppercase tracking-wider">Mã Vận Đơn</p>
+                                        <p className="text-sm font-bold text-[var(--primary)] font-mono">{order.tracking_code || 'Updating...'}</p>
+                                      </div>
+                                    </div>
+                                    
+                                    <div className="flex gap-2">
+                                      <a href="https://viettelpost.com.vn/tra-cuu-hanh-trinh-don/" target="_blank" rel="noreferrer" className="flex-1 py-2 bg-[#EE0033] hover:bg-[#CC002C] text-white text-xs font-bold rounded-lg text-center transition-colors">
+                                        Tra Cứu Hàng
+                                      </a>
+                                      <button onClick={() => setReviewOrder(order)} className="flex-1 py-2 bg-green-600 hover:bg-green-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                                        <Check className="w-4 h-4" /> Đã Nhận
+                                      </button>
+                                    </div>
                                   </div>
-                                );
-                              })}
+                                )}
+
+                                {order.status?.toLowerCase() === 'completed' && !order.rating && (
+                                  <button onClick={() => setReviewOrder(order)} className="px-4 py-2.5 rounded-xl bg-yellow-500/10 text-yellow-500 hover:bg-yellow-500/20 border border-yellow-500/20 text-xs font-bold transition-colors flex items-center justify-center gap-1 cursor-pointer">
+                                    <Star className="w-4 h-4" /> Leave Review
+                                  </button>
+                                )}
+                              </div>
                             </div>
+
+                            {order.status?.toLowerCase() === 'completed' && order.rating && (
+                              <div className="p-4 bg-black/20 rounded-xl border border-white/5 mt-2">
+                                <div className="flex items-center gap-1 mb-1.5">
+                                  {[1, 2, 3, 4, 5].map((star) => (
+                                    <Star key={star} className={`w-3.5 h-3.5 ${star <= order.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-600'}`} />
+                                  ))}
+                                  <span className="text-xs text-yellow-500 font-bold ml-2">My Review</span>
+                                </div>
+                                {order.review_comment && (
+                                  <p className="text-xs text-gray-400 italic">"{order.review_comment}"</p>
+                                )}
+                              </div>
+                            )}
+
+                            {!isReturned ? (
+                              <div className="pt-2">
+                                <div className="relative flex justify-between items-center w-full">
+                                  <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/5 -translate-y-1/2 z-0"></div>
+                                  <div className="absolute top-1/2 left-0 h-0.5 bg-[var(--primary)] -translate-y-1/2 z-0 transition-all duration-500" style={{ width: `${(currentStepIdx / (STEPS.length - 1)) * 100}%` }}></div>
+
+                                  {STEPS.map((step, index) => {
+                                    const isPassed = index <= currentStepIdx;
+                                    const isCurrent = index === currentStepIdx;
+                                    return (
+                                      <div key={step} className="flex flex-col items-center relative z-10">
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center border text-[10px] font-bold transition-all duration-300 ${isPassed ? 'bg-[var(--primary)] border-[var(--primary)] text-black' : 'bg-[#1A1528] border-white/10 text-gray-500'} ${isCurrent ? 'ring-4 ring-[var(--primary)]/20 scale-110' : ''}`}>{index + 1}</div>
+                                        <span className={`text-[10px] mt-1.5 font-medium tracking-wide transition-colors ${isPassed ? 'text-[var(--primary)]' : 'text-gray-600'} ${isCurrent ? 'font-bold' : ''}`}>{step}</span>
+                                      </div>
+                                    );
+                                  })}
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl flex items-center gap-2 text-red-400 text-xs font-semibold">
+                                <AlertCircle className="w-4 h-4" /> Đơn hàng này đã được xử lý hoàn trả hàng.
+                              </div>
+                            )}
                           </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </motion.div>
+            )}
+
+            {/* VIEW 2: MY WISHLIST */}
+            {activeView === 'wishlist' && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
+                <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2"><Heart className="w-6 h-6"/> My Wishlist ({wishlist.length})</h3>
+                
+                {loadingWishlist ? (
+                  <div className="text-center py-8 text-[var(--primary)] opacity-60">Loading your wishlist...</div>
+                ) : wishlist.length === 0 ? (
+                  <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[var(--border)] border-dashed">
+                    <p className="text-[var(--primary)] opacity-70">You haven't liked any products yet.</p>
+                    <button onClick={() => navigate('/products')} className="mt-4 px-6 py-2 bg-[var(--primary)] text-white rounded-full font-bold text-sm hover:opacity-90 transition-opacity cursor-pointer">Explore Products</button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    {wishlist.map((item) => (
+                       <div key={item.product_id} className="bg-[#1A1528] border border-[var(--border)] rounded-2xl p-4 flex items-center gap-4 hover:border-[var(--primary)]/30 transition-colors cursor-pointer" onClick={() => navigate(`/product/${item.product_id}`)}>
+                         <div className="w-16 h-16 bg-black/40 rounded-xl border border-white/10 flex items-center justify-center flex-shrink-0">
+                            <Heart className="w-6 h-6 text-red-500 fill-red-500" />
+                         </div>
+                         <div>
+                           <h4 className="text-white font-bold text-sm line-clamp-1">{item.product_id}</h4>
+                           <p className="text-xs text-gray-500 mt-1">Added: {new Date(item.created_at).toLocaleDateString('vi-VN')}</p>
+                         </div>
+                       </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* VIEW 3: ACCOUNT SETTINGS */}
+            {activeView === 'settings' && (
+              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
+                <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2"><Settings className="w-6 h-6"/> Account Settings</h3>
+                
+                <form onSubmit={handleUpdateProfile} className="space-y-6">
+                  
+                  {/* UPLOAD VÀ XÓA AVATAR */}
+                  <div className="space-y-2">
+                    <label className="text-sm text-[var(--silver-gray)] font-semibold flex items-center gap-2">Profile Picture</label>
+                    <div className="flex items-center gap-6">
+                      <div className="w-20 h-20 bg-[#1A1528] rounded-full flex items-center justify-center border-2 border-[var(--primary)] overflow-hidden relative group cursor-pointer flex-shrink-0">
+                        {avatarPreview || profileForm.avatarUrl ? (
+                          <img src={avatarPreview || profileForm.avatarUrl} alt="Avatar Preview" className="w-full h-full object-cover group-hover:opacity-50 transition-opacity" />
                         ) : (
-                          <div className="p-3 bg-red-500/5 border border-red-500/10 rounded-xl flex items-center gap-2 text-red-400 text-xs font-semibold">
-                            <AlertCircle className="w-4 h-4" /> Đơn hàng này đã được xử lý hoàn trả hàng.
-                          </div>
+                          <User className="w-8 h-8 text-[var(--primary)]" />
+                        )}
+                        
+                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                          <Camera className="w-6 h-6 text-white" />
+                        </div>
+                        
+                        <input type="file" accept="image/*" onChange={handleFileChange} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer" />
+                      </div>
+                      <div className="space-y-2">
+                        <div>
+                          <p className="text-sm font-bold text-white mb-1">Upload new avatar</p>
+                          <p className="text-xs text-gray-400">Recommended size: 256x256px. Max 2MB.</p>
+                        </div>
+                        
+                        {(avatarPreview || profileForm.avatarUrl) && (
+                          <button 
+                            type="button" 
+                            onClick={() => {
+                              setAvatarFile(null);
+                              setAvatarPreview(null);
+                              setProfileForm({...profileForm, avatarUrl: ''}); 
+                            }}
+                            className="text-xs text-red-400 hover:text-red-300 font-semibold flex items-center gap-1 cursor-pointer transition-colors w-fit p-1 -ml-1 rounded-md hover:bg-red-400/10"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Remove picture
+                          </button>
                         )}
                       </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-[var(--border)] my-6"></div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm text-[var(--silver-gray)] font-semibold flex items-center gap-2"><User className="w-4 h-4"/> Display Name</label>
+                    <input required type="text" value={profileForm.fullName} onChange={e => setProfileForm({...profileForm, fullName: e.target.value})} placeholder="e.g. Froggy Member" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm text-[var(--silver-gray)] font-semibold flex items-center gap-2"><Lock className="w-4 h-4"/> Change Password</label>
+                    <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Leave blank to keep your current password" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                  </div>
+
+                  <div className="border-t border-[var(--border)] my-6"></div>
+
+                  <div className="space-y-2">
+                    <label className="text-sm text-yellow-500 font-semibold flex items-center gap-2"><Mail className="w-4 h-4"/> Security Email</label>
+                    <input required type="email" value={profileForm.email} onChange={e => setProfileForm({...profileForm, email: e.target.value})} className="w-full px-4 py-3 bg-[#1A1528] border border-yellow-500/30 rounded-xl text-white focus:border-yellow-500 outline-none transition-colors" />
+                    <div className="flex items-start gap-2 bg-yellow-500/10 border border-yellow-500/20 p-4 rounded-xl mt-3">
+                      <AlertCircle className="w-5 h-5 text-yellow-500 flex-shrink-0 mt-0.5" />
+                      <p className="text-xs text-yellow-500/90 leading-relaxed">
+                        <strong>Lưu ý quan trọng:</strong> Nếu bạn thay đổi Email, hệ thống sẽ gửi liên kết xác nhận đến <strong>CẢ email cũ và email mới</strong>. Bạn phải bấm xác nhận ở cả hai hộp thư thì Email mới chính thức được đổi.
+                      </p>
+                    </div>
+                  </div>
+
+                  <button type="submit" disabled={updatingProfile} className="w-full sm:w-auto px-8 py-3.5 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_0_15px_rgba(139,114,190,0.3)] disabled:opacity-50 cursor-pointer">
+                    {updatingProfile ? 'Saving...' : <><Save className="w-5 h-5"/> Save Changes</>}
+                  </button>
+                </form>
+              </motion.div>
+            )}
+
           </div>
         </div>
       </div>
 
-      {/* MODAL ĐÁNH GIÁ ĐƠN HÀNG */}
+      {/* MODAL ĐÁNH GIÁ ĐƠN HÀNG VÀ HOÀN TRẢ HÀNG GIỮ NGUYÊN */}
       <AnimatePresence>
         {reviewOrder && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
@@ -294,7 +520,6 @@ export function ProfilePage() {
         )}
       </AnimatePresence>
 
-      {/* MODAL HƯỚNG DẪN HOÀN TRẢ HÀNG */}
       <AnimatePresence>
         {returnOrder && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
@@ -321,7 +546,6 @@ export function ProfilePage() {
           </div>
         )}
       </AnimatePresence>
-
     </div>
   );
 }

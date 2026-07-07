@@ -1,7 +1,8 @@
 // src/app/pages/CheckoutPage.jsx
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Truck, CreditCard, CheckCircle2, ArrowLeft } from 'lucide-react';
+// Bổ sung Ticket, XCircle để làm UI Mã giảm giá
+import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle } from 'lucide-react';
 import { Link } from 'react-router';
 
 // Import Context và Components dùng chung
@@ -27,6 +28,11 @@ export function CheckoutPage() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
 
+  // 🚀 STATE QUẢN LÝ MÃ GIẢM GIÁ 🚀
+  const [promoCodeInput, setPromoCodeInput] = useState('');
+  const [appliedVoucher, setAppliedVoucher] = useState(null);
+  const [checkingVoucher, setCheckingVoucher] = useState(false);
+
   // Tự động cập nhật đầu số điện thoại theo quốc gia được chọn
   useEffect(() => {
     const selected = COUNTRY_LIST.find(c => c.code === shippingForm.countryCode);
@@ -43,6 +49,75 @@ export function CheckoutPage() {
   const handleInputChange = (e) => {
     setShippingForm({ ...shippingForm, [e.target.name]: e.target.value });
   };
+
+  // 🚀 HÀM KIỂM TRA MÀ ÁP DỤNG VOUCHER
+  const handleApplyVoucher = async () => {
+    if (!promoCodeInput.trim()) return;
+    setCheckingVoucher(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('vouchers')
+        .select('*')
+        .eq('code', promoCodeInput.trim().toUpperCase())
+        .single(); // Chỉ lấy 1 mã chính xác
+
+      if (error || !data) {
+        showToast('Invalid promo code! ❌', 'error');
+        setAppliedVoucher(null);
+        return;
+      }
+
+      // Check điều kiện mã
+      if (!data.is_active) {
+        showToast('This promo code is currently disabled. 🚫', 'error');
+        return;
+      }
+      
+      if (data.usage_limit && data.used_count >= data.usage_limit) {
+        showToast('This promo code has reached its usage limit. 🥺', 'error');
+        return;
+      }
+
+      // Check Hạn sử dụng (nếu có)
+      if (data.expires_at && new Date() > new Date(data.expires_at)) {
+        showToast('This promo code has expired. ⏰', 'error');
+        return;
+      }
+
+      // Nếu pass mọi bài test -> Lụm!
+      setAppliedVoucher(data);
+      showToast('Promo code applied successfully! 🎉', 'success');
+
+    } catch (err) {
+      console.error(err);
+      showToast('Something went wrong. Please try again.', 'error');
+    } finally {
+      setCheckingVoucher(false);
+    }
+  };
+
+  // Hủy mã
+  const handleRemoveVoucher = () => {
+    setAppliedVoucher(null);
+    setPromoCodeInput('');
+  };
+
+  // 🚀 TÍNH TOÁN LẠI TỔNG TIỀN SAU KHI CÓ MÃ
+  const SHIPPING_FEE = 15; // Giữ nguyên $15 như code cũ của sếp
+  
+  const getDiscountAmount = () => {
+    if (!appliedVoucher) return 0;
+    if (appliedVoucher.discount_type === 'percent') {
+      return cartTotal * (appliedVoucher.discount_value / 100);
+    }
+    // Kiểu trừ thẳng tiền (fixed)
+    return appliedVoucher.discount_value;
+  };
+
+  const discountValue = getDiscountAmount();
+  // Đảm bảo tổng bill không bị âm
+  const finalPrice = Math.max(0, cartTotal + SHIPPING_FEE - discountValue);
 
   const handlePlaceOrder = async (e) => {
     e.preventDefault();
@@ -61,15 +136,13 @@ export function CheckoutPage() {
     }
 
     try {
-      // 1. Đóng gói thông tin giỏ hàng và địa chỉ
       const orderSummary = cart.map(item => `${item.qty}x ${item.name}`).join(' | ');
       const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
       const fullAddress = `${firstName} ${lastName} - ${address}, ${city}, ${postalCode} (${countryCode})`;
       const fullPhone = `${phoneCode} ${phoneNumber}`;
-      const finalPrice = cartTotal + 15; // Cộng 15$ ship
 
-      // 2. Bắn thẳng đơn hàng vào bảng inquiries trên Supabase
-      const { error } = await supabase.from('inquiries').insert([{
+      // 1. Tạo đơn hàng (Đã được áp mã giảm giá)
+      const { error: orderError } = await supabase.from('inquiries').insert([{
         user_id: user ? user.id : null, 
         customer_email: email,          
         customer_name: `${firstName} ${lastName}`,
@@ -81,16 +154,27 @@ export function CheckoutPage() {
         status: 'Pending',
         shipping_address: fullAddress,
         phone_number: fullPhone,
-        total_amount: finalPrice
+        total_amount: finalPrice,
+        // (Tùy chọn: Lưu mã đã dùng vào database để đối soát nếu cần)
+        // applied_voucher_code: appliedVoucher ? appliedVoucher.code : null 
       }]);
 
-      if (error) throw error;
+      if (orderError) throw orderError;
 
-      // 3. Thành công -> Hiện hiệu ứng và dọn giỏ hàng
+      // 2. Tăng biến Đếm (used_count) của Voucher lên 1 trên Database
+      if (appliedVoucher) {
+        await supabase
+          .from('vouchers')
+          .update({ used_count: appliedVoucher.used_count + 1 })
+          .eq('id', appliedVoucher.id);
+      }
+
+      // 3. Xong xui, show pháo hoa
       setOrderComplete(true);
       setTimeout(() => {
         setOrderComplete(false);
         setAcceptedStoreTerms(false);
+        setAppliedVoucher(null); // Clear voucher
         clearCart(); 
         setShippingForm({
           email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '', countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
@@ -110,7 +194,6 @@ export function CheckoutPage() {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Nút quay lại trang sản phẩm nếu khách muốn mua thêm */}
         <div className="mb-6">
           <Link to="/products" className="inline-flex items-center gap-2 text-[var(--silver-gray)] hover:text-white transition-colors text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Back to Shopping
@@ -127,7 +210,7 @@ export function CheckoutPage() {
             </div>
           ) : (
             <>
-              {/* PHẦN ĐIỀN FORM (BÊN TRÁI) */}
+              {/* PHẦN ĐIỀN FORM (BÊN TRÁI) - GIỮ NGUYÊN KHÔNG ĐỔI */}
               <div className="w-full md:w-3/5 p-8 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] space-y-8">
                 <div>
                   <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -141,12 +224,19 @@ export function CheckoutPage() {
                     <div className="space-y-1">
                       <label className="text-xs text-[var(--silver-gray)] font-semibold">Country / Region *</label>
                       <div className="relative">
-                        <select name="countryCode" value={shippingForm.countryCode} onChange={handleInputChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none appearance-none cursor-pointer font-medium">
+                        <select 
+                          name="countryCode" 
+                          value={shippingForm.countryCode} 
+                          onChange={handleInputChange} 
+                          className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none appearance-none cursor-pointer font-medium"
+                        >
                           {COUNTRY_LIST.map(country => (
-                            <option key={country.code} value={country.code} className="bg-[#1A1528] text-white">{country.name} ({country.dialCode})</option>
+                            <option key={country.code} value={country.code} className="bg-[#1A1528] text-white">
+                              {country.flag} {country.name} ({country.dialCode})
+                            </option>
                           ))}
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white">
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[var(--silver-gray)]">
                           <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                         </div>
                       </div>
@@ -178,8 +268,19 @@ export function CheckoutPage() {
                     <div className="space-y-1">
                       <label className="text-xs text-[var(--silver-gray)] font-semibold">Phone Number *</label>
                       <div className="flex bg-[#1A1528] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-[var(--primary)] transition-colors">
-                        <span className="bg-white/5 px-4 flex items-center text-[var(--silver-gray)] text-sm font-bold border-r border-[var(--border)] select-none">{shippingForm.phoneCode}</span>
-                        <input required type="tel" name="phoneNumber" value={shippingForm.phoneNumber} onChange={handleInputChange} placeholder="987654321" className="w-full px-4 py-3 bg-transparent text-white outline-none" />
+                        <span className="bg-white/5 px-4 flex items-center gap-2 text-[var(--silver-gray)] text-sm font-bold border-r border-[var(--border)] select-none">
+                          <span className="text-lg">{COUNTRY_LIST.find(c => c.code === shippingForm.countryCode)?.flag}</span>
+                          {shippingForm.phoneCode}
+                        </span>
+                        <input 
+                          required 
+                          type="tel" 
+                          name="phoneNumber" 
+                          value={shippingForm.phoneNumber} 
+                          onChange={handleInputChange} 
+                          placeholder="987 654 321" 
+                          className="w-full px-4 py-3 bg-transparent text-white outline-none" 
+                        />
                       </div>
                     </div>
                   </div>
@@ -215,14 +316,69 @@ export function CheckoutPage() {
                       </div>
                     ))}
                   </div>
+
+                  {/* 🚀 Ô NHẬP MÃ GIẢM GIÁ 🚀 */}
+                  <div className="mb-6 border-b border-[var(--border)] pb-6">
+                    <label className="text-xs text-[var(--silver-gray)] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5"><Ticket className="w-3.5 h-3.5" /> Promo Code</label>
+                    {appliedVoucher ? (
+                      // Đã áp mã thành công
+                      <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
+                        <div>
+                          <p className="text-sm font-bold text-green-500 font-mono uppercase">{appliedVoucher.code}</p>
+                          <p className="text-xs text-green-500/80">
+                            {appliedVoucher.discount_type === 'percent' ? `${appliedVoucher.discount_value}% discount applied` : `$${appliedVoucher.discount_value} fixed discount applied`}
+                          </p>
+                        </div>
+                        <button onClick={handleRemoveVoucher} className="p-1.5 text-green-500 hover:bg-green-500/20 rounded-lg cursor-pointer transition-colors">
+                          <XCircle className="w-5 h-5" />
+                        </button>
+                      </div>
+                    ) : (
+                      // Chưa có mã -> Hiện ô nhập
+                      <div className="flex gap-2">
+                        <input 
+                          type="text" 
+                          value={promoCodeInput} 
+                          onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
+                          placeholder="Enter your code" 
+                          className="flex-1 px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white font-mono uppercase focus:border-[var(--primary)] outline-none transition-colors text-sm" 
+                        />
+                        <button 
+                          type="button" 
+                          onClick={handleApplyVoucher}
+                          disabled={!promoCodeInput.trim() || checkingVoucher}
+                          className="px-5 py-3 bg-[var(--card)] hover:bg-[var(--primary)] text-white border border-[var(--border)] hover:border-transparent font-bold rounded-xl text-sm transition-all cursor-pointer disabled:opacity-50"
+                        >
+                          {checkingVoucher ? '...' : 'Apply'}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+
                   <div className="space-y-3 text-sm text-[var(--silver-gray)] border-b border-[var(--border)] pb-6 mb-6">
                     <div className="flex justify-between"><span>Subtotal</span> <span className="font-semibold text-white">${cartTotal.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>Shipping Fee</span> <span className="font-semibold text-white">$15.00</span></div>
-                    <div className="flex justify-between"><span>Taxes</span> <span className="font-semibold text-white">Calculated at payment</span></div>
+                    <div className="flex justify-between"><span>Shipping Fee</span> <span className="font-semibold text-white">${SHIPPING_FEE.toFixed(2)}</span></div>
+                    
+                    {/* HIỆN SỐ TIỀN GIẢM VÀ GẠCH NGANG TRÊN HÓA ĐƠN */}
+                    <AnimatePresence>
+                      {appliedVoucher && (
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex justify-between text-yellow-500 font-bold overflow-hidden">
+                          <span>Discount ({appliedVoucher.code})</span> 
+                          <span>-${discountValue.toFixed(2)}</span>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
                   </div>
+
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-lg font-bold text-white">Total Amount</span>
-                    <span className="text-3xl font-bold text-[var(--primary)]">${(cartTotal + 15).toFixed(2)}</span>
+                    <div className="text-right">
+                      {/* Nếu có áp mã thì hiện giá gốc gạch mờ nhỏ ở trên */}
+                      {appliedVoucher && (
+                        <p className="text-sm text-gray-500 line-through">${(cartTotal + SHIPPING_FEE).toFixed(2)}</p>
+                      )}
+                      <span className="text-3xl font-bold text-[var(--primary)]">${finalPrice.toFixed(2)}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -234,7 +390,7 @@ export function CheckoutPage() {
                     </label>
                   </div>
                   <button type="button" onClick={handlePlaceOrder} className="w-full py-4 rounded-full bg-[var(--primary)] text-white font-bold text-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.5)] transition-all cursor-pointer block text-center">
-                    Confirm & Pay ${(cartTotal + 15).toFixed(2)}
+                    Confirm & Pay ${finalPrice.toFixed(2)}
                   </button>
                 </div>
               </div>
