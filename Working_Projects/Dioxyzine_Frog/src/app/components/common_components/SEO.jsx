@@ -1,39 +1,40 @@
 import { Helmet } from 'react-helmet-async';
 
 export function SEO({ title, description, image, url }) {
-  const siteTitle = title ? `${title} | Dioxyzine Frog` : 'Dioxyzine Frog | Custom Plushies & Merch';
+  // Tên mặc định của website sếp
+  const siteName = "Dioxyzine Frog";
   
-  // description
-  const defaultDesc = 'Transforming all your creative layouts and art concepts into premium high-quality handmade plush items.';
-  const siteDesc = description || defaultDesc;
+  // Tự động ghép tên sản phẩm với tên Shop. Nếu không có tên SP thì hiện tên Shop.
+  const finalTitle = title ? `${title} | ${siteName}` : siteName;
   
-  // banner
-  const defaultImage = 'https://res.cloudinary.com/dghydqkka/image/upload/q_auto,f_auto/DioxyzineFrog_Database/Products/Custom/Doll2D_In/DollIn_39.jpg';
-  const siteImage = image || defaultImage;
+  // Mô tả mặc định nếu trang đó không truyền mô tả vào
+  const finalDesc = description || "Transforming your creative layouts and art concepts into premium high-quality handmade plush items.";
+  
+  // Ảnh mặc định lúc chia sẻ link Trang chủ (Sếp thay link ảnh Logo/Banner xưởng của sếp vào đây nhé)
+  const finalImage = image || "https://res.cloudinary.com/dghydqkka/image/upload/DioxyzineFrog_Database/Avatar.jpg"; 
+  
+  // Tự động lấy đường link hiện tại khách đang xem
+  const finalUrl = url || typeof window !== 'undefined' ? window.location.href : '';
 
   return (
     <Helmet>
-      {/*browser seo*/}
-      <title>{siteTitle}</title>
-      <meta name="description" content={siteDesc} />
+      {/* 🚀 Thẻ chuẩn cho Trình duyệt (Đổi tên trên Tab) */}
+      <title>{finalTitle}</title>
+      <meta name="description" content={finalDesc} />
 
-      {/*media content */}
+      {/* 🚀 Thẻ Open Graph (Dành cho Facebook, Zalo, Discord...) */}
       <meta property="og:type" content="website" />
-      <meta property="og:url" content={url || 'https://dioxyzinefrog.com'} />
-      <meta property="og:title" content={siteTitle} />
-      <meta property="og:description" content={siteDesc} />
-      <meta property="og:image" content={siteImage} />
+      <meta property="og:url" content={finalUrl} />
+      <meta property="og:title" content={finalTitle} />
+      <meta property="og:description" content={finalDesc} />
+      <meta property="og:image" content={finalImage} />
 
-      {/* =======================================================
-        [FUTURE UPGRADE: TIKTOK INTEGRATION]
-        Hiện tại TikTok khi copy link vẫn đọc thẻ "og:" ở trên.
-        Nhưng tương lai nếu chạy Ads Tiktok hoặc gắn giỏ hàng Tiktok Shop, 
-        thì sẽ bỏ comment đoạn dưới đây và điền mã của TikTok cung cấp:
-        =======================================================
-        
-        <meta name="tiktok-verify-page" content="TIKTOK_VERIFY_CODE" />
-        <meta property="tiktok:app_id" content="YOUR_APP_ID" />
-      */}
+      {/* 🚀 Thẻ Twitter Card (Dành riêng cho X/Twitter) */}
+      <meta name="twitter:card" content="summary_large_image" />
+      <meta name="twitter:url" content={finalUrl} />
+      <meta name="twitter:title" content={finalTitle} />
+      <meta name="twitter:description" content={finalDesc} />
+      <meta name="twitter:image" content={finalImage} />
     </Helmet>
   );
 }
