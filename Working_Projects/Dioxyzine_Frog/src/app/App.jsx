@@ -28,7 +28,7 @@ import { ScrollToTop } from './components/ScrollToTop';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
 import { PixelTracker } from './components/common_components/PixelTracker';
-import { AnalyticsTracker } from './app/components/common_components/AnalyticsTracker';
+import { AnalyticsTracker } from '../app/components/common_components/AnalyticsTracker';
 import { CartDrawer } from './components/store/CartDrawer';
 
 //import context
