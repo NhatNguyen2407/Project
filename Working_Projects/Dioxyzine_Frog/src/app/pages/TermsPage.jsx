@@ -6,7 +6,6 @@ import { Printer, Truck, RotateCcw, Crown, ChevronRight, Construction } from 'lu
 export function TermsPage() {
   const location = useLocation();
   
-  // Lấy phần cuối của URL để xác định tab hiện tại
   const currentPath = location.pathname.split('/').pop();
 
   const tabs = [
@@ -16,7 +15,6 @@ export function TermsPage() {
     { id: 'membership', label: 'Terms of Membership', icon: Crown, path: '/about/terms/membership' },
   ];
 
-  // Giao diện trạng thái chờ cập nhật (Coming Soon)
   const ComingSoon = ({ title }) => (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }} 
@@ -140,13 +138,13 @@ export function TermsPage() {
                 </div>
               </div>
 
-              {/* Milestone 10 - GOLD VIP */}
+              {/* Milestone 10 - GOLD TIER */}
               <div className="bg-gradient-to-br from-[#4A154B] via-[#2C1654] to-[#120C1F] p-6 rounded-3xl border border-white/5 relative overflow-hidden shadow-[0_15px_30px_rgba(0,0,0,0.3)] hover:border-[var(--primary)]/50 transition-colors">
                 <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
                 
                 <div className="text-5xl font-black text-[var(--primary)] mb-2 relative z-10">10</div>
                 <h4 className="text-[var(--primary)] font-bold mb-2 uppercase tracking-widest text-sm opacity-90 relative z-10">
-                  Gold VIP
+                  Gold TIER
                 </h4>
                 <div className="space-y-1 relative z-10">
                   <p className="text-[var(--primary)] font-semibold text-sm">-10% OFF + Freeship</p>

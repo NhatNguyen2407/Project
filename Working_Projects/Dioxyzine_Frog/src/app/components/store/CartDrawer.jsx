@@ -1,10 +1,8 @@
-// src/app/components/store/CartDrawer.jsx
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ShoppingBag, Minus, Plus, ChevronRight } from 'lucide-react';
 import { useCart } from '../../context/CartContext';
 import { createPortal } from 'react-dom';
 
-// --- ĐÃ THÊM IMPORT NÀY ĐỂ ĐIỀU HƯỚNG URL ---
 import { useNavigate } from 'react-router';
 
 export function CartDrawer() {
@@ -12,7 +10,6 @@ export function CartDrawer() {
     cart, cartTotal, cartCount, isCartOpen, setIsCartOpen, updateCartQty, removeFromCart 
   } = useCart();
 
-  // Khởi tạo công cụ chuyển trang của react-router
   const navigate = useNavigate();
 
   if (typeof document === 'undefined') return null;
@@ -79,12 +76,11 @@ export function CartDrawer() {
                   <span className="text-white font-bold text-lg">Subtotal</span>
                   <span className="text-3xl font-bold text-[var(--primary)]">${cartTotal.toFixed(2)}</span>
                 </div>
-                {/* --- ĐÃ SỬA CHỖ NÀY: CHUYỂN HƯỚNG URL SANG TRANG THANH TOÁN MỚI --- */}
                 <button 
                   type="button"
                   onClick={() => {
-                    setIsCartOpen(false); // Đóng ngăn kéo giỏ hàng
-                    navigate('/checkout'); // Phi thẳng sang trang checkout độc lập
+                    setIsCartOpen(false); 
+                    navigate('/checkout');
                   }}
                   className="w-full py-4 rounded-full bg-[var(--primary)] text-white font-bold text-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.5)] transition-all cursor-pointer flex items-center justify-center gap-2"
                 >

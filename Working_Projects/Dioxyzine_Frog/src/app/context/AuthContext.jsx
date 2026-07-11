@@ -5,10 +5,9 @@ const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
-  const [role, setRole] = useState('customer'); // Mặc định ban đầu là khách thường
+  const [role, setRole] = useState('customer');
   const [loading, setLoading] = useState(true);
 
-  // Hàm phụ trợ để lấy role từ database dựa trên ID người dùng
   const fetchUserRole = async (userId) => {
     try {
       const { data, error } = await supabase
@@ -26,7 +25,6 @@ export const AuthProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    // Kiểm tra phiên đăng nhập hiện tại khi load trang
     supabase.auth.getSession().then(async ({ data: { session } }) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);
@@ -38,7 +36,6 @@ export const AuthProvider = ({ children }) => {
       setLoading(false);
     });
 
-    // Lắng nghe sự thay đổi trạng thái đăng nhập (Login/Logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
       const currentUser = session?.user ?? null;
       setUser(currentUser);

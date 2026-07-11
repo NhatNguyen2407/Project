@@ -133,9 +133,9 @@ export default function App() {
                   <Route path="/about" element={<Navigate to="/about/contact" replace />} />
                   <Route path="/about/contact" element={<AboutContactPage />} />
                   <Route path="/about/feedback" element={<FeedbackPage />} />
-                    {/* sub-terms */}
+                    
+                    {/* sub-terms */} 
                   <Route path="/about/terms" element={<TermsPage />}>
-                    {/* Khi khách vào /about/terms thì tự động đá sang /about/terms/printing */}
                     <Route index element={<Navigate to="printing" replace />} />
                     <Route path="printing" element={null} />
                     <Route path="shipping" element={null} />

@@ -14,7 +14,6 @@ export function ProfilePage() {
   const [orders, setOrders] = useState([]);
   const [loadingOrders, setLoadingOrders] = useState(true);
 
-  // 🚀 STATE CHO WISHLIST
   const [wishlist, setWishlist] = useState([]);
   const [loadingWishlist, setLoadingWishlist] = useState(true);
 
@@ -25,7 +24,6 @@ export function ProfilePage() {
   const [comment, setComment] = useState('');
   const [submittingReview, setSubmittingReview] = useState(false);
 
-  // STATE QUẢN LÝ FORM SETTINGS
   const [profileForm, setProfileForm] = useState({
     fullName: '',
     avatarUrl: '',
@@ -39,7 +37,6 @@ export function ProfilePage() {
 
   const STEPS = ['Pending', 'Confirmed', 'Processing', 'Shipping', 'Completed'];
 
-  // HÀM LẤY DANH SÁCH WISHLIST
   const fetchMyWishlist = async () => {
     try {
       const { data, error } = await supabase
@@ -81,7 +78,7 @@ export function ProfilePage() {
         email: user.email || ''
       });
       fetchMyOrders();
-      fetchMyWishlist(); // Gọi thêm data wishlist khi load trang
+      fetchMyWishlist(); 
     }
   }, [user]);
 
@@ -185,7 +182,6 @@ export function ProfilePage() {
         
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           
-          {/* CỘT TRÁI: MENU */}
           <div className="md:col-span-1 space-y-4">
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
               <div className="flex flex-col items-center text-center">
@@ -209,7 +205,6 @@ export function ProfilePage() {
                 <Package className="w-5 h-5" /> My Orders
               </button>
               
-              {/* NÚT TAB WISHLIST */}
               <button onClick={() => setActiveView('wishlist')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all cursor-pointer ${activeView === 'wishlist' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}>
                 <Heart className="w-5 h-5" /> My Wishlist
               </button>
@@ -226,13 +221,10 @@ export function ProfilePage() {
             </div>
           </div>
 
-          {/* CỘT PHẢI: NỘI DUNG TƯƠNG ỨNG VỚI TAB ĐANG CHỌN */}
           <div className="md:col-span-3 space-y-6">
             
-            {/* VIEW 1: MY ORDERS */}
             {activeView === 'orders' && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="space-y-6">
-                {/* THẺ THÀNH VIÊN LOYALTY */}
                 <div className={`bg-gradient-to-br ${currentTier.gradient} border border-white/5 rounded-3xl p-6 relative overflow-hidden shadow-[0_15px_35px_rgba(0,0,0,0.4)]`}>
                   <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-white/5 rounded-full blur-2xl pointer-events-none"></div>
                   <div className="flex justify-between items-start mb-10">
@@ -254,7 +246,6 @@ export function ProfilePage() {
                   </div>
                 </div>
 
-                {/* DANH SÁCH ĐƠN HÀNG */}
                 <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
                   <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2"><Package /> My Orders ({orders.length})</h3>
 
@@ -373,7 +364,6 @@ export function ProfilePage() {
               </motion.div>
             )}
 
-            {/* VIEW 2: MY WISHLIST */}
             {activeView === 'wishlist' && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
                 <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2"><Heart className="w-6 h-6"/> My Wishlist ({wishlist.length})</h3>
@@ -403,14 +393,12 @@ export function ProfilePage() {
               </motion.div>
             )}
 
-            {/* VIEW 3: ACCOUNT SETTINGS */}
             {activeView === 'settings' && (
               <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_30px_rgba(139,114,190,0.05)]">
                 <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2"><Settings className="w-6 h-6"/> Account Settings</h3>
                 
                 <form onSubmit={handleUpdateProfile} className="space-y-6">
                   
-                  {/* UPLOAD VÀ XÓA AVATAR */}
                   <div className="space-y-2">
                     <label className="text-sm text-[var(--silver-gray)] font-semibold flex items-center gap-2">Profile Picture</label>
                     <div className="flex items-center gap-6">
@@ -486,7 +474,6 @@ export function ProfilePage() {
         </div>
       </div>
 
-      {/* MODAL ĐÁNH GIÁ ĐƠN HÀNG VÀ HOÀN TRẢ HÀNG GIỮ NGUYÊN */}
       <AnimatePresence>
         {reviewOrder && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">

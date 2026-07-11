@@ -6,7 +6,6 @@ export function NotFoundPage() {
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent flex items-center justify-center px-4 relative z-10">
       
-      {/* Hiệu ứng mờ ảo phía sau */}
       <div className="absolute top-[20%] right-[20%] w-96 h-96 bg-[var(--primary)]/5 rounded-full blur-[120px] pointer-events-none -z-10"></div>
 
       <div className="max-w-2xl w-full text-center">

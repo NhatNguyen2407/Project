@@ -25,14 +25,13 @@ export function ProductProvider({ children }) {
         if (error) throw error;
 
         const formattedProducts = data.map(item => {
-          // Lấy cấu hình bảng giá từ file Matrix
           const pricing = pricingMatrix[item.pricing_type] || pricingMatrix['contact'];
           
           return {
             id: item.id,
             title: item.title || '',
             category: item.category ? String(item.category).split('|').map(c => c.trim()) : [],
-            type: item.type || 'custom', // Phân loại readyuse hay custom
+            type: item.type || 'custom',
             moq: Number(item.moq) || 11,
             pricingType: item.pricing_type,
             price: Number(item.price) || 0,

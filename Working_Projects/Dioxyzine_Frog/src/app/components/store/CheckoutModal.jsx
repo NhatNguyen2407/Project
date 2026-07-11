@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, Truck, CreditCard, CheckCircle2 } from 'lucide-react';
-// ĐÃ THÊM: Import createPortal
 import { createPortal } from 'react-dom';
 
 import { useCart } from '../../context/CartContext';
@@ -86,7 +85,7 @@ export function CheckoutModal({ isOpen, onClose }) {
         setOrderComplete(false);
         setAcceptedStoreTerms(false);
         clearCart();
-        onClose(); // Đóng popup sau khi xong
+        onClose(); 
         setShippingForm({
           email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '', countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
         });
@@ -100,7 +99,6 @@ export function CheckoutModal({ isOpen, onClose }) {
 
   if (typeof document === 'undefined') return null;
 
-  // ĐÃ SỬA: Bọc toàn bộ trong createPortal
   return createPortal(
     <AnimatePresence>
       {isOpen && (

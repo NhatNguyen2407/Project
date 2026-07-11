@@ -2,14 +2,13 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { Filter, ArrowDownUp, Star } from 'lucide-react';
 import { Link } from 'react-router';
-import { useProducts } from '../context/ProductContext'; // Lấy kho sản phẩm tổng
+import { useProducts } from '../context/ProductContext';
 
 export function ReadyUsePage() {
   const { products } = useProducts();
   const [activeCategory, setActiveCategory] = useState('All');
   const [sortBy, setSortBy] = useState('newest');
 
-  // Lọc lấy đúng hàng Có sẵn (Ready Use)
   const readyUseProducts = products.filter(p => p.type === 'readyuse');
 
   let displayedProducts = readyUseProducts.filter(p => activeCategory === 'All' || p.category.includes(activeCategory));

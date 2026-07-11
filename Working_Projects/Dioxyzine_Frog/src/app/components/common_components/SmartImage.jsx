@@ -1,4 +1,3 @@
-// src/app/components/common/SmartImage.jsx
 import { useState, useEffect } from 'react';
 
 export function SmartImage({ src, alt, className }) {

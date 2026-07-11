@@ -2,13 +2,12 @@ import { customList } from 'country-codes-list';
 
 const rawCountryData = customList('countryCode', '{countryCode}|{countryNameEn}|{countryCallingCode}|{flag}');
 
-// 2. Biến đổi dữ liệu thành mảng Object và sắp xếp theo bảng chữ cái ABC
 export const COUNTRY_LIST = Object.values(rawCountryData).map(item => {
   const [code, name, dial, flag] = item.split('|');
   return {
     code: code,
     name: name,
-    dialCode: `+${dial.split(',')[0]}`, // Lấy mã vùng đầu tiên nếu 1 nước có nhiều mã
+    dialCode: `+${dial.split(',')[0]}`, 
     flag: flag
   };
 }).sort((a, b) => a.name.localeCompare(b.name));

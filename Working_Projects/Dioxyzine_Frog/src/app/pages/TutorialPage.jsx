@@ -6,7 +6,6 @@ import { SEO } from '../components/common_components/SEO';
 
 import { useParams, useNavigate } from 'react-router';
 
-// Cấu hình danh sách bài học
 const TUTORIAL_NAV = [
   { id: 'how-to-draw-2piece-plushie', label: '2-Piece Plushie Guide', icon: <Scissors className="w-4 h-4" /> },
   { id: 'how-to-draw-3piece-plushie', label: '3-Piece Plushie Guide', icon: <Scissors className="w-4 h-4" /> },
@@ -18,10 +17,8 @@ export function TutorialPage() {
   const { tutorialSlug } = useParams();
   const navigate = useNavigate();
 
-  // Nếu khách truy cập /tutorial rỗng, tự động đẩy vào bài đầu tiên
   const activeSlug = tutorialSlug || 'how-to-draw-2piece-plushie';
 
-  // Lấy tên bài học hiện tại để hiển thị ra màn hình chờ
   const currentTutorial = TUTORIAL_NAV.find(t => t.id === activeSlug);
 
   return (
@@ -32,7 +29,6 @@ export function TutorialPage() {
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* TIÊU ĐỀ CHÍNH */}
         <div className="text-center mb-12 border-b border-[var(--border)] pb-6">
           <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)] flex items-center justify-center gap-3">
             <BookOpen className="w-10 h-10 text-[var(--primary)]" /> Creator Tutorial
@@ -42,10 +38,8 @@ export function TutorialPage() {
           </p>
         </div>
 
-        {/* BỐ CỤC HAI CỘT */}
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           
-          {/* CỘT TRÁI: SIDEBAR ĐIỀU HƯỚNG BÀI HỌC */}
           <div className="w-full lg:w-1/4 bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 shadow-xl flex-shrink-0">
             <p className="text-xs font-bold text-[var(--primary)] uppercase tracking-wider px-3 mb-4">Tutorials</p>
             <div className="space-y-2">
@@ -65,7 +59,6 @@ export function TutorialPage() {
             </div>
           </div>
 
-          {/* CỘT PHẢI: KHUNG CHỨA NỘI DUNG "ĐANG CẬP NHẬT" */}
           <div className="w-full lg:w-3/4">
             <AnimatePresence mode="wait">
               <motion.div 

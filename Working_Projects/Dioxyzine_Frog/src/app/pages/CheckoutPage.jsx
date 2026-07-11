@@ -1,11 +1,8 @@
-// src/app/pages/CheckoutPage.jsx
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-// Bổ sung Ticket, XCircle để làm UI Mã giảm giá
 import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle } from 'lucide-react';
 import { Link } from 'react-router';
 
-// Import Context và Components dùng chung
 import { useCart } from '../context/CartContext';
 import { COUNTRY_LIST } from '../data/storeData';
 import { ToastNotification } from '../components/common_components/ToastNotification';
@@ -18,7 +15,6 @@ export function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart();
   const [orderComplete, setOrderComplete] = useState(false);
   
-  // State quản lý thông tin giao hàng
   const [shippingForm, setShippingForm] = useState({
     email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '',
     countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
@@ -28,12 +24,10 @@ export function CheckoutPage() {
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
 
-  // 🚀 STATE QUẢN LÝ MÃ GIẢM GIÁ 🚀
   const [promoCodeInput, setPromoCodeInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState(null);
   const [checkingVoucher, setCheckingVoucher] = useState(false);
 
-  // Tự động cập nhật đầu số điện thoại theo quốc gia được chọn
   useEffect(() => {
     const selected = COUNTRY_LIST.find(c => c.code === shippingForm.countryCode);
     if (selected) {
@@ -50,7 +44,6 @@ export function CheckoutPage() {
     setShippingForm({ ...shippingForm, [e.target.name]: e.target.value });
   };
 
-  // 🚀 HÀM KIỂM TRA MÀ ÁP DỤNG VOUCHER
   const handleApplyVoucher = async () => {
     if (!promoCodeInput.trim()) return;
     setCheckingVoucher(true);
@@ -60,15 +53,13 @@ export function CheckoutPage() {
         .from('vouchers')
         .select('*')
         .eq('code', promoCodeInput.trim().toUpperCase())
-        .single(); // Chỉ lấy 1 mã chính xác
-
+        .single();
       if (error || !data) {
         showToast('Invalid promo code! ❌', 'error');
         setAppliedVoucher(null);
         return;
       }
 
-      // Check điều kiện mã
       if (!data.is_active) {
         showToast('This promo code is currently disabled. 🚫', 'error');
         return;
@@ -79,13 +70,11 @@ export function CheckoutPage() {
         return;
       }
 
-      // Check Hạn sử dụng (nếu có)
       if (data.expires_at && new Date() > new Date(data.expires_at)) {
         showToast('This promo code has expired. ⏰', 'error');
         return;
       }
 
-      // Nếu pass mọi bài test -> Lụm!
       setAppliedVoucher(data);
       showToast('Promo code applied successfully! 🎉', 'success');
 
@@ -97,26 +86,22 @@ export function CheckoutPage() {
     }
   };
 
-  // Hủy mã
   const handleRemoveVoucher = () => {
     setAppliedVoucher(null);
     setPromoCodeInput('');
   };
 
-  // 🚀 TÍNH TOÁN LẠI TỔNG TIỀN SAU KHI CÓ MÃ
-  const SHIPPING_FEE = 15; // Giữ nguyên $15 như code cũ của sếp
+  const SHIPPING_FEE = 15;
   
   const getDiscountAmount = () => {
     if (!appliedVoucher) return 0;
     if (appliedVoucher.discount_type === 'percent') {
       return cartTotal * (appliedVoucher.discount_value / 100);
     }
-    // Kiểu trừ thẳng tiền (fixed)
     return appliedVoucher.discount_value;
   };
 
   const discountValue = getDiscountAmount();
-  // Đảm bảo tổng bill không bị âm
   const finalPrice = Math.max(0, cartTotal + SHIPPING_FEE - discountValue);
 
   const handlePlaceOrder = async (e) => {
@@ -141,7 +126,6 @@ export function CheckoutPage() {
       const fullAddress = `${firstName} ${lastName} - ${address}, ${city}, ${postalCode} (${countryCode})`;
       const fullPhone = `${phoneCode} ${phoneNumber}`;
 
-      // 1. Tạo đơn hàng (Đã được áp mã giảm giá)
       const { error: orderError } = await supabase.from('inquiries').insert([{
         user_id: user ? user.id : null, 
         customer_email: email,          
@@ -155,13 +139,10 @@ export function CheckoutPage() {
         shipping_address: fullAddress,
         phone_number: fullPhone,
         total_amount: finalPrice,
-        // (Tùy chọn: Lưu mã đã dùng vào database để đối soát nếu cần)
-        // applied_voucher_code: appliedVoucher ? appliedVoucher.code : null 
       }]);
 
       if (orderError) throw orderError;
 
-      // 2. Tăng biến Đếm (used_count) của Voucher lên 1 trên Database
       if (appliedVoucher) {
         await supabase
           .from('vouchers')
@@ -169,7 +150,6 @@ export function CheckoutPage() {
           .eq('id', appliedVoucher.id);
       }
 
-      // 3. Xong xui, show pháo hoa
       setOrderComplete(true);
       setTimeout(() => {
         setOrderComplete(false);
@@ -210,7 +190,6 @@ export function CheckoutPage() {
             </div>
           ) : (
             <>
-              {/* PHẦN ĐIỀN FORM (BÊN TRÁI) - GIỮ NGUYÊN KHÔNG ĐỔI */}
               <div className="w-full md:w-3/5 p-8 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] space-y-8">
                 <div>
                   <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
@@ -300,7 +279,6 @@ export function CheckoutPage() {
                 </div>
               </div>
 
-              {/* PHẦN HÓA ĐƠN TÓM TẮT (BÊN PHẢI) */}
               <div className="w-full md:w-2/5 p-8 md:p-12 bg-[#1A1528] flex flex-col justify-between">
                 <div>
                   <h3 className="text-xl font-bold text-white mb-6 font-heading">Order Summary</h3>
@@ -317,11 +295,9 @@ export function CheckoutPage() {
                     ))}
                   </div>
 
-                  {/* 🚀 Ô NHẬP MÃ GIẢM GIÁ 🚀 */}
                   <div className="mb-6 border-b border-[var(--border)] pb-6">
                     <label className="text-xs text-[var(--silver-gray)] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5"><Ticket className="w-3.5 h-3.5" /> Promo Code</label>
                     {appliedVoucher ? (
-                      // Đã áp mã thành công
                       <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
                         <div>
                           <p className="text-sm font-bold text-green-500 font-mono uppercase">{appliedVoucher.code}</p>
@@ -334,7 +310,6 @@ export function CheckoutPage() {
                         </button>
                       </div>
                     ) : (
-                      // Chưa có mã -> Hiện ô nhập
                       <div className="flex gap-2">
                         <input 
                           type="text" 
@@ -359,7 +334,6 @@ export function CheckoutPage() {
                     <div className="flex justify-between"><span>Subtotal</span> <span className="font-semibold text-white">${cartTotal.toFixed(2)}</span></div>
                     <div className="flex justify-between"><span>Shipping Fee</span> <span className="font-semibold text-white">${SHIPPING_FEE.toFixed(2)}</span></div>
                     
-                    {/* HIỆN SỐ TIỀN GIẢM VÀ GẠCH NGANG TRÊN HÓA ĐƠN */}
                     <AnimatePresence>
                       {appliedVoucher && (
                         <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex justify-between text-yellow-500 font-bold overflow-hidden">
@@ -373,7 +347,6 @@ export function CheckoutPage() {
                   <div className="flex justify-between items-center mb-6">
                     <span className="text-lg font-bold text-white">Total Amount</span>
                     <div className="text-right">
-                      {/* Nếu có áp mã thì hiện giá gốc gạch mờ nhỏ ở trên */}
                       {appliedVoucher && (
                         <p className="text-sm text-gray-500 line-through">${(cartTotal + SHIPPING_FEE).toFixed(2)}</p>
                       )}

@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { CheckCircle, Loader2, Star, MessageSquareQuote, AlertCircle } from 'lucide-react';
-// 👉 Đã Import reCAPTCHA
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3'; 
 
 import { api } from '../service/api';
@@ -55,7 +54,6 @@ export function FeedbackPage() {
         token: token
       };
 
-      // Gọi API để chuyển qua sang Google Sheets
       await api.submitFeedback(feedbackData);
       
       showToast('Feedback submitted successfully! Thank you 💜', 'success');

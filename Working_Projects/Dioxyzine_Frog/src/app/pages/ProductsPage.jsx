@@ -8,7 +8,6 @@ import { useProducts } from '../context/ProductContext';
 import { ReadyUsePage } from './ReadyUsePage';
 import { SEO } from '../components/common_components/SEO';
 
-// --- ĐÃ THÊM: Dùng useParams và useNavigate để chạy URL Paths ---
 import { useParams, useNavigate } from 'react-router';
 
 const categories = ['All', 'Plushie', 'Doll', 'Customize'];
@@ -17,41 +16,34 @@ export function ProductsPage() {
   const location = useLocation();
   const { products, loading } = useProducts();
   
-  // Công cụ điều hướng và đọc tham số URL dạng /products/:activeTab
   const navigate = useNavigate();
   const { activeTab: urlTab } = useParams();
   
-  // Nếu khách vào /products không có đuôi, mặc định nhận diện là tab 'custom'
   const activeTab = urlTab || 'custom';
   
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [searchQuery, setSearchQuery] = useState('');
 
-  // 🚀 THÊM STATE CHO BỘ LỌC CẮT VIỀN
   const [cutStyleFilter, setCutStyleFilter] = useState('All');
 
-  // Xử lý đồng bộ nếu từ trang khác nhảy qua có truyền kèm state
   useEffect(() => {
     if (location.state?.tab) {
       navigate(`/products/${location.state.tab}`, { replace: true });
     }
   }, [location.state, navigate]);
 
-  // Hàm chuyển tab đổi URL sạch sẽ: /products/custom hoặc /products/readyuse
   const handleTabChange = (tabName) => {
     navigate(`/products/${tabName}`);
     setSelectedCategory('All');
     setSearchQuery('');
-    setCutStyleFilter('All'); // Đổi tab reset luôn bộ lọc
+    setCutStyleFilter('All'); 
   };
 
-  // Cập nhật hàm lọc để xử lý thêm Cut Style
   const filteredProducts = products.filter((product) => {
     const matchesCategory = selectedCategory === 'All' || product.category.includes(selectedCategory);
     const titleEn = (product.title || '').toLowerCase();
     const matchesSearch = titleEn.includes(searchQuery.toLowerCase());
     
-    // 🚀 Lọc theo kiểu cắt viền (Chỉ áp dụng khi đang ở tab Plushie)
     let matchesCutStyle = true;
     if (selectedCategory === 'Plushie' && cutStyleFilter !== 'All') {
       matchesCutStyle = product.cut_style === cutStyleFilter;
@@ -73,7 +65,6 @@ export function ProductsPage() {
           <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">Explore our full range of high-quality customizable merchandise</p>
         </div>
 
-        {/* CỤM NÚT ĐỔI TAB CHUYỂN PATHS SẠCH SẼ */}
         <div className="flex flex-col sm:flex-row justify-center gap-4 mb-12">
           <button 
             onClick={() => handleTabChange('custom')}
@@ -100,7 +91,6 @@ export function ProductsPage() {
           </button>
         </div>
 
-        {/* RENDER NỘI DUNG THEO PATH HIỆN TẠI */}
         {activeTab === 'custom' ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <div className="flex flex-col md:flex-row gap-6 mb-6 items-center justify-between">
@@ -110,7 +100,7 @@ export function ProductsPage() {
                     key={category}
                     onClick={() => {
                       setSelectedCategory(category);
-                      setCutStyleFilter('All'); // Bấm chọn category thì reset lọc viền
+                      setCutStyleFilter('All'); 
                     }}
                     className={`px-6 py-2 rounded-full font-medium transition-all cursor-pointer ${
                       selectedCategory === category
@@ -135,7 +125,6 @@ export function ProductsPage() {
               </div>
             </div>
 
-            {/* 🚀 BỘ LỌC PHỤ CHO KIỂU CẮT VIỀN (CHỈ HIỆN KHI Ở TAB PLUSHIE) */}
             <AnimatePresence>
               {selectedCategory === 'Plushie' && (
                 <motion.div 
@@ -169,7 +158,6 @@ export function ProductsPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-            {/* Thêm margin-bottom nếu không hiển thị bộ lọc để giữ khoảng cách */}
             {selectedCategory !== 'Plushie' && <div className="mb-10"></div>}
 
             {loading ? (

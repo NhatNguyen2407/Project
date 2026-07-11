@@ -5,7 +5,6 @@ import { useProducts } from '../context/ProductContext';
 import { SEO } from '../components/common_components/SEO';
 import { SmartImage } from '../components/common_components/SmartImage';
 
-// Đồng bộ chuẩn với danh mục mới
 const categories = ['All', 'Plushie', 'Doll', 'Customize'];
 const ITEMS_PER_PAGE = 16; 
 
@@ -14,14 +13,11 @@ export function GalleryPage() {
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [selectedImage, setSelectedImage] = useState(null);
   
-  // Trạng thái Phân Trang
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Bốc toàn bộ ảnh từ mảng images_gallery ra 
   const galleryItems = useMemo(() => {
     let items = [];
     products.forEach(product => {
-      // Vì category trong Database giờ chỉ có 1 tag (Plushie, Doll, Customize)
       const displayCategory = product.category[0] || 'Customize';
 
       if (product.images && product.images.length > 0) {
@@ -38,22 +34,20 @@ export function GalleryPage() {
     return items;
   }, [products]);
 
-  // Lọc theo Tab
   const filteredItems = galleryItems.filter(item => selectedCategory === 'All' || item.category === selectedCategory);
   
-  // Tính toán phân trang
   const totalPages = Math.ceil(filteredItems.length / ITEMS_PER_PAGE);
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const currentItems = filteredItems.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
-    setCurrentPage(1); // Đổi tab thì về lại trang 1
+    setCurrentPage(1); 
   };
 
   const goToPage = (page) => {
     setCurrentPage(page);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // Tự cuộn lên đầu khi sang trang
+    window.scrollTo({ top: 0, behavior: 'smooth' }); 
   };
 
   return (
@@ -66,7 +60,6 @@ export function GalleryPage() {
           <p className="text-lg text-[var(--muted-foreground)]">Realized concepts and final products from our workshop</p>
         </div>
 
-        {/* NÚT LỌC TAB */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {categories.map((category) => (
             <button
@@ -103,7 +96,6 @@ export function GalleryPage() {
               </AnimatePresence>
             </motion.div>
 
-            {/* BỘ ĐIỀU KHIỂN PHÂN TRANG */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-16">
                 <button

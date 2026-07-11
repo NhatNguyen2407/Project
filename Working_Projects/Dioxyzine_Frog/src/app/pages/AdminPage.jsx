@@ -6,14 +6,12 @@ import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
 import emailjs from '@emailjs/browser';
 
-// 🚀 IMPORT TOAST VÀO ADMIN PAGE
 import { ToastNotification } from '../components/common_components/ToastNotification';
 
 export function AdminPage() {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   
-  // 🚀 STATE CHO TOAST NOTIFICATION
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
   const showToast = (msg, type) => {
     setToast({ show: true, msg, type });
@@ -83,7 +81,6 @@ export function AdminPage() {
     if (role === 'admin') fetchData();
   }, [role]);
 
-  // --- LOGIC ĐƠN HÀNG ---
   const handleUpdateStatus = async (order, newStatus) => {
     setUpdatingId(order.id);
     try {
@@ -136,7 +133,6 @@ export function AdminPage() {
     } catch (err) { console.error(err); showToast("Lỗi cập nhật ngày giao!", "error"); }
   };
 
-  // --- LOGIC CMS SẢN PHẨM ---
   const openProductModal = (product = null) => {
     setCoverFile(null); setCoverPreview(null); setGalleryFiles([]); setGalleryPreviews([]);
     if (product) {
@@ -222,7 +218,6 @@ export function AdminPage() {
     } catch (err) { showToast(err.message, "error"); }
   };
 
-  // --- LOGIC VOUCHERS ---
   const handleSaveVoucher = async (e) => {
     e.preventDefault();
 
@@ -239,12 +234,9 @@ export function AdminPage() {
       
       if (!finalData.usage_limit) finalData.usage_limit = null;
       
-      // 🚀 CHỮA LỖI LỆCH MÚI GIỜ BẰNG CÁCH DỊCH SANG UTC TRƯỚC KHI LƯU
       if (!hasExpiration || !finalData.expires_at) {
         finalData.expires_at = null; 
       } else {
-        // Hàm này lấy giờ sếp chọn (GMT+7) trừ đi 7 tiếng để lưu chuẩn vào Database
-        // Lúc tải về, trình duyệt lại cộng 7 tiếng lên là khớp 100%
         finalData.expires_at = new Date(finalData.expires_at).toISOString();
       }
       
@@ -287,21 +279,20 @@ export function AdminPage() {
     <>
       <ToastNotification toast={toast} />
 
-      {/* 🚀 Đã xóa class relative z-10 ở đây để không bọc kín các cửa sổ Modal lại */}
       <div className="min-h-screen pt-28 pb-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* TABS ĐIỀU HƯỚNG */}
+          {/* navigate */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-white/10 pb-6 relative z-0">
             <div className="flex flex-wrap gap-2 bg-[#1A1528] p-1.5 rounded-xl border border-[var(--border)]">
               <button onClick={() => setActiveTab('orders')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'orders' ? 'bg-[var(--primary)] text-white' : 'text-gray-400 hover:text-white cursor-pointer'}`}>
-                📦 Orders ({orders.length})
+                Orders ({orders.length})
               </button>
               <button onClick={() => setActiveTab('products')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'products' ? 'bg-[var(--primary)] text-white' : 'text-gray-400 hover:text-white cursor-pointer'}`}>
-                🏷️ CMS Products ({products.length})
+                CMS Products ({products.length})
               </button>
               <button onClick={() => setActiveTab('vouchers')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'vouchers' ? 'bg-[var(--primary)] text-white' : 'text-gray-400 hover:text-white cursor-pointer'}`}>
-                🎟️ Promo Codes
+                Promo Codes
               </button>
             </div>
             
@@ -440,8 +431,6 @@ export function AdminPage() {
         </div>
       </div>
 
-      {/* 🚀 MODAL ĐƯỢC ĐẶT Ở NGOÀI CÙNG ĐỂ KHÔNG BỊ ĐÈ BỞI Z-INDEX 🚀 */}
-      
       {/* MODAL SẢN PHẨM */}
       <AnimatePresence>
         {isModalOpen && (
@@ -554,7 +543,7 @@ export function AdminPage() {
         )}
       </AnimatePresence>
 
-      {/* MODAL TẠO VOUCHER */}
+      {/* MODAL VOUCHER */}
       <AnimatePresence>
         {isVoucherModalOpen && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm">
@@ -589,7 +578,6 @@ export function AdminPage() {
                   <input type="number" value={voucherForm.usage_limit || ''} onChange={e => { const val = e.target.value; setVoucherForm({...voucherForm, usage_limit: val === '' ? null : parseInt(val)}); }} placeholder="E.g. 50" className="w-full bg-black/40 border border-white/10 rounded-xl p-3 text-sm text-white focus:border-yellow-500 outline-none mt-1" />
                 </div>
 
-                {/* 🚀 PHẦN CÔNG TẮC HẸN GIỜ HẾT HẠN ĐÃ ĐƯỢC LÀM LẠI MƯỢT MÀ 🚀 */}
                 <div className="pt-2">
                   <div className="flex items-center gap-3 mb-2">
                     <label className="text-xs text-gray-400 font-bold uppercase tracking-wider">Set Expiration Date</label>
@@ -599,7 +587,6 @@ export function AdminPage() {
                   </div>
                   {hasExpiration && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex gap-3">
-                      {/* BỘ CHỌN NGÀY (LỊCH) */}
                       <div className="flex-1">
                         <label className="text-[10px] text-gray-500 font-bold ml-1 mb-1 block">DATE</label>
                         <input 
@@ -615,7 +602,6 @@ export function AdminPage() {
                         />
                       </div>
                       
-                      {/* BỘ CHỌN GIỜ */}
                       <div className="flex-1">
                         <label className="text-[10px] text-gray-500 font-bold ml-1 mb-1 block">TIME</label>
                         <input 

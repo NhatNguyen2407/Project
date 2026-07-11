@@ -19,9 +19,21 @@ const steps = [
 ];
 
 const slides = [
-  { title: 'Turn all your ideas into reality', subtitle: 'Exclusive handmade plushies, fan merch, and gifts', image: doll2d_banner },
-  { title: 'High-quality manufacturing', subtitle: 'Unlimited revisions until satisfied, full support for artists', image: doll2d_banner02 },
-  { title: 'Unlimited creativity', subtitle: 'Serving all your projects from single pieces to bulk orders', image: doll2d_banner03 }
+  { 
+    title: 'Custom Plush Manufacturer', 
+    subtitle: 'Turn your artwork into premium plushies. OEM/POD & Global Shipping.', 
+    image: doll2d_banner 
+  },
+  { 
+    title: 'Design • Produce • Ship', 
+    subtitle: 'From single prototypes to bulk manufacturing. We are your reliable B2B partner.', 
+    image: doll2d_banner02 
+  },
+  { 
+    title: 'Premium Quality & Low MOQ', 
+    subtitle: 'Strict quality control, white-label services, and seamless fulfillment for creators.', 
+    image: doll2d_banner03 
+  }
 ];
 
 export function HomePage() {

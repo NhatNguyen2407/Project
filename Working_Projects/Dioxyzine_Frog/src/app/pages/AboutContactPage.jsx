@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Sparkles, Users, Award, Mail, MapPin, Clock } from 'lucide-react';
+import { Heart, Sparkles, Users, Award, Mail, MapPin, Clock, Building2, ShieldCheck, HelpCircle, ChevronDown, CheckCircle2, Factory, PackageCheck } from 'lucide-react';
 
 // import image
 import jobsite_01 from '../../assets/Products/Banner/JobSite_01.jpg';
@@ -21,7 +21,6 @@ const values = [
   { icon: <Award className="w-8 h-8" />, title: 'Quality Guaranteed', desc: 'Premium materials and rigorous quality control.' }
 ];
 
-// ĐÃ HỢP NHẤT BỘ CÂU HỎI TỪ CẢ 2 FILE
 const faqs = [
   { question: 'What is your minimum order quantity (MOQ)?', answer: 'We support production from 11 pieces/model for listed products, and 30 pieces/model for completely custom layouts. We occasionally open slots for 1 piece/model orders on our social media, stay tuned!' },
   { question: 'How long does production take?', answer: 'Average production time is 2 to 6 weeks after design finalization. Large volume orders may require more time.' },
@@ -83,7 +82,54 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* 4. VALUES SECTION (Lấy từ AboutPage) */}
+      {/* 4. TRUST FACTORS: PRODUCTION & QC */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-[var(--card)] p-8 rounded-3xl border border-[var(--border)] shadow-lg">
+            <div className="w-14 h-14 bg-[var(--primary)]/20 rounded-2xl flex items-center justify-center mb-6 border border-[var(--primary)]/50">
+              <Factory className="w-7 h-7 text-[var(--primary)]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">In-House Production</h3>
+            <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-4">
+              We own the entire production line from digital embroidery, fabric cutting, sewing, to stuffing. This ensures rapid prototyping and strictly controlled timelines.
+            </p>
+            <ul className="space-y-2 text-sm text-[var(--silver-gray)]">
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Advanced Embroidery Machines</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Experienced Tailor Team</li>
+            </ul>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="bg-[var(--card)] p-8 rounded-3xl border border-[var(--border)] shadow-lg">
+            <div className="w-14 h-14 bg-[var(--primary)]/20 rounded-2xl flex items-center justify-center mb-6 border border-[var(--primary)]/50">
+              <ShieldCheck className="w-7 h-7 text-[var(--primary)]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">100% Quality Control</h3>
+            <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-4">
+              Every single plushie undergoes a rigorous 3-step QC process before shipping. We check for seam strength, embroidery accuracy, and overall shape symmetry.
+            </p>
+            <ul className="space-y-2 text-sm text-[var(--silver-gray)]">
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Thread & Seam Inspection</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Premium Velboa Fabric Only</li>
+            </ul>
+          </motion.div>
+
+          <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.4 }} className="bg-[var(--card)] p-8 rounded-3xl border border-[var(--border)] shadow-lg">
+            <div className="w-14 h-14 bg-[var(--primary)]/20 rounded-2xl flex items-center justify-center mb-6 border border-[var(--primary)]/50">
+              <PackageCheck className="w-7 h-7 text-[var(--primary)]" />
+            </div>
+            <h3 className="text-xl font-bold text-white mb-4">B2B & White Label</h3>
+            <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-4">
+              We empower your brand. Ship your products directly to your customers with blind packaging. We act as your silent, reliable back-end factory.
+            </p>
+            <ul className="space-y-2 text-sm text-[var(--silver-gray)]">
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> No Invoices or Logos Attached</li>
+              <li className="flex items-center gap-2"><CheckCircle2 className="w-4 h-4 text-green-500" /> Custom Tags Available</li>
+            </ul>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* 5. VALUES SECTION (Lấy từ AboutPage) */}
       <section className="py-24 bg-[#09090B] border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -112,7 +158,7 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* 5. PRODUCTION PROCESS */}
+      {/* 6. PRODUCTION PROCESS */}
       <section className="py-24 bg-transparent border-b border-[var(--border)]">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -139,7 +185,7 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* 6. FAQ SECTION (Đã gộp đầy đủ) */}
+      {/* 7. FAQ SECTION */}
       <section className="py-24 bg-[#09090B] border-b border-[var(--border)]">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -166,7 +212,7 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* 7. CONTACT INFO */}
+      {/* 8. CONTACT INFO */}
       <section className="py-24 bg-transparent text-center">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="font-heading text-4xl mb-12 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Contact Details</h2>

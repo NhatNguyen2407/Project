@@ -4,7 +4,6 @@ import { Heart } from 'lucide-react';
 import { supabase } from '../service/supabase';
 import { useAuth } from '../context/AuthContext';
 
-// --- ĐÃ SỬA: Import SmartImage ---
 import { SmartImage } from '../components/common_components/SmartImage';
 
 export function ProductCard({ id, title, image, basePriceObj, moq, category, pricingType }) {
@@ -22,7 +21,6 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
   const [isLiked, setIsLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false); // Ngăn click spam
 
-  // 1. Kiểm tra xem khách đã thích chưa lúc vừa load thẻ sản phẩm
   useEffect(() => {
     if (user) {
       const checkWishlist = async () => {
@@ -30,7 +28,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
           .from('wishlists')
           .select('id')
           .eq('user_id', user.id)
-          .eq('product_id', id) // id của sản phẩm truyền vào qua props
+          .eq('product_id', id)
           .maybeSingle();
           
         if (data) setIsLiked(true);
@@ -39,9 +37,8 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
     }
   }, [user, id]);
 
-  // 2. Logic Bấm nút thả tim
   const toggleWishlist = async (e) => {
-    e.preventDefault(); // Ngăn không cho thẻ chuyển sang trang chi tiết khi bấm tim
+    e.preventDefault(); 
     e.stopPropagation();
 
     if (!user) {

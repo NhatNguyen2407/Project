@@ -3,7 +3,7 @@ import { createContext, useState, useContext } from 'react';
 const LanguageContext = createContext();
 
 export const LanguageProvider = ({ children }) => {
-  const [lang, setLang] = useState('vi'); // Mặc định là Tiếng Việt
+  const [lang, setLang] = useState('vi');
 
   return (
     <LanguageContext.Provider value={{ lang, setLang }}>

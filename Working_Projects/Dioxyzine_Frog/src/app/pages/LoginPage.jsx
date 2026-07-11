@@ -81,8 +81,6 @@ const SocialButton = ({ icon: Icon, label, onClick }) => {
   );
 };
 
-// MAIN PAGE COMPONENT: LOGIN
-
 export function LoginPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });

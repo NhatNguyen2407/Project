@@ -17,7 +17,6 @@ export function Navbar() {
   const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
 
   const { user, role } = useAuth();
-  // const ADMIN_EMAIL = 'dioxyzinefrog@gmail.com';
 
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 20);
@@ -32,9 +31,10 @@ export function Navbar() {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/products', label: 'Products' },
-    { path: '/gallery', label: 'Gallery' },
+    { path: '#', label: 'Services' },
+    { path: '/gallery', label: 'Gallery' }, 
     { path: '/pricing', label: 'Pricing' },
-    { path: '/tutorial', label: 'Tutorial' },
+    { path: '/tutorial', label: 'Blog' }, 
     { path: '/about', label: 'About' },
   ];
   
@@ -54,26 +54,27 @@ export function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Link to="/" className="flex items-center space-x-3 group">
+            <Link to="/" className="flex items-center space-x-3 group flex-shrink-0">
               <motion.div whileHover={{ scale: 1.05 }} className="relative">
                 <img src={Logo} alt="Dioxyzine Frog" className="w-12 h-12 object-contain scale-125 drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]" />
               </motion.div>
-              <span className="text-3xl tracking-wide drop-shadow-[0_0_8px_rgba(139,114,190,0.6)] ml-2" style={{ fontFamily: "'Coiny', cursive", color: "var(--primary)", WebkitTextStroke: "1.5px white", paintOrder: "stroke fill" }}>
+              <span className="text-2xl sm:text-3xl tracking-wide drop-shadow-[0_0_8px_rgba(139,114,190,0.6)] ml-2" style={{ fontFamily: "'Coiny', cursive", color: "var(--primary)", WebkitTextStroke: "1.5px white", paintOrder: "stroke fill" }}>
                 Dioxyzine Frog
               </span>
             </Link>
 
             {/* Desktop Menu Links */}
-            <div className="hidden md:flex items-center space-x-8">
+            <div className="hidden xl:flex items-center space-x-6"> {/* Đổi md:flex thành xl:flex và giảm space để chứa thêm tab Services */}
               {navLinks.map((link) => {
-                const isActive = (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path;
+                const isActive = (location.pathname.startsWith(link.path) && link.path !== '/' && link.path !== '#') || location.pathname === link.path;
                 
-                if (link.label === 'Products' || link.label === 'About') {
+                if (link.label === 'Products' || link.label === 'About' || link.label === 'Services') {
                   const isProducts = link.label === 'Products';
-                  const basePath = isProducts ? '/products' : '/about/contact';
+                  const isServices = link.label === 'Services';
+                  const basePath = isProducts ? '/products' : (isServices ? '#' : '/about/contact');
 
                   return (
-                    <div key={link.path} className="relative group py-6">
+                    <div key={link.label} className="relative group py-6">
                       <Link to={basePath} className={`flex items-center gap-1 transition-colors ${isActive ? 'text-[var(--primary)] font-medium' : 'text-foreground hover:text-[var(--primary)]'}`}>
                         {link.label}
                         <ChevronDown className="w-4 h-4 transition-transform group-hover:rotate-180" />
@@ -82,7 +83,7 @@ export function Navbar() {
                       
                       {/* Dropdown Desktop */}
                       <div className="absolute left-0 top-full -mt-2 w-56 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 bg-[#1A1528] border border-[var(--primary)]/30 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] z-50 overflow-hidden">
-                        {isProducts ? (
+                        {isProducts && (
                           <>
                             <Link to="/products/custom" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">
                               Custom Orders
@@ -91,7 +92,17 @@ export function Navbar() {
                               Ready-made
                             </Link>
                           </>
-                        ) : (
+                        )}
+                        {isServices && (
+                          <>
+                            <Link to="#" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">Custom Plush</Link>
+                            <Link to="#" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium border-t border-[var(--border)] transition-colors">OEM</Link>
+                            <Link to="#" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium border-t border-[var(--border)] transition-colors">White Label</Link>
+                            <Link to="#" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium border-t border-[var(--border)] transition-colors">Dropshipping</Link>
+                            <Link to="#" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium border-t border-[var(--border)] transition-colors">Fulfillment</Link>
+                          </>
+                        )}
+                        {link.label === 'About' && (
                           <>
                             <Link to="/about/contact" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">
                               Contact Us
@@ -110,7 +121,7 @@ export function Navbar() {
                 }
 
                 return (
-                  <Link key={link.path} to={link.path} className={`relative group transition-colors py-6 ${isActive ? 'text-[var(--primary)] font-medium' : 'text-foreground hover:text-[var(--primary)]'}`}>
+                  <Link key={link.label} to={link.path} className={`relative group transition-colors py-6 ${isActive ? 'text-[var(--primary)] font-medium' : 'text-foreground hover:text-[var(--primary)]'}`}>
                     {link.label}
                     <span className={`absolute bottom-5 left-0 h-0.5 bg-gradient-to-r from-[var(--primary)] to-transparent transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
                   </Link>
@@ -119,9 +130,7 @@ export function Navbar() {
             </div>
 
             {/* User Auth & Actions (Desktop) */}
-            <div className="hidden md:flex items-center space-x-4">
-              
-              {/* 🚀 ĐÃ BỔ SUNG: NÚT GIỎ HÀNG */}
+            <div className="hidden xl:flex items-center space-x-4">
               <button 
                 onClick={() => setIsCartOpen(true)} 
                 className="relative p-2 text-white hover:text-[var(--primary)] transition-colors cursor-pointer"
@@ -147,7 +156,7 @@ export function Navbar() {
                   </div>
 
                   <div className="absolute right-0 top-full -mt-2 w-48 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 bg-[#1A1528] border border-[var(--primary)]/30 rounded-xl shadow-[0_10px_30px_rgba(0,0,0,0.5)] overflow-hidden">
-                    {/* 🛡️ MỤC CHỌN CHO TÀI KHOẢN ADMIN TRÊN DESKTOP */}
+                    {/* ADMIN on DESKTOP */}
                     {role === 'admin' && (
                       <Link to="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors border-b border-[var(--border)]">
                         <Shield className="w-4 h-4 text-[var(--primary)]" /> Admin Control
@@ -164,7 +173,7 @@ export function Navbar() {
                 </div>
               ) : (
                 <Link to="/login">
-                  <span className="text-foreground hover:text-[var(--primary)] font-medium transition-colors">Sign In</span>
+                  <span className="text-foreground hover:text-[var(--primary)] font-medium transition-colors whitespace-nowrap">Sign In</span>
                 </Link>
               )}
 
@@ -175,9 +184,8 @@ export function Navbar() {
               </Link>
             </div>
 
-            {/* mobile hamburger button & Cụm icon mobile */}
-            <div className="md:hidden flex items-center gap-4 z-50 relative">
-              {/* 🚀 BỔ SUNG NÚT GIỎ HÀNG CHO MOBILE */}
+            {/* mobile hamburger button & icon mobile */}
+            <div className="xl:hidden flex items-center gap-4 z-50 relative">
               <button 
                 onClick={() => setIsCartOpen(true)} 
                 className="relative p-2 text-white hover:text-[var(--primary)] transition-colors cursor-pointer"
@@ -202,7 +210,7 @@ export function Navbar() {
       {/* MOBILE MENU */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div initial={{ opacity: 0, x: '100%' }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: '100%' }} transition={{ type: 'spring', damping: 25 }} className="fixed inset-y-0 right-0 z-40 w-full max-w-sm bg-[var(--card)] border-l border-[var(--border)] shadow-2xl md:hidden">
+          <motion.div initial={{ opacity: 0, x: '100%' }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: '100%' }} transition={{ type: 'spring', damping: 25 }} className="fixed inset-y-0 right-0 z-40 w-full max-w-sm bg-[var(--card)] border-l border-[var(--border)] shadow-2xl xl:hidden">
             <div className="flex flex-col h-full pt-24 pb-8 px-6 overflow-y-auto">
               
               {/* Profile Block on Mobile */}
@@ -219,7 +227,7 @@ export function Navbar() {
                        </div>
                      </div>
                      
-                     {/* 🛡️ MỤC CHỌN CHO TÀI KHOẢN ADMIN TRÊN MOBILE */}
+                     {/* admin */}
                      {role === 'admin' && (
                        <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-[var(--primary)]/10 text-[var(--primary)] font-medium border border-[var(--primary)]/30 rounded-xl hover:bg-[var(--primary)]/20 transition-colors">
                          <Shield className="w-4 h-4" /> Admin Control
@@ -245,19 +253,27 @@ export function Navbar() {
               {/* Link Menu */}
               <div className="space-y-6 flex-1">
                 {navLinks.map((link, index) => {
-                  const isActive = (location.pathname.startsWith(link.path) && link.path !== '/') || location.pathname === link.path;
+                  const isActive = (location.pathname.startsWith(link.path) && link.path !== '/' && link.path !== '#') || location.pathname === link.path;
                   
                   return (
-                    <motion.div key={link.path} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }}>
-                      <Link to={link.label === 'Products' ? '/products/custom' : (link.label === 'About' ? '/about/contact' : link.path)} onClick={() => { if (link.label !== 'Products' && link.label !== 'About') setIsMobileMenuOpen(false) }} className={`block text-2xl font-medium transition-colors ${isActive ? 'text-[var(--primary)]' : 'text-foreground hover:text-[var(--primary)]'}`}>
+                    <motion.div key={link.label} initial={{ opacity: 0, x: 50 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: index * 0.1 }}>
+                      <Link to={link.label === 'Products' ? '/products/custom' : (link.label === 'About' ? '/about/contact' : (link.label === 'Services' ? '#' : link.path))} onClick={() => { if (link.label !== 'Products' && link.label !== 'About' && link.label !== 'Services') setIsMobileMenuOpen(false) }} className={`block text-2xl font-medium transition-colors ${isActive ? 'text-[var(--primary)]' : 'text-foreground hover:text-[var(--primary)]'}`}>
                         {link.label}
                       </Link>
                       
-                      {/* Sub-menu Mobile */}
                       {link.label === 'Products' && (
                         <div className="mt-3 ml-4 flex flex-col gap-3 border-l-2 border-[var(--border)] pl-4">
                           <Link to="/products/custom" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Custom Orders</Link>
                           <Link to="/products/readyuse" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Ready-made</Link>
+                        </div>
+                      )}
+                      {link.label === 'Services' && (
+                        <div className="mt-3 ml-4 flex flex-col gap-3 border-l-2 border-[var(--border)] pl-4">
+                          <Link to="#" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Custom Plush</Link>
+                          <Link to="#" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">OEM</Link>
+                          <Link to="#" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">White Label</Link>
+                          <Link to="#" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Dropshipping</Link>
+                          <Link to="#" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Fulfillment</Link>
                         </div>
                       )}
                       {link.label === 'About' && (
