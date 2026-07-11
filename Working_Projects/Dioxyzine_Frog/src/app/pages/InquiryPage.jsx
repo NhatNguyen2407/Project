@@ -6,7 +6,7 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
 import { ToastNotification } from '../components/common_components/ToastNotification';
-import { TermsModal } from '../components/common_components/TermsModal';
+import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { SEO } from '../components/common_components/SEO';
 import { useAuth } from '../context/AuthContext';
 
@@ -27,7 +27,7 @@ export function InquiryPage() {
   const [isSubjectEdited, setIsSubjectEdited] = useState(false);
   const [status, setStatus] = useState('idle');
   const [acceptedTerms, setAcceptedTerms] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showTermsOfServiceModal, setShowTermsOfServiceModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
 
   useEffect(() => {
@@ -95,7 +95,7 @@ export function InquiryPage() {
       
       {/*Components*/}
       <ToastNotification toast={toast} />
-      <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
+      <TermsOfServiceModal isOpen={showTermsOfServiceModal} onClose={() => setShowTermsOfServiceModal(false)} />
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
@@ -181,7 +181,7 @@ export function InquiryPage() {
             <div className="flex items-center gap-3 bg-[var(--cyber-black)] p-4 rounded-xl border border-[var(--border)] mt-4">
               <input type="checkbox" id="termsCheck" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="w-5 h-5 accent-[var(--primary)] cursor-pointer flex-shrink-0" />
               <label htmlFor="termsCheck" className="text-sm text-[var(--silver-gray)] cursor-pointer select-none">
-                I agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }} className="text-[var(--primary)] font-bold underline hover:text-white transition-colors ml-1 cursor-pointer">Terms of Service</span> *
+                I agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsOfServiceModal(true); }} className="text-[var(--primary)] font-bold underline hover:text-white transition-colors ml-1 cursor-pointer">Terms of Service</span> *
               </label>
             </div>
 

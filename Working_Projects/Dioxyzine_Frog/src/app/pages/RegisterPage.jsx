@@ -4,9 +4,9 @@ import { User, Mail, Lock, Eye, EyeOff, Loader2, Chrome, Facebook, UserPlus } fr
 import { Link, useNavigate } from 'react-router';
 import { supabase } from '../service/supabase';
 
-// ==========================================
-// REUSABLE COMPONENTS (Tạm thời để chung file cho dễ copy, sếp có thể tách ra sau)
-// ==========================================
+import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
+import { PrivacyPolicyModal } from '../components/common_components/PrivacyPolicyModal';
+
 
 const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
@@ -84,7 +84,6 @@ const SocialButton = ({ icon: Icon, label, onClick }) => {
 };
 
 // MAIN PAGE COMPONENT: REGISTER
-
 export function RegisterPage() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ 
@@ -96,6 +95,9 @@ export function RegisterPage() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+
+  const [isTermsOpen, setIsTermsOpen] = useState(false);
+  const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -256,8 +258,23 @@ export function RegisterPage() {
                 onChange={handleChange}
                 className="w-5 h-5 mt-0.5 rounded border-[var(--border)] bg-[#1A1528] accent-[var(--primary)] text-[var(--primary)] focus:ring-[var(--primary)]/30 cursor-pointer flex-shrink-0"
               />
-              <label htmlFor="acceptedTerms" className="text-sm text-[var(--silver-gray)] cursor-pointer select-none leading-relaxed">
-                I agree to the <Link to="/terms" className="font-bold text-[var(--primary)] hover:text-white underline transition-colors mx-1">Terms of Service</Link> and <Link to="/terms" className="font-bold text-[var(--primary)] hover:text-white underline transition-colors ml-1">Privacy Policy</Link>
+              <label className="text-sm text-[var(--silver-gray)] leading-relaxed">
+                I agree to the{' '}
+                <button 
+                  type="button" 
+                  onClick={() => setIsTermsOpen(true)} 
+                  className="text-[var(--primary)] font-bold hover:underline cursor-pointer"
+                >
+                  Terms of Service
+                </button>
+                {' '}and{' '}
+                <button 
+                  type="button" 
+                  onClick={() => setIsPrivacyOpen(true)} 
+                  className="text-[var(--primary)] font-bold hover:underline cursor-pointer"
+                >
+                  Privacy Policy
+                </button>
               </label>
             </div>
 
@@ -302,6 +319,10 @@ export function RegisterPage() {
           </Link>
         </p>
       </motion.div>
+
+      {/*TermsModal */}
+      <TermsOfServiceModal isOpen={isTermsOpen} onClose={() => setIsTermsOpen(false)} />
+      <PrivacyPolicyModal isOpen={isPrivacyOpen} onClose={() => setIsPrivacyOpen(false)} />
     </div>
   );
 }

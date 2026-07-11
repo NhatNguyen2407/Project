@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Heart, Sparkles, Users, Award, Mail, MapPin, Clock, Building2, ShieldCheck, HelpCircle, ChevronDown, CheckCircle2, Factory, PackageCheck } from 'lucide-react';
+import { Quote, Star, Heart, Sparkles, Users, Award, Mail, MapPin, Clock, Building2, ShieldCheck, HelpCircle, ChevronDown, CheckCircle2, Factory, PackageCheck } from 'lucide-react';
 
 // import image
 import jobsite_01 from '../../assets/Products/Banner/JobSite_01.jpg';
@@ -129,7 +129,7 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* 5. VALUES SECTION (Lấy từ AboutPage) */}
+      {/* 5. VALUES SECTION */}
       <section className="py-24 bg-[#09090B] border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
@@ -212,7 +212,71 @@ export function AboutContactPage() {
         </div>
       </section>
 
-      {/* 8. CONTACT INFO */}
+      {/* 8. REVIEWS */}
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
+        <div className="text-center mb-12">
+          <h2 className="font-heading text-3xl md:text-4xl text-white mb-4">What Creators Say About Us</h2>
+          <p className="text-[var(--silver-gray)]">Trusted by independent artists and brands worldwide.</p>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Review 1 */}
+          <div className="bg-[var(--card)] p-8 rounded-3xl border border-[var(--border)] relative">
+            <Quote className="absolute top-6 right-6 w-10 h-10 text-[var(--primary)]/20" />
+            <div className="flex gap-1 mb-4">
+              {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />)}
+            </div>
+            <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-6 italic">
+              "The embroidery details on my custom 20cm dolls were absolutely flawless. Dioxyzine Frog's team was incredibly patient with my revisions. Highly recommend for any artist looking to make merch!"
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">S</div>
+              <div>
+                <p className="text-white font-bold text-sm">Sarah J.</p>
+                <p className="text-[var(--muted-foreground)] text-xs">Indie Illustrator</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Review 2 */}
+          <div className="bg-[var(--card)] p-8 rounded-3xl border border-[var(--primary)]/40 shadow-[0_0_30px_rgba(139,114,190,0.15)] relative transform md:-translate-y-4">
+            <Quote className="absolute top-6 right-6 w-10 h-10 text-[var(--primary)]/20" />
+            <div className="flex gap-1 mb-4">
+              {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />)}
+            </div>
+            <p className="text-white text-sm leading-relaxed mb-6 italic">
+              "White-label dropshipping has saved my Etsy business. They handle production, blind-packaging, and global shipping seamlessly. My customers are always thrilled with the plushie quality."
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">M</div>
+              <div>
+                <p className="text-white font-bold text-sm">Mark T.</p>
+                <p className="text-[var(--primary)] text-xs">Etsy Store Owner</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Review 3 */}
+          <div className="bg-[var(--card)] p-8 rounded-3xl border border-[var(--border)] relative">
+            <Quote className="absolute top-6 right-6 w-10 h-10 text-[var(--primary)]/20" />
+            <div className="flex gap-1 mb-4">
+              {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />)}
+            </div>
+            <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-6 italic">
+              "Low MOQ is a game changer! I only needed 30 pieces for my Kickstarter campaign, and the final products looked exactly like my 2D references. The premium Velboa fabric is so soft."
+            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">L</div>
+              <div>
+                <p className="text-white font-bold text-sm">Lina P.</p>
+                <p className="text-[var(--muted-foreground)] text-xs">Kickstarter Creator</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 9. CONTACT INFO */}
       <section className="py-24 bg-transparent text-center">
         <div className="max-w-7xl mx-auto px-4">
           <h2 className="font-heading text-4xl mb-12 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Contact Details</h2>

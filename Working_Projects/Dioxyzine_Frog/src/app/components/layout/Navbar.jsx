@@ -31,9 +31,9 @@ export function Navbar() {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/products', label: 'Products' },
-    { path: '#', label: 'Services' },
+    // { path: '#', label: 'Services' },
     { path: '/gallery', label: 'Gallery' }, 
-    { path: '/pricing', label: 'Pricing' },
+    // { path: '/pricing', label: 'Pricing' },
     { path: '/tutorial', label: 'Blog' }, 
     { path: '/about', label: 'About' },
   ];
@@ -104,6 +104,9 @@ export function Navbar() {
                         )}
                         {link.label === 'About' && (
                           <>
+                            <Link to="/pricing" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">
+                              Pricing
+                            </Link>
                             <Link to="/about/contact" className="block px-5 py-4 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">
                               Contact Us
                             </Link>
@@ -278,6 +281,7 @@ export function Navbar() {
                       )}
                       {link.label === 'About' && (
                         <div className="mt-3 ml-4 flex flex-col gap-3 border-l-2 border-[var(--border)] pl-4">
+                          <Link to="/pricing" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Pricing</Link>
                           <Link to="/about/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Contact Us</Link>
                           <Link to="/about/terms" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Terms of Service</Link>
                           <Link to="/about/feedback" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-[var(--silver-gray)] hover:text-white transition-colors">Feedback</Link>

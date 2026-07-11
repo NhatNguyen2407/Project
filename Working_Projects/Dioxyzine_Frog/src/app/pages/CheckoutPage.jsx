@@ -6,7 +6,7 @@ import { Link } from 'react-router';
 import { useCart } from '../context/CartContext';
 import { COUNTRY_LIST } from '../data/storeData';
 import { ToastNotification } from '../components/common_components/ToastNotification';
-import { TermsModal } from '../components/common_components/TermsModal';
+import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
 
@@ -21,7 +21,7 @@ export function CheckoutPage() {
   });
   
   const [acceptedStoreTerms, setAcceptedStoreTerms] = useState(false);
-  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showTermsOfServiceModal, setShowTermsOfServiceModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
 
   const [promoCodeInput, setPromoCodeInput] = useState('');
@@ -55,28 +55,28 @@ export function CheckoutPage() {
         .eq('code', promoCodeInput.trim().toUpperCase())
         .single();
       if (error || !data) {
-        showToast('Invalid promo code! ❌', 'error');
+        showToast('Invalid promo code!', 'error');
         setAppliedVoucher(null);
         return;
       }
 
       if (!data.is_active) {
-        showToast('This promo code is currently disabled. 🚫', 'error');
+        showToast('This promo code is currently disabled.', 'error');
         return;
       }
       
       if (data.usage_limit && data.used_count >= data.usage_limit) {
-        showToast('This promo code has reached its usage limit. 🥺', 'error');
+        showToast('This promo code has reached its usage limit.', 'error');
         return;
       }
 
       if (data.expires_at && new Date() > new Date(data.expires_at)) {
-        showToast('This promo code has expired. ⏰', 'error');
+        showToast('This promo code has expired.', 'error');
         return;
       }
 
       setAppliedVoucher(data);
-      showToast('Promo code applied successfully! 🎉', 'success');
+      showToast('Promo code applied successfully!', 'success');
 
     } catch (err) {
       console.error(err);
@@ -109,15 +109,15 @@ export function CheckoutPage() {
     
     const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
     if (!email.trim() || !firstName.trim() || !lastName.trim() || !address.trim() || !city.trim() || !phoneNumber.trim()) {
-      return showToast('Please fill out all required information columns! 📝', 'error');
+      return showToast('Please fill out all required information columns!', 'error');
     }
 
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return showToast('Invalid email structural layout! ✉️', 'error');
+      return showToast('Invalid email structural layout!', 'error');
     }
 
     if (!acceptedStoreTerms) {
-      return showToast('You must agree to the Terms of Service before checkout! ⚠️', 'error');
+      return showToast('You must agree to the Terms of Service before checkout!', 'error');
     }
 
     try {
@@ -170,7 +170,7 @@ export function CheckoutPage() {
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
       <ToastNotification toast={toast} />
-      <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
+      <TermsOfServiceModal isOpen={showTermsOfServiceModal} onClose={() => setShowTermsOfServiceModal(false)} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
@@ -359,7 +359,7 @@ export function CheckoutPage() {
                   <div className="flex items-center gap-3 bg-[var(--cyber-black)] p-4 rounded-xl border border-[var(--border)]">
                     <input type="checkbox" id="storeTermsCheck" checked={acceptedStoreTerms} onChange={(e) => setAcceptedStoreTerms(e.target.checked)} className="w-5 h-5 accent-[var(--primary)] cursor-pointer flex-shrink-0" />
                     <label htmlFor="storeTermsCheck" className="text-sm text-[var(--silver-gray)] cursor-pointer select-none">
-                      I have read and agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }} className="text-[var(--primary)] font-bold underline ml-1 hover:text-white transition-colors">Terms of Service</span> *
+                      I have read and agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsOfServiceModal(true); }} className="text-[var(--primary)] font-bold underline ml-1 hover:text-white transition-colors">Terms of Service</span> *
                     </label>
                   </div>
                   <button type="button" onClick={handlePlaceOrder} className="w-full py-4 rounded-full bg-[var(--primary)] text-white font-bold text-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.5)] transition-all cursor-pointer block text-center">

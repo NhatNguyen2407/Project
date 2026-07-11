@@ -158,7 +158,30 @@ export function ProductsPage() {
                 </motion.div>
               )}
             </AnimatePresence>
-            {selectedCategory !== 'Plushie' && <div className="mb-10"></div>}
+
+            <AnimatePresence>
+              {selectedCategory === 'Customize' && (
+                <motion.div 
+                  initial={{ opacity: 0, height: 0, y: -20 }} 
+                  animate={{ opacity: 1, height: 'auto', y: 0 }} 
+                  exit={{ opacity: 0, height: 0, y: -20 }}
+                  className="mb-10 bg-gradient-to-r from-[var(--primary)]/20 via-[var(--primary)]/5 to-transparent border border-[var(--primary)]/30 rounded-3xl p-8 relative overflow-hidden"
+                >
+                  <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-[var(--primary)]/20 blur-3xl rounded-full"></div>
+                  <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div>
+                      <h3 className="font-heading text-2xl md:text-3xl text-white mb-2 drop-shadow-[0_0_10px_rgba(139,114,190,0.5)]">
+                        You have an idea no one ever thinks of?
+                      </h3>
+                      <p className="text-[var(--silver-gray)] text-lg">Let us make it come true. 🌟</p>
+                    </div>
+                    <Paintbrush className="w-16 h-16 text-[var(--primary)] opacity-80 flex-shrink-0" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {selectedCategory !== 'Plushie' && selectedCategory !== 'Customize' && <div className="mb-10"></div>}
 
             {loading ? (
               <div className="text-center py-24 text-[var(--primary)] font-bold text-xl animate-pulse">

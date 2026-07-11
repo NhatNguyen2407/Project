@@ -138,6 +138,44 @@ export function ProductDetailPage() {
   const displayDesc = product.description || '';
   const displayPrice = (val) => (!isReadyUse && (isCustomSize || product.pricingType === 'contact')) ? 'Inquiry' : `$${Number(val).toFixed(2)}`;
 
+  // phân loại chất liệu theo tên và category 
+  const renderMaterials = () => {
+    const title = displayTitle.toLowerCase();
+    const category = Array.isArray(product.category) ? product.category.join(' ').toLowerCase() : (product.category || '').toLowerCase();
+
+    const isEmbroidery = title.includes('thêu') || title.includes('embroidery') || title.includes('embroidered');
+    const isCustomizeTab = category.includes('customize');
+
+    // 1. Hàng Customize
+    if (isCustomizeTab) {
+      return (
+        <>
+          <li>Specialized based on your ideas</li>
+          {/* <li>Premium Cotton Filling</li> */}
+        </>
+      );
+    }
+
+    // 2. Hàng Thêu (Plushie thêu, Doll thêu)
+    if (isEmbroidery) {
+      return (
+        <>
+          <li>Pile Plush Fabric</li>
+          <li>Options: 1mm, 3mm, 5mm, 7mm</li>
+          {/* <li>PP Cotton Filling</li> */}
+        </>
+      );
+    }
+
+    // 3. Mặc định: Hàng Standard và In (Plushie standard, Doll in)
+    return (
+      <>
+        <li>Velboa Fabric</li>
+        {/* <li>PP Cotton Filling</li> */}
+      </>
+    );
+  };
+
   return (
     <>
       <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
@@ -345,6 +383,7 @@ export function ProductDetailPage() {
                 </div>
               )}
 
+              {/* B2B */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                 <div className="bg-[#1A1528] p-5 rounded-2xl border border-[var(--border)]">
                   <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
@@ -358,8 +397,7 @@ export function ProductDetailPage() {
                     <Component className="w-4 h-4 text-[var(--primary)]" /> Material
                   </h4>
                   <ul className="text-[var(--silver-gray)] text-sm space-y-1.5 list-disc list-inside">
-                    <li>Felt Fabric</li>
-                    <li>PP Cotton Filling</li>
+                    {renderMaterials()}
                   </ul>
                 </div>
 

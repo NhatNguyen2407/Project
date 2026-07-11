@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom';
 import { useCart } from '../../context/CartContext';
 import { COUNTRY_LIST } from '../../data/storeData';
 import { ToastNotification } from '../common_components/ToastNotification';
-import { TermsModal } from '../common_components/TermsModal';
+import { TermsOfServiceModal } from '../common_components/TermsOfServiceModal';
 import { supabase } from '../../service/supabase';
 import { useAuth } from '../../context/AuthContext';
 
