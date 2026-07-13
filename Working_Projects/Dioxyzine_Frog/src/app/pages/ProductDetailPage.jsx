@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, MessageSquare, Plus, Minus, Clock, Component, Package, Tag, Check } from 'lucide-react';
+// 🚀 Thêm Shield icon cho dòng reply của Admin
+import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, MessageSquare, Plus, Minus, Clock, Component, Package, Tag, Check, Shield } from 'lucide-react';
 
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
@@ -53,8 +54,11 @@ export function ProductDetailPage() {
       try {
         const { data, error } = await supabase
           .from('inquiries')
-          .select('customer_name, rating, review_comment, created_at')
+          // 🚀 Gọi thêm admin_reply
+          .select('customer_name, rating, review_comment, created_at, admin_reply')
           .not('rating', 'is', null)
+          // 🚀 Chỉ lấy các review KHÔNG bị ẩn
+          .eq('is_hidden', false) 
           .ilike('product_name', `%${product.title}%`)
           .order('created_at', { ascending: false });
 
@@ -138,7 +142,6 @@ export function ProductDetailPage() {
   const displayDesc = product.description || '';
   const displayPrice = (val) => (!isReadyUse && (isCustomSize || product.pricingType === 'contact')) ? 'Inquiry' : `$${Number(val).toFixed(2)}`;
 
-  // phân loại chất liệu theo tên và category 
   const renderMaterials = () => {
     const title = displayTitle.toLowerCase();
     const category = Array.isArray(product.category) ? product.category.join(' ').toLowerCase() : (product.category || '').toLowerCase();
@@ -146,32 +149,26 @@ export function ProductDetailPage() {
     const isEmbroidery = title.includes('thêu') || title.includes('embroidery') || title.includes('embroidered');
     const isCustomizeTab = category.includes('customize');
 
-    // 1. Hàng Customize
     if (isCustomizeTab) {
       return (
         <>
           <li>Specialized based on your ideas</li>
-          {/* <li>Premium Cotton Filling</li> */}
         </>
       );
     }
 
-    // 2. Hàng Thêu (Plushie thêu, Doll thêu)
     if (isEmbroidery) {
       return (
         <>
           <li>Pile Plush Fabric</li>
           <li>Options: 1mm, 3mm, 5mm, 7mm</li>
-          {/* <li>PP Cotton Filling</li> */}
         </>
       );
     }
 
-    // 3. Mặc định: Hàng Standard và In (Plushie standard, Doll in)
     return (
       <>
         <li>Velboa Fabric</li>
-        {/* <li>PP Cotton Filling</li> */}
       </>
     );
   };
@@ -201,7 +198,6 @@ export function ProductDetailPage() {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            {/* Ảnh sản phẩm */}
             <div className="space-y-4">
               <div className="relative aspect-square rounded-3xl overflow-hidden bg-[var(--card)] shadow-[0_0_30px_rgba(139,114,190,0.15)] border border-[var(--border)] group">
                 <img src={images[currentImage]} alt="Product" className="w-full h-full object-cover opacity-90 transition-all duration-300" />
@@ -214,7 +210,6 @@ export function ProductDetailPage() {
               </div>
             </div>
 
-            {/* Chi tiết sản phẩm */}
             <div className="space-y-6">
               <div>
                 <h1 className="font-heading mb-4 text-white drop-shadow-[0_0_8px_rgba(139,114,190,0.4)] text-3xl md:text-4xl">{displayTitle}</h1>
@@ -383,7 +378,6 @@ export function ProductDetailPage() {
                 </div>
               )}
 
-              {/* B2B */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
                 <div className="bg-[#1A1528] p-5 rounded-2xl border border-[var(--border)]">
                   <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
@@ -423,7 +417,6 @@ export function ProductDetailPage() {
                 </div>
               </div>
 
-              {/* NÚT KÍCH HOẠT */}
               <div className="pt-2">
                 {isReadyUse ? (
                   <motion.button 
@@ -475,6 +468,17 @@ export function ProductDetailPage() {
                   </div>
                 </div>
                 <p className="text-[var(--silver-gray)] text-sm italic">"{rev.review_comment}"</p>
+                
+                {/* 🚀 HIỂN THỊ CÂU TRẢ LỜI CỦA ADMIN */}
+                {rev.admin_reply && (
+                  <div className="mt-4 bg-[var(--primary)]/10 border border-[var(--primary)]/20 p-4 rounded-xl ml-4 relative">
+                    <div className="absolute -left-2 top-4 w-4 h-4 bg-[var(--card)] border-l border-b border-[var(--primary)]/20 rotate-45"></div>
+                    <p className="text-xs font-bold text-[var(--primary)] mb-1 flex items-center gap-1.5">
+                      <Shield className="w-3.5 h-3.5" /> Dioxyzine Frog Reply:
+                    </p>
+                    <p className="text-sm text-gray-300">"{rev.admin_reply}"</p>
+                  </div>
+                )}
               </div>
             ))}
           </div>

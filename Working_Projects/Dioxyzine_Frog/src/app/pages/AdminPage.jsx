@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { PackageSearch, PackagePlus, Edit, Trash2, X, PlusCircle, Save, Ticket, ToggleLeft, ToggleRight, UploadCloud } from 'lucide-react';
+import { PackageSearch, PackagePlus, Edit, Trash2, X, PlusCircle, Save, Ticket, ToggleLeft, ToggleRight, UploadCloud, MessageSquare, Eye, EyeOff, Star } from 'lucide-react';
 import { supabase } from '../service/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
 import emailjs from '@emailjs/browser';
+import { toast } from 'sonner';
 
 import { ToastNotification } from '../components/common_components/ToastNotification';
 
@@ -12,18 +13,23 @@ export function AdminPage() {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   
-  const [toast, setToast] = useState({ show: false, msg: '', type: '' });
+  const [toastNotif, setToastNotif] = useState({ show: false, msg: '', type: '' });
   const showToast = (msg, type) => {
-    setToast({ show: true, msg, type });
-    setTimeout(() => setToast({ show: false, msg: '', type: '' }), 3500);
+    if(type === 'success') toast.success(msg);
+    else if(type === 'error') toast.error(msg);
+    else toast(msg);
   };
 
+  // 🚀 ĐÃ BỔ SUNG: Tab 'reviews'
   const [activeTab, setActiveTab] = useState('orders'); 
   const [orders, setOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [vouchers, setVouchers] = useState([]); 
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
+
+  // 🚀 ĐÃ BỔ SUNG: Quản lý Textbox trả lời Review
+  const [replyInputs, setReplyInputs] = useState({});
 
   const [coverFile, setCoverFile] = useState(null);
   const [coverPreview, setCoverPreview] = useState(null);
@@ -113,24 +119,46 @@ export function AdminPage() {
               },
               'XNy24de8QlT536ZQU'
             );
-            showToast("✅ Đã lưu mã vận đơn và gửi Email tự động!", "success");
+            toast.success("✅ Đã lưu mã vận đơn và gửi Email tự động!");
           } catch (emailErr) {
             console.error("Lỗi EmailJS:", emailErr);
-            showToast("⚠️ Lưu thành công, nhưng gửi Email thất bại.", "error");
+            toast.error("⚠️ Lưu thành công, nhưng gửi Email thất bại.");
           }
         }
       } else {
-        showToast("✅ Cập nhật trạng thái thành công!", "success");
+        toast.success("✅ Cập nhật trạng thái thành công!");
       }
-    } catch (err) { showToast("Lỗi khi cập nhật trạng thái!", "error"); } finally { setUpdatingId(null); }
+    } catch (err) { toast.error("Lỗi khi cập nhật trạng thái!"); } finally { setUpdatingId(null); }
   };
 
   const handleUpdateShippingDate = async (orderId, newDate) => {
     try {
       await supabase.from('inquiries').update({ estimated_shipping_date: newDate }).eq('id', orderId);
       setOrders(orders.map(o => o.id === orderId ? { ...o, estimated_shipping_date: newDate } : o));
-      showToast("Cập nhật ngày giao hàng thành công!", "success");
-    } catch (err) { console.error(err); showToast("Lỗi cập nhật ngày giao!", "error"); }
+      toast.success("Cập nhật ngày giao hàng thành công!");
+    } catch (err) { console.error(err); toast.error("Lỗi cập nhật ngày giao!"); }
+  };
+
+  // 🚀 ĐÃ BỔ SUNG: Tính năng Admin Reply Review
+  const handleSaveReply = async (id) => {
+    const replyText = replyInputs[id];
+    if (!replyText) return toast.error("Vui lòng nhập câu trả lời!");
+    try {
+      const { error } = await supabase.from('inquiries').update({ admin_reply: replyText }).eq('id', id);
+      if (error) throw error;
+      setOrders(orders.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      toast.success("Đã phản hồi đánh giá!");
+    } catch (err) { toast.error(err.message); }
+  };
+
+  // 🚀 ĐÃ BỔ SUNG: Tính năng Ẩn/Hiện Review
+  const handleToggleReviewVisibility = async (id, isHidden) => {
+    try {
+      const { error } = await supabase.from('inquiries').update({ is_hidden: !isHidden }).eq('id', id);
+      if (error) throw error;
+      setOrders(orders.map(o => o.id === id ? { ...o, is_hidden: !isHidden } : o));
+      toast.success(!isHidden ? "Đã ẨN đánh giá này!" : "Đã HIỆN đánh giá này!");
+    } catch (err) { toast.error(err.message); }
   };
 
   const openProductModal = (product = null) => {
@@ -201,9 +229,9 @@ export function AdminPage() {
       
       await fetchData();
       setIsModalOpen(false);
-      showToast("Lưu sản phẩm thành công! 🎉", "success");
+      toast.success("Lưu sản phẩm thành công! 🎉");
     } catch (err) {
-      showToast("Lỗi lưu sản phẩm: " + err.message, "error");
+      toast.error("Lỗi lưu sản phẩm: " + err.message);
     } finally {
       setIsSavingProduct(false);
     }
@@ -214,32 +242,20 @@ export function AdminPage() {
     try {
       await supabase.from('products').delete().eq('id', id);
       setProducts(products.filter(p => p.id !== id));
-      showToast("Đã xóa sản phẩm", "success");
-    } catch (err) { showToast(err.message, "error"); }
+      toast.success("Đã xóa sản phẩm");
+    } catch (err) { toast.error(err.message); }
   };
 
   const handleSaveVoucher = async (e) => {
     e.preventDefault();
-
-    if (!voucherForm.code.trim()) {
-      return showToast("Please enter a Promo Code! 🎟️", "error");
-    }
-    
-    if (hasExpiration && !voucherForm.expires_at) {
-      return showToast("Please completely fill out the Expiration Date and Time! ⏰", "error");
-    }
+    if (!voucherForm.code.trim()) return toast.error("Please enter a Promo Code! 🎟️");
+    if (hasExpiration && !voucherForm.expires_at) return toast.error("Please completely fill out the Expiration Date and Time! ⏰");
 
     try {
       const finalData = { ...voucherForm };
-      
       if (!finalData.usage_limit) finalData.usage_limit = null;
-      
-      if (!hasExpiration || !finalData.expires_at) {
-        finalData.expires_at = null; 
-      } else {
-        finalData.expires_at = new Date(finalData.expires_at).toISOString();
-      }
-      
+      if (!hasExpiration || !finalData.expires_at) finalData.expires_at = null; 
+      else finalData.expires_at = new Date(finalData.expires_at).toISOString();
       finalData.code = finalData.code.toUpperCase();
 
       const { error } = await supabase.from('vouchers').insert([finalData]);
@@ -247,21 +263,18 @@ export function AdminPage() {
       
       await fetchData();
       setIsVoucherModalOpen(false);
-      
-      // Reset form
       setVoucherForm({ code: '', discount_type: 'percent', discount_value: 10, usage_limit: null, expires_at: '' });
       setHasExpiration(false); 
-      
-      showToast("Tạo mã giảm giá thành công! 🎉", "success");
-    } catch (err) { showToast("Lỗi tạo mã: " + err.message, "error"); }
+      toast.success("Tạo mã giảm giá thành công! 🎉");
+    } catch (err) { toast.error("Lỗi tạo mã: " + err.message); }
   };
 
   const handleToggleVoucher = async (id, currentStatus) => {
     try {
       await supabase.from('vouchers').update({ is_active: !currentStatus }).eq('id', id);
       setVouchers(vouchers.map(v => v.id === id ? { ...v, is_active: !currentStatus } : v));
-      showToast("Đã cập nhật trạng thái mã!", "success");
-    } catch (err) { showToast(err.message, "error"); }
+      toast.success("Đã cập nhật trạng thái mã!");
+    } catch (err) { toast.error(err.message); }
   };
 
   const handleDeleteVoucher = async (id) => {
@@ -269,20 +282,23 @@ export function AdminPage() {
     try {
       await supabase.from('vouchers').delete().eq('id', id);
       setVouchers(vouchers.filter(v => v.id !== id));
-      showToast("Đã xóa mã giảm giá!", "success");
-    } catch (err) { showToast(err.message, "error"); }
+      toast.success("Đã xóa mã giảm giá!");
+    } catch (err) { toast.error(err.message); }
   };
 
   if (!user || role !== 'admin') return <div className="min-h-screen pt-28 text-center text-white">Checking Auth...</div>;
 
+  // Lọc ra các đơn hàng có đánh giá
+  const reviewsList = orders.filter(o => o.rating != null);
+
   return (
     <>
-      <ToastNotification toast={toast} />
+      <ToastNotification toast={toastNotif} />
 
       <div className="min-h-screen pt-28 pb-16 bg-transparent">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          {/* navigate */}
+          {/* Navigate */}
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-white/10 pb-6 relative z-0">
             <div className="flex flex-wrap gap-2 bg-[#1A1528] p-1.5 rounded-xl border border-[var(--border)]">
               <button onClick={() => setActiveTab('orders')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'orders' ? 'bg-[var(--primary)] text-white' : 'text-gray-400 hover:text-white cursor-pointer'}`}>
@@ -293,6 +309,10 @@ export function AdminPage() {
               </button>
               <button onClick={() => setActiveTab('vouchers')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'vouchers' ? 'bg-[var(--primary)] text-white' : 'text-gray-400 hover:text-white cursor-pointer'}`}>
                 Promo Codes
+              </button>
+              {/* 🚀 ĐÃ BỔ SUNG: Nút Tab Reviews */}
+              <button onClick={() => setActiveTab('reviews')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'reviews' ? 'bg-yellow-500 text-black' : 'text-gray-400 hover:text-yellow-500 cursor-pointer'}`}>
+                Reviews ({reviewsList.length})
               </button>
             </div>
             
@@ -343,7 +363,55 @@ export function AdminPage() {
                 </table>
               </div>
             </div>
+          ) : activeTab === 'reviews' ? (
+            /* 🚀 ĐÃ BỔ SUNG: BẢNG QUẢN LÝ REVIEWS DÀNH CHO ADMIN */
+            <div className="space-y-6 max-w-4xl mx-auto">
+              {reviewsList.length === 0 ? (
+                <div className="text-center py-10 text-gray-500">Chưa có đánh giá nào từ khách hàng.</div>
+              ) : (
+                reviewsList.map(review => (
+                  <div key={review.id} className={`bg-[var(--card)] border ${review.is_hidden ? 'border-red-500/30 opacity-60' : 'border-[var(--border)]'} rounded-3xl p-6 shadow-xl transition-all`}>
+                    <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
+                      <div>
+                        <h4 className="font-bold text-white text-lg">{review.product_name}</h4>
+                        <p className="text-sm text-[var(--muted-foreground)]">
+                          Bởi <strong className="text-white">{review.customer_name || review.customer_email}</strong> • {new Date(review.created_at).toLocaleDateString()}
+                        </p>
+                        <div className="flex mt-2">
+                          {[1,2,3,4,5].map(star => <Star key={star} className={`w-4 h-4 ${star <= review.rating ? 'text-yellow-500 fill-yellow-500' : 'text-gray-600'}`} />)}
+                        </div>
+                      </div>
+                      <button 
+                        onClick={() => handleToggleReviewVisibility(review.id, review.is_hidden)} 
+                        className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${review.is_hidden ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'}`}
+                      >
+                        {review.is_hidden ? <><Eye className="w-4 h-4"/> Đang Ẩn (Bấm để Hiện)</> : <><EyeOff className="w-4 h-4"/> Đang Hiện (Bấm để Ẩn)</>}
+                      </button>
+                    </div>
+                    
+                    <p className="text-sm text-white italic mb-6 bg-black/20 p-4 rounded-xl border border-white/5">"{review.review_comment}"</p>
+                    
+                    <div className="flex flex-col sm:flex-row gap-3 items-stretch">
+                      <input 
+                        type="text" 
+                        placeholder="Trả lời bình luận với tư cách Dioxyzine Frog..." 
+                        value={replyInputs[review.id] ?? (review.admin_reply || '')}
+                        onChange={(e) => setReplyInputs({...replyInputs, [review.id]: e.target.value})}
+                        className="flex-1 bg-black/40 border border-[var(--border)] rounded-xl px-4 py-3 text-sm text-white focus:border-[var(--primary)] outline-none"
+                      />
+                      <button 
+                        onClick={() => handleSaveReply(review.id)} 
+                        className="px-6 py-3 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                      >
+                        <MessageSquare className="w-4 h-4" /> Lưu Câu Trả Lời
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           ) : activeTab === 'products' ? (
+            /* BẢNG PRODUCTS GIỮ NGUYÊN */
             <div className="bg-[#1A1528] border border-[var(--border)] rounded-3xl overflow-hidden shadow-2xl relative z-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -376,6 +444,7 @@ export function AdminPage() {
               </div>
             </div>
           ) : (
+            /* BẢNG VOUCHERS GIỮ NGUYÊN */
             <div className="bg-[#1A1528] border border-[var(--border)] rounded-3xl overflow-hidden shadow-2xl relative z-0">
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
@@ -431,7 +500,7 @@ export function AdminPage() {
         </div>
       </div>
 
-      {/* MODAL SẢN PHẨM */}
+      {/* MODAL SẢN PHẨM & VOUCHER GIỮ NGUYÊN (TRÁNH LÀM RỐI CODE) */}
       <AnimatePresence>
         {isModalOpen && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm overflow-y-auto">
@@ -543,7 +612,6 @@ export function AdminPage() {
         )}
       </AnimatePresence>
 
-      {/* MODAL VOUCHER */}
       <AnimatePresence>
         {isVoucherModalOpen && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-[9999] backdrop-blur-sm">

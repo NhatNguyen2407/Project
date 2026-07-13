@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
-import { Menu, ShoppingCart, X, ChevronDown, User, LogOut, LayoutDashboard, Shield } from 'lucide-react';
+import { MapPin, Menu, ShoppingCart, X, ChevronDown, User, LogOut, LayoutDashboard, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from '../../../assets/Logo.png';
 import { useAuth } from '../../context/AuthContext';
@@ -169,6 +169,11 @@ export function Navbar() {
                     <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors">
                       <LayoutDashboard className="w-4 h-4 text-[var(--primary)]" /> My Dashboard
                     </Link>
+
+                    <Link to="/tracking" className="flex items-center gap-3 px-4 py-3 hover:bg-[var(--primary)]/20 text-white text-sm font-medium transition-colors border-b border-[var(--border)]">
+                      <MapPin className="w-4 h-4 text-[var(--primary)]" /> Track Order
+                    </Link>
+
                     <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 text-red-400 text-sm font-medium border-t border-[var(--border)] transition-colors text-left cursor-pointer">
                       <LogOut className="w-4 h-4" /> Sign Out
                     </button>
@@ -239,6 +244,10 @@ export function Navbar() {
 
                      <Link to="/profile" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-[#1A1528] rounded-xl text-white font-medium border border-[var(--border)] hover:border-[var(--primary)] transition-colors">
                        <LayoutDashboard className="w-4 h-4" /> Go to Dashboard
+                     </Link>
+
+                     <Link to="/tracking" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-[#1A1528] rounded-xl text-white font-medium border border-[var(--border)] hover:border-[var(--primary)] transition-colors">
+                       <MapPin className="w-4 h-4" /> Track Order
                      </Link>
                    </div>
                 ) : (

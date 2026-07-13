@@ -3,12 +3,16 @@ import { motion, AnimatePresence } from 'motion/react';
 import { X, Truck, CreditCard, CheckCircle2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+
 import { useCart } from '../../context/CartContext';
 import { COUNTRY_LIST } from '../../data/storeData';
 import { ToastNotification } from '../common_components/ToastNotification';
 import { TermsOfServiceModal } from '../common_components/TermsOfServiceModal';
 import { supabase } from '../../service/supabase';
 import { useAuth } from '../../context/AuthContext';
+
+const PAYPAL_CLIENT_ID = "AQ13HgNvoGjg75Qjftly9tG4aTYywjNbUyG4YW5MxBY567O2cTajzDfVEWQLoUGKq_kfD8N5IVm4SMRK";
 
 export function CheckoutModal({ isOpen, onClose }) {
   const { user } = useAuth();
@@ -23,6 +27,8 @@ export function CheckoutModal({ isOpen, onClose }) {
   const [acceptedStoreTerms, setAcceptedStoreTerms] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
+
+  const finalPrice = (cartTotal + 15).toFixed(2);
 
   useEffect(() => {
     const selected = COUNTRY_LIST.find(c => c.code === shippingForm.countryCode);
@@ -40,28 +46,30 @@ export function CheckoutModal({ isOpen, onClose }) {
     setShippingForm({ ...shippingForm, [e.target.name]: e.target.value });
   };
 
-  const handlePlaceOrder = async (e) => {
-    e.preventDefault();
-    
-    const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
+  const validateCheckoutForm = () => {
+    const { email, firstName, lastName, address, city, phoneNumber } = shippingForm;
     if (!email.trim() || !firstName.trim() || !lastName.trim() || !address.trim() || !city.trim() || !phoneNumber.trim()) {
-      return showToast('Please fill out all required information columns! 📝', 'error');
+      showToast('Please fill out all required information columns! 📝', 'error');
+      return false;
     }
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return showToast('Invalid email structural layout! ✉️', 'error');
+      showToast('Invalid email structural layout! ✉️', 'error');
+      return false;
     }
-
     if (!acceptedStoreTerms) {
-      return showToast('You must agree to the Terms of Service before checkout! ⚠️', 'error');
+      showToast('You must agree to the Terms of Service before checkout! ⚠️', 'error');
+      return false;
     }
+    return true;
+  };
 
+  const saveOrderToDatabase = async (transactionId) => {
     try {
+      const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
       const orderSummary = cart.map(item => `${item.qty}x ${item.name}`).join(' | ');
       const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
       const fullAddress = `${firstName} ${lastName} - ${address}, ${city}, ${postalCode} (${countryCode})`;
       const fullPhone = `${phoneCode} ${phoneNumber}`;
-      const finalPrice = cartTotal + 15;
 
       const { error } = await supabase.from('inquiries').insert([{
         user_id: user ? user.id : null,
@@ -72,10 +80,14 @@ export function CheckoutModal({ isOpen, onClose }) {
         image_link: cart[0]?.image || 'N/A',
         product_name: `[READY-MADE] ${orderSummary}`,
         quantity: totalQty,
-        status: 'Pending',
+        status: 'pending',
         shipping_address: fullAddress,
         phone_number: fullPhone,
-        total_amount: finalPrice
+        total_amount: parseFloat(finalPrice),
+        payment_method: 'paypal',
+        payment_status: 'paid',
+        transaction_id: transactionId,
+        total_paid: parseFloat(finalPrice)
       }]);
 
       if (error) throw error;
@@ -89,11 +101,11 @@ export function CheckoutModal({ isOpen, onClose }) {
         setShippingForm({
           email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '', countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
         });
-      }, 3000);
+      }, 4000);
 
     } catch (error) {
       console.error('Lỗi khi chốt đơn:', error);
-      showToast('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!', 'error');
+      showToast('Database Error! Please contact support with your Transaction ID.', 'error');
     }
   };
 
@@ -112,13 +124,13 @@ export function CheckoutModal({ isOpen, onClose }) {
             </button>
 
             <ToastNotification toast={toast} />
-            <TermsModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
+            <TermsOfServiceModal isOpen={showTermsModal} onClose={() => setShowTermsModal(false)} />
 
             {orderComplete ? (
               <div className="w-full p-16 flex flex-col items-center justify-center text-center">
                 <CheckCircle2 className="w-24 h-24 text-green-500 mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-full" />
                 <h2 className="text-4xl font-bold text-white mb-4 font-heading">Order Confirmed!</h2>
-                <p className="text-[var(--silver-gray)] text-lg max-w-md mb-8">Thank you for your purchase. We will process your order and send a tracking link to your email shortly.</p>
+                <p className="text-[var(--silver-gray)] text-lg max-w-md mb-8">Thank you for your purchase. We have received your payment and will send a tracking link to your email shortly.</p>
               </div>
             ) : (
               <>
@@ -178,13 +190,13 @@ export function CheckoutModal({ isOpen, onClose }) {
                   </div>
 
                   <div>
-                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><CreditCard className="w-5 h-5 text-[var(--primary)]" /> Payment Options</h3>
-                    <div className="p-4 bg-[#1A1528] border border-[var(--border)] rounded-xl">
+                    <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2"><CreditCard className="w-5 h-5 text-[var(--primary)]" /> Payment Gateways</h3>
+                    <div className="p-4 bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl shadow-[0_0_15px_rgba(139,114,190,0.15)]">
                       <div className="flex items-center gap-3 text-[var(--silver-gray)]">
                         <input type="radio" checked readOnly className="w-4 h-4 accent-[var(--primary)]" />
-                        <span className="font-semibold text-white">Secure E-Commerce Gateway</span>
+                        <span className="font-bold text-white flex items-center gap-2">PayPal / Credit Card</span>
                       </div>
-                      <p className="text-sm mt-2 opacity-70">Redirects to secure payment validation interface after placement confirmation.</p>
+                      <p className="text-sm mt-2 opacity-70">Secured and encrypted by PayPal. You don't need a PayPal account to pay with your credit card.</p>
                     </div>
                   </div>
                 </div>
@@ -192,7 +204,7 @@ export function CheckoutModal({ isOpen, onClose }) {
                 <div className="w-full md:w-2/5 p-8 md:p-12 bg-[#1A1528] flex flex-col justify-between">
                   <div>
                     <h3 className="text-xl font-bold text-white mb-6 font-heading">Order Summary</h3>
-                    <div className="space-y-4 max-h-[25vh] overflow-y-auto mb-6 pr-2 border-b border-[var(--border)] pb-6">
+                    <div className="space-y-4 max-h-[25vh] overflow-y-auto mb-6 pr-2 border-b border-[var(--border)] pb-6 custom-scrollbar">
                       {cart.map(item => (
                         <div key={item.id} className="flex items-center gap-4 relative">
                           <div className="relative flex-shrink-0">
@@ -211,7 +223,7 @@ export function CheckoutModal({ isOpen, onClose }) {
                     </div>
                     <div className="flex justify-between items-center mb-6">
                       <span className="text-lg font-bold text-white">Total Amount</span>
-                      <span className="text-3xl font-bold text-[var(--primary)]">${(cartTotal + 15).toFixed(2)}</span>
+                      <span className="text-3xl font-bold text-[var(--primary)]">${finalPrice}</span>
                     </div>
                   </div>
 
@@ -222,9 +234,48 @@ export function CheckoutModal({ isOpen, onClose }) {
                         I have read and agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsModal(true); }} className="text-[var(--primary)] font-bold underline ml-1 hover:text-white transition-colors">Terms of Service</span> *
                       </label>
                     </div>
-                    <button type="button" onClick={handlePlaceOrder} className="w-full py-4 rounded-full bg-[var(--primary)] text-white font-bold text-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.5)] transition-all cursor-pointer block text-center">
-                      Confirm & Pay ${(cartTotal + 15).toFixed(2)}
-                    </button>
+
+                    <div className="w-full relative z-0">
+                      <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD" }}>
+                        <PayPalButtons 
+                          style={{ 
+                            layout: "vertical", 
+                            color: "silver", 
+                            shape: "rect", 
+                            label: "pay",
+                            height: 48 
+                          }}
+                          onClick={(data, actions) => {
+                            const isValid = validateCheckoutForm();
+                            if (!isValid) return actions.reject();
+                            return actions.resolve();
+                          }}
+                          createOrder={(data, actions) => {
+                            return actions.order.create({
+                              purchase_units: [{
+                                amount: {
+                                  value: finalPrice
+                                },
+                                description: "Dioxyzine Frog Store Order"
+                              }]
+                            });
+                          }}
+                          onApprove={async (data, actions) => {
+                            try {
+                              const details = await actions.order.capture();
+                              const transactionId = details.id;
+                              await saveOrderToDatabase(transactionId);
+                            } catch (error) {
+                              showToast("Transaction failed or was canceled.", "error");
+                            }
+                          }}
+                          onError={(err) => {
+                            console.error("PayPal Error:", err);
+                            showToast("Payment Gateway encountered an error.", "error");
+                          }}
+                        />
+                      </PayPalScriptProvider>
+                    </div>
                   </div>
                 </div>
               </>

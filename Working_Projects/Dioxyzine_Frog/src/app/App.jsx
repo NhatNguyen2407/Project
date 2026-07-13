@@ -22,6 +22,7 @@ import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
+import { OrderTrackingPage } from './pages/OrderTrackingPage';
 
 //import componenets
 import { ScrollToTop } from './components/ScrollToTop';
@@ -96,6 +97,7 @@ export default function App() {
                   <Route path="/pricing" element={<PricingPage />} />
                   <Route path="/gallery" element={<GalleryPage />} />
                   <Route path="/inquiry" element={<InquiryPage />} />
+                  <Route path="/tracking" element={<OrderTrackingPage />} />
                   <Route path="/quote" element={<QuoteRequestPage />} />
                   <Route path="/checkout" element={<CheckoutPage />} />
                   <Route path="/admin" element={<AdminPage />} />
