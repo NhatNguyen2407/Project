@@ -3,12 +3,18 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle } from 'lucide-react';
 import { Link } from 'react-router';
 
+// 🚀 BỔ SUNG: Import thư viện PayPal
+import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+
 import { useCart } from '../context/CartContext';
 import { COUNTRY_LIST } from '../data/storeData';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
+
+// 🚀 ĐỂ TẠM CHỮ "test" - THAY BẰNG MÃ CỦA SẾP SAU
+const PAYPAL_CLIENT_ID = "test";
 
 export function CheckoutPage() {
   const { user } = useAuth();
@@ -104,23 +110,28 @@ export function CheckoutPage() {
   const discountValue = getDiscountAmount();
   const finalPrice = Math.max(0, cartTotal + SHIPPING_FEE - discountValue);
 
-  const handlePlaceOrder = async (e) => {
-    e.preventDefault();
-    
-    const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
+  // 🚀 KIỂM TRA FORM (PayPal sẽ gọi hàm này trước khi cho quẹt thẻ)
+  const validateCheckoutForm = () => {
+    const { email, firstName, lastName, address, city, phoneNumber } = shippingForm;
     if (!email.trim() || !firstName.trim() || !lastName.trim() || !address.trim() || !city.trim() || !phoneNumber.trim()) {
-      return showToast('Please fill out all required information columns!', 'error');
+      showToast('Please fill out all required information columns!', 'error');
+      return false;
     }
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-      return showToast('Invalid email structural layout!', 'error');
+      showToast('Invalid email structural layout!', 'error');
+      return false;
     }
-
     if (!acceptedStoreTerms) {
-      return showToast('You must agree to the Terms of Service before checkout!', 'error');
+      showToast('You must agree to the Terms of Service before checkout!', 'error');
+      return false;
     }
+    return true;
+  };
 
+  // 🚀 LƯU VÀO DATABASE (PayPal sẽ gọi hàm này sau khi trả tiền xong)
+  const saveOrderToDatabase = async (transactionId) => {
     try {
+      const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
       const orderSummary = cart.map(item => `${item.qty}x ${item.name}`).join(' | ');
       const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
       const fullAddress = `${firstName} ${lastName} - ${address}, ${city}, ${postalCode} (${countryCode})`;
@@ -135,14 +146,20 @@ export function CheckoutPage() {
         image_link: cart[0]?.image || 'N/A', 
         product_name: `[READY-MADE] ${orderSummary}`,
         quantity: totalQty,
-        status: 'Pending',
+        status: 'pending', // lowercase cho chuẩn format
         shipping_address: fullAddress,
         phone_number: fullPhone,
         total_amount: finalPrice,
+        // Cột mới thêm để lưu mã GD
+        payment_method: 'paypal',
+        payment_status: 'paid',
+        transaction_id: transactionId,
+        total_paid: finalPrice
       }]);
 
       if (orderError) throw orderError;
 
+      // Cộng thêm 1 lượt dùng cho Voucher
       if (appliedVoucher) {
         await supabase
           .from('vouchers')
@@ -154,16 +171,16 @@ export function CheckoutPage() {
       setTimeout(() => {
         setOrderComplete(false);
         setAcceptedStoreTerms(false);
-        setAppliedVoucher(null); // Clear voucher
+        setAppliedVoucher(null);
         clearCart(); 
         setShippingForm({
           email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '', countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
         });
-      }, 3000);
+      }, 4000);
 
     } catch (error) {
       console.error('Lỗi khi chốt đơn:', error);
-      showToast('Có lỗi xảy ra khi đặt hàng. Vui lòng thử lại!', 'error');
+      showToast('Database Error! Please contact support with your Transaction ID.', 'error');
     }
   };
 
@@ -186,7 +203,7 @@ export function CheckoutPage() {
             <div className="w-full p-16 flex flex-col items-center justify-center text-center bg-[var(--card)]">
               <CheckCircle2 className="w-24 h-24 text-green-500 mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-full" />
               <h2 className="text-4xl font-bold text-white mb-4 font-heading">Order Confirmed!</h2>
-              <p className="text-[var(--silver-gray)] text-lg max-w-md mb-8">Thank you for your purchase. We will process your order and send a tracking link to your email shortly.</p>
+              <p className="text-[var(--silver-gray)] text-lg max-w-md mb-8">Thank you for your purchase. We have received your payment and will process your order shortly.</p>
             </div>
           ) : (
             <>
@@ -274,7 +291,7 @@ export function CheckoutPage() {
                       <input type="radio" checked readOnly className="w-4 h-4 accent-[var(--primary)]" />
                       <span className="font-semibold text-white">Secure E-Commerce Gateway</span>
                     </div>
-                    <p className="text-sm mt-2 opacity-70">Redirects to secure payment validation interface after placement confirmation.</p>
+                    <p className="text-sm mt-2 opacity-70">Redirects to secure payment validation interface after placement confirmation. Supports PayPal & Credit Cards.</p>
                   </div>
                 </div>
               </div>
@@ -336,7 +353,7 @@ export function CheckoutPage() {
                     
                     <AnimatePresence>
                       {appliedVoucher && (
-                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex justify-between text-yellow-500 font-bold overflow-hidden">
+                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex justify-between text-yellow-500 font-bold overflow-hidden mt-3">
                           <span>Discount ({appliedVoucher.code})</span> 
                           <span>-${discountValue.toFixed(2)}</span>
                         </motion.div>
@@ -362,9 +379,49 @@ export function CheckoutPage() {
                       I have read and agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsOfServiceModal(true); }} className="text-[var(--primary)] font-bold underline ml-1 hover:text-white transition-colors">Terms of Service</span> *
                     </label>
                   </div>
-                  <button type="button" onClick={handlePlaceOrder} className="w-full py-4 rounded-full bg-[var(--primary)] text-white font-bold text-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.5)] transition-all cursor-pointer block text-center">
-                    Confirm & Pay ${finalPrice.toFixed(2)}
-                  </button>
+
+                  {/* 🚀 NÚT CŨ ĐÃ BỊ XÓA, THAY HOÀN TOÀN BẰNG NÚT PAYPAL */}
+                  <div className="w-full relative z-0 mt-4">
+                    <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD", locale: "en_US" }}>
+                      <PayPalButtons 
+                        style={{ 
+                          layout: "vertical", 
+                          color: "silver", 
+                          shape: "rect", 
+                          label: "pay",
+                          height: 48 
+                        }}
+                        onClick={(data, actions) => {
+                          const isValid = validateCheckoutForm();
+                          if (!isValid) return actions.reject();
+                          return actions.resolve();
+                        }}
+                        createOrder={(data, actions) => {
+                          return actions.order.create({
+                            purchase_units: [{
+                              amount: {
+                                value: finalPrice.toFixed(2)
+                              },
+                              description: "Dioxyzine Frog Store Order"
+                            }]
+                          });
+                        }}
+                        onApprove={async (data, actions) => {
+                          try {
+                            const details = await actions.order.capture();
+                            await saveOrderToDatabase(details.id);
+                          } catch (error) {
+                            showToast("Transaction failed or was canceled.", "error");
+                          }
+                        }}
+                        onError={(err) => {
+                          console.error("PayPal Error:", err);
+                          showToast("Payment Gateway encountered an error.", "error");
+                        }}
+                      />
+                    </PayPalScriptProvider>
+                  </div>
+
                 </div>
               </div>
             </>
