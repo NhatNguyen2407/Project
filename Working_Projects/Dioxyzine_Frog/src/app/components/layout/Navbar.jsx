@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router';
 import { MapPin, Menu, ShoppingCart, X, ChevronDown, User, LogOut, LayoutDashboard, Shield } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import Logo from '../../../assets/Logo.png';
+import Logo from '../../../assets/Avatar.jpeg';
 import { useAuth } from '../../context/AuthContext';
 import { supabase } from '../../service/supabase';
 import { useCart } from '../../context/CartContext';
