@@ -1,4 +1,3 @@
-// src/app/pages/TutorialPage.jsx
 import { motion, AnimatePresence } from 'motion/react';
 import { BookOpen, Paintbrush, Scissors, Palette, Wrench } from 'lucide-react';
 
@@ -13,28 +12,28 @@ const TUTORIAL_NAV = [
   { id: 'how-to-draw-embroidered-2ddoll', label: 'Embroidered 2D Doll Guide', icon: <Paintbrush className="w-4 h-4" /> },
 ];
 
-export function TutorialPage() {
-  const { tutorialSlug } = useParams();
+export function BlogPage() {
+  const { blogSlug } = useParams();
   const navigate = useNavigate();
 
-  const activeSlug = tutorialSlug || 'how-to-draw-2piece-plushie';
+  const activeSlug = blogSlug || 'how-to-draw-2piece-plushie';
 
   const currentTutorial = TUTORIAL_NAV.find(t => t.id === activeSlug);
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
       <SEO 
-        title={currentTutorial ? `${currentTutorial.label} | Creator Academy` : 'Creator Academy'} 
+        title={currentTutorial ? `${currentTutorial.label} | Creator Blog` : 'Creator Blog'} 
         description="Step-by-step design blueprints and template specifications for our workshop assets." 
       />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-12 border-b border-[var(--border)] pb-6">
           <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)] flex items-center justify-center gap-3">
-            <BookOpen className="w-10 h-10 text-[var(--primary)]" /> Creator Tutorial
+            <BookOpen className="w-10 h-10 text-[var(--primary)]" /> Creator Blog
           </h1>
           <p className="text-lg text-[var(--muted-foreground)]">
-            Step-by-step design blueprints and specifications for our workshop assets
+            Step-by-step design blueprints, news, and specifications for our workshop assets
           </p>
         </div>
 
@@ -46,7 +45,7 @@ export function TutorialPage() {
               {TUTORIAL_NAV.map((item) => (
                 <button
                   key={item.id}
-                  onClick={() => navigate(`/tutorial/${item.id}`)}
+                  onClick={() => navigate(`/blog/${item.id}`)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all cursor-pointer text-left
                     ${activeSlug === item.id 
                       ? 'bg-[var(--primary)] text-white shadow-[0_0_15px_rgba(139,114,190,0.3)] font-bold' 

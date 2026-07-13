@@ -1,14 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-// 🚀 Thêm Shield icon cho dòng reply của Admin
 import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, MessageSquare, Plus, Minus, Clock, Component, Package, Tag, Check, Shield } from 'lucide-react';
 
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 import { MOCK_PRODUCTS } from '../data/storeData';
 import { CartDrawer } from '../components/store/CartDrawer';
-import { CheckoutModal } from '../components/store/CheckoutModal';
 import { SEO } from '../components/common_components/SEO';
 import { supabase } from '../service/supabase';
 
@@ -54,10 +52,8 @@ export function ProductDetailPage() {
       try {
         const { data, error } = await supabase
           .from('inquiries')
-          // 🚀 Gọi thêm admin_reply
           .select('customer_name, rating, review_comment, created_at, admin_reply')
           .not('rating', 'is', null)
-          // 🚀 Chỉ lấy các review KHÔNG bị ẩn
           .eq('is_hidden', false) 
           .ilike('product_name', `%${product.title}%`)
           .order('created_at', { ascending: false });
@@ -441,7 +437,6 @@ export function ProductDetailPage() {
       </div>
 
       <CartDrawer onProceedToCheckout={() => setIsCheckoutOpen(true)} />
-      <CheckoutModal isOpen={isCheckoutOpen} onClose={() => setIsCheckoutOpen(false)} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-24">
         <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2 font-heading">
@@ -469,7 +464,7 @@ export function ProductDetailPage() {
                 </div>
                 <p className="text-[var(--silver-gray)] text-sm italic">"{rev.review_comment}"</p>
                 
-                {/* 🚀 HIỂN THỊ CÂU TRẢ LỜI CỦA ADMIN */}
+                {/* admin rreply */}
                 {rev.admin_reply && (
                   <div className="mt-4 bg-[var(--primary)]/10 border border-[var(--primary)]/20 p-4 rounded-xl ml-4 relative">
                     <div className="absolute -left-2 top-4 w-4 h-4 bg-[var(--card)] border-l border-b border-[var(--primary)]/20 rotate-45"></div>

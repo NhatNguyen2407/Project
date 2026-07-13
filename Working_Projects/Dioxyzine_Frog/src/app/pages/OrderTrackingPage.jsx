@@ -1,11 +1,10 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-// 🚀 ĐÃ SỬA: Import thẳng PackageCheck từ lucide-react luôn
 import { Search, Package, Truck, CheckCircle2, Factory, PenTool, FileText, AlertCircle, Calendar, Hash, PackageCheck } from 'lucide-react';
 import { supabase } from '../service/supabase';
 import { SEO } from '../components/common_components/SEO';
 
-// Cấu hình các bước tracking
+// các bước tracking
 const TRACKING_STEPS = [
   { id: 'pending', label: 'Order Placed', desc: 'We have received your order.', icon: FileText },
   { id: 'prototyping', label: 'Prototyping', desc: 'Creating & revising your 3D sample.', icon: PenTool },

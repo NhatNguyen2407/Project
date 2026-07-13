@@ -34,7 +34,7 @@ export function Navbar() {
     // { path: '#', label: 'Services' },
     { path: '/gallery', label: 'Gallery' }, 
     // { path: '/pricing', label: 'Pricing' },
-    { path: '/tutorial', label: 'Blog' }, 
+    { path: '/blog', label: 'Blog' }, 
     { path: '/about', label: 'About' },
   ];
   

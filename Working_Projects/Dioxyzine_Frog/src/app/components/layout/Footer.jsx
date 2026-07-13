@@ -78,7 +78,7 @@ export function Footer() {
                 <Link to="/products" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Products</Link>
                 <Link to="/pricing" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Pricing</Link>
                 <Link to="/gallery" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Gallery</Link>
-                <Link to="/tutorial" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Tutorials</Link>
+                <Link to="/blog" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Tutorials</Link>
                 <Link to="/about/terms" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Terms</Link>
                 <Link to="/about/contact" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Contact</Link>
               </div>

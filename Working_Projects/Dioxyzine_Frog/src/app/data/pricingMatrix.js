@@ -1,5 +1,6 @@
 export const pricingMatrix = {
-  '2-manh': {
+  '2-piece-margin': {
+    name: '2-Piece Plushie (With White Margin)',
     sizes: [
       { key: '5', label: '5cm' }, { key: '10', label: '10cm' }, { key: '15', label: '15cm' },
       { key: '20', label: '20cm' }, { key: '25', label: '25cm' }, { key: '30', label: '30cm' },
@@ -14,7 +15,39 @@ export const pricingMatrix = {
     ],
     addons: { phuKien: [0, 0.4, 0.4, 0.5, 0.8, 0.8, 1.1, 1.9, 2.6] }
   },
-  '3-manh-in': {
+  '2-piece-edge': {
+    name: '2-Piece Plushie (Edge-to-Edge)',
+    sizes: [
+      { key: '5', label: '5cm' }, { key: '10', label: '10cm' }, { key: '15', label: '15cm' },
+      { key: '20', label: '20cm' }, { key: '25', label: '25cm' }, { key: '30', label: '30cm' },
+      { key: '40', label: '40cm' }, { key: '50', label: '50cm' }, { key: '60', label: '60cm' }
+    ],
+    priceBrackets: [
+      { min: 11, max: 50, prices: [1.9, 3.8, 7.9, 6.8, 9.4, 12.1, 14.3, 24.5, 34.3] },
+      { min: 51, max: 100, prices: [1.9, 3.6, 7.5, 6.4, 8.7, 11.3, 13.6, 23.4, 33.2] },
+      { min: 101, max: 500, prices: [1.8, 3.4, 6.8, 6.0, 8.3, 10.9, 13.2, 23.0, 31.3] },
+      { min: 501, max: 1000, prices: [1.7, 3.2, 6.4, 5.7, 7.9, 10.2, 12.1, 22.3, 29.4] },
+      { min: 1001, max: Infinity, prices: [1.6, 3.0, 6.0, 5.3, 7.2, 9.1, 10.9, 20.4, 27.2] }
+    ],
+    addons: { phuKien: [0, 0.4, 0.4, 0.5, 0.8, 0.8, 1.1, 1.9, 2.6] }
+  },
+  '2-piece-embroidered': {
+    name: '2-Piece Plushie (Embroidered)',
+    sizes: [
+      { key: '5', label: '5cm' }, { key: '10', label: '10cm' }, { key: '15', label: '15cm' },
+      { key: '20', label: '20cm' }, { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
+    ],
+    priceBrackets: [
+      { min: 11, max: 50, prices: [5.7, 11.3, 13.2, 15.1, 17.0, 18.9] },
+      { min: 51, max: 100, prices: [5.3, 8.3, 9.8, 11.3, 12.1, 12.8] },
+      { min: 101, max: 500, prices: [4.9, 5.3, 6.4, 7.5, 8.3, 9.1] },
+      { min: 501, max: 1000, prices: [4.5, 4.5, 5.3, 6.0, 6.8, 7.5] },
+      { min: 1001, max: Infinity, prices: [4.2, 3.8, 4.5, 5.3, 6.0, 6.8] }
+    ],
+    addons: { phuKien: [0.4, 0.4, 0.8, 1.1, 1.5, 1.9] }
+  },
+  '3-piece-printed': {
+    name: '3-Piece Plushie (Printed)',
     sizes: [
       { key: '10', label: '10cm' }, { key: '15', label: '15cm' }, { key: '20', label: '20cm' },
       { key: '25', label: '25cm' }, { key: '30', label: '30cm' }, { key: '40', label: '40cm' }
@@ -28,7 +61,23 @@ export const pricingMatrix = {
     ],
     addons: { phuKien: [0.4, 0.4, 0.5, 0.8, 0.8, 1.1] }
   },
-  'doll-in': {
+  '3-piece-embroidered': {
+    name: '3-Piece Plushie (Embroidered)',
+    sizes: [
+      { key: '10', label: '10cm' }, { key: '15', label: '15cm' }, { key: '20', label: '20cm' },
+      { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
+    ],
+    priceBrackets: [
+      { min: 11, max: 50, prices: [11.3, 13.2, 15.1, 17.0, 18.9] },
+      { min: 51, max: 100, prices: [8.3, 9.8, 11.3, 12.1, 12.8] },
+      { min: 101, max: 500, prices: [5.3, 6.4, 7.5, 8.3, 9.1] },
+      { min: 501, max: 1000, prices: [4.5, 5.3, 6.0, 6.8, 7.5] },
+      { min: 1001, max: Infinity, prices: [3.8, 4.5, 5.3, 6.0, 6.8] }
+    ],
+    addons: { phuKien: [0.4, 0.8, 1.1, 1.5, 1.9] }
+  },
+  'doll-printed': {
+    name: '2D Doll (Printed)',
     sizes: [
       { key: '10', label: '10cm' }, { key: '15', label: '15cm' }, { key: '20', label: '20cm' },
       { key: '25', label: '25cm' }, { key: '30', label: '30cm' }, { key: '40', label: '40cm' },
@@ -43,7 +92,8 @@ export const pricingMatrix = {
     ],
     addons: { phuKien: [0.4, 0.4, 0.5, 0.8, 0.8, 1.1, 1.9, 2.6] }
   },
-  'doll-theu': {
+  'doll-embroidered': {
+    name: '2D Doll (Embroidered)',
     sizes: [
       { key: '10', label: '10cm' }, { key: '15', label: '15cm' }, { key: '20', label: '20cm' },
       { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
@@ -58,6 +108,7 @@ export const pricingMatrix = {
     addons: { phuKien: [0.4, 0.8, 1.1, 1.5, 1.9] }
   },
   'contact': {
+    name: 'Custom Requirements',
     sizes: [], priceBrackets: [], addons: {}
   }
 };

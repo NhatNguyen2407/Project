@@ -17,7 +17,7 @@ import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
 import { FeedbackPage } from './pages/FeedbackPage';
 import { CheckoutPage } from './pages/CheckoutPage';
-import { TutorialPage } from './pages/TutorialPage';
+import { BlogPage } from './pages/BlogPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
 import { ProfilePage } from './pages/ProfilePage';
@@ -145,9 +145,9 @@ export default function App() {
                     <Route path="membership" element={null} />
                   </Route>
 
-                  {/*tutorial and sub-tutorial*/}
-                  <Route path="/tutorial" element={<TutorialPage />} />
-                  <Route path="/tutorial/:tutorialSlug" element={<TutorialPage />} />
+                  {/*blog and sub-blog*/}
+                  <Route path="/blog" element={<BlogPage />} />
+                  <Route path="/blog/:blogSlug" element={<BlogPage />} />
 
                   <Route path="*" element={<NotFoundPage />} />
                 </Routes>

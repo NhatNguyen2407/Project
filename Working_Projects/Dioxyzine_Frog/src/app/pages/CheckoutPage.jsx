@@ -3,7 +3,6 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle } from 'lucide-react';
 import { Link } from 'react-router';
 
-// 🚀 BỔ SUNG: Import thư viện PayPal
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
 
 import { useCart } from '../context/CartContext';
@@ -13,8 +12,7 @@ import { TermsOfServiceModal } from '../components/common_components/TermsOfServ
 import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
 
-// 🚀 ĐỂ TẠM CHỮ "test" - THAY BẰNG MÃ CỦA SẾP SAU
-const PAYPAL_CLIENT_ID = "test";
+const PAYPAL_CLIENT_ID = "AQ13HgNvoGjg75Qjftly9tG4aTYywjNbUyG4YW5MxBY567O2cTajzDfVEWQLoUGKq_kfD8N5IVm4SMRK";
 
 export function CheckoutPage() {
   const { user } = useAuth();
@@ -110,7 +108,7 @@ export function CheckoutPage() {
   const discountValue = getDiscountAmount();
   const finalPrice = Math.max(0, cartTotal + SHIPPING_FEE - discountValue);
 
-  // 🚀 KIỂM TRA FORM (PayPal sẽ gọi hàm này trước khi cho quẹt thẻ)
+  // kiểm tra form
   const validateCheckoutForm = () => {
     const { email, firstName, lastName, address, city, phoneNumber } = shippingForm;
     if (!email.trim() || !firstName.trim() || !lastName.trim() || !address.trim() || !city.trim() || !phoneNumber.trim()) {
@@ -128,7 +126,7 @@ export function CheckoutPage() {
     return true;
   };
 
-  // 🚀 LƯU VÀO DATABASE (PayPal sẽ gọi hàm này sau khi trả tiền xong)
+  // lưu vào database sau khi trả tiền
   const saveOrderToDatabase = async (transactionId) => {
     try {
       const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
@@ -146,11 +144,10 @@ export function CheckoutPage() {
         image_link: cart[0]?.image || 'N/A', 
         product_name: `[READY-MADE] ${orderSummary}`,
         quantity: totalQty,
-        status: 'pending', // lowercase cho chuẩn format
+        status: 'pending',
         shipping_address: fullAddress,
         phone_number: fullPhone,
         total_amount: finalPrice,
-        // Cột mới thêm để lưu mã GD
         payment_method: 'paypal',
         payment_status: 'paid',
         transaction_id: transactionId,
@@ -159,7 +156,7 @@ export function CheckoutPage() {
 
       if (orderError) throw orderError;
 
-      // Cộng thêm 1 lượt dùng cho Voucher
+      // +1 Voucher
       if (appliedVoucher) {
         await supabase
           .from('vouchers')
@@ -380,7 +377,6 @@ export function CheckoutPage() {
                     </label>
                   </div>
 
-                  {/* 🚀 NÚT CŨ ĐÃ BỊ XÓA, THAY HOÀN TOÀN BẰNG NÚT PAYPAL */}
                   <div className="w-full relative z-0 mt-4">
                     <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD", locale: "en_US" }}>
                       <PayPalButtons 

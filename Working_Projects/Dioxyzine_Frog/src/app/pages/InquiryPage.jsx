@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, CheckCircle, Loader2, Lock } from 'lucide-react';
+import { Send, CheckCircle, Loader2, Lock, Calculator } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
@@ -9,6 +9,8 @@ import { ToastNotification } from '../components/common_components/ToastNotifica
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { SEO } from '../components/common_components/SEO';
 import { useAuth } from '../context/AuthContext';
+
+import { pricingMatrix } from '../data/pricingMatrix';
 
 export function InquiryPage() {
   const { executeRecaptcha } = useGoogleReCaptcha();
@@ -19,8 +21,10 @@ export function InquiryPage() {
 
   const [formData, setFormData] = useState({
     subject: '', customerName: '', customerEmail: '', contactInfo: '', 
-    productName: state.passedProduct || '', quantity: state.passedQty || '', 
-    size: state.passedSize || '', accessoryQty: state.passedAccQty || '0', 
+    productType: '2-piece-margin', // Default
+    quantity: state.passedQty || '50', 
+    size: state.passedSize || '10', 
+    accessoryQty: state.passedAccQty || '0', 
     imageLink: '', note: ''
   });
 
@@ -29,6 +33,38 @@ export function InquiryPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsOfServiceModal, setShowTermsOfServiceModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
+
+  const currentProduct = pricingMatrix[formData.productType];
+  const availableSizes = currentProduct?.sizes || [];
+
+  useEffect(() => {
+    if (currentProduct && currentProduct.sizes.length > 0) {
+      const sizeExists = currentProduct.sizes.find(s => s.key === formData.size);
+      if (!sizeExists) {
+        setFormData(prev => ({ ...prev, size: currentProduct.sizes[0].key }));
+      }
+    }
+  }, [formData.productType, currentProduct]);
+
+  const estimatedQuote = useMemo(() => {
+    if (!currentProduct || currentProduct.name === 'Custom Requirements') return null;
+    
+    const qty = parseInt(formData.quantity) || 0;
+    if (qty < 11) return null; // MOQ là 11
+
+    const bracket = currentProduct.priceBrackets.find(b => qty >= b.min && qty <= b.max);
+    if (!bracket) return null;
+
+    const sizeIndex = currentProduct.sizes.findIndex(s => s.key === formData.size);
+    if (sizeIndex === -1) return null;
+
+    const basePrice = bracket.prices[sizeIndex];
+    const addonPrice = currentProduct.addons?.phuKien?.[sizeIndex] || 0;
+    const accQty = parseInt(formData.accessoryQty) || 0;
+
+    const totalPerItem = basePrice + (addonPrice * accQty);
+    return (totalPerItem * qty).toFixed(2);
+  }, [formData.productType, formData.quantity, formData.size, formData.accessoryQty, currentProduct]);
 
   useEffect(() => {
     if (user) {
@@ -56,7 +92,7 @@ export function InquiryPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.productName || !formData.imageLink || !formData.quantity) {
+    if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.imageLink || !formData.quantity) {
       return showToast('Please fill in all required fields!', 'error');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
@@ -67,7 +103,12 @@ export function InquiryPage() {
     setStatus('loading');
     
     try {
-      await api.submitInquiry(formData);
+      const payload = {
+        ...formData,
+        productName: currentProduct?.name || 'Custom Requirements'
+      };
+      
+      await api.submitInquiry(payload);
       
       showToast('Inquiry Sent Successfully!', 'success');
       setStatus('success');
@@ -77,7 +118,7 @@ export function InquiryPage() {
         subject: '', 
         customerName: user ? user.user_metadata?.full_name : '', 
         customerEmail: user ? user.email : '', 
-        contactInfo: '', productName: '', quantity: '', size: '', accessoryQty: '0', imageLink: '', note: '' 
+        contactInfo: '', productType: '2-piece-margin', quantity: '50', size: '10', accessoryQty: '0', imageLink: '', note: '' 
       });
     } catch (error) {
       console.error('Error:', error);
@@ -89,107 +130,174 @@ export function InquiryPage() {
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
       <SEO 
-        title="Submit Inquiry" 
+        title="Submit Inquiry | Dioxyzine Frog" 
         description="Fill in the details for us to provide the most accurate consultation and custom quote for your project." 
       />
       
-      {/*Components*/}
       <ToastNotification toast={toast} />
       <TermsOfServiceModal isOpen={showTermsOfServiceModal} onClose={() => setShowTermsOfServiceModal(false)} />
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
           <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Submit Inquiry</h1>
           <p className="text-lg text-[var(--muted-foreground)]">Fill in the details for us to provide the most accurate consultation and quote</p>
         </div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 md:p-10 shadow-[0_0_40px_rgba(139,114,190,0.15)] relative overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-8">
           
-          <AnimatePresence>
-            {status === 'success' ? (
-              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-20 bg-[var(--card)] flex flex-col items-center justify-center text-center p-8">
-                <CheckCircle className="w-20 h-20 text-green-500 mb-6 drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
-                <h2 className="text-3xl font-bold text-white mb-4">Submitted Successfully!</h2>
-                <p className="text-[var(--silver-gray)] text-lg mb-8 max-w-md">Dioxyzine has received your inquiry. We will review it and get back to you as soon as possible!</p>
-                <button onClick={() => setStatus('idle')} className="px-8 py-3 rounded-full bg-[var(--primary)] text-white font-bold hover:scale-105 transition-transform cursor-pointer">
-                  Submit another inquiry
-                </button>
-              </motion.div>
-            ) : null}
-          </AnimatePresence>
+          {/* information form */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 md:p-10 shadow-[0_0_40px_rgba(139,114,190,0.15)] relative overflow-hidden">
+            <AnimatePresence>
+              {status === 'success' ? (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-20 bg-[var(--card)] flex flex-col items-center justify-center text-center p-8">
+                  <CheckCircle className="w-20 h-20 text-green-500 mb-6 drop-shadow-[0_0_15px_rgba(34,197,94,0.5)]" />
+                  <h2 className="text-3xl font-bold text-white mb-4">Submitted Successfully!</h2>
+                  <p className="text-[var(--silver-gray)] text-lg mb-8 max-w-md">Dioxyzine has received your inquiry. We will review it and get back to you as soon as possible!</p>
+                  <button onClick={() => setStatus('idle')} className="px-8 py-3 rounded-full bg-[var(--primary)] text-white font-bold hover:scale-105 transition-transform cursor-pointer">
+                    Submit another inquiry
+                  </button>
+                </motion.div>
+              ) : null}
+            </AnimatePresence>
 
-          <form onSubmit={handleSubmit} noValidate className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-white">Inquiry Subject / Email Subject *</label>
-                <input required type="text" name="subject" value={formData.subject} onChange={(e) => { setIsSubjectEdited(true); handleChange(e); }} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl text-white font-medium outline-none" />
+            <form onSubmit={handleSubmit} noValidate className="space-y-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-white">Inquiry Subject *</label>
+                  <input required type="text" name="subject" value={formData.subject} onChange={(e) => { setIsSubjectEdited(true); handleChange(e); }} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl text-white font-medium outline-none" />
+                </div>
+                
+                <div className="space-y-2 relative">
+                  <label className="text-sm font-semibold text-white">Email Address *</label>
+                  <input 
+                    required type="email" name="customerEmail" value={formData.customerEmail} onChange={handleChange} readOnly={!!user}
+                    className={`w-full px-4 py-3 rounded-xl text-white outline-none border ${user ? 'bg-[#130F1D] border-transparent text-gray-400 cursor-not-allowed' : 'bg-[#1A1528] border-[var(--border)] focus:border-[var(--primary)]'}`} 
+                  />
+                  {user && <Lock className="absolute right-4 top-[38px] w-4 h-4 text-gray-500" />}
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-white flex items-center justify-between">
+                    Your Name * {user && <span className="text-xs text-[var(--primary)] font-normal">Editable</span>}
+                  </label>
+                  <input required type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-white">Social Media Link (Facebook / Instagram) *</label>
+                  <input required type="text" name="contactInfo" value={formData.contactInfo} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" />
+                </div>
+
+                {/* category dropdown */}
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-[var(--primary)]">Product Type *</label>
+                  <div className="relative">
+                    <select name="productType" value={formData.productType} onChange={handleChange} className="w-full bg-[#1A1528] border border-[var(--primary)]/50 rounded-xl px-4 py-3 text-white appearance-none cursor-pointer focus:border-[var(--primary)] outline-none font-bold">
+                      {Object.keys(pricingMatrix).map(key => (
+                        <option key={key} value={key}>{pricingMatrix[key].name}</option>
+                      ))}
+                    </select>
+                    <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-white"><Lock className="w-4 h-4 opacity-50" /></div>
+                  </div>
+                </div>
+
+                {/* size dropdown for each product */}
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-white">Size</label>
+                  <div className="relative">
+                    <select name="size" value={formData.size} onChange={handleChange} disabled={availableSizes.length === 0} className="w-full bg-[#1A1528] border border-[var(--border)] rounded-xl px-4 py-3 text-white appearance-none cursor-pointer focus:border-[var(--primary)] outline-none disabled:opacity-50">
+                      {availableSizes.length > 0 ? (
+                        availableSizes.map(s => <option key={s.key} value={s.key}>{s.label}</option>)
+                      ) : <option value="">N/A</option>}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-white">Quantity * (Min 11)</label>
+                  <input required type="number" min="11" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-white">Number of Custom Accessories (Per Unit)</label>
+                  <input type="number" min="0" name="accessoryQty" value={formData.accessoryQty} onChange={handleChange} placeholder="E.g., 1 Hat + 1 Shirt = 2" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" />
+                </div>
+
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-white">Design Link (Google Drive...) *</label>
+                  <input required type="url" name="imageLink" value={formData.imageLink} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" placeholder="https://..." />
+                </div>
+                
+                <div className="space-y-2 md:col-span-2">
+                  <label className="text-sm font-semibold text-white">Additional Notes</label>
+                  <textarea name="note" value={formData.note} onChange={handleChange} rows="3" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none resize-none focus:border-[var(--primary)]"></textarea>
+                </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-white flex items-center justify-between">
-                  Your Name *
-                  {user && <span className="text-xs text-[var(--primary)] font-normal">Editable</span>}
+
+              <div className="flex items-center gap-3 bg-[var(--cyber-black)] p-4 rounded-xl border border-[var(--border)] mt-4">
+                <input type="checkbox" id="termsCheck" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="w-5 h-5 accent-[var(--primary)] cursor-pointer flex-shrink-0" />
+                <label htmlFor="termsCheck" className="text-sm text-[var(--silver-gray)] cursor-pointer select-none">
+                  I agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsOfServiceModal(true); }} className="text-[var(--primary)] font-bold underline hover:text-white transition-colors ml-1 cursor-pointer">Terms of Service</span> *
                 </label>
-                <input required type="text" name="customerName" value={formData.customerName} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" placeholder="John Doe" />
               </div>
 
-              <div className="space-y-2 relative">
-                <label className="text-sm font-semibold text-white">Email Address *</label>
-                <input 
-                  required 
-                  type="email" 
-                  name="customerEmail" 
-                  value={formData.customerEmail} 
-                  onChange={handleChange} 
-                  readOnly={!!user}
-                  className={`w-full px-4 py-3 rounded-xl text-white outline-none border ${user ? 'bg-[#130F1D] border-transparent text-gray-400 cursor-not-allowed' : 'bg-[#1A1528] border-[var(--border)] focus:border-[var(--primary)]'}`} 
-                  placeholder="example@gmail.com" 
-                />
-                {user && <Lock className="absolute right-4 top-[38px] w-4 h-4 text-gray-500" />}
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-white">Facebook / Instagram *</label>
-                <input required type="text" name="contactInfo" value={formData.contactInfo} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none" placeholder="Enter Link..." />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-white">Desired Product *</label>
-                <input required type="text" name="productName" value={formData.productName} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none" placeholder="E.g., 2D Doll, Plushie..." />
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-white">Expected Size</label>
-                <input type="text" name="size" value={formData.size} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none" placeholder="10cm, 20cm..." />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-white">Quantity *</label>
-                  <input required type="number" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none" />
+              <button type="submit" disabled={status === 'loading'} className="w-full py-4 rounded-full bg-[var(--primary)] text-white font-bold text-lg shadow-[0_0_20px_rgba(139,114,190,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
+                {status === 'loading' ? <><Loader2 className="w-6 h-6 animate-spin" /> Sending...</> : <><Send className="w-6 h-6" /> Confirm & Submit Inquiry</>}
+              </button>
+            </form>
+          </motion.div>
+
+          {/* estimated quote */}
+          <div className="w-full lg:w-1/3">
+            <div className="sticky top-28 bg-[#1A1528] border border-[var(--primary)]/30 rounded-3xl p-6 shadow-xl">
+              <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 border-b border-[var(--border)] pb-4">
+                <Calculator className="w-5 h-5 text-[var(--primary)]" /> 
+                Estimate Quote
+              </h3>
+              
+              <div className="space-y-4 mb-6">
+                <div>
+                  <p className="text-xs text-[var(--silver-gray)] uppercase tracking-wider mb-1">Product</p>
+                  <p className="text-sm font-bold text-white">{currentProduct?.name || 'Custom'}</p>
                 </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-white">Accessories</label>
-                  <input type="number" min="0" name="accessoryQty" value={formData.accessoryQty} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none" />
+                {availableSizes.length > 0 && (
+                  <div className="flex justify-between items-center">
+                    <p className="text-xs text-[var(--silver-gray)] uppercase tracking-wider">Size</p>
+                    <p className="text-sm font-bold text-white">{currentProduct?.sizes.find(s => s.key === formData.size)?.label || formData.size}</p>
+                  </div>
+                )}
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-[var(--silver-gray)] uppercase tracking-wider">Quantity</p>
+                  <p className="text-sm font-bold text-white">{formData.quantity} units</p>
+                </div>
+                <div className="flex justify-between items-center">
+                  <p className="text-xs text-[var(--silver-gray)] uppercase tracking-wider">Accessories</p>
+                  <p className="text-sm font-bold text-white">{formData.accessoryQty} per unit</p>
                 </div>
               </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-white">Design Link (Google Drive...) *</label>
-                <input required type="url" name="imageLink" value={formData.imageLink} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none" placeholder="https://..." />
-              </div>
-              <div className="space-y-2 md:col-span-2">
-                <label className="text-sm font-semibold text-white">Additional Notes</label>
-                <textarea name="note" value={formData.note} onChange={handleChange} rows="4" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none resize-none"></textarea>
-              </div>
-            </div>
 
-            <div className="flex items-center gap-3 bg-[var(--cyber-black)] p-4 rounded-xl border border-[var(--border)] mt-4">
-              <input type="checkbox" id="termsCheck" checked={acceptedTerms} onChange={(e) => setAcceptedTerms(e.target.checked)} className="w-5 h-5 accent-[var(--primary)] cursor-pointer flex-shrink-0" />
-              <label htmlFor="termsCheck" className="text-sm text-[var(--silver-gray)] cursor-pointer select-none">
-                I agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsOfServiceModal(true); }} className="text-[var(--primary)] font-bold underline hover:text-white transition-colors ml-1 cursor-pointer">Terms of Service</span> *
-              </label>
-            </div>
+              <div className="bg-[var(--cyber-black)] p-4 rounded-2xl border border-[var(--border)] mb-4">
+                <p className="text-xs text-[var(--silver-gray)] uppercase tracking-wider mb-2 text-center">Estimated Total</p>
+                {estimatedQuote ? (
+                  <div className="text-center">
+                    <span className="text-3xl font-bold text-green-400">${estimatedQuote}</span>
+                    <p className="text-xs text-green-400/70 mt-1">~ ${(estimatedQuote / formData.quantity).toFixed(2)} / unit</p>
+                  </div>
+                ) : (
+                  <div className="text-center text-yellow-500 font-bold text-sm">
+                    {parseInt(formData.quantity) < 11 ? 'Minimum order is 11 units' : 'Please contact us for quote'}
+                  </div>
+                )}
+              </div>
 
-            <button type="submit" disabled={status === 'loading'} className="w-full py-4 rounded-full bg-[var(--primary)] text-white font-bold text-lg shadow-[0_0_20px_rgba(139,114,190,0.5)] hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 cursor-pointer">
-              {status === 'loading' ? <><Loader2 className="w-6 h-6 animate-spin" /> Sending...</> : <><Send className="w-6 h-6" /> Confirm & Submit Inquiry</>}
-            </button>
-          </form>
-        </motion.div>
+              <p className="text-[11px] text-[var(--muted-foreground)] leading-relaxed italic text-center">
+                * This is a roughly estimated price. Final price may vary slightly depending on the complexity of your design and shipping costs. 
+                If you want a more accurate quote, kindly reach us.
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
     </div>
   );
