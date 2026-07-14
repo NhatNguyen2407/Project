@@ -1,35 +1,35 @@
 export const pricingMatrix = {
   '2-piece-margin': {
-    name: '2-Piece Plushie (With White Margin)',
+    name: '2-Piece Plushie (With Margin)',
     sizes: [
       { key: '5', label: '5cm' }, { key: '10', label: '10cm' }, { key: '15', label: '15cm' },
-      { key: '20', label: '20cm' }, { key: '25', label: '25cm' }, { key: '30', label: '30cm' },
-      { key: '40', label: '40cm' }, { key: '50', label: '50cm' }, { key: '60', label: '60cm' }
+      { key: '20', label: '20cm' }, { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
     ],
     priceBrackets: [
-      { min: 11, max: 50, prices: [1.4, 2.8, 5.9, 5.1, 7.1, 9.1, 10.9, 18.5, 25.7] },
-      { min: 51, max: 100, prices: [1.4, 2.6, 5.5, 4.9, 6.8, 8.7, 10.6, 18.1, 24.9] },
-      { min: 101, max: 500, prices: [1.3, 2.5, 5.1, 4.5, 6.4, 8.3, 9.8, 17.4, 23.4] },
-      { min: 501, max: 1000, prices: [1.2, 2.4, 4.9, 4.2, 5.8, 7.5, 9.1, 16.6, 21.9] },
-      { min: 1001, max: Infinity, prices: [1.1, 2.3, 4.5, 3.8, 5.3, 6.8, 8.3, 15.1, 20.4] }
+      { min: 1, max: 10, prices: [2.30, 4.53, 6.23, 7.92, 11.04, 14.15] },
+      { min: 11, max: 50, prices: [1.43, 2.80, 5.90, 6.57, 7.81, 9.06] },
+      { min: 51, max: 100, prices: [1.36, 2.64, 5.51, 6.11, 7.40, 8.70] },
+      { min: 101, max: 500, prices: [1.28, 2.50, 5.13, 5.74, 7.02, 8.30] },
+      { min: 501, max: 1000, prices: [1.21, 2.42, 4.91, 5.43, 6.49, 7.55] },
+      { min: 1001, max: Infinity, prices: [1.13, 2.26, 4.53, 4.91, 5.85, 6.80] }
     ],
-    addons: { phuKien: [0, 0.4, 0.4, 0.5, 0.8, 0.8, 1.1, 1.9, 2.6] }
+    addons: { phuKien: [0, 0, 0, 0, 0, 0] }
   },
   '2-piece-edge': {
     name: '2-Piece Plushie (Edge-to-Edge)',
     sizes: [
       { key: '5', label: '5cm' }, { key: '10', label: '10cm' }, { key: '15', label: '15cm' },
-      { key: '20', label: '20cm' }, { key: '25', label: '25cm' }, { key: '30', label: '30cm' },
-      { key: '40', label: '40cm' }, { key: '50', label: '50cm' }, { key: '60', label: '60cm' }
+      { key: '20', label: '20cm' }, { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
     ],
     priceBrackets: [
-      { min: 11, max: 50, prices: [1.9, 3.8, 7.9, 6.8, 9.4, 12.1, 14.3, 24.5, 34.3] },
-      { min: 51, max: 100, prices: [1.9, 3.6, 7.5, 6.4, 8.7, 11.3, 13.6, 23.4, 33.2] },
-      { min: 101, max: 500, prices: [1.8, 3.4, 6.8, 6.0, 8.3, 10.9, 13.2, 23.0, 31.3] },
-      { min: 501, max: 1000, prices: [1.7, 3.2, 6.4, 5.7, 7.9, 10.2, 12.1, 22.3, 29.4] },
-      { min: 1001, max: Infinity, prices: [1.6, 3.0, 6.0, 5.3, 7.2, 9.1, 10.9, 20.4, 27.2] }
+      { min: 1, max: 10, prices: [2.83, 5.1, 6.80, 8.50, 11.60, 14.72] },
+      { min: 11, max: 50, prices: [1.81, 3.17, 6.26, 6.87, 7.43, 9.43] },
+      { min: 51, max: 100, prices: [1.74, 3.02, 5.89, 6.50, 7.17, 9.06] },
+      { min: 101, max: 500, prices: [1.66, 2.87, 5.51, 6.11, 6.79, 8.68] },
+      { min: 501, max: 1000, prices: [1.58, 2.80, 5.28, 5.74, 6.23, 7.92] },
+      { min: 1001, max: Infinity, prices: [1.51, 2.64, 4.91, 5.30, 5.66, 7.17] }
     ],
-    addons: { phuKien: [0, 0.4, 0.4, 0.5, 0.8, 0.8, 1.1, 1.9, 2.6] }
+    addons: { phuKien: [0, 0.75, 1.13, 1.51, 1.90, 2.26] }
   },
   '2-piece-embroidered': {
     name: '2-Piece Plushie (Embroidered)',
@@ -38,28 +38,30 @@ export const pricingMatrix = {
       { key: '20', label: '20cm' }, { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
     ],
     priceBrackets: [
-      { min: 11, max: 50, prices: [5.7, 11.3, 13.2, 15.1, 17.0, 18.9] },
-      { min: 51, max: 100, prices: [5.3, 8.3, 9.8, 11.3, 12.1, 12.8] },
-      { min: 101, max: 500, prices: [4.9, 5.3, 6.4, 7.5, 8.3, 9.1] },
-      { min: 501, max: 1000, prices: [4.5, 4.5, 5.3, 6.0, 6.8, 7.5] },
-      { min: 1001, max: Infinity, prices: [4.2, 3.8, 4.5, 5.3, 6.0, 6.8] }
+      { min: 1, max: 10, prices: [5.66, 7.92, 9.62, 11.32, 14.43, 17.55] },
+      { min: 11, max: 50, prices: [2.94, 4.30, 7.40, 7.85, 8.57, 10.57] },
+      { min: 51, max: 100, prices: [2.49, 3.77, 6.64, 7.32, 7.92, 9.81] },
+      { min: 101, max: 500, prices: [2.42, 3.62, 6.26, 6.87, 7.55, 9.43] },
+      { min: 501, max: 1000, prices: [2.34, 3.55, 6.04, 6.57, 6.98, 8.68] },
+      { min: 1001, max: Infinity, prices: [2.26, 3.40, 5.66, 6.04, 6.42, 7.92] }
     ],
-    addons: { phuKien: [0.4, 0.4, 0.8, 1.1, 1.5, 1.9] }
+    addons: { phuKien: 'contact' }
   },
   '3-piece-printed': {
     name: '3-Piece Plushie (Printed)',
     sizes: [
       { key: '10', label: '10cm' }, { key: '15', label: '15cm' }, { key: '20', label: '20cm' },
-      { key: '25', label: '25cm' }, { key: '30', label: '30cm' }, { key: '40', label: '40cm' }
+      { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
     ],
     priceBrackets: [
-      { min: 11, max: 50, prices: [4.7, 5.9, 7.0, 8.6, 10.2, 13.3] },
-      { min: 51, max: 100, prices: [4.5, 5.5, 6.6, 8.1, 9.7, 12.7] },
-      { min: 101, max: 500, prices: [4.2, 5.1, 6.0, 7.5, 9.1, 12.1] },
-      { min: 501, max: 1000, prices: [4.0, 4.9, 5.7, 7.2, 8.7, 11.7] },
-      { min: 1001, max: Infinity, prices: [3.8, 4.5, 5.3, 6.8, 8.3, 11.3] }
+      { min: 1, max: 10, prices: [7.36, 9.40, 11.32, 13.87, 16.42] },
+      { min: 11, max: 50, prices: [4.68, 5.90, 7.02, 8.60, 10.20] },
+      { min: 51, max: 100, prices: [4.45, 5.51, 6.57, 8.11, 9.66] },
+      { min: 101, max: 500, prices: [4.15, 5.13, 6.04, 7.55, 9.06] },
+      { min: 501, max: 1000, prices: [4.00, 4.91, 5.66, 7.17, 8.68] },
+      { min: 1001, max: Infinity, prices: [3.77, 4.53, 5.28, 6.80, 8.30] }
     ],
-    addons: { phuKien: [0.4, 0.4, 0.5, 0.8, 0.8, 1.1] }
+    addons: { phuKien: [0.4, 0.4, 0.5, 0.8, 0.8] }
   },
   '3-piece-embroidered': {
     name: '3-Piece Plushie (Embroidered)',
@@ -68,29 +70,30 @@ export const pricingMatrix = {
       { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
     ],
     priceBrackets: [
-      { min: 11, max: 50, prices: [11.3, 13.2, 15.1, 17.0, 18.9] },
-      { min: 51, max: 100, prices: [8.3, 9.8, 11.3, 12.1, 12.8] },
-      { min: 101, max: 500, prices: [5.3, 6.4, 7.5, 8.3, 9.1] },
-      { min: 501, max: 1000, prices: [4.5, 5.3, 6.0, 6.8, 7.5] },
-      { min: 1001, max: Infinity, prices: [3.8, 4.5, 5.3, 6.0, 6.8] }
+      { min: 1, max: 10, prices: [28.3, 29.43, 30.57, 33.4, 36.23] },
+      { min: 11, max: 50, prices: [11.32, 13.21, 15.1, 17.0, 18.87] },
+      { min: 51, max: 100, prices: [8.3, 9.81, 11.32, 12.08, 12.83] },
+      { min: 101, max: 500, prices: [5.28, 6.42, 7.55, 8.3, 9.06] },
+      { min: 501, max: 1000, prices: [4.53, 5.28, 6.04, 6.8, 7.55] },
+      { min: 1001, max: Infinity, prices: [3.77, 4.53, 5.28, 6.04, 6.8] }
     ],
-    addons: { phuKien: [0.4, 0.8, 1.1, 1.5, 1.9] }
+    addons: { phuKien: 'contact' }
   },
   'doll-printed': {
     name: '2D Doll (Printed)',
     sizes: [
       { key: '10', label: '10cm' }, { key: '15', label: '15cm' }, { key: '20', label: '20cm' },
-      { key: '25', label: '25cm' }, { key: '30', label: '30cm' }, { key: '40', label: '40cm' },
-      { key: '50', label: '50cm' }, { key: '60', label: '60cm' }
+      { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
     ],
     priceBrackets: [
-      { min: 11, max: 50, prices: [4.7, 5.9, 7.0, 8.6, 10.2, 13.3, 20.4, 28.7] },
-      { min: 51, max: 100, prices: [4.5, 5.5, 6.6, 8.1, 9.7, 12.7, 19.6, 27.2] },
-      { min: 101, max: 500, prices: [4.2, 5.1, 6.0, 7.5, 9.1, 12.1, 18.9, 25.7] },
-      { min: 501, max: 1000, prices: [4.0, 4.9, 5.7, 7.2, 8.7, 11.7, 18.1, 24.2] },
-      { min: 1001, max: Infinity, prices: [3.8, 4.5, 5.3, 6.8, 8.3, 11.3, 17.4, 22.6] }
+      { min: 1, max: 10, prices: [7.36, 9.4, 11.32, 13.87, 16.42] },
+      { min: 11, max: 50, prices: [4.68, 5.9, 7.02, 8.6, 10.2] },
+      { min: 51, max: 100, prices: [4.45, 5.51, 6.57, 8.11, 9.66] },
+      { min: 101, max: 500, prices: [4.15, 5.13, 6.04, 7.55, 9.06] },
+      { min: 501, max: 1000, prices: [4.0, 4.91, 5.66, 7.17, 8.68] },
+      { min: 1001, max: Infinity, prices: [3.77, 4.53, 5.28, 6.8, 8.3] }
     ],
-    addons: { phuKien: [0.4, 0.4, 0.5, 0.8, 0.8, 1.1, 1.9, 2.6] }
+    addons: { phuKien: [0.4, 0.4, 0.5, 0.8, 0.8] }
   },
   'doll-embroidered': {
     name: '2D Doll (Embroidered)',
@@ -99,13 +102,14 @@ export const pricingMatrix = {
       { key: '25', label: '25cm' }, { key: '30', label: '30cm' }
     ],
     priceBrackets: [
-      { min: 11, max: 50, prices: [11.3, 13.2, 15.1, 17.0, 18.9] },
-      { min: 51, max: 100, prices: [8.3, 9.8, 11.3, 12.1, 12.8] },
-      { min: 101, max: 500, prices: [5.3, 6.4, 7.5, 8.3, 9.1] },
-      { min: 501, max: 1000, prices: [4.5, 5.3, 6.0, 6.8, 7.5] },
-      { min: 1001, max: Infinity, prices: [3.8, 4.5, 5.3, 6.0, 6.8] }
+      { min: 1, max: 10, prices: [28.3, 29.43, 30.57, 33.4, 36.23] },
+      { min: 11, max: 50, prices: [11.32, 13.21, 15.1, 16.98, 18.87] },
+      { min: 51, max: 100, prices: [8.3, 9.81, 11.32, 12.08, 12.83] },
+      { min: 101, max: 500, prices: [5.28, 6.42, 7.55, 8.3, 9.06] },
+      { min: 501, max: 1000, prices: [4.53, 5.28, 6.04, 6.8, 7.55] },
+      { min: 1001, max: Infinity, prices: [3.77, 4.53, 5.28, 6.04, 6.8] }
     ],
-    addons: { phuKien: [0.4, 0.8, 1.1, 1.5, 1.9] }
+    addons: { phuKien: 'contact' }
   },
   'contact': {
     name: 'Custom Requirements',

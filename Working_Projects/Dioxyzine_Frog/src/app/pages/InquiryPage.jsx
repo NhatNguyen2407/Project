@@ -50,7 +50,7 @@ export function InquiryPage() {
     if (!currentProduct || currentProduct.name === 'Custom Requirements') return null;
     
     const qty = parseInt(formData.quantity) || 0;
-    if (qty < 11) return null; // MOQ là 11
+    if (qty < 1) return null; // MOQ là 1
 
     const bracket = currentProduct.priceBrackets.find(b => qty >= b.min && qty <= b.max);
     if (!bracket) return null;
@@ -214,8 +214,8 @@ export function InquiryPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-white">Quantity * (Min 11)</label>
-                  <input required type="number" min="11" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" />
+                  <label className="text-sm font-semibold text-white">Quantity * (Min 1)</label>
+                  <input required type="number" min="1" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" />
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
@@ -285,7 +285,7 @@ export function InquiryPage() {
                   </div>
                 ) : (
                   <div className="text-center text-yellow-500 font-bold text-sm">
-                    {parseInt(formData.quantity) < 11 ? 'Minimum order is 11 units' : 'Please contact us for quote'}
+                    {parseInt(formData.quantity) < 1 ? 'Minimum order is 1 units' : 'Please contact us for quote'}
                   </div>
                 )}
               </div>

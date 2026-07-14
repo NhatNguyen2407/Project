@@ -6,101 +6,160 @@ import { SEO } from '../components/common_components/SEO';
 const pricingData = [
   {
     id: '2-piece-margin',
-    title: '2-Piece Plushie (With White Margin)',
-    note: 'Details are 2D printed on white minky fabric, leaving a ~3mm white border. Adding extra custom sewn accessories (clothing, hats, etc.) will incur additional costs based on the addon price.',
-    sizes: ['5cm', '10cm', '15cm', '20cm', '25cm', '30cm', '40cm', '50cm', '60cm'],
-    rows: [
-      { qty: '11-50', prices: ['$1.40', '$2.80', '$5.90', '$5.10', '$7.10', '$9.10', '$10.90', '$18.50', '$25.70'] },
-      { qty: '51-100', prices: ['$1.40', '$2.60', '$5.50', '$4.90', '$6.80', '$8.70', '$10.60', '$18.10', '$24.90'] },
-      { qty: '101-500', prices: ['$1.30', '$2.50', '$5.10', '$4.50', '$6.40', '$8.30', '$9.80', '$17.40', '$23.40'] },
-      { qty: '501-1000', prices: ['$1.20', '$2.40', '$4.90', '$4.20', '$5.80', '$7.50', '$9.10', '$16.60', '$21.90'] },
-      { qty: '>1000', prices: ['$1.10', '$2.30', '$4.50', '$3.80', '$5.30', '$6.80', '$8.30', '$15.10', '$20.40'] }
+    title: '2-Piece Plushie (With Margin)',
+    notes: [
+      'Uses 2-way stretch velboa fabric.',
+      'Sizes under 20cm include a white elastic keychain loop by default.',
+      'Sizes 20cm and above cannot include a squeaker inside.',
+      'Please double-check the design file with Frog before placing an order.',
+      
     ],
-    addons: [{ name: 'Custom Accessories', prices: ['N/A', '$0.40', '$0.40', '$0.50', '$0.80', '$0.80', '$1.10', '$1.90', '$2.60'] }]
+    sizes: ['5cm', '10cm', '15cm', '20cm', '25cm', '30cm'],
+    rows: [
+      { qty: '1-10', prices: ['$2.30', '$4.53', '$6.23', '$7.92', '$11.04', '$14.15'] },
+      { qty: '11-50', prices: ['$1.43', '$2.80', '$5.90', '$6.57', '$7.81', '$9.06'] },
+      { qty: '51-100', prices: ['$1.36', '$2.64', '$5.51', '$6.11', '$7.40', '$8.70'] },
+      { qty: '101-500', prices: ['$1.28', '$2.50', '$5.13', '$5.74', '$7.02', '$8.30'] },
+      { qty: '501-1000', prices: ['$1.21', '$2.42', '$4.91', '$5.43', '$6.49', '$7.55'] },
+      { qty: '>1000', prices: ['$1.13', '$2.26', '$4.53', '$4.91', '$5.85', '$6.80'] }
+    ],
+    addons: [{ name: 'Custom Accessories', prices: ['N/A', 'N/A', 'N/A', 'N/A', 'N/A', 'N/A'] }]
   },
   {
     id: '2-piece-edge',
     title: '2-Piece Plushie (Edge-to-Edge)',
-    note: 'Details are 2D printed on white minky fabric, sewn close to the edge (borderless). Adding extra custom sewn accessories (clothing, hats, etc.) will incur additional costs based on the addon price.',
-    sizes: ['5cm', '10cm', '15cm', '20cm', '25cm', '30cm', '40cm', '50cm', '60cm'],
-    rows: [
-      { qty: '11-50', prices: ['$1.90', '$3.80', '$7.90', '$6.80', '$9.40', '$12.10', '$14.30', '$24.50', '$34.30'] },
-      { qty: '51-100', prices: ['$1.90', '$3.60', '$7.50', '$6.40', '$8.70', '$11.30', '$13.60', '$23.40', '$33.20'] },
-      { qty: '101-500', prices: ['$1.80', '$3.40', '$6.80', '$6.00', '$8.30', '$10.90', '$13.20', '$23.00', '$31.30'] },
-      { qty: '501-1000', prices: ['$1.70', '$3.20', '$6.40', '$5.70', '$7.90', '$10.20', '$12.10', '$22.30', '$29.40'] },
-      { qty: '>1000', prices: ['$1.60', '$3.00', '$6.00', '$5.30', '$7.20', '$9.10', '$10.90', '$20.40', '$27.20'] }
+    notes: [
+      'Uses 2-way stretch velboa fabric.',
+      'Sizes under 20cm include a white elastic keychain loop by default.',
+      'Sizes 20cm and above cannot include a squeaker inside.',
+      'Available addons: ears, tail, arms, legs, horns, wings, etc.',
+      'Please double-check the design file with Frog before placing an order.',
+      
     ],
-    addons: [{ name: 'Custom Accessories', prices: ['N/A', '$0.40', '$0.40', '$0.50', '$0.80', '$0.80', '$1.10', '$1.90', '$2.60'] }]
+    sizes: ['5cm', '10cm', '15cm', '20cm', '25cm', '30cm'],
+    rows: [
+      { qty: '1-10', prices: ['$2.83', '$5.10', '$6.80', '$8.50', '$11.60', '$14.72'] },
+      { qty: '11-50', prices: ['$1.81', '$3.17', '$6.26', '$6.87', '$7.43', '$9.43'] },
+      { qty: '51-100', prices: ['$1.74', '$3.02', '$5.89', '$6.50', '$7.17', '$9.06'] },
+      { qty: '101-500', prices: ['$1.66', '$2.87', '$5.51', '$6.11', '$6.79', '$8.68'] },
+      { qty: '501-1000', prices: ['$1.58', '$2.80', '$5.28', '$5.74', '$6.23', '$7.92'] },
+      { qty: '>1000', prices: ['$1.51', '$2.64', '$4.91', '$5.30', '$5.66', '$7.17'] }
+    ],
+    addons: [{ name: 'Custom Accessories', prices: ['N/A', '$0.75', '$1.13', '$1.51', '$1.90', '$2.26'] }]
   },
   {
     id: '2-piece-embroidered',
     title: '2-Piece Plushie (Embroidered)',
-    note: 'Details are embroidered (outline or full) on white minky fabric or pre-dyed fabric (chosen by the workshop for optimal results), sewn close to the edge (borderless). Adding extra custom sewn accessories (clothing, hats, etc.) will incur additional costs.',
+    notes: [
+      'Default material is 1mm pile fabric (Upgrading to 3mm, 5mm, or 7mm hair length incurs a surcharge).',
+      'Unlimited embroidery thread colors. Color blocking (fur splicing) incurs an additional surcharge.',
+      'Sizes under 20cm include a white elastic keychain loop by default.',
+      'Sizes 20cm and above cannot include a squeaker inside.',
+      'Available addons: ears, tail, arms, legs, horns, wings, etc.',
+      'Please double-check the design file with Frog before placing an order.',
+      
+    ],
     sizes: ['5cm', '10cm', '15cm', '20cm', '25cm', '30cm'],
     rows: [
-      { qty: '11-50', prices: ['$5.70', '$11.30', '$13.20', '$15.10', '$17.00', '$18.90'] },
-      { qty: '51-100', prices: ['$5.30', '$8.30', '$9.80', '$11.30', '$12.10', '$12.80'] },
-      { qty: '101-500', prices: ['$4.90', '$5.30', '$6.40', '$7.50', '$8.30', '$9.10'] },
-      { qty: '501-1000', prices: ['$4.50', '$4.50', '$5.30', '$6.00', '$6.80', '$7.50'] },
-      { qty: '>1000', prices: ['$4.20', '$3.80', '$4.50', '$5.30', '$6.00', '$6.80'] }
+      { qty: '1-10', prices: ['$5.66', '$7.92', '$9.62', '$11.32', '$14.43', '$17.55'] },
+      { qty: '11-50', prices: ['$2.94', '$4.30', '$7.40', '$7.85', '$8.57', '$10.57'] },
+      { qty: '51-100', prices: ['$2.49', '$3.77', '$6.64', '$7.32', '$7.92', '$9.81'] },
+      { qty: '101-500', prices: ['$2.42', '$3.62', '$6.26', '$6.87', '$7.55', '$9.43'] },
+      { qty: '501-1000', prices: ['$2.34', '$3.55', '$6.04', '$6.57', '$6.98', '$8.68'] },
+      { qty: '>1000', prices: ['$2.26', '$3.40', '$5.66', '$6.04', '$6.42', '$7.92'] }
     ],
-    addons: [{ name: 'Custom Accessories', prices: ['$0.40', '$0.40', '$0.80', '$1.10', '$1.50', '$1.90'] }]
+    addons: [{ name: 'Custom Accessories', contactOnly: true }]
   },
   {
     id: '3-piece-printed',
     title: '3-Piece Plushie (Printed)',
-    note: 'Details are 2D printed on white minky fabric. Adding extra custom sewn accessories (clothing, hats, etc.) will incur additional costs based on the addon price.',
-    sizes: ['10cm', '15cm', '20cm', '25cm', '30cm', '40cm'],
-    rows: [
-      { qty: '11-50', prices: ['$4.70', '$5.90', '$7.00', '$8.60', '$10.20', '$13.30'] },
-      { qty: '51-100', prices: ['$4.50', '$5.50', '$6.60', '$8.10', '$9.70', '$12.70'] },
-      { qty: '101-500', prices: ['$4.20', '$5.10', '$6.00', '$7.50', '$9.10', '$12.10'] },
-      { qty: '501-1000', prices: ['$4.00', '$4.90', '$5.70', '$7.20', '$8.70', '$11.70'] },
-      { qty: '>1000', prices: ['$3.80', '$4.50', '$5.30', '$6.80', '$8.30', '$11.30'] }
+    notes: [
+      'Uses 2-way stretch velboa fabric.',
+      'Sizes under 20cm include a white elastic keychain loop by default.',
+      'Sizes 20cm and above cannot include a squeaker inside.',
+      'Base price already includes 1 pair of ears and 1 tail.',
+      'Available addons: arms, legs, horns, tail, wings, etc.',
+      'Please double-check the design file with Frog before placing an order.',
+      
     ],
-    addons: [{ name: 'Custom Accessories', prices: ['$0.40', '$0.40', '$0.50', '$0.80', '$0.80', '$1.10'] }]
+    sizes: ['10cm', '15cm', '20cm', '25cm', '30cm'],
+    rows: [
+      { qty: '1-10', prices: ['$7.36', '$9.40', '$11.32', '$13.87', '$16.42'] },
+      { qty: '11-50', prices: ['$4.68', '$5.90', '$7.02', '$8.60', '$10.20'] },
+      { qty: '51-100', prices: ['$4.45', '$5.51', '$6.57', '$8.11', '$9.66'] },
+      { qty: '101-500', prices: ['$4.15', '$5.13', '$6.04', '$7.55', '$9.06'] },
+      { qty: '501-1000', prices: ['$4.00', '$4.91', '$5.66', '$7.17', '$8.68'] },
+      { qty: '>1000', prices: ['$3.77', '$4.53', '$5.28', '$6.80', '$8.30'] }
+    ],
+    addons: [{ name: 'Custom Accessories', prices: ['$0.40', '$0.40', '$0.50', '$0.80', '$0.80'] }]
   },
   {
     id: '3-piece-embroidered',
     title: '3-Piece Plushie (Embroidered)',
-    note: 'Details are embroidered (outline or full) on white minky fabric or pre-dyed fabric (chosen by the workshop for optimal results). Adding extra custom sewn accessories (clothing, hats, etc.) will incur additional costs.',
+    notes: [
+      'Default material is 1mm pile fabric (Upgrading to 3mm, 5mm, or 7mm hair length incurs a surcharge).',
+      'Unlimited embroidery thread colors. Color blocking (fur splicing) incurs an additional surcharge.',
+      'Sizes under 20cm include a white elastic keychain loop by default.',
+      'Sizes 20cm and above cannot include a squeaker inside.',
+      'Available addons: arms, legs, horns, tail, wings, etc.',
+      'Please double-check the design file with Frog before placing an order.',
+      
+    ],
     sizes: ['10cm', '15cm', '20cm', '25cm', '30cm'],
     rows: [
-      { qty: '11-50', prices: ['$11.30', '$13.20', '$15.10', '$17.00', '$18.90'] },
-      { qty: '51-100', prices: ['$8.30', '$9.80', '$11.30', '$12.10', '$12.80'] },
-      { qty: '101-500', prices: ['$5.30', '$6.40', '$7.50', '$8.30', '$9.10'] },
-      { qty: '501-1000', prices: ['$4.50', '$5.30', '$6.00', '$6.80', '$7.50'] },
-      { qty: '>1000', prices: ['$3.80', '$4.50', '$5.30', '$6.00', '$6.80'] }
+      { qty: '1-10', prices: ['$28.30', '$29.43', '$30.57', '$33.40', '$36.23'] },
+      { qty: '11-50', prices: ['$11.32', '$13.21', '$15.10', '$17.00', '$18.87'] },
+      { qty: '51-100', prices: ['$8.30', '$9.81', '$11.32', '$12.08', '$12.83'] },
+      { qty: '101-500', prices: ['$5.28', '$6.42', '$7.55', '$8.30', '$9.06'] },
+      { qty: '501-1000', prices: ['$4.53', '$5.28', '$6.04', '$6.80', '$7.55'] },
+      { qty: '>1000', prices: ['$3.77', '$4.53', '$5.28', '$6.04', '$6.80'] }
     ],
-    addons: [{ name: 'Custom Accessories', prices: ['$0.40', '$0.80', '$1.10', '$1.50', '$1.90'] }]
+    addons: [{ name: 'Custom Accessories', contactOnly: true }]
   },
   {
     id: 'doll-printed',
     title: '2D Printed Doll',
-    note: '1 doll includes 1 base + 1 single-sided printed clothing item. Details are 2D printed on white minky fabric. Adding extra custom sewn accessories (clothing, hats, etc.) will incur additional costs.',
-    sizes: ['10cm', '15cm', '20cm', '25cm', '30cm', '40cm', '50cm', '60cm'],
-    rows: [
-      { qty: '11-50', prices: ['$4.70', '$5.90', '$7.00', '$8.60', '$10.20', '$13.30', '$20.40', '$28.70'] },
-      { qty: '51-100', prices: ['$4.50', '$5.50', '$6.60', '$8.10', '$9.70', '$12.70', '$19.60', '$27.20'] },
-      { qty: '101-500', prices: ['$4.20', '$5.10', '$6.00', '$7.50', '$9.10', '$12.10', '$18.90', '$25.70'] },
-      { qty: '501-1000', prices: ['$4.00', '$4.90', '$5.70', '$7.20', '$8.70', '$11.70', '$18.10', '$24.20'] },
-      { qty: '>1000', prices: ['$3.80', '$4.50', '$5.30', '$6.80', '$8.30', '$11.30', '$17.40', '$22.60'] }
+    notes: [
+      'Uses 2-way stretch velboa fabric.',
+      'Sizes under 20cm include a white elastic keychain loop by default.',
+      'Sizes 20cm and above cannot include a squeaker inside.',
+      'Base price already includes 1 pair of ears and 1 tail.',
+      'Available addons: arms, legs, horns, tail, wings, etc.',
+      'Please double-check the design file with Frog before placing an order.',
+      
     ],
-    addons: [{ name: 'Custom Accessories', prices: ['$0.40', '$0.40', '$0.50', '$0.80', '$0.80', '$1.10', '$1.90', '$2.60'] }]
+    sizes: ['10cm', '15cm', '20cm', '25cm', '30cm'],
+    rows: [
+      { qty: '1-10', prices: ['$7.36', '$9.40', '$11.32', '$13.87', '$16.42'] },
+      { qty: '11-50', prices: ['$4.68', '$5.90', '$7.02', '$8.60', '$10.20'] },
+      { qty: '51-100', prices: ['$4.45', '$5.51', '$6.57', '$8.11', '$9.66'] },
+      { qty: '101-500', prices: ['$4.15', '$5.13', '$6.04', '$7.55', '$9.06'] },
+      { qty: '501-1000', prices: ['$4.00', '$4.91', '$5.66', '$7.17', '$8.68'] },
+      { qty: '>1000', prices: ['$3.77', '$4.53', '$5.28', '$6.80', '$8.30'] }
+    ],
+    addons: [{ name: 'Custom Accessories', prices: ['$0.40', '$0.40', '$0.50', '$0.80', '$0.80'] }]
   },
   {
     id: 'doll-embroidered',
     title: '2D Embroidered Doll',
-    note: '1 doll includes 1 base + 1 single-sided printed clothing item. Details are embroidered on white minky fabric or pre-dyed fabric (optimized by workshop). Adding extra custom sewn accessories will incur additional costs.',
+    notes: [
+      'Default material is 1mm pile fabric (Upgrading to 3mm, 5mm, or 7mm hair length incurs a surcharge).',
+      'Unlimited embroidery thread colors. Color blocking (fur splicing) incurs an additional surcharge.',
+      'Sizes under 20cm include a white elastic keychain loop by default.',
+      'Sizes 20cm and above cannot include a squeaker inside.',
+      'Please double-check the design file with Frog before placing an order.',
+      
+    ],
     sizes: ['10cm', '15cm', '20cm', '25cm', '30cm'],
     rows: [
-      { qty: '11-50', prices: ['$11.30', '$13.20', '$15.10', '$17.00', '$18.90'] },
-      { qty: '51-100', prices: ['$8.30', '$9.80', '$11.30', '$12.10', '$12.80'] },
-      { qty: '101-500', prices: ['$5.30', '$6.40', '$7.50', '$8.30', '$9.10'] },
-      { qty: '501-1000', prices: ['$4.50', '$5.30', '$6.00', '$6.80', '$7.50'] },
-      { qty: '>1000', prices: ['$3.80', '$4.50', '$5.30', '$6.00', '$6.80'] }
+      { qty: '1-10', prices: ['$28.30', '$29.43', '$30.57', '$33.40', '$36.23'] },
+      { qty: '11-50', prices: ['$11.32', '$13.21', '$15.10', '$16.98', '$18.87'] },
+      { qty: '51-100', prices: ['$8.30', '$9.81', '$11.32', '$12.08', '$12.83'] },
+      { qty: '101-500', prices: ['$5.28', '$6.42', '$7.55', '$8.30', '$9.06'] },
+      { qty: '501-1000', prices: ['$4.53', '$5.28', '$6.04', '$6.80', '$7.55'] },
+      { qty: '>1000', prices: ['$3.77', '$4.53', '$5.28', '$6.04', '$6.80'] }
     ],
-    addons: [{ name: 'Custom Accessories', prices: ['$0.40', '$0.80', '$1.10', '$1.50', '$1.90'] }]
+    addons: [{ name: 'Custom Accessories', contactOnly: true }]
   }
 ];
 
@@ -143,7 +202,6 @@ export function PricingPage() {
       
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        {/* Banner */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-center mb-16">
           <h1 className="font-heading text-5xl md:text-7xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.6)]">
             PRICING MATRIX
@@ -158,7 +216,6 @@ export function PricingPage() {
 
         <div className="flex flex-col lg:flex-row gap-8 lg:gap-12">
           
-          {/* Table of Contents */}
           <div className="w-full lg:w-1/4 shrink-0">
             <div className="lg:sticky lg:top-32 bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 shadow-xl hidden md:block">
               <h3 className="text-lg font-bold text-white mb-4 uppercase tracking-wider font-heading border-b border-[var(--border)] pb-4">
@@ -184,7 +241,6 @@ export function PricingPage() {
               </ul>
             </div>
             
-            {/* mobile table of contents */}
             <div className="md:hidden flex overflow-x-auto gap-2 pb-4 snap-x custom-scrollbar">
               {pricingData.map((item) => (
                 <a
@@ -253,16 +309,23 @@ export function PricingPage() {
                       {table.addons && (
                         <>
                           <tr><td colSpan={table.sizes.length + 1} className="h-4 border-none"></td></tr>
-                          {table.addons?.map((addon, aIndex) => (
+                          {table.addons.map((addon, aIndex) => (
                             <tr key={`addon-${aIndex}`} className="bg-[#1A1528]/80">
                               <td className="p-4 border border-[var(--border)] border-l-0 text-[var(--primary)] font-semibold whitespace-nowrap text-left rounded-l-xl">
                                 + {addon.name}
                               </td>
-                              {addon.prices.map((price, pIndex) => (
-                                <td key={pIndex} className={`p-4 border border-[var(--border)] text-[var(--silver-gray)] font-mono whitespace-nowrap ${pIndex === table.sizes.length - 1 ? 'border-r-0 rounded-r-xl' : ''}`}>
-                                  {price}
+                              
+                              {addon.contactOnly ? (
+                                <td colSpan={table.sizes.length} className="p-4 border border-[var(--border)] border-r-0 text-[var(--silver-gray)] italic text-sm rounded-r-xl">
+                                  Please submit an inquiry for custom accessory quotes.
                                 </td>
-                              ))}
+                              ) : (
+                                addon.prices?.map((price, pIndex) => (
+                                  <td key={pIndex} className={`p-4 border border-[var(--border)] text-[var(--silver-gray)] font-mono whitespace-nowrap ${pIndex === table.sizes.length - 1 ? 'border-r-0 rounded-r-xl' : ''}`}>
+                                    {price}
+                                  </td>
+                                ))
+                              )}
                             </tr>
                           ))}
                         </>
@@ -271,17 +334,19 @@ export function PricingPage() {
                   </table>
                 </div>
                 
-                {/* category note */}
+                {/* bullet point notes */}
                 <div className="bg-black/30 border border-[var(--border)] rounded-2xl p-5 md:p-6 flex flex-col sm:flex-row gap-4 items-start">
-                  <div className="p-3 rounded-full bg-yellow-500/10 shrink-0">
+                  <div className="p-3 rounded-full bg-yellow-500/10 shrink-0 hidden sm:block">
                     <AlertCircle className="w-6 h-6 text-yellow-500" />
                   </div>
-                  <div>
-                    <h4 className="text-sm font-bold text-white mb-3 uppercase tracking-wide">Production Notes</h4>
+                  <div className="w-full">
+                    <h4 className="text-sm font-bold text-white mb-3 uppercase tracking-wide flex items-center gap-2">
+                      <AlertCircle className="w-5 h-5 text-yellow-500 sm:hidden" /> Production Notes
+                    </h4>
                     <ul className="space-y-2 text-sm text-[var(--silver-gray)]">
                       {table.notes?.map((noteLine, idx) => (
                         <li key={idx} className="flex items-start gap-2">
-                          <span className="text-[var(--primary)] mt-0.5 shrink-0">✔</span>
+                          <span className="text-[var(--primary)] mt-[1px] shrink-0">✔</span>
                           <span className="leading-relaxed">{noteLine}</span>
                         </li>
                       ))}
