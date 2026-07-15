@@ -21,20 +21,27 @@ export function OrderTrackingPage() {
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    if (!searchId.trim()) return;
+    
+    const idToSearch = searchId.trim(); 
+    if (!idToSearch) return;
+
+    const uuidRegex = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
+    if (!uuidRegex.test(idToSearch)) {
+      setError('Invalid Order ID format. Please make sure you copied the full ID including dashes.');
+      setOrderData(null);
+      return;
+    }
 
     setLoading(true);
     setError('');
     setOrderData(null);
 
     try {
-      const { data, error: fetchError } = await supabase
-        .from('inquiries')
-        .select('*')
-        .eq('id', searchId.trim())
+      const { data, error: rpcError } = await supabase
+        .rpc('track_order_by_id', { search_id: idToSearch })
         .single();
 
-      if (fetchError) {
+      if (rpcError || !data) {
         throw new Error('Order not found. Please check your Order ID.');
       }
 

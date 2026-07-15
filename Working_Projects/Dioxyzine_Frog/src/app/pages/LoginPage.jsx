@@ -144,7 +144,7 @@ export function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: 'http://localhost:5173/profile' 
+          redirectTo: 'https://dioxyzinefrog.vercel.app' 
         }
       });
       if (error) throw error;
@@ -167,7 +167,7 @@ export function LoginPage() {
       >
         <div className="text-center mb-8">
           <h1 className="text-3xl font-heading font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
-            Welcome Back
+            Welcome Back!
           </h1>
           <p className="text-[var(--muted-foreground)] mt-2 font-medium">
             Sign in to continue to Dioxyzine Frog

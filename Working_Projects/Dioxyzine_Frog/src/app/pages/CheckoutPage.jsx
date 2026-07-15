@@ -12,8 +12,7 @@ import { TermsOfServiceModal } from '../components/common_components/TermsOfServ
 import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
 
-const PAYPAL_CLIENT_ID = "AQ13HgNvoGjg75Qjftly9tG4aTYywjNbUyG4YW5MxBY567O2cTajzDfVEWQLoUGKq_kfD8N5IVm4SMRK";
-
+const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 export function CheckoutPage() {
   const { user } = useAuth();
   const { cart, cartTotal, clearCart } = useCart();
@@ -158,10 +157,12 @@ export function CheckoutPage() {
 
       // +1 Voucher
       if (appliedVoucher) {
-        await supabase
-          .from('vouchers')
-          .update({ used_count: appliedVoucher.used_count + 1 })
-          .eq('id', appliedVoucher.id);
+        const { error: voucherError } = await supabase
+          .rpc('increment_voucher_usage', { voucher_id: appliedVoucher.id });
+        
+        if (voucherError) {
+          console.error('Lỗi khi cập nhật số lượt dùng Voucher:', voucherError);
+        }
       }
 
       setOrderComplete(true);

@@ -111,13 +111,17 @@ export function AdminPage() {
         if (customerEmail) {
           try {
             await emailjs.send(
-              'service_ief99r9', 'template_1n0wscd',
+              import.meta.env.VITE_EMAILJS_SERVICE_ID, 
+              import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
               {
-                to_email: customerEmail, customer_name: order.customer_name || 'Quý khách',
-                order_id: order.id.substring(0, 8), product_name: order.product_name,
-                tracking_code: trackingCode, tracking_link: 'https://viettelpost.com.vn/tra-cuu-hanh-trinh-don/'
+                to_email: customerEmail, 
+                customer_name: order.customer_name || 'Quý khách',
+                order_id: order.id.substring(0, 8), 
+                product_name: order.product_name,
+                tracking_code: trackingCode, 
+                tracking_link: 'https://viettelpost.com.vn/tra-cuu-hanh-trinh-don/'
               },
-              'XNy24de8QlT536ZQU'
+              import.meta.env.VITE_EMAILJS_PUBLIC_KEY
             );
             toast.success("✅ Đã lưu mã vận đơn và gửi Email tự động!");
           } catch (emailErr) {
