@@ -5,6 +5,7 @@
 		}
 	],
 	"settings": {
-		"liveServer.settings.multiRootWorkspaceName": "Projects"
+		"liveServer.settings.multiRootWorkspaceName": "Projects",
+		"deno.enable": true
 	}
 }

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle } from 'lucide-react';
+import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle, Loader2 } from 'lucide-react';
 import { Link } from 'react-router';
 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
@@ -13,6 +13,7 @@ import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+
 export function CheckoutPage() {
   const { user } = useAuth();
   const { cart, cartTotal, clearCart } = useCart();
@@ -25,7 +26,10 @@ export function CheckoutPage() {
   
   const [acceptedStoreTerms, setAcceptedStoreTerms] = useState(false);
   const [showTermsOfServiceModal, setShowTermsOfServiceModal] = useState(false);
+  const [status, setStatus] = useState('idle');
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
+  
+  const [isFinalizing, setIsFinalizing] = useState(false);
 
   const [promoCodeInput, setPromoCodeInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState(null);
@@ -155,7 +159,7 @@ export function CheckoutPage() {
 
       if (orderError) throw orderError;
 
-      // +1 Voucher
+      // +1 Voucher bảo mật bằng RPC
       if (appliedVoucher) {
         const { error: voucherError } = await supabase
           .rpc('increment_voucher_usage', { voucher_id: appliedVoucher.id });
@@ -195,8 +199,25 @@ export function CheckoutPage() {
           </Link>
         </div>
 
-        <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row">
+        <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row relative">
           
+          <AnimatePresence>
+            {isFinalizing && (
+              <motion.div 
+                initial={{ opacity: 0 }} 
+                animate={{ opacity: 1 }} 
+                exit={{ opacity: 0 }}
+                className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#0d0a14]/90 backdrop-blur-md"
+              >
+                <Loader2 className="w-16 h-16 text-[var(--primary)] animate-spin mb-6" />
+                <h2 className="text-2xl font-bold text-white mb-2 font-heading tracking-wider">Processing Your Order...</h2>
+                <p className="text-[var(--silver-gray)] text-center max-w-md px-4 animate-pulse">
+                  Please do not close or refresh this page. We are finalizing your receipt and updating the system.
+                </p>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
           {orderComplete ? (
             <div className="w-full p-16 flex flex-col items-center justify-center text-center bg-[var(--card)]">
               <CheckCircle2 className="w-24 h-24 text-green-500 mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-full" />
@@ -393,27 +414,45 @@ export function CheckoutPage() {
                           if (!isValid) return actions.reject();
                           return actions.resolve();
                         }}
-                        createOrder={(data, actions) => {
-                          return actions.order.create({
-                            purchase_units: [{
-                              amount: {
-                                value: finalPrice.toFixed(2)
-                              },
-                              description: "Dioxyzine Frog Store Order"
-                            }]
-                          });
+                        // Xóa cái createOrder cũ và thay bằng cái này:
+                        createOrder={async () => {
+                          try {
+                            // 🚀 GỌI BACKEND: Nhờ Supabase Edge Function tạo đơn hàng giúp
+                            const { data, error } = await supabase.functions.invoke('create-paypal-order', {
+                              body: { amount: finalPrice.toFixed(2) }
+                            });
+
+                            console.log("Dữ liệu từ Backend trả về:", data);
+
+                            if (error) {
+                              console.error("Lỗi từ Supabase Function:", error);
+                              showToast("Server error when connecting to PayPal.", "error");
+                              return null;
+                            }
+
+                            // data.id chính là mã đơn hàng (Order ID) an toàn tuyệt đối do PayPal cấp
+                            return data.id; 
+                          } catch (err) {
+                            console.error("Lỗi khởi tạo PayPal Order:", err);
+                            showToast("Could not initialize payment.", "error");
+                            return null;
+                          }
                         }}
                         onApprove={async (data, actions) => {
                           try {
+                            setIsFinalizing(true);
                             const details = await actions.order.capture();
                             await saveOrderToDatabase(details.id);
+                            setIsFinalizing(false);
                           } catch (error) {
                             showToast("Transaction failed or was canceled.", "error");
+                            setIsFinalizing(false);
                           }
                         }}
                         onError={(err) => {
                           console.error("PayPal Error:", err);
                           showToast("Payment Gateway encountered an error.", "error");
+                          setIsFinalizing(false);
                         }}
                       />
                     </PayPalScriptProvider>
