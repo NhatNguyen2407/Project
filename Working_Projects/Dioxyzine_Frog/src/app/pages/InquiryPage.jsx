@@ -103,6 +103,16 @@ export function InquiryPage() {
     setStatus('loading');
     
     try {
+      const token = await executeRecaptcha('inquiry_submit');
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-recaptcha', {
+        body: { token }
+      });
+
+      if (verifyError || !verifyData?.success) {
+        console.error("Bot detected:", verifyError || verifyData?.message);
+        setStatus('idle');
+        return showToast("Hệ thống phát hiện dấu hiệu Spam. Vui lòng thử lại!", "error");
+      }
       const payload = {
         ...formData,
         productName: currentProduct?.name || 'Custom Requirements'

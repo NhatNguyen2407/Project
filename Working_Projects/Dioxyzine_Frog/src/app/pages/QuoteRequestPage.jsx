@@ -2,6 +2,8 @@ import { useState } from 'react';
 import { motion } from 'motion/react';
 import { useLocation } from 'react-router';
 import { CheckCircle, User, MessageSquare, Package, DollarSign, Calendar, Sparkles } from 'lucide-react';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
+import { supabase } from '../service/supabase';
 
 export function QuoteRequestPage() {
   const location = useLocation();
@@ -27,8 +29,45 @@ export function QuoteRequestPage() {
   ];
 
   const handleSubmit = (e) => {
+    const [toast, setToast] = useState({ show: false, msg: '', type: '' });
+  const [isLoading, setIsLoading] = useState(false);
+
+  const showToast = (msg, type) => {
+    setToast({ show: true, msg, type });
+    setTimeout(() => setToast({ show: false, msg: '', type: '' }), 3500);
+  };
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    
+    if (!executeRecaptcha) {
+      showToast('Hệ thống bảo mật chưa tải xong. Vui lòng tải lại trang!', 'error');
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const token = await executeRecaptcha('quote_submit');
+      
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-recaptcha', {
+        body: { token }
+      });
+
+      if (verifyError || !verifyData?.success) {
+        console.error("Spam detected:", verifyError || verifyData?.message);
+        showToast("Phát hiện truy cập bất thường (Spam). Từ chối gửi!", "error");
+        setIsLoading(false);
+        return; 
+      }
+
+      setIsSubmitted(true);
+    } catch (error) {
+      console.error("Lỗi:", error);
+      showToast("Lỗi hệ thống, vui lòng thử lại sau.", "error");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   };
 
   const handleInputChange = (e) => {
@@ -38,6 +77,7 @@ export function QuoteRequestPage() {
   if (isSubmitted) {
     return (
       <div className="min-h-screen pt-24 pb-16 bg-background flex items-center justify-center px-4 relative z-10">
+        <ToastNotification toast={toast} />
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}

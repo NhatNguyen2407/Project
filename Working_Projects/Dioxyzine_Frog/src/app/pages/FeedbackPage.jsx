@@ -46,6 +46,16 @@ export function FeedbackPage() {
     try {
       const token = await executeRecaptcha('feedback_submit');
 
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-recaptcha', {
+        body: { token }
+      });
+
+      if (verifyError || !verifyData?.success) {
+        console.error("Bot detected:", verifyError || verifyData?.message);
+        setStatus('idle');
+        return showToast("Xác thực bảo mật thất bại, có dấu hiệu Spam!", "error");
+      } 
+
       const feedbackData = {
         name: formData.name || 'Anonymous',
         email: formData.email || 'not-provided@email.com',

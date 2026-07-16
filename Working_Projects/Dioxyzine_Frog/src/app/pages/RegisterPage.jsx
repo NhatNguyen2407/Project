@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, Mail, Lock, Eye, EyeOff, Loader2, Chrome, Facebook, UserPlus } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { supabase } from '../service/supabase';
+import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { PrivacyPolicyModal } from '../components/common_components/PrivacyPolicyModal';
@@ -85,6 +86,7 @@ const SocialButton = ({ icon: Icon, label, onClick }) => {
 
 // MAIN PAGE COMPONENT: REGISTER
 export function RegisterPage() {
+  const { executeRecaptcha } = useGoogleReCaptcha();
   const navigate = useNavigate();
   const [formData, setFormData] = useState({ 
     fullName: '', 
@@ -134,8 +136,25 @@ export function RegisterPage() {
     e.preventDefault();
     if (!validateForm()) return;
 
+    if (!executeRecaptcha) {
+      setErrors({ form: 'Hệ thống bảo mật chưa sẵn sàng, vui lòng tải lại trang!' });
+      return;
+    }
+
     setIsLoading(true);
     try {
+      const token = await executeRecaptcha('register_submit');
+      
+      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-recaptcha', {
+        body: { token }
+      });
+
+      if (verifyError || !verifyData?.success) {
+        setErrors({ form: 'Xác thực bảo mật thất bại, phát hiện dấu hiệu Spam!' });
+        setIsLoading(false);
+        return; 
+      }
+
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
@@ -218,7 +237,7 @@ export function RegisterPage() {
               label="Email Address"
               name="email"
               type="email"
-              placeholder="froggy@dioxyzine.com"
+              placeholder="froggy@example.com"
               icon={Mail}
               value={formData.email}
               onChange={handleChange}

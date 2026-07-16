@@ -4,6 +4,7 @@ import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle, Loader2 } 
 import { Link } from 'react-router';
 
 import { PayPalScriptProvider, PayPalButtons } from "@paypal/react-paypal-js";
+import emailjs from '@emailjs/browser';
 
 import { useCart } from '../context/CartContext';
 import { COUNTRY_LIST } from '../data/storeData';
@@ -129,7 +130,7 @@ export function CheckoutPage() {
     return true;
   };
 
-  // lưu vào database sau khi trả tiền
+  // lưu database sau khi trả tiền
   const saveOrderToDatabase = async (transactionId) => {
     try {
       const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
@@ -158,6 +159,24 @@ export function CheckoutPage() {
       }]);
 
       if (orderError) throw orderError;
+
+      try {
+        await emailjs.send(
+          import.meta.env.VITE_EMAILJS_SERVICE_ID,
+          'template_qeyzv5c',
+          {
+            to_email: email,
+            customer_name: `${firstName} ${lastName}`,
+            order_id: transactionId, 
+            product_name: orderSummary,
+            total_amount: `$${finalPrice.toFixed(2)}`
+          },
+          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+        );
+        console.log("Đã gửi email biên lai thành công!");
+      } catch (emailError) {
+        console.error("Lỗi khi gửi email xác nhận:", emailError);
+      }
 
       // +1 Voucher bảo mật bằng RPC
       if (appliedVoucher) {
@@ -200,7 +219,7 @@ export function CheckoutPage() {
         </div>
 
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl w-full overflow-hidden shadow-2xl flex flex-col md:flex-row relative">
-          
+          {/* lock mouse when finalizing */}
           <AnimatePresence>
             {isFinalizing && (
               <motion.div 
@@ -422,14 +441,11 @@ export function CheckoutPage() {
                               body: { amount: finalPrice.toFixed(2) }
                             });
 
-                            console.log("Dữ liệu từ Backend trả về:", data);
-
-                            if (error) {
-                              console.error("Lỗi từ Supabase Function:", error);
+                            if (error || !data || !data.id || data.error) {
+                              console.error("Lỗi từ Supabase Function:", error || data);
                               showToast("Server error when connecting to PayPal.", "error");
                               return null;
                             }
-
                             // data.id chính là mã đơn hàng (Order ID) an toàn tuyệt đối do PayPal cấp
                             return data.id; 
                           } catch (err) {
