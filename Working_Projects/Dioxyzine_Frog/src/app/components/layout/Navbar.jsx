@@ -57,8 +57,7 @@ export function Navbar() {
               <motion.div whileHover={{ scale: 1.05 }} className="relative">
                 <img src={Logo} alt="Dioxyzine Frog" className="w-12 h-12 object-contain scale-125 rounded-full border border-border shadow-sm" />
               </motion.div>
-              {/* Giữ nguyên font Coiny béo mập cho logo thương hiệu */}
-              <span className="text-2xl sm:text-3xl tracking-wide ml-2 font-heading" style={{ color: "var(--primary)" }}>
+              <span className="text-2xl sm:text-3xl tracking-wide ml-2 font-heading animate-in fade-in" style={{ color: "var(--primary)" }}>
                 Dioxyzine Frog
               </span>
             </Link>
@@ -79,26 +78,26 @@ export function Navbar() {
                         <span className={`absolute bottom-5 left-0 h-0.5 bg-[var(--primary)] transition-all duration-300 ${isActive ? 'w-full' : 'w-0 group-hover:w-full'}`}></span>
                       </Link>
                       
-                      {/* Dropdown Desktop tương thích 2 theme */}
+                      {/* Dropdown Desktop */}
                       <div className="absolute left-0 top-full -mt-2 w-56 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 bg-card border border-border rounded-xl shadow-xl z-50 overflow-hidden">
                         {link.label === 'Products' && (
                           <>
-                            <Link to="/products/custom" className="block px-5 py-4 hover:bg-secondary text-foreground text-sm font-bold transition-colors">Custom Orders</Link>
-                            <Link to="/products/readyuse" className="block px-5 py-4 hover:bg-secondary text-foreground text-sm font-bold border-t border-border transition-colors">Ready-made</Link>
+                            <Link to="/products/custom" className="block px-5 py-4 hover:bg-secondary/40 text-foreground text-sm font-bold transition-colors">Custom Orders</Link>
+                            <Link to="/products/readyuse" className="block px-5 py-4 hover:bg-secondary/40 text-foreground text-sm font-bold border-t border-border transition-colors">Ready-made</Link>
                           </>
                         )}
                         {link.label === 'Tools' && (
                           <>
-                            <Link to="/tools/prototype-generator" className="block px-5 py-4 hover:bg-secondary text-foreground text-sm font-bold transition-colors">Prototype Generator</Link>
-                            <Link to="/tools/pricing-calculator" className="block px-5 py-4 hover:bg-secondary text-foreground text-sm font-bold border-t border-border transition-colors">Pricing & Size Guide</Link>
-                            <Link to="/tools/color-matcher" className="block px-5 py-4 hover:bg-secondary text-foreground text-sm font-bold border-t border-border transition-colors">Color Matcher</Link>
+                            <Link to="/tools/prototype-generator" className="block px-5 py-4 hover:bg-secondary/40 text-foreground text-sm font-bold transition-colors">Prototype Generator</Link>
+                            <Link to="/tools/pricing-calculator" className="block px-5 py-4 hover:bg-secondary/40 text-foreground text-sm font-bold border-t border-border transition-colors">Pricing & Size Guide</Link>
+                            <Link to="/tools/color-matcher" className="block px-5 py-4 hover:bg-secondary/40 text-foreground text-sm font-bold border-t border-border transition-colors">Color Matcher</Link>
                           </>
                         )}
                         {link.label === 'About' && (
                           <>
-                            <Link to="/about/contact" className="block px-5 py-4 hover:bg-secondary text-foreground text-sm font-bold transition-colors">Contact Us</Link>
-                            <Link to="/about/terms" className="block px-5 py-4 hover:bg-secondary text-foreground text-sm font-bold border-t border-border transition-colors">Terms of Service</Link>
-                            <Link to="/about/feedback" className="block px-5 py-4 hover:bg-secondary text-foreground text-sm font-bold border-t border-border transition-colors">Feedback</Link>
+                            <Link to="/about/contact" className="block px-5 py-4 hover:bg-secondary/40 text-foreground text-sm font-bold transition-colors">Contact Us</Link>
+                            <Link to="/about/terms" className="block px-5 py-4 hover:bg-secondary/40 text-foreground text-sm font-bold border-t border-border transition-colors">Terms of Service</Link>
+                            <Link to="/about/feedback" className="block px-5 py-4 hover:bg-secondary/40 text-foreground text-sm font-bold border-t border-border transition-colors">Feedback</Link>
                           </>
                         )}
                       </div>
@@ -115,13 +114,13 @@ export function Navbar() {
               })}
             </div>
 
-            {/* User Auth & Actions (Desktop) */}
+            {/* User Auth & Actions */}
             <div className="hidden xl:flex items-center space-x-4">
-              <ThemeToggle /> {/* 🌟 Tích hợp nút đổi theme góc phải desktop */}
+              <ThemeToggle /> 
 
               <button onClick={() => setIsCartOpen(true)} className="relative p-2 text-foreground hover:text-[var(--primary)] transition-colors cursor-pointer">
                 <ShoppingCart className="w-6 h-6" />
-                {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md">{totalItems}</span>}
+                {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-white {theme === 'light' ? 'bg-purple-500' : ''} text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md">{totalItems}</span>}
               </button>
 
               {user ? (
@@ -136,14 +135,14 @@ export function Navbar() {
 
                   <div className="absolute right-0 top-full -mt-2 w-48 opacity-0 invisible translate-y-2 group-hover:opacity-100 group-hover:visible group-hover:translate-y-0 transition-all duration-300 bg-card border border-border rounded-xl shadow-xl overflow-hidden">
                     {role === 'admin' && (
-                      <Link to="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-secondary text-foreground text-sm font-bold transition-colors border-b border-border">
+                      <Link to="/admin" className="flex items-center gap-3 px-4 py-3 hover:bg-secondary/40 text-foreground text-sm font-bold transition-colors border-b border-border">
                         <Shield className="w-4 h-4 text-[var(--primary)]" /> Admin Control
                       </Link>
                     )}
-                    <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-secondary text-foreground text-sm font-bold transition-colors">
+                    <Link to="/profile" className="flex items-center gap-3 px-4 py-3 hover:bg-secondary/40 text-foreground text-sm font-bold transition-colors">
                       <LayoutDashboard className="w-4 h-4 text-[var(--primary)]" /> My Dashboard
                     </Link>
-                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 text-red-500 text-sm font-bold border-t border-border transition-colors text-left cursor-pointer">
+                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-50 text-red-500 text-sm font-bold border-t border-border transition-colors text-left cursor-pointer">
                       <LogOut className="w-4 h-4" /> Sign Out
                     </button>
                   </div>
@@ -161,7 +160,7 @@ export function Navbar() {
 
             {/* Mobile Actions */}
             <div className="xl:hidden flex items-center gap-4 z-50 relative">
-              <ThemeToggle /> {/* 🌟 Thêm nút đổi theme cho giao diện mobile */}
+              <ThemeToggle />
               <button onClick={() => setIsCartOpen(true)} className="relative p-2 text-foreground hover:text-[var(--primary)] transition-colors cursor-pointer">
                 <ShoppingCart className="w-6 h-6" />
                 {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md">{totalItems}</span>}
@@ -194,7 +193,7 @@ export function Navbar() {
                        </div>
                      </div>
                      {role === 'admin' && (
-                       <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-secondary text-primary font-bold rounded-xl transition-colors">
+                       <Link to="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center justify-center gap-2 w-full py-3 bg-secondary text-secondary-foreground font-bold rounded-xl transition-colors">
                          <Shield className="w-4 h-4" /> Admin Control
                        </Link>
                      )}
@@ -237,11 +236,13 @@ export function Navbar() {
                             <>
                               <Link to="/tools/prototype-generator" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-muted-foreground font-semibold hover:text-[var(--primary)]">Prototype Generator</Link>
                               <Link to="/tools/pricing-calculator" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-muted-foreground font-semibold hover:text-[var(--primary)]">Pricing & Size Guide</Link>
+                              <Link to="/tools/color-matcher" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-muted-foreground font-semibold hover:text-[var(--primary)]">Color Matcher</Link>
                             </>
                           )}
                           {link.label === 'About' && (
                             <>
                               <Link to="/about/contact" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-muted-foreground font-semibold hover:text-[var(--primary)]">Contact Us</Link>
+                              <Link to="/about/terms" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-muted-foreground font-semibold hover:text-[var(--primary)]">Terms of Service</Link>
                               <Link to="/about/feedback" onClick={() => setIsMobileMenuOpen(false)} className="text-lg text-muted-foreground font-semibold hover:text-[var(--primary)]">Feedback</Link>
                             </>
                           )}
@@ -259,7 +260,7 @@ export function Navbar() {
                   </button>
                 </Link>
                 {user && (
-                   <button onClick={handleLogout} className="w-full py-4 rounded-full bg-red-500/10 text-red-500 font-bold border border-destructive/20 flex items-center justify-center gap-2">
+                   <button onClick={handleLogout} className="w-full py-4 rounded-full bg-red-50 text-red-500 font-bold border border-destructive/20 flex items-center justify-center gap-2">
                      <LogOut className="w-5 h-5" /> Sign Out
                    </button>
                 )}

@@ -79,7 +79,7 @@ export function ProductDetailPage() {
   }
 
   if (!product) {
-    return <div className="min-h-screen pt-32 text-center text-white text-2xl">Product not found.</div>;
+    return <div className="min-h-screen pt-32 text-center text-foreground font-bold text-2xl">Product not found.</div>;
   }
 
   let images = [];
@@ -171,23 +171,23 @@ export function ProductDetailPage() {
 
   return (
     <>
-      <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
+      <div className="min-h-screen pt-24 pb-16 bg-background relative z-10">
         <SEO title={displayTitle} description={displayDesc} image={images[0]} />
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-            <Link to={`/products/${isReadyUse ? 'readyuse' : 'custom'}`} className="inline-flex items-center gap-2 text-[var(--silver-gray)] hover:text-[var(--primary)] transition-colors font-medium">
+            <Link to={`/products/${isReadyUse ? 'readyuse' : 'custom'}`} className="inline-flex items-center gap-2 text-muted-foreground hover:text-[var(--primary)] transition-colors font-bold">
               <ChevronLeft className="w-4 h-4" />
               Back to Products
             </Link>
 
             <div className="flex items-center gap-3">
-              <Link to={`/product/${prevProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--card)] border border-[var(--border)] text-[var(--silver-gray)] hover:text-white hover:border-[var(--primary)] transition-all">
+              <Link to={`/product/${prevProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
                 <ChevronLeft className="w-4 h-4" />
-                <span className="hidden sm:inline text-sm font-medium">Previous</span>
+                <span className="hidden sm:inline text-sm font-bold">Previous</span>
               </Link>
-              <Link to={`/product/${nextProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-[var(--card)] border border-[var(--border)] text-[var(--silver-gray)] hover:text-white hover:border-[var(--primary)] transition-all">
-                <span className="hidden sm:inline text-sm font-medium">Next</span>
+              <Link to={`/product/${nextProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
+                <span className="hidden sm:inline text-sm font-bold">Next</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
             </div>
@@ -195,12 +195,12 @@ export function ProductDetailPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="space-y-4">
-              <div className="relative aspect-square rounded-3xl overflow-hidden bg-[var(--card)] shadow-[0_0_30px_rgba(139,114,190,0.15)] border border-[var(--border)] group">
-                <img src={images[currentImage]} alt="Product" className="w-full h-full object-cover opacity-90 transition-all duration-300" />
+              <div className="relative aspect-square rounded-3xl overflow-hidden bg-card shadow-lg border border-border group">
+                <img src={images[currentImage]} alt="Product" className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105" />
                 {images.length > 1 && (
                   <>
-                    <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[var(--cyber-black)]/80 text-white opacity-0 group-hover:opacity-100 hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all"><ChevronLeft className="w-5 h-5" /></button>
-                    <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[var(--cyber-black)]/80 text-white opacity-0 group-hover:opacity-100 hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all"><ChevronRight className="w-5 h-5" /></button>
+                    <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronLeft className="w-5 h-5" /></button>
+                    <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronRight className="w-5 h-5" /></button>
                   </>
                 )}
               </div>
@@ -208,62 +208,70 @@ export function ProductDetailPage() {
 
             <div className="space-y-6">
               <div>
-                <h1 className="font-heading mb-4 text-white drop-shadow-[0_0_8px_rgba(139,114,190,0.4)] text-3xl md:text-4xl">{displayTitle}</h1>
-                <p className="text-lg text-[var(--silver-gray)] leading-relaxed">{displayDesc}</p>
+                <h1 className="font-heading mb-4 text-foreground drop-shadow-sm text-3xl md:text-4xl">{displayTitle}</h1>
+                <p className="text-lg text-muted-foreground leading-relaxed font-medium">{displayDesc}</p>
               </div>
 
               {(!isReadyUse && product.pricingType === 'contact') ? (
-                <div className="bg-[#1A1528] border border-[var(--primary)]/50 rounded-3xl p-8 text-center shadow-[0_0_30px_rgba(139,114,190,0.2)]">
+                <div className="bg-muted border border-[var(--primary)]/50 rounded-3xl p-8 text-center shadow-sm">
                   <Sparkles className="w-12 h-12 text-[var(--primary)] mx-auto mb-4" />
-                  <h3 className="text-2xl font-bold text-white mb-2">Custom Quote Required</h3>
-                  <p className="text-[var(--silver-gray)] text-sm">Please submit an inquiry for us to provide the most accurate quote!</p>
+                  <h3 className="text-2xl font-bold text-foreground mb-2">Custom Quote Required</h3>
+                  <p className="text-muted-foreground text-sm font-medium">Please submit an inquiry for us to provide the most accurate quote!</p>
                 </div>
               ) : (
-                <div className="bg-[var(--card)] rounded-3xl p-6 border border-[var(--border)] shadow-lg space-y-6">
+                <div className="bg-card rounded-3xl p-6 border border-border shadow-md space-y-6">
                   
                   <div className="flex items-center gap-2 mb-2">
                     <div className="flex items-center gap-1">
                       {[1, 2, 3, 4, 5].map((star) => (
-                        <Star key={star} className={`w-5 h-5 ${star <= Math.round(liveRating) ? 'fill-yellow-500 text-yellow-500' : 'text-gray-600'}`} />
+                        <Star key={star} className={`w-5 h-5 ${star <= Math.round(liveRating) ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300 dark:text-gray-600'}`} />
                       ))}
                     </div>
-                    <span className="text-[var(--silver-gray)] font-bold text-sm ml-2">
+                    <span className="text-muted-foreground font-bold text-sm ml-2">
                       {liveRating.toFixed(1)} / 5.0 ({reviews.length} reviews)
                     </span>
                   </div>
 
-                  <div className="mb-4 border-b border-[var(--border)] pb-6">
+                  <div className="mb-4 border-b border-border pb-6">
                     <div className="flex items-baseline justify-between">
                       <div>
-                        <span className="text-sm text-[var(--muted-foreground)]">Unit Price</span>
-                        <p className="text-3xl lg:text-4xl font-bold text-[var(--primary)]">{displayPrice(pricing.unitPrice)}</p>
+                        <span className="text-sm font-bold text-muted-foreground">Unit Price</span>
+                        <p className="text-3xl lg:text-4xl font-black text-[var(--primary)]">{displayPrice(pricing.unitPrice)}</p>
                       </div>
                       <div className="text-right">
-                        <span className="text-sm text-[var(--muted-foreground)]">Total Price</span>
-                        <p className="text-2xl lg:text-3xl font-bold text-white">{displayPrice(pricing.totalPrice)}</p>
+                        <span className="text-sm font-bold text-muted-foreground">Total Price</span>
+                        <p className="text-2xl lg:text-3xl font-bold text-foreground">{displayPrice(pricing.totalPrice)}</p>
                       </div>
                     </div>
                     
                     {!isReadyUse && (
                       <div className="mt-3 flex justify-end">
-                        <span className="text-xs font-bold text-yellow-500 bg-yellow-500/10 px-3 py-1.5 rounded-lg border border-yellow-500/20">
+                        <span className="text-xs font-bold text-yellow-600 dark:text-yellow-500 bg-yellow-500/10 px-3 py-1.5 rounded-lg border border-yellow-500/20">
                           MOQ: {currentMoq} pcs
                         </span>
                       </div>
                     )}
                   </div>
 
+                  {/* 🚀 ĐÃ FIX UI SIZE BỊ TÀNG HÌNH Ở LIGHT THEME */}
                   <div>
-                    <label className="font-semibold mb-3 block text-white">Select Size</label>
+                    <label className="font-bold mb-3 block text-foreground">Select Size</label>
                     <div className="grid grid-cols-3 gap-3">
                       {product.sizes?.map((option, index) => (
-                        <button key={option.key} onClick={() => { setSizeIndex(index); setIsCustomSize(false); }} className={`p-3 rounded-2xl border transition-all ${!isCustomSize && sizeIndex === index ? 'border-[var(--primary)] bg-[var(--primary)]/20 text-white' : 'border-[var(--border)] text-[var(--silver-gray)] hover:border-gray-400'}`}>
-                          <p className="font-medium text-sm">{option.label}</p>
+                        <button 
+                          key={option.key} 
+                          onClick={() => { setSizeIndex(index); setIsCustomSize(false); }} 
+                          className={`p-3 rounded-2xl border transition-all shadow-sm ${!isCustomSize && sizeIndex === index ? 'border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)] font-bold' : 'border-border bg-card text-muted-foreground hover:border-[var(--primary)]/50 hover:bg-muted'}`}
+                        >
+                          <p className="font-bold text-sm">{option.label}</p>
                         </button>
                       ))}
                       {!isReadyUse && (
-                        <button onClick={() => setIsCustomSize(true)} className={`p-3 rounded-2xl border transition-all ${isCustomSize ? 'border-[var(--primary)] bg-[var(--primary)]/20 text-white' : 'border-[var(--border)] text-[var(--silver-gray)] hover:border-gray-400'}`}>
-                          <p className="font-medium text-sm">Custom Size</p>
+                        <button 
+                          onClick={() => setIsCustomSize(true)} 
+                          className={`p-3 rounded-2xl border transition-all shadow-sm ${isCustomSize ? 'border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)] font-bold' : 'border-border bg-card text-muted-foreground hover:border-[var(--primary)]/50 hover:bg-muted'}`}
+                        >
+                          <p className="font-bold text-sm">Custom Size</p>
                         </button>
                       )}
                     </div>
@@ -271,13 +279,13 @@ export function ProductDetailPage() {
 
                   <div>
                     <div className="flex items-center justify-between mb-3 mt-6">
-                      <label className="font-semibold text-white">Quantity</label>
+                      <label className="font-bold text-foreground">Quantity</label>
                       <div className="flex items-center gap-3">
-                        <div className="flex items-center bg-[#1A1528] border border-[var(--border)] rounded-lg overflow-hidden">
+                        <div className="flex items-center bg-muted border border-border rounded-lg overflow-hidden shadow-sm">
                           <button 
                             type="button" 
                             onClick={() => setQuantity(Math.max(currentMoq, (Number(quantity) || currentMoq) - 1))} 
-                            className="p-2 text-[var(--silver-gray)] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                            className="p-2 text-muted-foreground hover:text-[var(--primary)] hover:bg-card transition-colors cursor-pointer"
                           >
                             <Minus className="w-4 h-4" />
                           </button>
@@ -295,12 +303,12 @@ export function ProductDetailPage() {
                           <button 
                             type="button" 
                             onClick={() => setQuantity(Math.min(maxQty, (Number(quantity) || currentMoq) + 1))} 
-                            className="p-2 text-[var(--silver-gray)] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                            className="p-2 text-muted-foreground hover:text-[var(--primary)] hover:bg-card transition-colors cursor-pointer"
                           >
                             <Plus className="w-4 h-4" />
                           </button>
                         </div>
-                        <span className="text-sm font-medium text-[var(--silver-gray)]">{isReadyUse ? `(Stock: ${maxQty})` : 'pcs'}</span>
+                        <span className="text-sm font-bold text-muted-foreground">{isReadyUse ? `(Stock: ${maxQty})` : 'pcs'}</span>
                       </div>
                     </div>
                     <input 
@@ -309,15 +317,15 @@ export function ProductDetailPage() {
                       max={maxQty} 
                       value={quantity === '' ? currentMoq : quantity} 
                       onChange={(e) => setQuantity(parseInt(e.target.value))} 
-                      className="w-full h-2 rounded-full appearance-none bg-white/10 accent-[var(--primary)] cursor-pointer" 
+                      className="w-full h-2 rounded-full appearance-none bg-muted-foreground/20 accent-[var(--primary)] cursor-pointer" 
                     />
                   </div>
                   
                   {!isReadyUse && (
-                    <div className="pt-4 border-t border-[var(--border)]">
-                      <div className="flex items-center justify-between cursor-pointer p-4 rounded-2xl bg-[var(--cyber-black)] border border-[var(--border)]" onClick={() => setHasAccessory(!hasAccessory)}>
-                        <h4 className="font-semibold text-white">Add Accessories</h4>
-                        <div className={`w-12 h-6 rounded-full p-1 transition-colors ${hasAccessory ? 'bg-[var(--primary)]' : 'bg-[#1A1528] border border-[var(--border)]'}`}>
+                    <div className="pt-4 border-t border-border">
+                      <div className="flex items-center justify-between cursor-pointer p-4 rounded-2xl bg-muted border border-border shadow-sm hover:border-[var(--primary)]/50 transition-colors" onClick={() => setHasAccessory(!hasAccessory)}>
+                        <h4 className="font-bold text-foreground">Add Accessories</h4>
+                        <div className={`w-12 h-6 rounded-full p-1 transition-colors ${hasAccessory ? 'bg-[var(--primary)]' : 'bg-card border border-border'}`}>
                           <div className={`w-4 h-4 rounded-full bg-white transition-transform ${hasAccessory ? 'translate-x-6' : 'translate-x-0'}`} />
                         </div>
                       </div>
@@ -326,13 +334,13 @@ export function ProductDetailPage() {
                         {hasAccessory && (
                           <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="pt-6 overflow-hidden">
                             <div className="flex items-center justify-between mb-3">
-                              <label className="font-semibold text-white">Accessory Qty</label>
+                              <label className="font-bold text-foreground">Accessory Qty</label>
                               <div className="flex items-center gap-3">
-                                <div className="flex items-center bg-[#1A1528] border border-[var(--border)] rounded-lg overflow-hidden">
+                                <div className="flex items-center bg-muted border border-border rounded-lg overflow-hidden shadow-sm">
                                   <button 
                                     type="button" 
                                     onClick={() => setAccessoryQuantity(Math.max(1, (Number(accessoryQuantity) || 1) - 1))} 
-                                    className="p-2 text-[var(--silver-gray)] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                                    className="p-2 text-muted-foreground hover:text-[var(--primary)] hover:bg-card transition-colors cursor-pointer"
                                   >
                                     <Minus className="w-4 h-4" />
                                   </button>
@@ -350,12 +358,12 @@ export function ProductDetailPage() {
                                   <button 
                                     type="button" 
                                     onClick={() => setAccessoryQuantity(Math.min(1000, (Number(accessoryQuantity) || 1) + 1))} 
-                                    className="p-2 text-[var(--silver-gray)] hover:text-white hover:bg-white/5 transition-colors cursor-pointer"
+                                    className="p-2 text-muted-foreground hover:text-[var(--primary)] hover:bg-card transition-colors cursor-pointer"
                                   >
                                     <Plus className="w-4 h-4" />
                                   </button>
                                 </div>
-                                <span className="text-sm font-medium text-[var(--silver-gray)]">pcs</span>
+                                <span className="text-sm font-bold text-muted-foreground">pcs</span>
                               </div>
                             </div>
                             <input 
@@ -364,7 +372,7 @@ export function ProductDetailPage() {
                               max="1000" 
                               value={accessoryQuantity === '' ? 1 : accessoryQuantity} 
                               onChange={(e) => setAccessoryQuantity(parseInt(e.target.value))} 
-                              className="w-full h-2 rounded-full appearance-none bg-white/10 accent-[var(--primary)] cursor-pointer" 
+                              className="w-full h-2 rounded-full appearance-none bg-muted-foreground/20 accent-[var(--primary)] cursor-pointer" 
                             />
                           </motion.div>
                         )}
@@ -375,40 +383,40 @@ export function ProductDetailPage() {
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4">
-                <div className="bg-[#1A1528] p-5 rounded-2xl border border-[var(--border)]">
-                  <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
+                <div className="bg-muted p-5 rounded-2xl border border-border shadow-sm">
+                  <h4 className="text-foreground font-bold text-sm mb-3 flex items-center gap-2">
                     <Clock className="w-4 h-4 text-[var(--primary)]" /> Production Time
                   </h4>
-                  <p className="text-[var(--silver-gray)] text-sm">5–10 business days</p>
+                  <p className="text-muted-foreground font-medium text-sm">5–10 business days</p>
                 </div>
                 
-                <div className="bg-[#1A1528] p-5 rounded-2xl border border-[var(--border)]">
-                  <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
+                <div className="bg-muted p-5 rounded-2xl border border-border shadow-sm">
+                  <h4 className="text-foreground font-bold text-sm mb-3 flex items-center gap-2">
                     <Component className="w-4 h-4 text-[var(--primary)]" /> Material
                   </h4>
-                  <ul className="text-[var(--silver-gray)] text-sm space-y-1.5 list-disc list-inside">
+                  <ul className="text-muted-foreground font-medium text-sm space-y-1.5 list-disc list-inside">
                     {renderMaterials()}
                   </ul>
                 </div>
 
-                <div className="bg-[#1A1528] p-5 rounded-2xl border border-[var(--border)]">
-                  <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
+                <div className="bg-muted p-5 rounded-2xl border border-border shadow-sm">
+                  <h4 className="text-foreground font-bold text-sm mb-3 flex items-center gap-2">
                     <Package className="w-4 h-4 text-[var(--primary)]" /> Packaging
                   </h4>
-                  <ul className="text-[var(--silver-gray)] text-sm space-y-1.5 list-disc list-inside">
+                  <ul className="text-muted-foreground font-medium text-sm space-y-1.5 list-disc list-inside">
                     <li>Individual Poly Bag</li>
                     <li>Vacuum Packing Available</li>
                   </ul>
                 </div>
 
-                <div className="bg-[#1A1528] p-5 rounded-2xl border border-[var(--border)]">
-                  <h4 className="text-white font-bold text-sm mb-3 flex items-center gap-2">
+                <div className="bg-muted p-5 rounded-2xl border border-border shadow-sm">
+                  <h4 className="text-foreground font-bold text-sm mb-3 flex items-center gap-2">
                     <Tag className="w-4 h-4 text-[var(--primary)]" /> White Label
                   </h4>
-                  <ul className="text-[var(--silver-gray)] text-sm space-y-1.5">
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> No logo</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> No invoice</li>
-                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-green-500 flex-shrink-0" /> Direct shipping</li>
+                  <ul className="text-muted-foreground font-medium text-sm space-y-1.5">
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[var(--secondary-foreground)] flex-shrink-0" /> No logo</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[var(--secondary-foreground)] flex-shrink-0" /> No invoice</li>
+                    <li className="flex items-center gap-2"><Check className="w-3.5 h-3.5 text-[var(--secondary-foreground)] flex-shrink-0" /> Direct shipping</li>
                   </ul>
                 </div>
               </div>
@@ -419,13 +427,13 @@ export function ProductDetailPage() {
                     whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} 
                     disabled={product.stock === 0}
                     onClick={() => addToCart({...product, qty: quantity, selectedSize: product.sizes?.[sizeIndex]?.label})} 
-                    className={`w-full py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all ${product.stock === 0 ? 'bg-white/10 text-gray-400 cursor-not-allowed' : 'bg-[var(--primary)] text-white shadow-[0_0_20px_rgba(139,114,190,0.5)] cursor-pointer'}`}
+                    className={`w-full py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md ${product.stock === 0 ? 'bg-muted text-muted-foreground cursor-not-allowed border border-border' : 'bg-[var(--primary)] text-white cursor-pointer hover:shadow-lg'}`}
                   >
                     <ShoppingCart className="w-6 h-6" /> {product.stock === 0 ? 'Out of Stock' : 'Add to Cart'}
                   </motion.button>
                 ) : (
                   <Link to="/inquiry" state={{ passedProduct: displayTitle, passedQty: product.pricingType === 'contact' ? '' : quantity, passedSize: product.pricingType === 'contact' ? '' : (isCustomSize ? customSizeText : product.sizes?.[sizeIndex]?.label), passedAccQty: hasAccessory && product.pricingType !== 'contact' ? accessoryQuantity : 0 }}>
-                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full py-4 rounded-full bg-[#1A1528] border border-[var(--primary)] text-white font-bold text-lg hover:bg-[var(--primary)] transition-colors cursor-pointer">
+                    <motion.button whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }} className="w-full py-4 rounded-full bg-card border-2 border-[var(--primary)] text-foreground font-bold text-lg hover:bg-[var(--primary)] hover:text-white transition-colors cursor-pointer shadow-sm">
                       Submit Inquiry
                     </motion.button>
                   </Link>
@@ -439,39 +447,38 @@ export function ProductDetailPage() {
       <CartDrawer onProceedToCheckout={() => setIsCheckoutOpen(true)} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-24">
-        <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2 font-heading">
+        <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2 font-heading">
           <MessageSquare className="text-[var(--primary)]" /> Customer Reviews
         </h3>
         
         {reviews.length === 0 ? (
-          <div className="bg-[#1A1528] rounded-3xl p-8 border border-[var(--border)] text-center text-[var(--muted-foreground)]">
+          <div className="bg-muted rounded-3xl p-8 border border-border text-center text-muted-foreground font-medium shadow-sm">
             Chưa có đánh giá nào cho sản phẩm này. Hãy là người đầu tiên trải nghiệm nhé!
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {reviews.map((rev, idx) => (
-              <div key={idx} className="bg-[var(--card)] p-6 rounded-2xl border border-[var(--border)] shadow-sm">
+              <div key={idx} className="bg-card p-6 rounded-2xl border border-border shadow-sm">
                 <div className="flex justify-between items-start mb-3">
                   <div>
-                    <p className="text-white font-bold text-sm">{rev.customer_name || 'Khách hàng ẩn danh'}</p>
-                    <p className="text-xs text-gray-500 mt-0.5">{new Date(rev.created_at).toLocaleDateString('vi-VN')}</p>
+                    <p className="text-foreground font-bold text-sm">{rev.customer_name || 'Khách hàng ẩn danh'}</p>
+                    <p className="text-xs text-muted-foreground font-medium mt-0.5">{new Date(rev.created_at).toLocaleDateString('vi-VN')}</p>
                   </div>
                   <div className="flex">
                     {[1, 2, 3, 4, 5].map((star) => (
-                      <Star key={star} className={`w-3.5 h-3.5 ${star <= rev.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-700'}`} />
+                      <Star key={star} className={`w-3.5 h-3.5 ${star <= rev.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-300 dark:text-gray-700'}`} />
                     ))}
                   </div>
                 </div>
-                <p className="text-[var(--silver-gray)] text-sm italic">"{rev.review_comment}"</p>
+                <p className="text-muted-foreground text-sm italic font-medium">"{rev.review_comment}"</p>
                 
-                {/* admin rreply */}
                 {rev.admin_reply && (
-                  <div className="mt-4 bg-[var(--primary)]/10 border border-[var(--primary)]/20 p-4 rounded-xl ml-4 relative">
-                    <div className="absolute -left-2 top-4 w-4 h-4 bg-[var(--card)] border-l border-b border-[var(--primary)]/20 rotate-45"></div>
+                  <div className="mt-4 bg-[var(--primary)]/5 border border-[var(--primary)]/20 p-4 rounded-xl ml-4 relative">
+                    <div className="absolute -left-2 top-4 w-4 h-4 bg-card border-l border-b border-[var(--primary)]/20 rotate-45"></div>
                     <p className="text-xs font-bold text-[var(--primary)] mb-1 flex items-center gap-1.5">
                       <Shield className="w-3.5 h-3.5" /> Dioxyzine Frog Reply:
                     </p>
-                    <p className="text-sm text-gray-300">"{rev.admin_reply}"</p>
+                    <p className="text-sm text-muted-foreground font-medium">"{rev.admin_reply}"</p>
                   </div>
                 )}
               </div>

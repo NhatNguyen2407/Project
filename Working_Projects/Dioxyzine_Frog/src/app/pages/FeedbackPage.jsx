@@ -56,7 +56,7 @@ export function FeedbackPage() {
 
       await api.submitFeedback(feedbackData);
       
-      showToast('Feedback submitted successfully! Thank you 🐸', 'success');
+      showToast('Feedback submitted successfully! Thank you 🐸💜', 'success');
       setStatus('success');
     } catch (error) {
       console.error('Error:', error);
@@ -73,15 +73,11 @@ export function FeedbackPage() {
 
   return (
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
-      <SEO 
-        title="Send Feedback" 
-        description="Share your thoughts, suggestions, or workshop experience to help us improve our ecosystem." 
-      />
+      <SEO title="Send Feedback" description="Share your thoughts, suggestions, or workshop experience to help us improve our ecosystem." />
       <ToastNotification toast={toast} />
 
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          {/* Tiêu đề tự động dùng font Coiny béo mập và đổi màu tương phản giữa 2 theme */}
           <h1 className="font-heading text-4xl md:text-5xl mb-4 drop-shadow-sm">
             Send Feedback
           </h1>
@@ -97,7 +93,7 @@ export function FeedbackPage() {
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-20 bg-card flex flex-col items-center justify-center text-center p-8">
                 <CheckCircle className="w-20 h-20 text-[var(--primary)] mb-6 drop-shadow-sm" />
                 <h2 className="text-3xl font-heading mb-4">Thank you!</h2>
-                <p className="text-foreground text-lg mb-8 max-w-md font-medium">Dioxyzine Frog has received your feedback. Your thoughts mean the world to us! 🐸💚</p>
+                <p className="text-foreground text-lg mb-8 max-w-md font-medium">Dioxyzine Frog has received your feedback. Your thoughts mean the world to us! 🐸💜</p>
                 <button onClick={resetForm} className="px-8 py-3 rounded-full bg-[var(--primary)] text-white font-bold hover:scale-105 transition-transform cursor-pointer shadow-md">
                   Send another feedback
                 </button>
@@ -106,7 +102,7 @@ export function FeedbackPage() {
           </AnimatePresence>
 
           <form onSubmit={handleSubmit} noValidate className="space-y-6">
-            {/* Box Đánh giá đổi sang dùng bg-muted động */}
+            {/* Box Đánh giá */}
             <div className="text-center bg-muted p-6 rounded-2xl border border-border relative">
               <label className="block text-sm font-bold text-primary mb-4 uppercase tracking-wider">How would you rate your experience? *</label>
               <div className="flex justify-center gap-3">
@@ -118,7 +114,6 @@ export function FeedbackPage() {
               </div>
             </div>
 
-            {/* Các ô nhập liệu đổi sang các class ngữ nghĩa, triệt tiêu gán cứng mã màu tối */}
             <div>
               <label className="block text-sm font-bold text-foreground mb-2">What is this regarding? *</label>
               <select name="topic" value={formData.topic} onChange={handleInputChange} className="w-full px-4 py-4 bg-card border-2 border-border focus:border-primary rounded-xl text-foreground font-medium outline-none cursor-pointer transition-colors shadow-sm">
@@ -146,7 +141,6 @@ export function FeedbackPage() {
               </div>
             </div>
 
-            {/* Box Note chân trang đổi sang bg-background động */}
             <div className="flex items-start gap-3 bg-background p-4 rounded-xl border border-border mt-6">
               <AlertCircle className="w-5 h-5 text-[var(--primary)] flex-shrink-0 mt-0.5" />
               <p className="text-sm text-foreground leading-relaxed font-medium"><span className="font-bold text-[var(--primary)]">Privacy Note:</span> Your feedback is securely processed and strictly used to help us improve Dioxyzine Frog's products and services.</p>

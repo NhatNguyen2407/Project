@@ -4,60 +4,60 @@
   --font-size: 16px;
   --radius: 1.25rem;
 
-  /* 🎨 CUTE THEME (LIGHT MODE) */
-  --background: #FFF5F7; /* Nền trắng hồng sữa nhạt */
-  --foreground: #4A4A4A; /* Chữ xám đậm dễ nhìn tương phản cao */
+  /* 🎨 REDESIGNED CUTE THEME (LIGHT MODE) - LAVENDER FROG */
+  --background: #FAF5FF; /* Nền trắng tím sữa nhạt siêu mịn */
+  --foreground: #4B5563; /* Chữ xám đậm tương phản cao dễ đọc */
   
-  --card: #FFFFFF; /* Khối form/thẻ trắng tinh */
-  --card-foreground: #4A4A4A;
+  --card: #FFFFFF; /* Khối thẻ/form trắng tinh tinh tế */
+  --card-foreground: #4B5563;
   
   --popover: #FFFFFF;
-  --popover-foreground: #4A4A4A;
+  --popover-foreground: #4B5563;
   
-  --primary: #5eac7d; /* Xanh matcha ếch */
+  --primary: #A78BFA; /* Tím Lavender Oải Hương từ Logo thương hiệu */
   --primary-foreground: #FFFFFF;
   
-  --secondary: #FFF0F3; /* Hồng sữa nhạt phụ trợ */
-  --secondary-foreground: #5eac7d;
+  --secondary: #D1FAE5; /* Xanh Lá Ếch nhạt nịnh mắt từ Logo */
+  --secondary-foreground: #065F46;
   
-  --muted: #FDE8EC; /* Nền mảng phụ nhạt */
-  --muted-foreground: #718096;
+  --muted: #F3E8FF; /* Các mảng màu nền phụ nhạt */
+  --muted-foreground: #6B7280;
   
-  --accent: #FDE8EC;
-  --accent-foreground: #4A4A4A;
+  --accent: #F3E8FF;
+  --accent-foreground: #4B5563;
   
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
   
-  --border: #FDE8EC; /* Viền thẻ mềm mại */
-  --input: #FDE8EC;
+  --border: #E9D5FF; /* Viền tím sữa mềm mại, không lo bị chói */
+  --input: #E9D5FF;
   --input-background: #FFFFFF;
-  --switch-background: #E2E8F0;
+  --switch-background: #E5E7EB;
   
-  --ring: #5eac7d;
+  --ring: #A78BFA;
   
-  /* Màu cho chữ to/Heading ở chế độ sáng (Xanh Matcha) */
-  --heading-color: var(--primary);
+  /* Token màu chữ to/Heading ở chế độ Sáng (Tím Lavender đậm đà sắc nét) */
+  --heading-color: #7C3AED;
 }
 
-/* 🌌 CYBER THEME (DARK MODE) - KHÔI PHỤC NGUYÊN BẢN ĐÚNG CẤU HÌNH GỐC */
+/* 🌌 CYBER THEME (DARK MODE) - KHÔI PHỤC NGUYÊN BẢN CẤU HÌNH GỐC */
 .dark {
-  --background: #08080C; /* Đen vũ trụ gốc */
-  --foreground: #E2E8F0; /* Chữ sáng bạc */
+  --background: #08080C; 
+  --foreground: #E2E8F0; 
   
-  --card: #171226; /* Tím tối gốc */
+  --card: #171226; 
   --card-foreground: #E2E8F0;
   
   --popover: #171226;
   --popover-foreground: #E2E8F0;
   
-  --primary: #8B72BE; /* Tím Neon gốc */
+  --primary: #8B72BE; 
   --primary-foreground: #FFFFFF;
   
   --secondary: #2C2144;
   --secondary-foreground: #E2E8F0;
   
-  --muted: #1A1528; /* Cyber black cũ của sếp */
+  --muted: #1A1528; 
   --muted-foreground: #9CA3AF;
   
   --accent: #2C2144;
@@ -73,7 +73,7 @@
   
   --ring: #8B72BE;
   
-  /* Màu cho chữ to/Heading ở chế độ tối (Trắng tinh như cũ) */
+  /* Token màu chữ to/Heading ở chế độ Tối (Trắng tinh ngầu lòi như cũ) */
   --heading-color: #FFFFFF;
 }
 
@@ -129,11 +129,11 @@
     background-attachment: fixed;
   }
 
-  /* 🚀 ÉP FONT COINY BÉO TRÒN CHO TIÊU ĐỀ LỚN & ĐOẠN CHỮ MUỐN GÂY CHÚ Ý */
+  /* 🚀 ÉP FONT CHỮ BÉO TRÒN COINY CHO TOÀN BỘ CHỮ TO & TIÊU ĐỀ */
   h1, h2, h3, h4, h5, h6, .font-heading {
     font-family: 'Coiny', cursive !important;
     letter-spacing: 0.03em;
-    color: var(--heading-color) !important; /* Tự động đổi Xanh Matcha <-> Trắng tinh */
+    color: var(--heading-color) !important;
     font-weight: 400 !important; 
   }
 
@@ -158,4 +158,22 @@
   input, textarea {
     font-weight: 400;
   }
+
+  /* FFloating elements */
+.floating-element {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.3s ease, opacity 0.3s ease, filter 0.3s ease; 
+}
+
+:root .floating-element {
+  opacity: 0.25;
+  filter: drop-shadow(0 4px 10px rgba(167, 139, 250, 0.3)) hue-rotate(0deg);
+}
+
+.dark .floating-element {
+  opacity: 0.6;
+  filter: drop-shadow(0 0 15px rgba(139, 114, 190, 0.8)) hue-rotate(20deg); 
+}
 }
