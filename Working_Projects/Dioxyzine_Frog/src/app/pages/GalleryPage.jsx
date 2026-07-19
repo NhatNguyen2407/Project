@@ -51,23 +51,25 @@ export function GalleryPage() {
   };
 
   return (
-    <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
+    <div className="min-h-screen pt-24 pb-16 bg-background relative z-10">
       <SEO title="Product Gallery" description="Explore the real-life premium plushies and custom merchandise." />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* HEADER Đã sửa màu chữ tương phản */}
         <div className="text-center mb-12">
-          <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Gallery</h1>
-          <p className="text-lg text-[var(--muted-foreground)]">Realized concepts and final products from our workshop</p>
+          <h1 className="font-heading text-4xl md:text-5xl mb-4 text-foreground drop-shadow-sm">Gallery</h1>
+          <p className="text-lg text-muted-foreground font-medium">Realized concepts and final products from our workshop</p>
         </div>
 
+        {/* BỘ LỌC CATEGORY */}
         <div className="flex flex-wrap justify-center gap-3 mb-12">
           {categories.map((category) => (
             <button
               key={category} onClick={() => handleCategoryChange(category)}
-              className={`px-6 py-2 rounded-full font-bold transition-all cursor-pointer ${
+              className={`px-6 py-2 rounded-full font-bold transition-all cursor-pointer shadow-sm ${
                 selectedCategory === category
-                  ? 'bg-[var(--primary)] text-white shadow-[0_0_15px_rgba(139,114,190,0.4)] scale-105'
-                  : 'bg-[var(--card)] text-[var(--silver-gray)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-white'
+                  ? 'bg-[var(--primary)] text-white scale-105'
+                  : 'bg-card text-muted-foreground border border-border hover:border-[var(--primary)] hover:text-foreground'
               }`}
             >
               {category}
@@ -76,31 +78,39 @@ export function GalleryPage() {
         </div>
 
         {loading ? (
-          <div className="text-center py-24 text-[var(--primary)] font-bold text-xl animate-pulse">
-            Loading gallery...
+          /* 🚀 SKELETON LOADING GRID */
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6 animate-in fade-in duration-500">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div 
+                key={i} 
+                className="relative aspect-square rounded-2xl md:rounded-3xl bg-muted animate-pulse border border-border shadow-sm"
+              ></div>
+            ))}
           </div>
         ) : filteredItems.length > 0 ? (
           <>
+            {/* LƯỚI HÌNH ẢNH */}
             <motion.div layout className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
               <AnimatePresence mode="popLayout">
                 {currentItems.map((item) => (
                   <motion.div
                     layout key={item.id} 
                     initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }} transition={{ duration: 0.3 }}
-                    className="relative aspect-square group rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer bg-black shadow-lg"
+                    className="relative aspect-square group rounded-2xl md:rounded-3xl overflow-hidden cursor-pointer bg-muted border border-border shadow-sm hover:shadow-md transition-shadow"
                     onClick={() => setSelectedImage(item)}
                   >
-                    <SmartImage src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 opacity-80 group-hover:opacity-100 transition-all duration-500" />
+                    <SmartImage src={item.image} alt={item.title} className="w-full h-full object-cover group-hover:scale-110 opacity-90 group-hover:opacity-100 transition-all duration-500" />
                   </motion.div>
                 ))}
               </AnimatePresence>
             </motion.div>
 
+            {/* PHÂN TRANG (PAGINATION) */}
             {totalPages > 1 && (
               <div className="flex justify-center items-center gap-2 mt-16">
                 <button
                   onClick={() => goToPage(currentPage - 1)} disabled={currentPage === 1}
-                  className="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-white disabled:opacity-30 hover:bg-white/10 transition cursor-pointer"
+                  className="p-3 rounded-xl bg-card border border-border text-foreground disabled:opacity-30 hover:bg-secondary transition cursor-pointer shadow-sm"
                 >
                   <ChevronLeft className="w-5 h-5" />
                 </button>
@@ -109,17 +119,17 @@ export function GalleryPage() {
                   {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => {
                     if (totalPages > 6) {
                       if (page !== 1 && page !== totalPages && Math.abs(currentPage - page) > 1) {
-                        if (page === 2 || page === totalPages - 1) return <span key={page} className="text-gray-500 self-end">...</span>;
+                        if (page === 2 || page === totalPages - 1) return <span key={page} className="text-muted-foreground font-bold self-end">...</span>;
                         return null;
                       }
                     }
                     return (
                       <button
                         key={page} onClick={() => goToPage(page)}
-                        className={`w-11 h-11 rounded-xl font-bold transition-all flex items-center justify-center cursor-pointer ${
+                        className={`w-11 h-11 rounded-xl font-bold transition-all flex items-center justify-center cursor-pointer shadow-sm ${
                           currentPage === page 
-                            ? 'bg-[var(--primary)] text-white shadow-[0_0_15px_rgba(139,114,190,0.5)] scale-110' 
-                            : 'bg-[var(--card)] border border-[var(--border)] text-gray-400 hover:bg-white/10 hover:text-white'
+                            ? 'bg-[var(--primary)] text-white scale-110' 
+                            : 'bg-card border border-border text-muted-foreground hover:bg-secondary hover:text-foreground'
                         }`}
                       >
                         {page}
@@ -130,7 +140,7 @@ export function GalleryPage() {
 
                 <button
                   onClick={() => goToPage(currentPage + 1)} disabled={currentPage === totalPages}
-                  className="p-3 rounded-xl bg-[var(--card)] border border-[var(--border)] text-white disabled:opacity-30 hover:bg-white/10 transition cursor-pointer"
+                  className="p-3 rounded-xl bg-card border border-border text-foreground disabled:opacity-30 hover:bg-secondary transition cursor-pointer shadow-sm"
                 >
                   <ChevronRight className="w-5 h-5" />
                 </button>
@@ -138,23 +148,25 @@ export function GalleryPage() {
             )}
           </>
         ) : (
-          <div className="text-center py-24 text-[var(--muted-foreground)] bg-[var(--card)] rounded-3xl border border-[var(--border)]">
+          /* TRẠNG THÁI TRỐNG (EMPTY STATE) */
+          <div className="text-center py-24 text-muted-foreground bg-card rounded-3xl border border-border shadow-sm">
             <Filter className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-xl font-medium">No images found for this category.</p>
+            <p className="text-xl font-bold">No images found for this category.</p>
           </div>
         )}
       </div>
 
+      {/* MODAL XEM ẢNH (LIGHTBOX) - Đã tương thích 2 theme */}
       <AnimatePresence>
         {selectedImage && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/95 backdrop-blur-sm p-4">
-            <button onClick={() => setSelectedImage(null)} className="absolute top-6 right-6 p-3 bg-white/10 hover:bg-white/20 rounded-full text-white transition-colors cursor-pointer">
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-md p-4">
+            <button onClick={() => setSelectedImage(null)} className="absolute top-6 right-6 p-3 bg-card border border-border hover:bg-secondary rounded-full text-foreground transition-colors cursor-pointer shadow-md">
               <X className="w-6 h-6" />
             </button>
             <motion.img
               initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
               src={selectedImage.image} alt={selectedImage.title}
-              className="max-w-full max-h-[90vh] rounded-2xl object-contain shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10"
+              className="max-w-full max-h-[90vh] rounded-2xl object-contain shadow-2xl border border-border bg-muted/50"
             />
           </div>
         )}

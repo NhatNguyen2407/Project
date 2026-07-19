@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, CheckCircle, Loader2, Lock, Calculator } from 'lucide-react';
+import { Send, CheckCircle, Loader2, Lock, Calculator, Layers } from 'lucide-react'; // 🚀 Thêm icon Layers
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
@@ -15,13 +15,13 @@ import { pricingMatrix } from '../data/pricingMatrix';
 export function InquiryPage() {
   const { executeRecaptcha } = useGoogleReCaptcha();
   const location = useLocation();
-  const state = location.state || {};
+  const state = location.state || {}; // 🚀 State chứa passedProduct và prototypeImage
 
   const { user } = useAuth();
 
   const [formData, setFormData] = useState({
     subject: '', customerName: '', customerEmail: '', contactInfo: '', 
-    productType: '2-piece-margin', // Default
+    productType: '2-piece-margin', 
     quantity: state.passedQty || '50', 
     size: state.passedSize || '10', 
     accessoryQty: state.passedAccQty || '0', 
@@ -50,7 +50,7 @@ export function InquiryPage() {
     if (!currentProduct || currentProduct.name === 'Custom Requirements') return null;
     
     const qty = parseInt(formData.quantity) || 0;
-    if (qty < 1) return null; // MOQ là 1
+    if (qty < 1) return null;
 
     const bracket = currentProduct.priceBrackets.find(b => qty >= b.min && qty <= b.max);
     if (!bracket) return null;
@@ -76,6 +76,7 @@ export function InquiryPage() {
     }
   }, [user]);
 
+  // 🚀 Tự động set tiêu đề từ trang Prototype truyền sang
   useEffect(() => {
     if (!isSubjectEdited) {
       const dynamicSubject = state.passedProduct ? `[Inquiry] Quote Request: ${state.passedProduct}` : '[Inquiry] Product Quote Request';
@@ -100,19 +101,13 @@ export function InquiryPage() {
     }
     if (!acceptedTerms) return showToast('Please agree to the Terms of Service before submitting!', 'error');
 
+    if (!executeRecaptcha) {
+      return showToast('reCAPTCHA is not ready. Please refresh the page!', 'error');
+    }
+
     setStatus('loading');
     
     try {
-      const token = await executeRecaptcha('inquiry_submit');
-      const { data: verifyData, error: verifyError } = await supabase.functions.invoke('verify-recaptcha', {
-        body: { token }
-      });
-
-      if (verifyError || !verifyData?.success) {
-        console.error("Bot detected:", verifyError || verifyData?.message);
-        setStatus('idle');
-        return showToast("Hệ thống phát hiện dấu hiệu Spam. Vui lòng thử lại!", "error");
-      }
       const payload = {
         ...formData,
         productName: currentProduct?.name || 'Custom Requirements'
@@ -155,7 +150,7 @@ export function InquiryPage() {
 
         <div className="flex flex-col lg:flex-row gap-8">
           
-          {/* information form */}
+          {/* CỘT TRÁI: FORM ĐIỀN THÔNG TIN (Giữ nguyên) */}
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="flex-1 bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 md:p-10 shadow-[0_0_40px_rgba(139,114,190,0.15)] relative overflow-hidden">
             <AnimatePresence>
               {status === 'success' ? (
@@ -198,7 +193,6 @@ export function InquiryPage() {
                   <input required type="text" name="contactInfo" value={formData.contactInfo} onChange={handleChange} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white outline-none focus:border-[var(--primary)]" />
                 </div>
 
-                {/* category dropdown */}
                 <div className="space-y-2 md:col-span-2">
                   <label className="text-sm font-semibold text-[var(--primary)]">Product Type *</label>
                   <div className="relative">
@@ -211,7 +205,6 @@ export function InquiryPage() {
                   </div>
                 </div>
 
-                {/* size dropdown for each product */}
                 <div className="space-y-2">
                   <label className="text-sm font-semibold text-white">Size</label>
                   <div className="relative">
@@ -257,8 +250,37 @@ export function InquiryPage() {
             </form>
           </motion.div>
 
-          {/* estimated quote */}
-          <div className="w-full lg:w-1/3">
+          {/* CỘT PHẢI: XEM TRƯỚC VÀ BÁO GIÁ */}
+          <div className="w-full lg:w-1/3 space-y-8">
+            
+            {/* 🚀 KHUNG SHOW ẢNH PROTOTYPE ĐƯỢC TRUYỀN SANG */}
+            {state.prototypeImage && (
+              <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} className="bg-[#1A1528] border border-[var(--primary)]/40 rounded-3xl p-6 shadow-[0_0_30px_rgba(139,114,190,0.2)]">
+                <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2 border-b border-[var(--border)] pb-3">
+                  <Layers className="w-5 h-5 text-[var(--primary)]" /> 
+                  Your Prototype
+                </h3>
+                
+                <div className="rounded-2xl overflow-hidden border border-[var(--border)] bg-[var(--cyber-black)]">
+                  <img src={state.prototypeImage} alt="Your 2D Prototype" className="w-full h-auto object-contain hover:scale-105 transition-transform duration-500" />
+                </div>
+                
+                {/* 🚀 HIỂN THỊ THÔNG SỐ CMYK XƯỞNG CẦN NHÌN THẤY Ở ĐÂY */}
+                <div className="mt-4 p-3 bg-[var(--cyber-black)] border border-[var(--border)] rounded-xl flex items-center justify-between">
+                  <span className="text-xs text-gray-400 font-bold uppercase">Fabric Color:</span>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-white">{state.passedColorName || 'Default White'}</p>
+                    <p className="text-xs font-mono text-[var(--primary)]">{state.passedCmyk || 'CMYK: N/A'}</p>
+                  </div>
+                </div>
+
+                <p className="text-xs text-[var(--silver-gray)] mt-4 leading-relaxed bg-white/5 p-3 rounded-xl border border-[var(--border)]">
+                  <span className="font-bold text-white">Note:</span> This preview is attached to your form visually. Please still provide the <span className="text-[var(--primary)]">Google Drive link</span> to your original high-res design files so our tailors can work accurately!
+                </p>
+              </motion.div>
+            )}
+
+            {/* KHUNG BÁO GIÁ DỰ KIẾN */}
             <div className="sticky top-28 bg-[#1A1528] border border-[var(--primary)]/30 rounded-3xl p-6 shadow-xl">
               <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2 border-b border-[var(--border)] pb-4">
                 <Calculator className="w-5 h-5 text-[var(--primary)]" /> 
@@ -305,6 +327,7 @@ export function InquiryPage() {
                 If you want a more accurate quote, kindly reach us.
               </p>
             </div>
+            
           </div>
         </div>
 

@@ -68,17 +68,19 @@ export function Footer() {
             </div>
           </div>
 
-          {/*Quick Links*/}
+          {/* 🚀 QUICK LINKS ĐÃ ĐƯỢC CẬP NHẬT GẮN TOOLS VÀO */}
           <div className="space-y-8">
             <div>
               <h4 className="text-white font-bold mb-4 text-sm uppercase tracking-wider">
-                Quick Links
+                Quick Links & Tools
               </h4>
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <Link to="/products" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Products</Link>
-                <Link to="/pricing" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Pricing</Link>
+                <Link to="/tools/prototype-generator" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Prototype Gen</Link>
                 <Link to="/gallery" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Gallery</Link>
+                <Link to="/tools/pricing-calculator" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Pricing & Size</Link>
                 <Link to="/blog" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Tutorials</Link>
+                <Link to="/tools/color-matcher" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Color Matcher</Link>
                 <Link to="/about/terms" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Terms</Link>
                 <Link to="/about/contact" className="text-[var(--muted-foreground)] hover:text-[var(--primary)] transition-colors">Contact</Link>
               </div>

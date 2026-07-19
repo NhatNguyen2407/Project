@@ -2,33 +2,66 @@
 
 :root {
   --font-size: 16px;
+  --radius: 1.25rem;
 
-  /* DIOXYZINE FROG - EXACT COLOR CODES */
-  --cyber-black: #08080C;
-  --neon-purple: #8B72BE;
-  --dark-purple: #171226;
-  --silver-gray: #E2E8F0;
+  /* 🎨 CUTE THEME (LIGHT MODE) */
+  --background: #FFF5F7; /* Nền trắng hồng sữa nhạt */
+  --foreground: #4A4A4A; /* Chữ xám đậm dễ nhìn tương phản cao */
+  
+  --card: #FFFFFF; /* Khối form/thẻ trắng tinh */
+  --card-foreground: #4A4A4A;
+  
+  --popover: #FFFFFF;
+  --popover-foreground: #4A4A4A;
+  
+  --primary: #5eac7d; /* Xanh matcha ếch */
+  --primary-foreground: #FFFFFF;
+  
+  --secondary: #FFF0F3; /* Hồng sữa nhạt phụ trợ */
+  --secondary-foreground: #5eac7d;
+  
+  --muted: #FDE8EC; /* Nền mảng phụ nhạt */
+  --muted-foreground: #718096;
+  
+  --accent: #FDE8EC;
+  --accent-foreground: #4A4A4A;
+  
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  
+  --border: #FDE8EC; /* Viền thẻ mềm mại */
+  --input: #FDE8EC;
+  --input-background: #FFFFFF;
+  --switch-background: #E2E8F0;
+  
+  --ring: #5eac7d;
+  
+  /* Màu cho chữ to/Heading ở chế độ sáng (Xanh Matcha) */
+  --heading-color: var(--primary);
+}
 
-  --background: var(--cyber-black);
-  --foreground: var(--silver-gray);
+/* 🌌 CYBER THEME (DARK MODE) - KHÔI PHỤC NGUYÊN BẢN ĐÚNG CẤU HÌNH GỐC */
+.dark {
+  --background: #08080C; /* Đen vũ trụ gốc */
+  --foreground: #E2E8F0; /* Chữ sáng bạc */
   
-  --card: var(--dark-purple);
-  --card-foreground: var(--silver-gray);
+  --card: #171226; /* Tím tối gốc */
+  --card-foreground: #E2E8F0;
   
-  --popover: var(--dark-purple);
-  --popover-foreground: var(--silver-gray);
+  --popover: #171226;
+  --popover-foreground: #E2E8F0;
   
-  --primary: var(--neon-purple);
+  --primary: #8B72BE; /* Tím Neon gốc */
   --primary-foreground: #FFFFFF;
   
   --secondary: #2C2144;
-  --secondary-foreground: var(--silver-gray);
+  --secondary-foreground: #E2E8F0;
   
-  --muted: #1A1528;
+  --muted: #1A1528; /* Cyber black cũ của sếp */
   --muted-foreground: #9CA3AF;
   
   --accent: #2C2144;
-  --accent-foreground: var(--silver-gray);
+  --accent-foreground: #E2E8F0;
   
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
@@ -36,14 +69,15 @@
   --border: rgba(139, 114, 190, 0.3);
   --input: rgba(139, 114, 190, 0.2);
   --input-background: rgba(8, 8, 12, 0.6);
-  --switch-background: var(--dark-purple);
+  --switch-background: #171226;
   
-  --ring: var(--neon-purple);
-  --radius: 1.25rem;
+  --ring: #8B72BE;
+  
+  /* Màu cho chữ to/Heading ở chế độ tối (Trắng tinh như cũ) */
+  --heading-color: #FFFFFF;
 }
 
 @theme inline {
-  /* Định nghĩa tên font cho Tailwind */
   --font-coiny: "Coiny", system-ui;
   --font-fredoka: "Fredoka", sans-serif;
 
@@ -76,7 +110,7 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border outline-ring/50 transition-colors duration-200;
   }
 
   html {
@@ -89,16 +123,17 @@
     font-family: 'Montserrat', sans-serif; 
     
     background-image: 
-      linear-gradient(rgba(139, 114, 190, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(139, 114, 190, 0.05) 1px, transparent 1px);
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
     background-size: 40px 40px;
     background-attachment: fixed;
   }
 
+  /* 🚀 ÉP FONT COINY BÉO TRÒN CHO TIÊU ĐỀ LỚN & ĐOẠN CHỮ MUỐN GÂY CHÚ Ý */
   h1, h2, h3, h4, h5, h6, .font-heading {
     font-family: 'Coiny', cursive !important;
-    letter-spacing: 0.02em;
-    color: #FFFFFF !important;
+    letter-spacing: 0.03em;
+    color: var(--heading-color) !important; /* Tự động đổi Xanh Matcha <-> Trắng tinh */
     font-weight: 400 !important; 
   }
 
@@ -109,21 +144,18 @@
 
   p, span, label, input, textarea, button, select, a, table, td, th {
     font-family: 'Montserrat', sans-serif;
-    color: var(--silver-gray); 
   }
 
   p, span { font-weight: 500; }
 
   .text-muted-foreground, p.text-lg {
-    color: var(--neon-purple) !important; 
+    color: var(--muted-foreground) !important; 
     font-weight: 600;
-    opacity: 0.9;
   }
 
   label, button { font-weight: 600; }
 
   input, textarea {
     font-weight: 400;
-    color: #FFFFFF !important;
   }
 }
