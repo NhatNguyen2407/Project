@@ -1,10 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { Send, CheckCircle, Loader2, Lock, Calculator, Layers } from 'lucide-react';
+import { Send, CheckCircle, Loader2, Lock, Calculator, Layers, UploadCloud } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
+import { uploadImageToCloudinary } from '../service/cloudinary';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { SEO } from '../components/common_components/SEO';
@@ -30,6 +31,7 @@ export function InquiryPage() {
 
   const [isSubjectEdited, setIsSubjectEdited] = useState(false);
   const [status, setStatus] = useState('idle');
+  const [isUploading, setIsUploading] = useState(false); // Trạng thái đang upload ảnh
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsOfServiceModal, setShowTermsOfServiceModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
@@ -90,10 +92,35 @@ export function InquiryPage() {
     setTimeout(() => setToast({ show: false, msg: '', type: '' }), 3500);
   };
 
+  // Hàm xử lý đẩy ảnh lên Cloudinary
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const uploadedUrl = await uploadImageToCloudinary(file);
+      if (uploadedUrl) {
+        setFormData(prev => ({ ...prev, imageLink: uploadedUrl }));
+        showToast('Image uploaded securely!', 'success');
+      } else {
+        showToast('Upload failed. Please try again.', 'error');
+      }
+    } catch (error) {
+      console.error("Upload error:", error);
+      showToast('Error connecting to image server.', 'error');
+    } finally {
+      setIsUploading(false);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.imageLink || !formData.quantity) {
+    if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.quantity) {
       return showToast('Please fill in all required fields!', 'error');
+    }
+    if (!formData.imageLink) {
+      return showToast('Please upload your design reference image!', 'error');
     }
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.customerEmail)) {
       return showToast('Invalid email address! Please check again.', 'error');
@@ -225,9 +252,35 @@ export function InquiryPage() {
                   <input type="number" min="0" name="accessoryQty" value={formData.accessoryQty} onChange={handleChange} placeholder="E.g., 1 Hat + 1 Shirt = 2" className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground font-medium outline-none focus:border-[var(--primary)] transition-colors shadow-sm" />
                 </div>
 
+                {/* KHU VỰC UPLOAD ẢNH THAY CHO GOOGLE DRIVE */}
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-foreground">Design Link (Google Drive...) *</label>
-                  <input required type="url" name="imageLink" value={formData.imageLink} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground font-medium outline-none focus:border-[var(--primary)] transition-colors shadow-sm" placeholder="https://..." />
+                  <label className="text-sm font-bold text-foreground">Design Reference Image *</label>
+                  <div className="flex flex-col gap-3">
+                    <input
+                      type="file"
+                      accept="image/jpeg, image/png, image/webp"
+                      onChange={handleImageUpload}
+                      disabled={isUploading}
+                      className="block w-full text-sm text-muted-foreground
+                        file:mr-4 file:py-3 file:px-6
+                        file:rounded-full file:border-0
+                        file:text-sm file:font-bold
+                        file:bg-[var(--primary)] file:text-white
+                        hover:file:scale-[1.02] active:file:scale-[0.98] file:transition-all file:cursor-pointer
+                        disabled:opacity-50 disabled:cursor-not-allowed border border-border rounded-full p-1 bg-background shadow-sm"
+                    />
+                    {isUploading && (
+                      <div className="flex items-center gap-2 text-sm text-[var(--primary)] font-bold px-2">
+                        <Loader2 className="w-4 h-4 animate-spin" /> Uploading securely to cloud...
+                      </div>
+                    )}
+                    {formData.imageLink && !isUploading && (
+                      <div className="flex items-center gap-2 text-sm text-green-500 font-bold px-2">
+                        <CheckCircle className="w-4 h-4" /> Image attached!
+                        <a href={formData.imageLink} target="_blank" rel="noreferrer" className="underline ml-2 text-xs text-muted-foreground hover:text-foreground transition-colors">View file</a>
+                      </div>
+                    )}
+                  </div>
                 </div>
                 
                 <div className="space-y-2 md:col-span-2">
@@ -243,8 +296,8 @@ export function InquiryPage() {
                 </label>
               </div>
 
-              <button type="submit" disabled={status === 'loading'} className={`w-full py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md ${status !== 'loading' ? 'bg-[var(--primary)] text-white hover:scale-[1.02] active:scale-[0.98] cursor-pointer' : 'bg-muted border border-border text-muted-foreground cursor-not-allowed'}`}>
-                {status === 'loading' ? <><Loader2 className="w-6 h-6 animate-spin" /> Sending...</> : <><Send className="w-6 h-6" /> Confirm & Submit Inquiry</>}
+              <button type="submit" disabled={status === 'loading' || isUploading} className={`w-full py-4 rounded-full font-bold text-lg flex items-center justify-center gap-2 transition-all shadow-md ${status !== 'loading' && !isUploading ? 'bg-[var(--primary)] text-white hover:scale-[1.02] active:scale-[0.98] cursor-pointer' : 'bg-muted border border-border text-muted-foreground cursor-not-allowed'}`}>
+                {status === 'loading' || isUploading ? <><Loader2 className="w-6 h-6 animate-spin" /> Processing...</> : <><Send className="w-6 h-6" /> Confirm & Submit Inquiry</>}
               </button>
             </form>
           </motion.div>
@@ -273,7 +326,7 @@ export function InquiryPage() {
                 </div>
 
                 <p className="text-xs text-muted-foreground mt-4 leading-relaxed font-medium bg-muted p-3 rounded-xl border border-border shadow-sm">
-                  <span className="font-bold text-foreground">Note:</span> This preview is attached to your form visually. Please still provide the <span className="text-[var(--primary)] font-bold">Google Drive link</span> to your original high-res design files so our tailors can work accurately!
+                  <span className="font-bold text-foreground">Note:</span> This preview is attached to your form visually. Please still <span className="text-[var(--primary)] font-bold">upload</span> your original high-res design files on the left so our tailors can work accurately!
                 </p>
               </motion.div>
             )}

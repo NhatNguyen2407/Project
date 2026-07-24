@@ -14,32 +14,51 @@ export function CartProvider({ children }) {
     localStorage.setItem('dioxyzine_cart', JSON.stringify(cart));
   }, [cart]);
 
-  const cartTotal = cart.reduce((sum, item) => sum + (item.price * item.qty), 0);
-  const cartCount = cart.reduce((sum, item) => sum + item.qty, 0);
+  const cartTotal = cart.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
+  const cartCount = cart.reduce((sum, item) => sum + (item.qty || 1), 0);
 
   const addToCart = (product) => {
+    // Tạo khóa duy nhất kết hợp ID và Size để phân biệt sản phẩm khác size
+    const productKey = `${product.id}_${product.selectedSize || 'default'}`;
+    
     setCart(prev => {
-      const existing = prev.find(item => item.id === product.id);
-      if (existing) {
-        if (existing.qty >= product.stock) return prev;
-        return prev.map(item => item.id === product.id ? { ...item, qty: item.qty + 1 } : item);
+      const existingIndex = prev.findIndex(item => `${item.id}_${item.selectedSize || 'default'}` === productKey);
+      
+      const addQty = Number(product.qty) || 1;
+
+      if (existingIndex > -1) {
+        const existing = prev[existingIndex];
+        const newQty = existing.qty + addQty;
+        // Kiểm tra stock nếu có
+        if (product.stock && newQty > product.stock) return prev;
+        
+        const updated = [...prev];
+        updated[existingIndex] = { ...existing, qty: newQty };
+        return updated;
       }
-      return [...prev, { ...product, qty: 1 }];
+      
+      return [...prev, { ...product, cartKey: productKey, qty: addQty }];
     });
     setIsCartOpen(true); 
   };
 
-  const updateCartQty = (id, delta) => {
+  const updateCartQty = (cartKey, delta) => {
     setCart(prev => prev.map(item => {
-      if (item.id === id) {
+      const currentKey = item.cartKey || `${item.id}_${item.selectedSize || 'default'}`;
+      if (currentKey === cartKey) {
         const newQty = item.qty + delta;
-        if (newQty > 0 && newQty <= item.stock) return { ...item, qty: newQty };
+        if (newQty > 0 && (!item.stock || newQty <= item.stock)) {
+          return { ...item, qty: newQty };
+        }
       }
       return item;
     }));
   };
 
-  const removeFromCart = (id) => setCart(prev => prev.filter(item => item.id !== id));
+  const removeFromCart = (cartKey) => setCart(prev => prev.filter(item => {
+    const currentKey = item.cartKey || `${item.id}_${item.selectedSize || 'default'}`;
+    return currentKey !== cartKey;
+  }));
   
   const clearCart = () => setCart([]);
 

@@ -349,7 +349,7 @@ export function PricingCalculatorPage() {
               </div>
 
               <div className="flex flex-col items-center opacity-50 hidden sm:flex">
-                <span className="text-[10px] font-mono text-muted-foreground font-bold mb-2 border-b border-border w-full text-center pb-1">40 cm</span>
+                <span className="text-[10px] font-mono text-muted-foreground font-bold mb-2 border-b border-border w-full text-center pb-1">45 cm</span>
                 <div className="w-20 flex justify-center text-muted-foreground" style={{ height: '400px' }}>
                   <Backpack className="w-16 h-16 mt-auto" />
                 </div>

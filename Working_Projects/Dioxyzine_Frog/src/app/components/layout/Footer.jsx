@@ -4,8 +4,6 @@ import { Facebook, Instagram, Clock, Heart } from 'lucide-react';
 import Logo from '../../../assets/Avatar.jpeg';
 
 export function Footer() {
-  const currentYear = new Date().getFullYear();
-
   const footerLinks = {
     shop: [
       { label: 'Custom Orders', path: '/products/custom' },
@@ -140,7 +138,7 @@ export function Footer() {
         {/* PHẦN 3: BẢN QUYỀN CHÂN TRANG */}
         <div className="pt-6 border-t border-border flex flex-col sm:flex-row items-center justify-between gap-4">
           <p className="text-xs font-bold text-muted-foreground">
-            &copy; {currentYear} Dioxyzine Frog. All rights reserved.
+            &copy; 2023 Dioxyzine Frog. All rights reserved.
           </p>
           <p className="text-xs font-bold text-muted-foreground flex items-center gap-1">
             Made with <Heart className="w-3.5 h-3.5 text-red-400 fill-red-400 animate-pulse" /> for the Artist Community
