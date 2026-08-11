@@ -4,9 +4,9 @@
   border: 4px solid var(--window-border, #b39ddb);
   border-radius: 12px;
   box-shadow: 4px 4px 0px rgba(179, 157, 219, 0.4);
-  position: absolute;
+  /* position: absolute;
   top: 60px;
-  left: 60px;
+  left: 60px; */
   display: flex;
   flex-direction: column;
   overflow: hidden;

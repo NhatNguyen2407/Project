@@ -1,0 +1,138 @@
+.container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #f4ecf7;
+  /* Lưới caro chìm tạo nền */
+  background-image: 
+    linear-gradient(#e1bee7 1px, transparent 1px),
+    linear-gradient(90deg, #e1bee7 1px, transparent 1px);
+  background-size: 40px 40px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 99999; /* Luôn nằm trên cùng */
+  transition: opacity 1s ease, transform 1s ease;
+}
+
+/* Hiệu ứng khi đăng nhập thành công */
+.fadeOut {
+  opacity: 0;
+  transform: scale(1.1); /* Phóng to nhẹ rồi biến mất */
+  pointer-events: none;
+}
+
+.loginBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.8);
+  backdrop-filter: blur(8px); /* Hiệu ứng kính mờ xịn xò */
+  padding: 40px;
+  border-radius: 20px;
+  border: 4px solid #b39ddb;
+  box-shadow: 8px 8px 0px rgba(179, 157, 219, 0.3);
+}
+
+.avatar {
+  width: 100px;
+  height: 100px;
+  background-color: #f3e5f5;
+  border: 4px solid #b39ddb;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 20px;
+  font-size: 50px;
+  box-shadow: inset 0px 0px 10px rgba(0,0,0,0.1);
+}
+
+.userName {
+  font-family: 'VT323', monospace;
+  font-size: 36px;
+  color: #4a148c;
+  margin-bottom: 8px;
+}
+
+.prompt {
+  font-family: 'VT323', monospace; /* Thêm font pixel */
+  font-size: 22px; /* Tăng size lên chút cho dễ đọc */
+  color: #7b1fa2;
+  margin-bottom: 20px;
+}
+
+.form {
+  display: flex;
+  gap: 10px;
+  position: relative;
+}
+
+.input {
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  padding: 8px 16px;
+  width: 220px;
+  border: 3px solid #b39ddb;
+  border-radius: 10px;
+  outline: none;
+  color: #4a148c;
+  text-align: center;
+  background-color: #ffffff;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  border-color: #7b1fa2;
+}
+
+.submitBtn {
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  background-color: #b39ddb;
+  color: white;
+  border: 3px solid #7b1fa2;
+  border-radius: 10px;
+  width: 50px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.submitBtn:hover {
+  background-color: #9575cd;
+}
+
+.submitBtn:active {
+  transform: scale(0.95);
+}
+
+.errorMsg {
+  font-family: 'VT323', monospace; /* Thêm font pixel */
+  color: #d32f2f;
+  font-size: 20px; /* Tăng size lên */
+  margin-top: 15px;
+  animation: fadeIn 0.3s;
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.8); /* Thêm tí viền trắng cho chữ nổi bật */
+}
+
+/* Hiệu ứng rung bần bật khi nhập sai pass */
+.shake {
+  animation: shakeAnimation 0.4s;
+  border-color: #d32f2f !important;
+  color: #d32f2f;
+}
+
+@keyframes shakeAnimation {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-8px); }
+  50% { transform: translateX(8px); }
+  75% { transform: translateX(-8px); }
+  100% { transform: translateX(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

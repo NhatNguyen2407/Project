@@ -1,0 +1,229 @@
+.taskbar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  /* Yêu cầu 3: To lên một chút, từ 48px lên 60px */
+  height: 60px;
+  background-color: #f3e5f5;
+  border-top: 5px solid #b39ddb; /* Viền dày hơn tí cho đồng bộ */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 10px;
+  z-index: 9999;
+  box-shadow: 0 -4px 0px rgba(179, 157, 219, 0.4);
+  user-select: none;
+}
+
+/* SECTION BÊN TRÁI */
+.leftSection {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.startBtn {
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  background-color: #f48fb1;
+  color: white;
+  border: 3px solid #d81b60;
+  padding: 5px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  transition: transform 0.1s;
+  box-shadow: 3px 3px 0px #ce93d8;
+}
+
+.startBtn:active {
+  transform: translate(2px, 2px);
+  box-shadow: none;
+}
+
+/* SECTION GIỮA: WINDOW TABS */
+.windowTabs {
+  display: flex;
+  gap: 8px;
+  flex: 1;
+  margin: 0 16px;
+  overflow-x: auto;
+}
+
+.windowTabs::-webkit-scrollbar {
+  display: none;
+}
+
+.tab {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  background-color: #ffffff;
+  border: 3px solid #b39ddb;
+  border-radius: 8px;
+  padding: 5px 12px;
+  cursor: pointer;
+  color: #4a148c;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  max-width: 180px;
+  box-shadow: 3px 3px 0px rgba(179, 157, 219, 0.5);
+  transition: all 0.15s;
+}
+
+.tab:hover {
+  background-color: #e1bee7;
+}
+
+.tabIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+/* SECTION BÊN PHẢI: SYSTEM TRAY NÂNG CẤP */
+.systemTray {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background-color: #ffffff;
+  border: 3px solid #b39ddb;
+  border-radius: 10px;
+  padding: 4px 12px;
+}
+
+.trayItem {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+.trayItem:hover {
+  background-color: #f3e5f5;
+}
+
+.pixelIcon {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  image-rendering: pixelated; /* Giữ nét pixel */
+}
+
+/* Yêu cầu 2: Volume & Slider Retro */
+.volumeTrayItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 3px;
+  cursor: default; /* Không cho click cả item */
+}
+
+.muteBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+}
+
+.mutedIcon {
+  opacity: 0.5; /* Làm mờ icon khi Mute */
+}
+
+/* Style Retro cho thanh trượt Volume */
+.volumeSlider {
+  -webkit-appearance: none;
+  width: 90px;
+  height: 10px;
+  background: #f3e5f5;
+  border: 2px solid #b39ddb;
+  border-radius: 4px;
+  outline: none;
+  cursor: pointer;
+}
+
+.volumeSlider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 14px;
+  height: 14px;
+  background: #ce93d8; /* Màu tím thanh trượt */
+  border: 2px solid #7b1fa2; /* Viền tím đậm */
+  border-radius: 4px;
+  transition: transform 0.1s;
+}
+
+.volumeSlider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+  background: #ba68c8;
+}
+
+.volumeSlider::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  background: #ce93d8;
+  border: 2px solid #7b1fa2;
+  border-radius: 4px;
+}
+
+/* Yêu cầu 1: Pin thực tế */
+.batteryText {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  color: #4a148c;
+}
+
+.charging {
+  color: #cddc39; /* Đổi màu khi sạc */
+  animation: chargingBlink 1s infinite alternate; /* Hiệu ứng nhấp nháy sạc */
+}
+
+@keyframes chargingBlink {
+  from { opacity: 1; }
+  to { opacity: 0.6; }
+}
+
+/* Yêu cầu 4, 5: Đồng hồ & Ngày */
+.clockBox {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-left: 8px;
+  border-left: 2px solid #e1bee7;
+  font-family: 'VT323', monospace;
+  line-height: 1;
+}
+
+.timeText {
+  font-size: 18px; /* Giờ 24h to hơn tí */
+  color: #4a148c;
+  font-weight: bold;
+}
+
+.dateText {
+  font-size: 14px; /* Ngày dd/mm/yyyy nhỏ hơn tí */
+  color: #7b1fa2;
+  margin-top: 3px;
+}
+
+/* Show Desktop Strip (giữ nguyên) */
+.showDesktopBtn {
+  width: 6px;
+  height: 30px;
+  border-left: 3px solid #b39ddb;
+  margin-left: 6px;
+  cursor: pointer;
+}
+
+.showDesktopBtn:hover {
+  background-color: #ce93d8;
+}

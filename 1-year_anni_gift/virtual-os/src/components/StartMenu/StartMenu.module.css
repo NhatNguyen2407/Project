@@ -1,0 +1,146 @@
+.startMenu {
+  position: absolute;
+  bottom: 70px; /* Nằm ngay trên Taskbar */
+  left: 10px;
+  width: 280px;
+  background-color: #ffffff;
+  border: 4px solid #b39ddb;
+  border-radius: 12px;
+  box-shadow: 4px 4px 0px rgba(179, 157, 219, 0.4);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 10000;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Header */
+.header {
+  background-color: #f3e5f5;
+  padding: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-bottom: 2px dashed #ce93d8;
+}
+
+.avatar {
+  width: 45px;
+  height: 45px;
+  background-color: #ffffff;
+  border: 2px solid #b39ddb;
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 24px;
+}
+
+.userInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.userName {
+  font-family: 'VT323', monospace;
+  font-size: 24px;
+  color: #4a148c;
+  line-height: 1;
+}
+
+.userStatus {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #7b1fa2;
+}
+
+/* Body & App List */
+.body {
+  padding: 16px;
+  background-image: 
+    linear-gradient(#fce4ec 1px, transparent 1px),
+    linear-gradient(90deg, #fce4ec 1px, transparent 1px);
+  background-size: 20px 20px;
+  background-color: #fffbfd;
+}
+
+.sectionTitle {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: #7b1fa2;
+  margin-bottom: 12px;
+  padding-left: 4px;
+}
+
+.appList {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.appItem {
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 8px;
+  padding: 8px 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.appItem:hover {
+  background-color: #f3e5f5;
+  border-color: #ce93d8;
+}
+
+.appIcon {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  image-rendering: pixelated;
+}
+
+.appTitle {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #4a148c;
+  text-align: center;
+}
+
+/* Footer */
+.footer {
+  background-color: #f3e5f5;
+  padding: 10px 16px;
+  border-top: 2px solid #b39ddb;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.powerBtn {
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  background-color: #ffffff;
+  border: 2px solid #b39ddb;
+  color: #4a148c;
+  padding: 4px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s;
+}
+
+.powerBtn:hover {
+  background-color: #ffcdd2; /* Đỏ pastel khi hover */
+  border-color: #ef9a9a;
+  color: #c62828;
+}
