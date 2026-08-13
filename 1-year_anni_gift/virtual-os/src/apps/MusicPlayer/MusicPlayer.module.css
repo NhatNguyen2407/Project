@@ -1,0 +1,170 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  height: 100%;
+}
+
+.tabBar {
+  display: flex;
+  gap: 8px;
+  border-bottom: 3px solid #e1bee7;
+  padding-bottom: 8px;
+}
+
+.tabBtn {
+  font-family: 'VT323', monospace;
+  font-size: 20px;
+  background-color: #f3e5f5;
+  border: 2px solid #b39ddb;
+  color: #7b1fa2;
+  padding: 6px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tabBtn:hover { background-color: #e1bee7; }
+.tabBtn.active {
+  background-color: #b39ddb;
+  color: #ffffff;
+  border-color: #7b1fa2;
+  box-shadow: 2px 2px 0px rgba(123, 31, 162, 0.3);
+}
+
+.tabContent {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.description {
+  font-size: 14px;
+  color: #6a1b9a;
+  font-style: italic;
+  margin-bottom: 8px;
+  background: #f3e5f5;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border-left: 4px solid #b39ddb;
+}
+
+/* PLAYLIST GRID */
+.playlistGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  max-height: 350px;
+  overflow-y: auto;
+  padding-right: 5px;
+}
+
+.playlistGrid::-webkit-scrollbar { width: 6px; }
+.playlistGrid::-webkit-scrollbar-thumb { background-color: #b39ddb; border-radius: 4px; }
+
+.songCard {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background-color: #ffffff;
+  border: 2px solid #ce93d8;
+  border-radius: 12px;
+  padding: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.songCard:hover {
+  background-color: #f3e5f5;
+  transform: translateX(4px);
+  border-color: #ab47bc;
+}
+
+.playingCard {
+  background-color: #fce4ec;
+  border-color: #d81b60;
+  box-shadow: 2px 2px 0px rgba(216, 27, 96, 0.3);
+}
+
+/* VINYL ĐĨA THAN */
+.vinylWrapper {
+  position: relative;
+  width: 50px;
+  height: 50px;
+  background-color: #111;
+  border-radius: 50%;
+  border: 2px solid #222;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.vinylRecord {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 50%;
+  opacity: 0.9;
+}
+
+.vinylHole {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: #fff;
+  border-radius: 50%;
+  border: 1px solid #ccc;
+  z-index: 2;
+}
+
+.spinning { animation: spin 4s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+/* SONG INFO */
+.songInfo { flex: 1; overflow: hidden; }
+.songTitle {
+  font-size: 15px;
+  color: #4a148c;
+  margin: 0 0 4px 0;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  font-weight: bold;
+}
+.songArtist { font-size: 12px; color: #7b1fa2; margin: 0; }
+.playIndicator { font-size: 20px; color: #d81b60; }
+
+/* PAST GRID */
+.pastGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.pastCard {
+  background-color: #fffbfd;
+  border: 2px dashed #ce93d8;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+
+.pastImg {
+  width: 100px;
+  height: 100px;
+  object-fit: cover;
+  border-radius: 10px;
+  border: 2px solid #b39ddb;
+  margin-bottom: 12px;
+}
+
+.pastTitle { font-family: 'VT323', monospace; font-size: 24px; color: #4a148c; margin: 0 0 6px 0; }
+.pastDesc { font-size: 14px; color: #666; margin: 0; }

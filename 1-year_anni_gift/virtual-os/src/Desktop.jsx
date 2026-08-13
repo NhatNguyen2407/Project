@@ -5,60 +5,88 @@ import Taskbar from './components/Taskbar/Taskbar';
 import StartMenu from './components/StartMenu/StartMenu';
 import ContextMenu from './components/ContextMenu/ContextMenu';
 
-// Import ảnh icon từ thư mục assets
+// Import ảnh icon
 import galleryIcon from './assets/images/folder_icon.png';
 import musicIcon from './assets/images/music_icon.png';
 import letterIcon from './assets/images/heart_letter_icon.png';
 
-// Kho ứng dụng tạm thời (chưa gắn code ruột bên trong)
+// Import các App
+import Gallery from './apps/Gallery/Gallery';
+import MusicPlayer from './apps/MusicPlayer/MusicPlayer';
+import Letter from './apps/Letter/Letter';
+
+// Kho ứng dụng
 const APPS = [
-  { id: 'gallery', title: 'GALLERY.EXE', icon: galleryIcon, content: <div style={{ padding: '20px' }}>Nội dung album ảnh kỷ niệm...</div> },
-  { id: 'music', title: 'MUSIC_PLAYER.EXE', icon: musicIcon, content: <div style={{ padding: '20px' }}>Trình phát nhạc sẽ nằm ở đây...</div> },
-  { id: 'letter', title: 'LOVE_LETTER.TXT', icon: letterIcon, content: <div style={{ padding: '20px' }}>Nội dung bức thư tình...</div> }
+  { id: 'gallery', title: 'GALLERY.EXE', icon: galleryIcon, content: <Gallery /> },
+  { id: 'music', title: 'MUSIC_PLAYER.EXE', icon: musicIcon, content: <MusicPlayer /> },
+  { id: 'letter', title: 'LOVE_LETTER.TXT', icon: letterIcon, content: <Letter /> }
 ];
 
 const Desktop = () => {
   const [openWindows, setOpenWindows] = useState([]); 
   const [topZIndex, setTopZIndex] = useState(10);
   const [isStartMenuOpen, setIsStartMenuOpen] = useState(false);
-  const [contextMenu, setContextMenu] = useState(null); // { x, y }
-  const [theme, setTheme] = useState('purple'); // 'purple', 'pink', 'mint'
+  const [contextMenu, setContextMenu] = useState(null); 
+  const [theme, setTheme] = useState('purple'); 
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
-  // Xử lý mở/focus/đóng App
   const handleOpenApp = (appId) => {
     setIsStartMenuOpen(false);
     setContextMenu(null);
-    const isAlreadyOpen = openWindows.find(w => w.id === appId);
+    const existingApp = openWindows.find(w => w.id === appId);
     
-    if (!isAlreadyOpen) {
+    if (!existingApp) {
       const newZIndex = topZIndex + 1;
-      setOpenWindows([...openWindows, { id: appId, zIndex: newZIndex }]);
+      setOpenWindows([...openWindows, { id: appId, zIndex: newZIndex, isMinimized: false }]);
       setTopZIndex(newZIndex);
     } else {
-      handleFocusApp(appId);
+      handleRestoreAndFocus(appId);
     }
+  };
+
+  const handleRestoreAndFocus = (appId) => {
+    const newZIndex = topZIndex + 1;
+    setOpenWindows(openWindows.map(w => 
+      w.id === appId ? { ...w, isMinimized: false, zIndex: newZIndex } : w
+    ));
+    setTopZIndex(newZIndex);
+  };
+
+  const handleMinimizeApp = (appId) => {
+    setOpenWindows(openWindows.map(w => 
+      w.id === appId ? { ...w, isMinimized: true } : w
+    ));
   };
 
   const handleCloseApp = (appId) => {
     setOpenWindows(openWindows.filter(w => w.id !== appId));
   };
 
-  const handleFocusApp = (appId) => {
-    const newZIndex = topZIndex + 1;
-    setOpenWindows(openWindows.map(w => 
-      w.id === appId ? { ...w, zIndex: newZIndex } : w
-    ));
-    setTopZIndex(newZIndex);
+  const handleTaskbarClick = (appId) => {
+    const app = openWindows.find(w => w.id === appId);
+    const isTop = app.zIndex === Math.max(...openWindows.map(win => win.zIndex));
+    
+    if (app.isMinimized) {
+      handleRestoreAndFocus(appId);
+    } else if (isTop) {
+      handleMinimizeApp(appId);
+    } else {
+      handleRestoreAndFocus(appId);
+    }
   };
 
-  // Hàm chặn chuột phải mặc định & mở Custom Context Menu
   const handleContextMenu = (e) => {
     e.preventDefault(); 
     setIsStartMenuOpen(false);
     setContextMenu({ x: e.clientX, y: e.clientY });
   };
 
-  // Đổi màu nền theo Theme
+  const handleRefresh = () => {
+    setContextMenu(null);
+    setIsRefreshing(true);
+    setTimeout(() => setIsRefreshing(false), 200);
+  };
+
   const getBackgroundStyle = () => {
     let bgColor = '#f4ecf7';
     let lineColor = '#e1bee7';
@@ -91,9 +119,7 @@ const Desktop = () => {
       onContextMenu={handleContextMenu} 
       onClick={() => { setIsStartMenuOpen(false); setContextMenu(null); }}
     >
-      
-      {/* 1. RENDER SHORTCUTS */}
-      <div style={iconGridStyle}>
+      <div style={{ ...iconGridStyle, opacity: isRefreshing ? 0 : 1 }}>
         {APPS.map((app) => (
           <DesktopIcon 
             key={app.id}
@@ -104,31 +130,29 @@ const Desktop = () => {
         ))}
       </div>
 
-      {/* 2. RENDER WINDOWS */}
       {openWindows.map((openedApp) => {
         const appData = APPS.find(a => a.id === openedApp.id);
         return (
-          <div 
-            key={openedApp.id} 
-            style={{ position: 'absolute', zIndex: openedApp.zIndex }}
-            onMouseDown={() => handleFocusApp(openedApp.id)}
+          <WindowFrame 
+            key={openedApp.id}
+            title={appData.title} 
+            zIndex={openedApp.zIndex}
+            isMinimized={openedApp.isMinimized}
+            onFocus={() => handleRestoreAndFocus(openedApp.id)}
+            onClose={() => handleCloseApp(openedApp.id)}
+            onMinimize={() => handleMinimizeApp(openedApp.id)}
           >
-            <WindowFrame 
-              title={appData.title} 
-              onClose={() => handleCloseApp(openedApp.id)}
-            >
-              {appData.content}
-            </WindowFrame>
-          </div>
+            {appData.content}
+          </WindowFrame>
         );
       })}
 
-      {/* 3. CONTEXT MENU (Chuột phải) */}
       {contextMenu && (
         <ContextMenu 
           x={contextMenu.x} 
           y={contextMenu.y} 
           onClose={() => setContextMenu(null)}
+          onRefresh={handleRefresh}
           onChangeWallpaper={(selectedTheme) => {
             setTheme(selectedTheme);
             setContextMenu(null);
@@ -137,7 +161,6 @@ const Desktop = () => {
         />
       )}
 
-      {/* 4. START MENU */}
       {isStartMenuOpen && (
         <StartMenu 
           APPS={APPS} 
@@ -146,14 +169,12 @@ const Desktop = () => {
         />
       )}
 
-      {/* 5. TASKBAR */}
       <Taskbar 
         openWindows={openWindows} 
         APPS={APPS} 
-        onTabClick={handleFocusApp} 
+        onTabClick={handleTaskbarClick} 
         toggleStartMenu={() => setIsStartMenuOpen(!isStartMenuOpen)} 
       />
-
     </div>
   );
 };
@@ -166,6 +187,7 @@ const iconGridStyle = {
   flexDirection: 'column',
   gap: '16px',
   zIndex: 1,
+  transition: 'opacity 0.1s ease',
 };
 
 export default Desktop;

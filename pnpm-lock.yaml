@@ -6,6 +6,12 @@ settings:
 
 importers:
 
+  .:
+    dependencies:
+      react-draggable:
+        specifier: ^4.7.1
+        version: 4.7.1(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+
   1-year_anni_gift/virtual-os:
     dependencies:
       react:
