@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Desktop from './Desktop';
 import LoginScreen from './components/LoginScreen/LoginScreen';
+import CRTOverlay from './components/CRTOverlay/CRTOverlay';
 import './styles/global.css';
 
 function App() {
@@ -16,6 +17,9 @@ function App() {
       
       {/* Desktop luôn được render ngầm bên dưới, nhưng LoginScreen sẽ đè lên trên */}
       <Desktop />
+
+      {/* Lớp phủ hiệu ứng CRT, luôn nằm trên cùng toàn bộ UI */}
+      <CRTOverlay />
     </>
   );
 }

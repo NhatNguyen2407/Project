@@ -1,6 +1,7 @@
 .container {
   display: flex;
-  height: 400px; /* Chiều cao cố định cho cửa sổ */
+  width: 100%;
+  height: 100%; /* Co giãn theo cửa sổ cha, không còn cố định */
   background-color: #ffffff;
   border-radius: 8px;
   overflow: hidden;
