@@ -3,7 +3,12 @@
   width: 100%;
   height: 100%; /* Co giãn theo cửa sổ cha, không còn cố định */
   background-color: #ffffff;
-  border-radius: 8px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   overflow: hidden;
   border: 2px solid #e1bee7;
 }
@@ -36,7 +41,12 @@
   color: #4a148c;
   text-align: left;
   padding: 6px 8px;
-  border-radius: 6px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -45,6 +55,10 @@
 }
 
 .navBtn:hover { background-color: #e1bee7; }
+
+.navBtn:active {
+  transform: translate(2px, 2px);
+}
 .navBtn.active {
   background-color: #ce93d8;
   border-color: #ab47bc;
@@ -92,7 +106,12 @@
   padding: 10px;
   padding-bottom: 16px;
   border: 2px solid #ce93d8;
-  border-radius: 4px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   box-shadow: 3px 3px 0px rgba(206, 147, 216, 0.3);
   cursor: url('../../assets/cursors/pointer-heart.svg') 4 4, pointer;
   display: flex;
@@ -100,6 +119,11 @@
   align-items: center;
   transition: transform 0.2s;
   position: relative;
+}
+
+.imageCard:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
 }
 
 .imageCard:hover { transform: scale(1.05) rotate(-2deg); z-index: 2; }
@@ -135,7 +159,12 @@
   font-family: 'VT323', monospace;
   font-size: 12px;
   padding: 2px 6px;
-  border-radius: 4px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   border: 2px solid #d81b60;
 }
 
@@ -155,7 +184,12 @@
 .modalContent {
   background-color: #ffffff;
   padding: 16px;
-  border-radius: 8px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   border: 4px solid #ce93d8;
   box-shadow: 0px 10px 20px rgba(0,0,0,0.3);
   display: flex;

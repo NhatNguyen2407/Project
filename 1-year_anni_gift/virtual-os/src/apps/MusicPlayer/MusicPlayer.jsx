@@ -1,5 +1,6 @@
 import React, { useState, useRef } from 'react';
 import styles from './MusicPlayer.module.css';
+import PixelProgressBar from '../../components/PixelProgressBar/PixelProgressBar';
 
 // 1. Import Ảnh
 import pastBibiImg from '../../assets/images/albumbibi.jpg';
@@ -32,6 +33,7 @@ const PLAYLIST = [
 const MusicPlayer = () => {
   const [activeTab, setActiveTab] = useState('shared');
   const [playingId, setPlayingId] = useState(null);
+  const [playProgress, setPlayProgress] = useState(0); // % tiến trình bài đang phát
   const audioRefs = useRef({}); // Lưu trữ các thẻ <audio>
 
   // Hàm xử lý Play/Pause nhạc
@@ -49,8 +51,17 @@ const MusicPlayer = () => {
         audioRefs.current[playingId].currentTime = 0; // Trả về đầu bài
       }
       // Phát bài mới
+      setPlayProgress(0);
       currentAudio.play();
       setPlayingId(id);
+    }
+  };
+
+  // Cập nhật % tiến trình mỗi khi audio phát ra sự kiện timeupdate
+  const handleTimeUpdate = (e) => {
+    const { currentTime, duration } = e.target;
+    if (duration > 0) {
+      setPlayProgress((currentTime / duration) * 100);
     }
   };
 
@@ -100,6 +111,12 @@ const MusicPlayer = () => {
                 <div className={styles.songInfo}>
                   <h4 className={styles.songTitle}>{song.title}</h4>
                   <p className={styles.songArtist}>{song.artist}</p>
+                  {/* Thanh tiến trình pixel, chỉ hiện ở bài đang phát */}
+                  {playingId === song.id && (
+                    <div className={styles.progressWrap}>
+                      <PixelProgressBar progress={playProgress} segments={16} />
+                    </div>
+                  )}
                 </div>
                 
                 {/* Nút Play ảo */}
@@ -111,7 +128,8 @@ const MusicPlayer = () => {
                 <audio 
                   ref={(el) => (audioRefs.current[song.id] = el)} 
                   src={song.src}
-                  onEnded={() => setPlayingId(null)} // Hết bài tự tắt đĩa than
+                  onTimeUpdate={playingId === song.id ? handleTimeUpdate : undefined}
+                  onEnded={() => { setPlayingId(null); setPlayProgress(0); }} // Hết bài tự tắt đĩa than
                 />
               </div>
             ))}

@@ -1,0 +1,19 @@
+.track {
+  display: flex;
+  gap: 2px;
+  width: 100%;
+}
+
+.block {
+  flex: 1;
+  height: 10px;
+  background-color: #ede7f6;
+  border: 2px solid #b39ddb;
+  box-sizing: border-box;
+  transition: background-color 0.1s;
+}
+
+.filled {
+  background-color: var(--pixel-progress-fill, #ab47bc);
+  border-color: var(--pixel-progress-fill-border, #7b1fa2);
+}

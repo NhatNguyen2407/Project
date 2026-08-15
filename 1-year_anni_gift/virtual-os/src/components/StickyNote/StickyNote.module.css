@@ -1,0 +1,95 @@
+.wrapper {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 5; /* Trên nền desktop, dưới các cửa sổ app đang mở */
+  transition: opacity 0.25s, transform 0.25s;
+}
+
+.wrapper.hidden {
+  opacity: 0;
+  transform: translateY(-12px) scale(0.9);
+  pointer-events: none;
+}
+
+.note {
+  position: relative;
+  width: 180px;
+  background-color: #fff9c4; /* Vàng giấy note pastel */
+  border: 2px solid #e6d17a;
+  padding: 18px 14px 14px;
+  transform: rotate(-4deg);
+  box-shadow: 4px 4px 0px rgba(123, 31, 162, 0.15);
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
+  transition: transform 0.2s, box-shadow 0.2s;
+  cursor: default;
+}
+
+.note.peek {
+  transform: rotate(0deg) scale(1.04);
+  box-shadow: 6px 6px 0px rgba(123, 31, 162, 0.2);
+}
+
+/* Cây ghim pixel nhỏ ở đầu note */
+.pin {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 10px;
+  height: 10px;
+  background-color: #e57373;
+  border: 2px solid #ad2b2b;
+  border-radius: 50%;
+  box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
+}
+
+.quoteText {
+  font-family: 'Itim', 'Yomogi', cursive;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #5d4a1f;
+  margin: 0;
+  word-break: break-word;
+}
+
+.closeBtn {
+  position: absolute;
+  top: 2px;
+  right: 4px;
+  background: none;
+  border: none;
+  font-family: monospace;
+  font-size: 14px;
+  line-height: 1;
+  color: #a08a3d;
+  cursor: pointer;
+  padding: 2px 4px;
+  opacity: 0.5;
+  transition: opacity 0.15s;
+}
+
+.closeBtn:hover {
+  opacity: 1;
+  color: #7b1fa2;
+}
+
+/* Trên màn hình nhỏ, thu gọn note lại và dịch vào trong 1 chút */
+@media (max-width: 600px) {
+  .wrapper {
+    top: 12px;
+    right: 12px;
+  }
+  .note {
+    width: 130px;
+    padding: 14px 10px 10px;
+  }
+  .quoteText {
+    font-size: 12px;
+  }
+}

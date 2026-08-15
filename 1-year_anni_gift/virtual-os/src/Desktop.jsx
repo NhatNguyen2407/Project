@@ -1,14 +1,18 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import WindowFrame from './components/WindowFrame/WindowFrame';
 import DesktopIcon from './components/DesktopIcon/DesktopIcon';
 import Taskbar from './components/Taskbar/Taskbar';
 import StartMenu from './components/StartMenu/StartMenu';
 import ContextMenu from './components/ContextMenu/ContextMenu';
+import StickyNote from './components/StickyNote/StickyNote';
+import PixelPet from './components/PixelPet/PixelPet';
+import FakeSystemScreen from './components/FakeSystemScreen/FakeSystemScreen';
+import { useSound } from './hooks/useSound';
 
 // Import ảnh icon
-import galleryIcon from './assets/images/folder_icon.png';
-import musicIcon from './assets/images/music_icon.png';
-import letterIcon from './assets/images/heart_letter_icon.png';
+import galleryIcon from './assets/images/pixel/folder_icon_pixel.png';
+import musicIcon from './assets/images/pixel/music_icon_pixel.png';
+import letterIcon from './assets/images/pixel/heart_letter_icon_pixel.png';
 
 // Import các App
 import Gallery from './apps/Gallery/Gallery';
@@ -29,6 +33,34 @@ const Desktop = () => {
   const [contextMenu, setContextMenu] = useState(null); 
   const [theme, setTheme] = useState('purple'); 
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const { playClick, playOpen, playClose } = useSound();
+  const [fakeScreen, setFakeScreen] = useState(null); // null | 'shutdown' | 'bsod'
+
+  // Easter egg: bấm tổ hợp Ctrl+Alt+B ("B" = BSOD) để "triệu hồi" màn hình troll
+  // Lưu ý: không dùng Ctrl+Alt+Delete vì tổ hợp đó bị Windows chặn ở tầng hệ điều hành,
+  // trình duyệt không bao giờ nhận được sự kiện này
+  useEffect(() => {
+    const handleSecretCombo = (e) => {
+      if (e.ctrlKey && e.altKey && (e.key === 'b' || e.key === 'B')) {
+        e.preventDefault();
+        setFakeScreen('bsod');
+      }
+    };
+    window.addEventListener('keydown', handleSecretCombo);
+    return () => window.removeEventListener('keydown', handleSecretCombo);
+  }, []);
+
+  // Lắng nghe click toàn màn hình 1 lần duy nhất: hễ bấm vào <button> hoặc icon desktop
+  // thì phát tiếng "tách" - không cần thêm onClick riêng ở từng component
+  useEffect(() => {
+    const handleGlobalClick = (e) => {
+      if (e.target.closest('button, [data-sfx="click"]')) {
+        playClick();
+      }
+    };
+    document.addEventListener('click', handleGlobalClick);
+    return () => document.removeEventListener('click', handleGlobalClick);
+  }, [playClick]);
 
   const handleOpenApp = (appId) => {
     setIsStartMenuOpen(false);
@@ -39,6 +71,7 @@ const Desktop = () => {
       const newZIndex = topZIndex + 1;
       setOpenWindows([...openWindows, { id: appId, zIndex: newZIndex, isMinimized: false }]);
       setTopZIndex(newZIndex);
+      playOpen();
     } else {
       handleRestoreAndFocus(appId);
     }
@@ -56,10 +89,12 @@ const Desktop = () => {
     setOpenWindows(openWindows.map(w => 
       w.id === appId ? { ...w, isMinimized: true } : w
     ));
+    playClose();
   };
 
   const handleCloseApp = (appId) => {
     setOpenWindows(openWindows.filter(w => w.id !== appId));
+    playClose();
   };
 
   const handleTaskbarClick = (appId) => {
@@ -89,25 +124,28 @@ const Desktop = () => {
 
   const getBackgroundStyle = () => {
     let bgColor = '#f4ecf7';
-    let lineColor = '#e1bee7';
+    let dotColor = '#e1bee7';
 
     if (theme === 'pink') {
       bgColor = '#fff0f5';
-      lineColor = '#f8bbd0';
+      dotColor = '#f8bbd0';
     } else if (theme === 'mint') {
       bgColor = '#e8f5e9';
-      lineColor = '#a5d6a7';
+      dotColor = '#a5d6a7';
     }
 
     return {
       width: '100vw',
       height: '100vh',
       backgroundColor: bgColor,
+      // Dither pattern: 2 lưới chấm bi xen kẽ (lệch nhau nửa ô) thay cho gradient mượt,
+      // tạo cảm giác texture pixel cổ điển kiểu desktop Windows 95/3.1
       backgroundImage: `
-        linear-gradient(${lineColor} 1px, transparent 1px),
-        linear-gradient(90deg, ${lineColor} 1px, transparent 1px)
+        radial-gradient(${dotColor} 1.5px, transparent 1.5px),
+        radial-gradient(${dotColor} 1.5px, transparent 1.5px)
       `,
-      backgroundSize: '30px 30px',
+      backgroundSize: '16px 16px',
+      backgroundPosition: '0 0, 8px 8px',
       position: 'relative',
       overflow: 'hidden',
     };
@@ -129,6 +167,9 @@ const Desktop = () => {
           />
         ))}
       </div>
+
+      <StickyNote />
+      <PixelPet />
 
       {openWindows.map((openedApp) => {
         const appData = APPS.find(a => a.id === openedApp.id);
@@ -158,6 +199,7 @@ const Desktop = () => {
             setContextMenu(null);
           }}
           onLock={() => window.location.reload()}
+          onShutdown={() => setFakeScreen('shutdown')}
         />
       )}
 
@@ -175,6 +217,13 @@ const Desktop = () => {
         onTabClick={handleTaskbarClick} 
         toggleStartMenu={() => setIsStartMenuOpen(!isStartMenuOpen)} 
       />
+
+      {fakeScreen && (
+        <FakeSystemScreen
+          variant={fakeScreen}
+          onDismiss={() => setFakeScreen(null)}
+        />
+      )}
     </div>
   );
 };

@@ -1,16 +1,39 @@
 .window {
   background-color: #ffffff;
   border: 3px solid #b39ddb;
-  border-radius: 8px;
-  box-shadow: 4px 4px 0px rgba(179, 157, 219, 0.4);
+  /* Góc bậc thang pixel thay cho border-radius mượt */
+  clip-path: polygon(
+    calc(var(--pixel-u) * 2) 0,
+    calc(100% - var(--pixel-u) * 2) 0,
+    calc(100% - var(--pixel-u) * 2) var(--pixel-u),
+    calc(100% - var(--pixel-u)) var(--pixel-u),
+    calc(100% - var(--pixel-u)) calc(var(--pixel-u) * 2),
+    100% calc(var(--pixel-u) * 2),
+    100% calc(100% - var(--pixel-u) * 2),
+    calc(100% - var(--pixel-u)) calc(100% - var(--pixel-u) * 2),
+    calc(100% - var(--pixel-u)) calc(100% - var(--pixel-u)),
+    calc(100% - var(--pixel-u) * 2) calc(100% - var(--pixel-u)),
+    calc(100% - var(--pixel-u) * 2) 100%,
+    calc(var(--pixel-u) * 2) 100%,
+    calc(var(--pixel-u) * 2) calc(100% - var(--pixel-u)),
+    var(--pixel-u) calc(100% - var(--pixel-u)),
+    var(--pixel-u) calc(100% - var(--pixel-u) * 2),
+    0 calc(100% - var(--pixel-u) * 2),
+    0 calc(var(--pixel-u) * 2),
+    var(--pixel-u) calc(var(--pixel-u) * 2),
+    var(--pixel-u) var(--pixel-u),
+    calc(var(--pixel-u) * 2) var(--pixel-u)
+  );
+  /* box-shadow thường bị clip-path cắt mất phần đổ ra ngoài, nên dùng filter drop-shadow */
+  filter: drop-shadow(4px 4px 0px rgba(179, 157, 219, 0.4));
   flex-direction: column;
   overflow: hidden;
 }
 
 .maximized {
-  border-radius: 0;
+  clip-path: none;
   border: none;
-  box-shadow: none;
+  filter: none;
 }
 
 .header {
@@ -45,7 +68,12 @@
   font-weight: bold;
   background-color: #ffffff;
   border: 2px solid #b39ddb;
-  border-radius: 4px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   width: 26px;
   height: 26px;
   display: flex;
@@ -53,7 +81,13 @@
   align-items: center;
   cursor: pointer;
   color: #4a148c;
+  box-shadow: inset 1px 1px 0 #ffffff, inset -1px -1px 0 rgba(123, 31, 162, 0.25);
   transition: background 0.15s;
+}
+
+.btn:active {
+  transform: translate(1px, 1px);
+  box-shadow: inset -1px -1px 0 #ffffff, inset 1px 1px 0 rgba(123, 31, 162, 0.25);
 }
 
 .btn:hover { background-color: #e1bee7; }
@@ -68,11 +102,18 @@
 
 .resizer {
   position: absolute;
-  right: 0;
-  bottom: 0;
+  right: calc(var(--pixel-u) * 2);
+  bottom: calc(var(--pixel-u) * 2);
   width: 16px;
   height: 16px;
   cursor: nwse-resize;
-  background: linear-gradient(135deg, transparent 50%, #b39ddb 50%);
+  /* 3 khối vuông pixel bậc thang thay cho gradient chéo mượt */
+  background-image:
+    linear-gradient(#b39ddb, #b39ddb),
+    linear-gradient(#b39ddb, #b39ddb),
+    linear-gradient(#b39ddb, #b39ddb);
+  background-size: 3px 3px;
+  background-position: 12px 3px, 7px 8px, 2px 13px;
+  background-repeat: no-repeat;
   z-index: 10;
 }

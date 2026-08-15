@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
 import styles from './LoginScreen.module.css';
+import PixelProgressBar from '../PixelProgressBar/PixelProgressBar';
 
 const LoginScreen = ({ onUnlock }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
   const [isUnlocking, setIsUnlocking] = useState(false);
+  const [unlockProgress, setUnlockProgress] = useState(0);
 
   // Mật khẩu bí mật (Bro có thể đổi thành ngày kỷ niệm hoặc chữ gì đó)
   const SECRET_PASSWORD = '24102026'; 
@@ -14,9 +16,19 @@ const LoginScreen = ({ onUnlock }) => {
     if (password === SECRET_PASSWORD) {
       setError(false);
       setIsUnlocking(true);
-      
+
+      // Chạy thanh tiến trình pixel song song với 1s chờ mở khóa
+      const stepMs = 60;
+      const totalSteps = 1000 / stepMs;
+      let step = 0;
+      const progressTimer = setInterval(() => {
+        step++;
+        setUnlockProgress(Math.min(100, (step / totalSteps) * 100));
+      }, stepMs);
+
       // Đợi 1s cho hiệu ứng fade out chạy xong rồi mới báo lên App.jsx là đã mở khóa
       setTimeout(() => {
+        clearInterval(progressTimer);
         onUnlock();
       }, 1000);
     } else {
@@ -53,6 +65,13 @@ const LoginScreen = ({ onUnlock }) => {
         </form>
         
         {error && <p className={styles.errorMsg}>Cái đồ Nhi Ngố!! Sai mật khẩu òi</p>}
+
+        {isUnlocking && (
+          <div className={styles.unlockProgressWrap}>
+            <p className={styles.unlockingText}>Đang mở khoá...</p>
+            <PixelProgressBar progress={unlockProgress} segments={14} />
+          </div>
+        )}
       </div>
     </div>
   );

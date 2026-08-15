@@ -30,7 +30,12 @@
   color: white;
   border: 3px solid #d81b60;
   padding: 5px 16px;
-  border-radius: 8px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   cursor: pointer;
   display: flex;
   gap: 8px;
@@ -40,8 +45,9 @@
 }
 
 .startBtn:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
+  transform: translate(3px, 3px);
+  box-shadow: inset 2px 2px 0px rgba(123, 31, 162, 0.35);
+  background-color: #ec6f9e; /* Đậm hơn 1 chút khi nhấn, tăng cảm giác lõm xuống */
 }
 
 /* SECTION GIỮA: WINDOW TABS */
@@ -62,7 +68,12 @@
   font-size: 20px;
   background-color: #ffffff;
   border: 3px solid #b39ddb;
-  border-radius: 8px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   padding: 5px 12px;
   cursor: pointer;
   color: #4a148c;
@@ -79,6 +90,11 @@
   background-color: #e1bee7;
 }
 
+.tab:active {
+  transform: translate(3px, 3px);
+  box-shadow: none;
+}
+
 .tabIcon {
   width: 20px;
   height: 20px;
@@ -93,7 +109,12 @@
   gap: 10px;
   background-color: #ffffff;
   border: 3px solid #b39ddb;
-  border-radius: 10px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   padding: 4px 12px;
 }
 
@@ -103,7 +124,12 @@
   gap: 5px;
   cursor: pointer;
   padding: 3px 6px;
-  border-radius: 6px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   transition: background 0.2s;
 }
 
@@ -136,6 +162,10 @@
   align-items: center;
 }
 
+.muteBtn:active {
+  transform: scale(0.85);
+}
+
 .mutedIcon {
   opacity: 0.5; /* Làm mờ icon khi Mute */
 }
@@ -147,7 +177,12 @@
   height: 10px;
   background: #f3e5f5;
   border: 2px solid #b39ddb;
-  border-radius: 4px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   outline: none;
   cursor: pointer;
 }
@@ -158,7 +193,12 @@
   height: 14px;
   background: #ce93d8; /* Màu tím thanh trượt */
   border: 2px solid #7b1fa2; /* Viền tím đậm */
-  border-radius: 4px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   transition: transform 0.1s;
 }
 
@@ -172,7 +212,12 @@
   height: 14px;
   background: #ce93d8;
   border: 2px solid #7b1fa2;
-  border-radius: 4px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
 }
 
 /* Yêu cầu 1: Pin thực tế */
@@ -207,6 +252,17 @@
   font-size: 18px; /* Giờ 24h to hơn tí */
   color: #4a148c;
   font-weight: bold;
+}
+
+/* Dấu hai chấm nhấp nháy mỗi giây, đúng kiểu đồng hồ điện tử pixel cổ điển */
+.blinkColon {
+  display: inline-block;
+  animation: colonBlink 1s steps(1) infinite;
+}
+
+@keyframes colonBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
 }
 
 .dateText {

@@ -20,12 +20,21 @@
   border: 2px solid #b39ddb;
   color: #7b1fa2;
   padding: 6px 16px;
-  border-radius: 8px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .tabBtn:hover { background-color: #e1bee7; }
+
+.tabBtn:active {
+  transform: translate(2px, 2px);
+}
 .tabBtn.active {
   background-color: #b39ddb;
   color: #ffffff;
@@ -52,7 +61,12 @@
   margin-bottom: 8px;
   background: #f3e5f5;
   padding: 8px 12px;
-  border-radius: 6px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   border-left: 4px solid #b39ddb;
 }
 
@@ -75,7 +89,12 @@
   gap: 12px;
   background-color: #ffffff;
   border: 2px solid #ce93d8;
-  border-radius: 12px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   padding: 10px;
   cursor: url('../../assets/cursors/pointer-heart.svg') 4 4, pointer;
   transition: all 0.2s;
@@ -85,6 +104,10 @@
   background-color: #f3e5f5;
   transform: translateX(4px);
   border-color: #ab47bc;
+}
+
+.songCard:active {
+  transform: scale(0.97);
 }
 
 .playingCard {
@@ -140,6 +163,15 @@
   font-weight: bold;
 }
 .songArtist { font-size: 12px; color: #7b1fa2; margin: 0; }
+
+.progressWrap {
+  margin-top: 6px;
+  max-width: 140px;
+  /* CSS variable này được PixelProgressBar đọc để tô màu khối đã lấp đầy,
+     dùng biến thay vì :global() vì CSS Modules hash tên class ở component con */
+  --pixel-progress-fill: #ec407a;
+  --pixel-progress-fill-border: #ad1457;
+}
 .playIndicator { font-size: 20px; color: #d81b60; }
 
 /* PAST GRID */
@@ -152,7 +184,12 @@
 .pastCard {
   background-color: #fffbfd;
   border: 2px dashed #ce93d8;
-  border-radius: 12px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   padding: 16px;
   text-align: center;
 }
@@ -161,7 +198,12 @@
   width: 100px;
   height: 100px;
   object-fit: cover;
-  border-radius: 10px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   border: 2px solid #b39ddb;
   margin-bottom: 12px;
 }

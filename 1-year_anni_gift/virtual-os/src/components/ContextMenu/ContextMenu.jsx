@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import styles from './ContextMenu.module.css';
 
-const ContextMenu = ({ x, y, onClose, onChangeWallpaper, onLock }) => {
+const ContextMenu = ({ x, y, onClose, onChangeWallpaper, onLock, onShutdown }) => {
   useEffect(() => {
     const handleClickOutside = () => onClose();
     const handleKeyDown = (e) => {
@@ -54,6 +54,11 @@ const ContextMenu = ({ x, y, onClose, onChangeWallpaper, onLock }) => {
       <button className={styles.menuItem} onClick={onLock}>
         <span className={styles.icon}>🔒</span>
         <span>Lock System</span>
+      </button>
+
+      <button className={styles.menuItem} onClick={onShutdown}>
+        <span className={styles.icon}>⏻</span>
+        <span>Shut Down</span>
       </button>
     </div>
   );

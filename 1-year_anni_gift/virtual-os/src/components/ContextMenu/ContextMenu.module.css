@@ -3,7 +3,12 @@
   width: 180px;
   background-color: #ffffff;
   border: 3px solid #b39ddb;
-  border-radius: 10px;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
   box-shadow: 4px 4px 0px rgba(179, 157, 219, 0.4);
   padding: 6px;
   display: flex;
@@ -25,7 +30,12 @@
   padding: 6px 10px;
   background: transparent;
   border: none;
-  border-radius: 6px;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
   font-family: 'VT323', monospace;
   font-size: 18px;
   color: #4a148c;

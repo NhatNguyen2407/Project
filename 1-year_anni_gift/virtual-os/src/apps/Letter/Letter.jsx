@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Letter.module.css';
+import { useSound } from '../../hooks/useSound';
 
 const Letter = () => {
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(true);
+  const { playType } = useSound();
 
   // Nội dung bức thư gốc 
   const fullText = `Gửi NhiNhi,
@@ -27,7 +29,12 @@ Bibii 💜`;
     
     const typingInterval = setInterval(() => {
       if (currentIndex < fullText.length) {
+        const nextChar = fullText[currentIndex];
         setDisplayedText(fullText.slice(0, currentIndex + 1));
+        // Chỉ phát tiếng "tạch" cho ký tự thật, bỏ qua khoảng trắng/xuống dòng cho đỡ ồn
+        if (nextChar.trim() !== '') {
+          playType();
+        }
         currentIndex++;
       } else {
         clearInterval(typingInterval);

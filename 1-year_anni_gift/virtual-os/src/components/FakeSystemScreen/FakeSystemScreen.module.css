@@ -1,0 +1,96 @@
+/* ============ SHUTDOWN SCREEN ============ */
+.shutdownScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999; /* Trên cả CRTOverlay */
+  background-color: #000000;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: default;
+  animation: fadeToBlack 0.6s ease-in;
+}
+
+.shutdownText {
+  font-family: 'VT323', monospace;
+  color: #f3e5f5;
+  font-size: 22px;
+  letter-spacing: 1px;
+  opacity: 0;
+  animation: textAppear 0.5s ease-out 0.8s forwards;
+}
+
+.shutdownHint {
+  font-family: 'VT323', monospace;
+  color: #6a5a72;
+  font-size: 14px;
+  margin-top: 18px;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeToBlack {
+  from { background-color: #4a148c; }
+  to { background-color: #000000; }
+}
+
+@keyframes textAppear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* ============ BSOD SCREEN (nhưng ngọt ngào) ============ */
+.bsodScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background-color: #0078d7;
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px;
+  cursor: default;
+  font-family: 'Segoe UI', 'VT323', monospace;
+}
+
+.bsodFace {
+  font-size: 64px;
+  font-weight: bold;
+  margin-bottom: 20px;
+  font-family: monospace;
+}
+
+.bsodMainText {
+  font-size: 18px;
+  max-width: 520px;
+  line-height: 1.6;
+  margin-bottom: 16px;
+}
+
+.bsodSubText {
+  font-size: 14px;
+  max-width: 480px;
+  line-height: 1.6;
+  color: #d6e8ff;
+  margin-bottom: 20px;
+}
+
+.bsodProgress {
+  font-size: 14px;
+  margin-bottom: 30px;
+}
+
+.bsodHint {
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  color: #b3d7ff;
+  animation: fadeIn 0.4s ease-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}

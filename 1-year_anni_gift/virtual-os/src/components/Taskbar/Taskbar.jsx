@@ -133,9 +133,11 @@ const Taskbar = ({ openWindows, APPS, onTabClick, toggleStartMenu }) => {
 
         {/* Đồng hồ & Ngày tháng (Format 24h & dd/mm/yyyy) */}
         <div className={styles.clockBox}>
-          {/* Giờ 24h: format: hh:mm */}
+          {/* Giờ 24h: format hh : mm, dấu hai chấm nhấp nháy mỗi giây */}
           <div className={styles.timeText}>
-            {time.toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit' })}
+            {time.getHours().toString().padStart(2, '0')}
+            <span className={styles.blinkColon}>:</span>
+            {time.getMinutes().toString().padStart(2, '0')}
           </div>
           {/* Ngày tháng dd/mm/yyyy: format: vi-VN */}
           <div className={styles.dateText}>
