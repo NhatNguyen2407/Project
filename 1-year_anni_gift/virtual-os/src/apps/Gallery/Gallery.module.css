@@ -94,7 +94,7 @@
   border: 2px solid #ce93d8;
   border-radius: 4px;
   box-shadow: 3px 3px 0px rgba(206, 147, 216, 0.3);
-  cursor: pointer;
+  cursor: url('../../assets/cursors/pointer-heart.svg') 4 4, pointer;
   display: flex;
   flex-direction: column;
   align-items: center;

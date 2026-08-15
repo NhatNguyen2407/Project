@@ -6,7 +6,7 @@
   gap: 8px;
   padding: 10px;
   border-radius: 12px;
-  cursor: pointer;
+  cursor: url('../../assets/cursors/pointer-heart.svg') 4 4, pointer;
   border: 2px dashed transparent;
   transition: all 0.2s ease;
 }
