@@ -1,0 +1,60 @@
+.widget {
+  position: fixed;
+  bottom: 76px; /* Đứng trên taskbar (taskbar cao 60px) + chừa khoảng thở */
+  left: 20px;
+  z-index: 4;
+  background-color: #ffffff;
+  border: 2px solid #ce93d8;
+  padding: 10px 16px;
+  text-align: center;
+  box-shadow: 3px 3px 0px rgba(206, 147, 216, 0.35);
+  clip-path: polygon(
+    4px 0, calc(100% - 4px) 0,
+    100% 4px, 100% calc(100% - 4px),
+    calc(100% - 4px) 100%, 4px 100%,
+    0 calc(100% - 4px), 0 4px
+  );
+  pointer-events: none; /* Chỉ để ngắm, không chặn click xuống desktop */
+}
+
+.label {
+  font-family: 'Itim', cursive;
+  font-size: 13px;
+  color: #ad1457;
+  margin: 0 0 2px;
+}
+
+.mainLine {
+  font-family: 'VT323', monospace;
+  font-size: 17px;
+  color: #4a148c;
+  margin: 0;
+  white-space: nowrap;
+}
+
+.timeLine {
+  font-family: 'VT323', monospace;
+  font-size: 15px;
+  color: #7b1fa2;
+  margin: 2px 0 0;
+  letter-spacing: 1px;
+}
+
+.blink {
+  animation: blinkColon 1s steps(1) infinite;
+}
+
+@keyframes blinkColon {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.25; }
+}
+
+/* Trên màn hình nhỏ, thu gọn chữ + kéo vào gần mép hơn để không đè lên PixelPet */
+@media (max-width: 600px) {
+  .widget {
+    left: 10px;
+    padding: 6px 10px;
+  }
+  .mainLine { font-size: 14px; }
+  .timeLine { font-size: 13px; }
+}

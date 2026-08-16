@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import styles from './ContextMenu.module.css';
 
-const ContextMenu = ({ x, y, onClose, onChangeWallpaper, onLock, onShutdown }) => {
+const ContextMenu = ({ x, y, onClose, onRefresh, onChangeWallpaper, onLock, onShutdown }) => {
   useEffect(() => {
     const handleClickOutside = () => onClose();
     const handleKeyDown = (e) => {
@@ -23,7 +23,7 @@ const ContextMenu = ({ x, y, onClose, onChangeWallpaper, onLock, onShutdown }) =
       onClick={(e) => e.stopPropagation()} 
       onContextMenu={(e) => e.preventDefault()} /* Ngăn click chuột phải vào menu này sinh lỗi */
     >
-      <button className={styles.menuItem} onClick={() => { window.location.reload(); }}>
+      <button className={styles.menuItem} onClick={onRefresh}>
         <span className={styles.icon}>🔄</span>
         <span>Refresh Desktop</span>
       </button>

@@ -8,6 +8,7 @@ import StickyNote from './components/StickyNote/StickyNote';
 import PixelPet from './components/PixelPet/PixelPet';
 import FloatingElements from './components/FloatingElements/FloatingElements';
 import FakeSystemScreen from './components/FakeSystemScreen/FakeSystemScreen';
+import CountdownWidget from './components/CountdownWidget/CountdownWidget';
 import { useSound } from './hooks/useSound';
 
 // Import ảnh icon
@@ -178,6 +179,7 @@ const Desktop = () => {
       <FloatingElements />
       <StickyNote />
       <PixelPet />
+      <CountdownWidget />
 
       {openWindows.map((openedApp) => {
         const appData = APPS.find(a => a.id === openedApp.id);

@@ -4,6 +4,9 @@
   --window-border: #b39ddb;
   --header-bg: #f3e5f5;
   --text-main: #7b1fa2;
+
+  /* Đơn vị "pixel" dùng cho góc bậc thang - đổi số này để scale toàn bộ góc pixel trong app */
+  --pixel-u: 4px;
 }
 
 * {
@@ -21,7 +24,7 @@ html, body, #root {
 
 /* Cursor pixel retro: mũi tên mặc định toàn màn hình */
 html, body {
-  cursor: url('../assets/cursors/arrow.svg') 2 2, auto;
+  cursor: url('../assets/cursors/arrow.svg') 1 1, auto;
 }
 
 /* Cursor trái tim pixel khi hover vào bất kỳ thứ gì bấm được */
@@ -29,5 +32,45 @@ button,
 a,
 input[type="range"],
 [role="button"] {
-  cursor: url('../assets/cursors/pointer-heart.svg') 4 4, pointer;
+  cursor: url('../assets/cursors/pointer-heart.svg') 2 2, pointer;
+}
+
+/* ============================================
+   GÓC BẬC THANG PIXEL (thay cho border-radius)
+   Dùng cho các khối lớn: window, menu, panel...
+   Nhân var(--pixel-u) lên để scale toàn bộ hệ thống góc.
+   ============================================ */
+.pixelCornersLg {
+  clip-path: polygon(
+    calc(var(--pixel-u) * 2) 0,
+    calc(100% - var(--pixel-u) * 2) 0,
+    calc(100% - var(--pixel-u) * 2) var(--pixel-u),
+    calc(100% - var(--pixel-u)) var(--pixel-u),
+    calc(100% - var(--pixel-u)) calc(var(--pixel-u) * 2),
+    100% calc(var(--pixel-u) * 2),
+    100% calc(100% - var(--pixel-u) * 2),
+    calc(100% - var(--pixel-u)) calc(100% - var(--pixel-u) * 2),
+    calc(100% - var(--pixel-u)) calc(100% - var(--pixel-u)),
+    calc(100% - var(--pixel-u) * 2) calc(100% - var(--pixel-u)),
+    calc(100% - var(--pixel-u) * 2) 100%,
+    calc(var(--pixel-u) * 2) 100%,
+    calc(var(--pixel-u) * 2) calc(100% - var(--pixel-u)),
+    var(--pixel-u) calc(100% - var(--pixel-u)),
+    var(--pixel-u) calc(100% - var(--pixel-u) * 2),
+    0 calc(100% - var(--pixel-u) * 2),
+    0 calc(var(--pixel-u) * 2),
+    var(--pixel-u) calc(var(--pixel-u) * 2),
+    var(--pixel-u) var(--pixel-u),
+    calc(var(--pixel-u) * 2) var(--pixel-u)
+  );
+}
+
+/* Góc bậc thang nhỏ hơn - dùng cho nút bấm nhỏ (26-40px) */
+.pixelCornersSm {
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
 }

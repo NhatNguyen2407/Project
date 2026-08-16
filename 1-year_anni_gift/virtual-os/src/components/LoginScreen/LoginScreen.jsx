@@ -5,7 +5,8 @@ import PixelProgressBar from '../PixelProgressBar/PixelProgressBar';
 const LoginScreen = ({ onUnlock }) => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState(false);
-  const [isUnlocking, setIsUnlocking] = useState(false);
+  const [isUnlocking, setIsUnlocking] = useState(false); // Đang hiện progress bar (chưa fade)
+  const [isFadingOut, setIsFadingOut] = useState(false); // Đã load xong, bắt đầu fade màn hình
   const [unlockProgress, setUnlockProgress] = useState(0);
 
   // Mật khẩu bí mật (Bro có thể đổi thành ngày kỷ niệm hoặc chữ gì đó)
@@ -15,22 +16,27 @@ const LoginScreen = ({ onUnlock }) => {
     e.preventDefault();
     if (password === SECRET_PASSWORD) {
       setError(false);
-      setIsUnlocking(true);
+      setIsUnlocking(true); // Chỉ hiện thanh loading, MÀN HÌNH CHƯA MỜ ĐI
 
-      // Chạy thanh tiến trình pixel song song với 1s chờ mở khóa
+      // Giai đoạn 1: chạy progress bar đầy dần trong 1s, đứng yên hoàn toàn
       const stepMs = 60;
       const totalSteps = 1000 / stepMs;
       let step = 0;
       const progressTimer = setInterval(() => {
         step++;
-        setUnlockProgress(Math.min(100, (step / totalSteps) * 100));
-      }, stepMs);
+        const pct = Math.min(100, (step / totalSteps) * 100);
+        setUnlockProgress(pct);
 
-      // Đợi 1s cho hiệu ứng fade out chạy xong rồi mới báo lên App.jsx là đã mở khóa
-      setTimeout(() => {
-        clearInterval(progressTimer);
-        onUnlock();
-      }, 1000);
+        if (pct >= 100) {
+          clearInterval(progressTimer);
+          // Giai đoạn 2: CHỈ SAU KHI load xong 100% mới bắt đầu hiệu ứng fade/scale
+          setIsFadingOut(true);
+          // Đợi đúng bằng thời lượng transition fade trong CSS (0.5s) rồi mới báo mở khoá
+          setTimeout(() => {
+            onUnlock();
+          }, 500);
+        }
+      }, stepMs);
     } else {
       setError(true);
       setPassword('');
@@ -40,7 +46,7 @@ const LoginScreen = ({ onUnlock }) => {
   };
 
   return (
-    <div className={`${styles.container} ${isUnlocking ? styles.fadeOut : ''}`}>
+    <div className={`${styles.container} ${isFadingOut ? styles.fadeOut : ''}`}>
       <div className={styles.loginBox}>
         {/* Avatar người dùng */}
         <div className={styles.avatar}>
@@ -58,8 +64,9 @@ const LoginScreen = ({ onUnlock }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             autoFocus
+            disabled={isUnlocking}
           />
-          <button type="submit" className={styles.submitBtn}>
+          <button type="submit" className={styles.submitBtn} disabled={isUnlocking}>
             →
           </button>
         </form>
