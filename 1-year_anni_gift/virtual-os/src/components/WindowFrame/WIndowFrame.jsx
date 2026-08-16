@@ -1,20 +1,46 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './WindowFrame.module.css';
 
+// 8 hướng resize: 4 cạnh (n/s/e/w) + 4 góc (ne/nw/se/sw), đúng như 1 cửa sổ hệ điều hành thật
+const RESIZE_HANDLES = [
+  { dir: 'n', className: styles.handleN },
+  { dir: 's', className: styles.handleS },
+  { dir: 'e', className: styles.handleE },
+  { dir: 'w', className: styles.handleW },
+  { dir: 'ne', className: styles.handleNE },
+  { dir: 'nw', className: styles.handleNW },
+  { dir: 'se', className: styles.handleSE },
+  { dir: 'sw', className: styles.handleSW },
+];
+
+const MIN_WIDTH = 320;
+const MIN_HEIGHT = 220;
+
 const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, isMinimized }) => {
   const [isMaximized, setIsMaximized] = useState(false);
-  
+
   const [size, setSize] = useState({ width: 750, height: 450 });
-  const [position, setPosition] = useState({ 
-    x: Math.random() * 50 + 50, 
-    y: Math.random() * 50 + 20 
+  const [position, setPosition] = useState({
+    x: Math.random() * 50 + 50,
+    y: Math.random() * 50 + 20
   });
-  
+
   const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, initialX: 0, initialY: 0 });
-  const resizeRef = useRef({ isResizing: false, startX: 0, startY: 0, initialWidth: 0, initialHeight: 0 });
+  // resizeRef lưu đầy đủ trạng thái ban đầu (vị trí + kích thước) và hướng đang kéo,
+  // để tính toán độc lập cho từng cạnh/góc mà không bị lệch nhau
+  const resizeRef = useRef({
+    isResizing: false,
+    dir: null,
+    startX: 0,
+    startY: 0,
+    initialWidth: 0,
+    initialHeight: 0,
+    initialX: 0,
+    initialY: 0,
+  });
 
   const onMouseDownDrag = (e) => {
-    if (isMaximized) return; 
+    if (isMaximized) return;
     dragRef.current = {
       isDragging: true,
       startX: e.clientX,
@@ -22,18 +48,23 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
       initialX: position.x,
       initialY: position.y
     };
+    document.body.classList.add(styles.noSelect);
     onFocus();
   };
 
-  const onMouseDownResize = (e) => {
-    e.stopPropagation(); 
+  const onMouseDownResize = (e, dir) => {
+    e.stopPropagation();
+    e.preventDefault();
     if (isMaximized) return;
     resizeRef.current = {
       isResizing: true,
+      dir,
       startX: e.clientX,
       startY: e.clientY,
       initialWidth: size.width,
-      initialHeight: size.height
+      initialHeight: size.height,
+      initialX: position.x,
+      initialY: position.y,
     };
     onFocus();
   };
@@ -46,16 +77,49 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
           y: dragRef.current.initialY + (e.clientY - dragRef.current.startY)
         });
       } else if (resizeRef.current.isResizing) {
-        setSize({
-          width: Math.max(350, resizeRef.current.initialWidth + (e.clientX - resizeRef.current.startX)), 
-          height: Math.max(250, resizeRef.current.initialHeight + (e.clientY - resizeRef.current.startY)) 
-        });
+        const {
+          dir, startX, startY, initialWidth, initialHeight, initialX, initialY,
+        } = resizeRef.current;
+        const deltaX = e.clientX - startX;
+        const deltaY = e.clientY - startY;
+
+        let nextWidth = initialWidth;
+        let nextHeight = initialHeight;
+        let nextX = initialX;
+        let nextY = initialY;
+
+        // Cạnh/góc bên phải: kéo ra ngoài -> rộng ra, vị trí trái không đổi
+        if (dir.includes('e')) {
+          nextWidth = Math.max(MIN_WIDTH, initialWidth + deltaX);
+        }
+        // Cạnh/góc bên trái: kéo sang trái -> rộng ra VÀ đẩy vị trí trái theo,
+        // kéo sang phải -> hẹp lại, clamp để không vọt qua kích thước tối thiểu
+        if (dir.includes('w')) {
+          const proposedWidth = initialWidth - deltaX;
+          nextWidth = Math.max(MIN_WIDTH, proposedWidth);
+          nextX = initialX + (initialWidth - nextWidth);
+        }
+        // Cạnh/góc dưới: kéo xuống -> cao ra
+        if (dir.includes('s')) {
+          nextHeight = Math.max(MIN_HEIGHT, initialHeight + deltaY);
+        }
+        // Cạnh/góc trên: kéo lên -> cao ra VÀ đẩy vị trí trên theo
+        if (dir.includes('n')) {
+          const proposedHeight = initialHeight - deltaY;
+          nextHeight = Math.max(MIN_HEIGHT, proposedHeight);
+          nextY = initialY + (initialHeight - nextHeight);
+        }
+
+        setSize({ width: nextWidth, height: nextHeight });
+        setPosition({ x: nextX, y: nextY });
       }
     };
 
     const onMouseUp = () => {
       dragRef.current.isDragging = false;
       resizeRef.current.isResizing = false;
+      document.body.classList.remove(styles.noSelect);
+      document.body.style.cursor = '';
     };
 
     document.addEventListener('mousemove', onMouseMove);
@@ -65,6 +129,19 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
       document.removeEventListener('mouseup', onMouseUp);
     };
   }, []);
+
+  // Khoá bôi đen chữ + ép cursor đúng hướng trong suốt lúc kéo, tránh giật/chọn nhầm text
+  const handleResizeMouseDown = (e, dir) => {
+    onMouseDownResize(e, dir);
+    document.body.classList.add(styles.noSelect);
+    const cursorMap = {
+      n: 'ns-resize', s: 'ns-resize',
+      e: 'ew-resize', w: 'ew-resize',
+      ne: 'nesw-resize', sw: 'nesw-resize',
+      nw: 'nwse-resize', se: 'nwse-resize',
+    };
+    document.body.style.cursor = cursorMap[dir];
+  };
 
   // Đẩy position và zIndex trực tiếp vào thẻ ngoài cùng
   const frameStyle = {
@@ -78,12 +155,12 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
   };
 
   return (
-    <div 
-      className={`${styles.window} ${isMaximized ? styles.maximized : ''}`} 
+    <div
+      className={`${styles.window} ${isMaximized ? styles.maximized : ''}`}
       style={frameStyle}
       onMouseDown={onFocus}
     >
-      <div className={styles.header} onMouseDown={onMouseDownDrag}>
+      <div className={styles.header} onMouseDown={onMouseDownDrag} onDoubleClick={() => !isMaximized && setIsMaximized(true)}>
         <div className={styles.title}>{title}</div>
         <div className={styles.controls}>
           <button className={styles.btn} onClick={(e) => { e.stopPropagation(); onMinimize(); }}>_</button>
@@ -93,14 +170,21 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
           <button className={`${styles.btn} ${styles.closeBtn}`} onClick={(e) => { e.stopPropagation(); onClose(); }}>X</button>
         </div>
       </div>
-      
+
       <div className={styles.content}>
         {children}
       </div>
 
-      {!isMaximized && (
-        <div className={styles.resizer} onMouseDown={onMouseDownResize}></div>
-      )}
+      {!isMaximized && RESIZE_HANDLES.map(({ dir, className }) => (
+        <div
+          key={dir}
+          className={`${styles.resizeHandle} ${className}`}
+          onMouseDown={(e) => handleResizeMouseDown(e, dir)}
+        />
+      ))}
+
+      {/* Giữ lại chấm pixel trang trí ở góc dưới-phải cho dễ nhận biết bằng mắt */}
+      {!isMaximized && <div className={styles.resizerVisual}></div>}
     </div>
   );
 };

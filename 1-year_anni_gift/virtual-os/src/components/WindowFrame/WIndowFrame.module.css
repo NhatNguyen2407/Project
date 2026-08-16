@@ -100,13 +100,13 @@
   background-color: #ffffff;
 }
 
-.resizer {
+.resizerVisual {
   position: absolute;
   right: calc(var(--pixel-u) * 2);
   bottom: calc(var(--pixel-u) * 2);
   width: 16px;
   height: 16px;
-  cursor: nwse-resize;
+  pointer-events: none; /* Chỉ để trang trí, việc kéo thật do .handleSE đảm nhiệm */
   /* 3 khối vuông pixel bậc thang thay cho gradient chéo mượt */
   background-image:
     linear-gradient(#b39ddb, #b39ddb),
@@ -116,4 +116,47 @@
   background-position: 12px 3px, 7px 8px, 2px 13px;
   background-repeat: no-repeat;
   z-index: 10;
+}
+
+/* ===== Hệ thống 8 vùng kéo resize: 4 cạnh + 4 góc, đúng như 1 cửa sổ hệ điều hành thật ===== */
+.resizeHandle {
+  position: absolute;
+  z-index: 20; /* Trên cả resizerVisual và content, để luôn bắt được sự kiện chuột */
+  background: transparent;
+}
+
+/* Cạnh trên/dưới: kéo dọc, chừa khoảng trống 2 đầu cho góc */
+.handleN, .handleS {
+  left: 14px;
+  right: 14px;
+  height: 10px;
+  cursor: ns-resize;
+}
+.handleN { top: -5px; }
+.handleS { bottom: -5px; }
+
+/* Cạnh trái/phải: kéo ngang */
+.handleE, .handleW {
+  top: 14px;
+  bottom: 14px;
+  width: 10px;
+  cursor: ew-resize;
+}
+.handleE { right: -5px; }
+.handleW { left: -5px; }
+
+/* 4 góc: vùng bấm to hơn hẳn (16x16) cho dễ trúng, đè lên trên phần giao của 2 cạnh */
+.handleNE, .handleNW, .handleSE, .handleSW {
+  width: 16px;
+  height: 16px;
+}
+.handleNE { top: -5px; right: -5px; cursor: nesw-resize; }
+.handleNW { top: -5px; left: -5px; cursor: nwse-resize; }
+.handleSE { bottom: -5px; right: -5px; cursor: nwse-resize; }
+.handleSW { bottom: -5px; left: -5px; cursor: nesw-resize; }
+
+/* Gán vào document.body trong lúc đang kéo resize/drag để tránh bôi đen chữ lung tung */
+.noSelect {
+  user-select: none;
+  -webkit-user-select: none;
 }

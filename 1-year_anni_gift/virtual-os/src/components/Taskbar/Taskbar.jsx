@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import styles from './Taskbar.module.css';
+import { useSoundSettings } from '../../context/SoundSettingsContext';
 
 // Import ảnh icon pixel mới bro tìm được
 import batteryIcon from '../../assets/images/battery_icon.png'; //image_6.png
@@ -8,8 +9,8 @@ import wifiPinkIcon from '../../assets/images/wifi_icon.png'; //image_8.png
 
 const Taskbar = ({ openWindows, APPS, onTabClick, toggleStartMenu }) => {
   const [time, setTime] = useState(new Date());
-  const [volume, setVolume] = useState(80); // Mức volume mặc định 80
-  const [isMuted, setIsMuted] = useState(false); // Trạng thái Mute
+  // Volume/Mute giờ lấy từ context dùng chung toàn OS, không còn là state cục bộ nữa
+  const { volume, setVolume, isMuted, setIsMuted } = useSoundSettings();
   const [batteryLevel, setBatteryLevel] = useState(100); // Mức pin đồng bộ
   const [isCharging, setIsCharging] = useState(false); // Trạng thái đang sạc
 

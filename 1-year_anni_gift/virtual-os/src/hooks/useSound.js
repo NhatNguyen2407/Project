@@ -1,4 +1,5 @@
-import { useCallback } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useSoundSettings } from '../context/SoundSettingsContext';
 
 // Dùng chung 1 AudioContext cho cả app (tạo âm thanh bằng oscillator, không cần file mp3 nào)
 let sharedCtx = null;
@@ -15,8 +16,15 @@ const getCtx = () => {
   return sharedCtx;
 };
 
+// Hệ số âm lượng chung của toàn OS (0-1), độc lập với volume hệ điều hành thật.
+// Đặt ở module-level (ngoài component) để mọi lệnh playTone - kể cả các nốt phát trễ
+// qua setTimeout trong playOpen/playMatch/playWin - luôn đọc được giá trị MỚI NHẤT
+// tại đúng thời điểm phát ra, thay vì bị "đóng băng" giá trị cũ do closure.
+let masterScale = 0.8;
+
 // Phát 1 nốt "bíp" ngắn kiểu 8-bit: sóng vuông/tam giác, tắt dần nhanh theo envelope
 const playTone = (freq, duration = 0.05, type = 'square', volume = 0.045) => {
+  if (masterScale <= 0) return; // Đang mute hoặc volume = 0 trong OS -> im lặng hoàn toàn
   const ctx = getCtx();
   if (!ctx) return;
   try {
@@ -24,7 +32,7 @@ const playTone = (freq, duration = 0.05, type = 'square', volume = 0.045) => {
     const gain = ctx.createGain();
     osc.type = type;
     osc.frequency.setValueAtTime(freq, ctx.currentTime);
-    gain.gain.setValueAtTime(volume, ctx.currentTime);
+    gain.gain.setValueAtTime(volume * masterScale, ctx.currentTime);
     // Giảm âm lượng theo hàm mũ để tiếng "tách" gọn, không bị rè cuối tiếng
     gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + duration);
     osc.connect(gain);
@@ -38,6 +46,13 @@ const playTone = (freq, duration = 0.05, type = 'square', volume = 0.045) => {
 
 // Hook dùng chung cho mọi component cần phát SFX
 export const useSound = () => {
+  const { effectiveVolume } = useSoundSettings();
+
+  // Đồng bộ hệ số âm lượng chung mỗi khi người dùng chỉnh slider/mute trong Taskbar
+  useEffect(() => {
+    masterScale = effectiveVolume / 100;
+  }, [effectiveVolume]);
+
   // Tiếng "tách" ngắn khi bấm nút
   const playClick = useCallback(() => {
     playTone(720, 0.035, 'square', 0.04);
@@ -62,6 +77,7 @@ export const useSound = () => {
 
   // Tiếng "meo~" tổng hợp bằng pitch-sweep cho pet, không cần file âm thanh
   const playMeow = useCallback(() => {
+    if (masterScale <= 0) return;
     const ctx = getCtx();
     if (!ctx) return;
     try {
@@ -71,7 +87,7 @@ export const useSound = () => {
       osc.frequency.setValueAtTime(480, ctx.currentTime);
       osc.frequency.exponentialRampToValueAtTime(850, ctx.currentTime + 0.12);
       osc.frequency.exponentialRampToValueAtTime(600, ctx.currentTime + 0.24);
-      gain.gain.setValueAtTime(0.05, ctx.currentTime);
+      gain.gain.setValueAtTime(0.05 * masterScale, ctx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.28);
       osc.connect(gain);
       gain.connect(ctx.destination);

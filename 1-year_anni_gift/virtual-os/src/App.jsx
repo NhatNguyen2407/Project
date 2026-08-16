@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import Desktop from './Desktop';
 import LoginScreen from './components/LoginScreen/LoginScreen';
 import CRTOverlay from './components/CRTOverlay/CRTOverlay';
+import { SoundSettingsProvider } from './context/SoundSettingsContext';
 import './styles/global.css';
 
 function App() {
@@ -9,7 +10,7 @@ function App() {
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   return (
-    <>
+    <SoundSettingsProvider>
       {/* Nếu chưa mở khóa thì hiện LoginScreen */}
       {!isUnlocked && (
         <LoginScreen onUnlock={() => setIsUnlocked(true)} />
@@ -20,7 +21,7 @@ function App() {
 
       {/* Lớp phủ hiệu ứng CRT, luôn nằm trên cùng toàn bộ UI */}
       <CRTOverlay />
-    </>
+    </SoundSettingsProvider>
   );
 }
 
