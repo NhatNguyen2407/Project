@@ -1,0 +1,157 @@
+.container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+  background-color: #faf5fc;
+  overflow: hidden;
+}
+
+.statusBar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  color: #4a148c;
+  padding: 6px 12px;
+  background-color: #f3e5f5;
+  border: 2px solid #ce93d8;
+  margin-bottom: 10px;
+  flex-shrink: 0;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
+}
+
+.restartBtn {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  background-color: #f48fb1;
+  color: white;
+  border: 2px solid #d81b60;
+  padding: 4px 12px;
+  cursor: pointer;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
+}
+
+.restartBtn:active {
+  transform: translate(1px, 1px);
+}
+
+/* Grid 4x4, co giãn theo cửa sổ - min-height: 0 để không tràn ra ngoài container flex */
+.grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.card {
+  position: relative;
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: url('../../assets/cursors/pointer-heart.svg') 4 4, pointer;
+  perspective: 600px;
+  width: 100%;
+  height: 100%;
+}
+
+.card:disabled {
+  cursor: default;
+}
+
+.cardInner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transition: transform 0.4s;
+  transform-style: preserve-3d;
+}
+
+.card.faceUp .cardInner {
+  transform: rotateY(180deg);
+}
+
+.cardBack,
+.cardFront {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #4a148c;
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.cardBack {
+  background-color: #d1c4e9;
+  font-size: 22px;
+}
+
+.cardFront {
+  background-color: #ffffff;
+  transform: rotateY(180deg);
+}
+
+.cardImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* ===== Màn thắng ===== */
+.winScreen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 12px;
+  padding: 20px;
+}
+
+.winTitle {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: #ad1457;
+  margin: 0;
+}
+
+.winMessage {
+  font-family: 'Itim', cursive;
+  font-size: 16px;
+  color: #6a1b9a;
+  max-width: 320px;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.winStats {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #8e5ba1;
+  margin: 0;
+}
+
+/* Trên màn hình nhỏ, giảm gap để 4x4 vẫn vừa khít */
+@media (max-width: 480px) {
+  .grid { gap: 4px; }
+  .statusBar { font-size: 13px; padding: 4px 8px; }
+}

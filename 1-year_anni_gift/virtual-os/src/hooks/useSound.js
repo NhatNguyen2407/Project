@@ -82,5 +82,19 @@ export const useSound = () => {
     }
   }, []);
 
-  return { playClick, playOpen, playClose, playType, playMeow };
+  // Tiếng "ting" 2 nốt khi ghép đúng 1 cặp thẻ trong Memory Match
+  const playMatch = useCallback(() => {
+    playTone(700, 0.05, 'triangle', 0.045);
+    setTimeout(() => playTone(1000, 0.07, 'triangle', 0.045), 70);
+  }, []);
+
+  // Giai điệu ngắn 4 nốt đi lên khi thắng game
+  const playWin = useCallback(() => {
+    const notes = [600, 750, 900, 1200];
+    notes.forEach((freq, i) => {
+      setTimeout(() => playTone(freq, 0.12, 'triangle', 0.05), i * 100);
+    });
+  }, []);
+
+  return { playClick, playOpen, playClose, playType, playMeow, playMatch, playWin };
 };

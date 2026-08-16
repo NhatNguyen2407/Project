@@ -1,0 +1,50 @@
+.wrapper {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none; /* Không chặn click xuống desktop/icon bên dưới */
+  z-index: 0; /* Thấp hơn icon desktop (zIndex 1) và mọi window/taskbar, chỉ là lớp trang trí nền */
+}
+
+.floatItem {
+  position: absolute;
+  bottom: -30px; /* Điểm xuất phát: ngay dưới mép màn hình */
+  animation-name: floatDrift;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  will-change: transform, opacity; /* Gợi ý trình duyệt tối ưu GPU cho transform */
+}
+
+@keyframes floatDrift {
+  0% {
+    transform: translate3d(0, 0, 0) rotate(0deg);
+    opacity: 0;
+  }
+  12% {
+    opacity: var(--peak-opacity, 0.25);
+  }
+  50% {
+    transform: translate3d(var(--drift-x, 20px), -55vh, 0) rotate(8deg);
+  }
+  88% {
+    opacity: var(--peak-opacity, 0.25);
+  }
+  100% {
+    transform: translate3d(0, -115vh, 0) rotate(-6deg);
+    opacity: 0;
+  }
+}
+
+/* Giảm bớt số lượng hiển thị & độ mờ trên màn nhỏ để đỡ rối mắt/ tốn hiệu năng mobile */
+@media (max-width: 600px) {
+  .floatItem:nth-child(n + 5) {
+    display: none;
+  }
+}
+
+/* Tôn trọng cài đặt "giảm chuyển động" của người dùng (accessibility) */
+@media (prefers-reduced-motion: reduce) {
+  .wrapper {
+    display: none;
+  }
+}

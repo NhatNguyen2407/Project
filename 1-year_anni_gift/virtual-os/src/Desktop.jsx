@@ -6,6 +6,7 @@ import StartMenu from './components/StartMenu/StartMenu';
 import ContextMenu from './components/ContextMenu/ContextMenu';
 import StickyNote from './components/StickyNote/StickyNote';
 import PixelPet from './components/PixelPet/PixelPet';
+import FloatingElements from './components/FloatingElements/FloatingElements';
 import FakeSystemScreen from './components/FakeSystemScreen/FakeSystemScreen';
 import { useSound } from './hooks/useSound';
 
@@ -13,17 +14,23 @@ import { useSound } from './hooks/useSound';
 import galleryIcon from './assets/images/pixel/folder_icon_pixel.png';
 import musicIcon from './assets/images/pixel/music_icon_pixel.png';
 import letterIcon from './assets/images/pixel/heart_letter_icon_pixel.png';
+import memoryMatchIcon from './assets/images/pixel/memory_match_icon.svg';
+import terminalIcon from './assets/images/pixel/terminal_icon.svg';
 
 // Import các App
 import Gallery from './apps/Gallery/Gallery';
 import MusicPlayer from './apps/MusicPlayer/MusicPlayer';
 import Letter from './apps/Letter/Letter';
+import MemoryMatch from './apps/MemoryMatch/MemoryMatch';
+import Terminal from './apps/Terminal/Terminal';
 
 // Kho ứng dụng
 const APPS = [
   { id: 'gallery', title: 'GALLERY.EXE', icon: galleryIcon, content: <Gallery /> },
   { id: 'music', title: 'MUSIC_PLAYER.EXE', icon: musicIcon, content: <MusicPlayer /> },
-  { id: 'letter', title: 'LOVE_LETTER.TXT', icon: letterIcon, content: <Letter /> }
+  { id: 'letter', title: 'LOVE_LETTER.TXT', icon: letterIcon, content: <Letter /> },
+  { id: 'memory', title: 'MEMORY_MATCH.EXE', icon: memoryMatchIcon, content: <MemoryMatch /> },
+  { id: 'terminal', title: 'TERMINAL.EXE', icon: terminalIcon, content: <Terminal /> }
 ];
 
 const Desktop = () => {
@@ -168,6 +175,7 @@ const Desktop = () => {
         ))}
       </div>
 
+      <FloatingElements />
       <StickyNote />
       <PixelPet />
 
