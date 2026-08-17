@@ -168,16 +168,16 @@ const Desktop = () => {
       onContextMenu={handleContextMenu} 
       onClick={() => { setIsStartMenuOpen(false); setContextMenu(null); }}
     >
-      <div style={{ ...iconGridStyle, opacity: isRefreshing ? 0 : 1 }}>
-        {APPS.map((app) => (
-          <DesktopIcon 
-            key={app.id}
-            iconSrc={app.icon} 
-            label={app.title.split('.')[0]} 
-            onDoubleClick={() => handleOpenApp(app.id)} 
-          />
-        ))}
-      </div>
+      {APPS.map((app, index) => (
+        <DesktopIcon 
+          key={app.id}
+          iconSrc={app.icon} 
+          title={app.title}
+          initialPosition={{ x: 20, y: 20 + index * 110 }}
+          onDoubleClick={() => handleOpenApp(app.id)} 
+          isRefreshing={isRefreshing}
+        />
+      ))}
 
       <FloatingElements />
       <StickyNote />
@@ -239,17 +239,6 @@ const Desktop = () => {
       )}
     </div>
   );
-};
-
-const iconGridStyle = {
-  position: 'absolute',
-  top: '20px',
-  left: '20px',
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '16px',
-  zIndex: 1,
-  transition: 'opacity 0.1s ease',
 };
 
 export default Desktop;

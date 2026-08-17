@@ -1,4 +1,6 @@
 .iconContainer {
+  position: absolute;
+  z-index: 1;
   width: 90px;
   display: flex;
   flex-direction: column;
@@ -13,16 +15,16 @@
   );
   cursor: url('../../assets/cursors/pointer-heart.svg') 2 2, pointer;
   border: 2px dashed transparent;
-  transition: all 0.2s ease;
+  transition: opacity 0.1s ease, background-color 0.2s ease, border-color 0.2s ease;
 }
 
-/* Hiệu ứng highlight khi hover */
+/*highlight khi hover*/
 .iconContainer:hover {
   background-color: rgba(225, 190, 231, 0.4);
   border-color: #b39ddb;
 }
 
-/* Hiệu ứng click (lõm xuống) */
+/*click*/
 .iconContainer:active {
   transform: scale(0.95);
 }
@@ -39,21 +41,32 @@
   width: 100%;
   height: 100%;
   object-fit: contain;
-  /* Giữ nguyên nét pixel khi scale ảnh */
   image-rendering: pixelated; 
 }
 
 .label {
   font-family: 'VT323', monospace;
   font-size: 22px;
-  color: #4a148c; /* Tím đậm */
+  color: #4a148c;
   text-align: center;
   line-height: 1;
-  /* Tạo viền trắng xung quanh chữ để luôn đọc được trên mọi nền */
   text-shadow: 
     1.5px 1.5px 0px #fff, 
     -1.5px -1.5px 0px #fff, 
     1.5px -1.5px 0px #fff, 
     -1.5px 1.5px 0px #fff;
   user-select: none;
+}
+
+.renameInput {
+  width: 100%;
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  color: #4a148c;
+  text-align: center;
+  background-color: #ffffff;
+  border: 2px solid #ab47bc;
+  padding: 2px 4px;
+  outline: none;
+  cursor: url('../../assets/cursors/arrow.svg') 1 1, text;
 }

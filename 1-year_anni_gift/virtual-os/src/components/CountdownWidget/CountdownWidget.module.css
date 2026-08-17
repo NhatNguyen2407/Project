@@ -1,7 +1,5 @@
 .widget {
   position: fixed;
-  bottom: 76px; /* Đứng trên taskbar (taskbar cao 60px) + chừa khoảng thở */
-  left: 20px;
   z-index: 4;
   background-color: #ffffff;
   border: 2px solid #ce93d8;
@@ -14,7 +12,7 @@
     calc(100% - 4px) 100%, 4px 100%,
     0 calc(100% - 4px), 0 4px
   );
-  pointer-events: none; /* Chỉ để ngắm, không chặn click xuống desktop */
+  cursor: grab;
 }
 
 .label {
@@ -49,10 +47,8 @@
   50%, 100% { opacity: 0.25; }
 }
 
-/* Trên màn hình nhỏ, thu gọn chữ + kéo vào gần mép hơn để không đè lên PixelPet */
 @media (max-width: 600px) {
   .widget {
-    left: 10px;
     padding: 6px 10px;
   }
   .mainLine { font-size: 14px; }

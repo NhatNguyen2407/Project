@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import styles from './CountdownWidget.module.css';
+import { useDraggable } from '../../hooks/useDraggable';
 
-// Mốc bắt đầu: 14:00:00 ngày 24/10/2025 - đổi ở đây nếu cần chỉnh lại
-// Lưu ý: tháng trong JS Date bắt đầu từ 0, nên tháng 10 (October) là index 9
 const START_DATE = new Date(2025, 9, 24, 14, 0, 0);
 
-// Tính khoảng cách theo đúng lịch thật (năm/tháng/ngày/giờ/phút/giây),
-// không dùng phép chia trung bình (kiểu "1 tháng = 30 ngày") vì sẽ bị lệch dần theo thời gian
 const getElapsed = (start, now) => {
   let years = now.getFullYear() - start.getFullYear();
   let months = now.getMonth() - start.getMonth();
@@ -19,7 +16,6 @@ const getElapsed = (start, now) => {
   if (minutes < 0) { minutes += 60; hours -= 1; }
   if (hours < 0) { hours += 24; days -= 1; }
   if (days < 0) {
-    // "Mượn" số ngày của tháng liền trước tháng hiện tại (dùng ngày 0 = ngày cuối tháng trước)
     const prevMonthLastDay = new Date(now.getFullYear(), now.getMonth(), 0).getDate();
     days += prevMonthLastDay;
     months -= 1;
@@ -31,12 +27,19 @@ const getElapsed = (start, now) => {
 
 const pad2 = (n) => n.toString().padStart(2, '0');
 
+// Vị trí ban đầu
+const getInitialPosition = () => ({
+  x: 20,
+  y: Math.max(20, window.innerHeight - 170),
+});
+
 const CountdownWidget = () => {
   const [elapsed, setElapsed] = useState(() => getElapsed(START_DATE, new Date()));
+  const { position, onDragMouseDown } = useDraggable(getInitialPosition);
 
   useEffect(() => {
     const tick = () => setElapsed(getElapsed(START_DATE, new Date()));
-    tick(); // Tính ngay lần đầu, không đợi 1s mới hiện
+    tick();
     const interval = setInterval(tick, 1000);
     return () => clearInterval(interval);
   }, []);
@@ -44,7 +47,11 @@ const CountdownWidget = () => {
   const { years, months, days, hours, minutes, seconds } = elapsed;
 
   return (
-    <div className={styles.widget} aria-hidden="true">
+    <div
+      className={styles.widget}
+      style={{ left: position.x, top: position.y }}
+      onMouseDown={onDragMouseDown}
+    >
       <p className={styles.label}>💜 Bên nhau được</p>
       <p className={styles.mainLine}>
         {years} năm {months} tháng {days} ngày

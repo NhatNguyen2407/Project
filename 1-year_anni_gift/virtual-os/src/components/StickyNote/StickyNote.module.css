@@ -1,8 +1,6 @@
 .wrapper {
   position: fixed;
-  top: 24px;
-  right: 24px;
-  z-index: 5; /* Trên nền desktop, dưới các cửa sổ app đang mở */
+  z-index: 5;
   transition: opacity 0.25s, transform 0.25s;
 }
 
@@ -15,7 +13,7 @@
 .note {
   position: relative;
   width: 180px;
-  background-color: #fff9c4; /* Vàng giấy note pastel */
+  background-color: #fff9c4;
   border: 2px solid #e6d17a;
   padding: 18px 14px 14px;
   transform: rotate(-4deg);
@@ -27,7 +25,7 @@
     0 calc(100% - 3px), 0 3px
   );
   transition: transform 0.2s, box-shadow 0.2s;
-  cursor: default;
+  cursor: grab;
 }
 
 .note.peek {
@@ -35,7 +33,6 @@
   box-shadow: 6px 6px 0px rgba(123, 31, 162, 0.2);
 }
 
-/* Cây ghim pixel nhỏ ở đầu note */
 .pin {
   position: absolute;
   top: -8px;
@@ -79,12 +76,7 @@
   color: #7b1fa2;
 }
 
-/* Trên màn hình nhỏ, thu gọn note lại và dịch vào trong 1 chút */
 @media (max-width: 600px) {
-  .wrapper {
-    top: 12px;
-    right: 12px;
-  }
   .note {
     width: 130px;
     padding: 14px 10px 10px;

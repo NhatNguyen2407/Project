@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import styles from './StickyNote.module.css';
+import { useDraggable } from '../../hooks/useDraggable';
 
-// Kho câu ngọt ngào - bro có thể tự thêm/sửa câu tuỳ ý, mỗi lần load lại trang sẽ random 1 câu
 const QUOTES = [
   'Hôm nay cũng yêu em nhiều như hôm qua vậy đó 💜',
   'Cảm ơn vì đã đồng ý đi cùng tui suốt 1 năm qua nha.',
@@ -15,22 +15,33 @@ const QUOTES = [
   'Nắm tay tui đi, mình còn nhiều chặng đường phải đi nữa.',
 ];
 
+// Vị trí ban đầu
+const getInitialPosition = () => ({
+  x: Math.max(20, window.innerWidth - 220),
+  y: 24,
+});
+
 const StickyNote = () => {
-  // Chọn 1 câu ngẫu nhiên mỗi lần component mount (tức mỗi lần load/reload trang)
   const quoteRef = useRef(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
   const [isVisible, setIsVisible] = useState(true);
   const [isPeeking, setIsPeeking] = useState(false);
+  const { position, onDragMouseDown, justDraggedRef } = useDraggable(getInitialPosition);
 
   return (
-    <div className={`${styles.wrapper} ${!isVisible ? styles.hidden : ''}`}>
+    <div
+      className={`${styles.wrapper} ${!isVisible ? styles.hidden : ''}`}
+      style={{ left: position.x, top: position.y }}
+    >
       <div
         className={`${styles.note} ${isPeeking ? styles.peek : ''}`}
+        onMouseDown={onDragMouseDown}
         onMouseEnter={() => setIsPeeking(true)}
         onMouseLeave={() => setIsPeeking(false)}
       >
         <button
           className={styles.closeBtn}
-          onClick={() => setIsVisible(false)}
+          onMouseDown={(e) => e.stopPropagation()}
+          onClick={() => { if (!justDraggedRef.current) setIsVisible(false); }}
           aria-label="Đóng sticky note"
           title="Đóng"
         >
