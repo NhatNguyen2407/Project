@@ -171,6 +171,7 @@ const Desktop = () => {
       {APPS.map((app, index) => (
         <DesktopIcon 
           key={app.id}
+          id={app.id}
           iconSrc={app.icon} 
           title={app.title}
           initialPosition={{ x: 20, y: 20 + index * 110 }}
