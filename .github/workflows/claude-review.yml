@@ -15,18 +15,29 @@ jobs:
       - name: Get diff
         id: diff
         run: |
-          echo "diff<<EOF" >> $GITHUB_OUTPUT
-          git diff HEAD^ HEAD >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          git diff HEAD^ HEAD > diff.txt
+          echo "Diff saved, $(wc -l < diff.txt) lines"
 
       - name: Call Claude API
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: |
+          # Build the JSON payload safely using jq, reading the diff from a file
+          jq -n \
+            --rawfile diff diff.txt \
+            '{
+              model: "claude-sonnet-5",
+              max_tokens: 1000,
+              messages: [
+                { role: "user", content: ("Tóm tắt và review đoạn diff code sau:\n" + $diff) }
+              ]
+            }' > payload.json
+
           curl -s -X POST https://api.anthropic.com/v1/messages \
-            -H "x-api-key: ${{ secrets.ANTHROPIC_API_KEY }}" \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
             -H "anthropic-version: 2023-06-01" \
             -H "content-type: application/json" \
-            -d "$(jq -n --arg diff "${{ steps.diff.outputs.diff }}" \
-              '{model:"claude-sonnet-5", max_tokens:1000, messages:[{role:"user", content:("Tóm tắt và review đoạn diff code sau:\n" + $diff)}]}')" \
+            -d @payload.json \
             > claude_response.json
 
       - name: Show result
