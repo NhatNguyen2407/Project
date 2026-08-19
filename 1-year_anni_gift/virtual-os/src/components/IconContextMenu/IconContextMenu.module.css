@@ -1,0 +1,60 @@
+.menu {
+  position: fixed;
+  width: 160px;
+  background-color: #ffffff;
+  border: 3px solid #b39ddb;
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
+  box-shadow: 4px 4px 0px rgba(179, 157, 219, 0.4);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 100000;
+  animation: popIn 0.15s ease-out;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.menuItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  background: transparent;
+  border: none;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  color: #4a148c;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.15s;
+}
+
+.menuItem:hover {
+  background-color: #f3e5f5;
+  color: #7b1fa2;
+}
+
+.icon {
+  font-size: 14px;
+}
+
+.divider {
+  height: 2px;
+  background-color: #f3e5f5;
+  margin: 2px 0;
+}

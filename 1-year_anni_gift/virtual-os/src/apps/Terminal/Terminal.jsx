@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './Terminal.module.css';
 import { useSound } from '../../hooks/useSound';
+import { useAchievements } from '../../context/AchievementsContext';
 
 const PROMPT = 'nhinhi@bibi-os:~$';
 
@@ -12,8 +13,8 @@ const BOOT_LINES = [
   '',
 ];
 
-// Toàn bộ logic lệnh nằm gọn ở đây - muốn thêm lệnh mới chỉ cần thêm 1 entry vào object này
-const buildCommands = ({ setLines, clearLines }) => ({
+// logic lệnh
+const buildCommands = ({ setLines, clearLines, unlock }) => ({
   help: () => [
     'Các lệnh khả dụng:',
     '  help            - Xem danh sách lệnh',
@@ -26,19 +27,25 @@ const buildCommands = ({ setLines, clearLines }) => ({
     '  clear           - Xoá màn hình',
     '  sudo make me a sandwich',
   ],
-  whoami: () => ['NhiNhi - người dùng có quyền truy cập cao nhất vào tim của tui. 💜'],
+  whoami: () => {
+    unlock('terminal_whoami');
+    return ['NhiNhi - người dùng có quyền truy cập cao nhất vào tim của tui. 💜'];
+  },
   ls: () => ['GALLERY.EXE   MUSIC_PLAYER.EXE   LOVE_LETTER.TXT   MEMORY_MATCH.EXE'],
   date: () => [new Date().toLocaleString('vi-VN')],
   clear: () => {
     clearLines();
     return null; // Không in thêm dòng nào sau khi clear
   },
-  'cat secret.txt': () => [
-    '> Đọc file secret.txt...',
-    'Thật ra không có bí mật kỹ thuật nào ở đây cả,',
-    'bí mật duy nhất là tui đã giấu bao nhiêu buổi tối',
-    'ngồi code cái OS này chỉ để thấy em cười lúc mở nó ra. 💜',
-  ],
+  'cat secret.txt': () => {
+    unlock('secret_finder');
+    return [
+      '> Đọc file secret.txt...',
+      'Thật ra không có bí mật kỹ thuật nào ở đây cả,',
+      'bí mật duy nhất là tui đã giấu bao nhiêu buổi tối',
+      'ngồi code cái OS này chỉ để thấy em cười lúc mở nó ra. 💜',
+    ];
+  },
   'love --status': () => [
     'Đang kiểm tra trạng thái hệ thống...',
     'STATUS: ĐANG CHẠY ỔN ĐỊNH',
@@ -61,6 +68,7 @@ const Terminal = () => {
   const bottomRef = useRef(null);
   const inputRef = useRef(null);
   const { playType } = useSound();
+  const { unlock } = useAchievements();
 
   const pushLines = (texts) => {
     if (!texts) return;
@@ -72,9 +80,9 @@ const Terminal = () => {
 
   const clearLines = () => setLines([]);
 
-  const commandsRef = useRef(buildCommands({ setLines, clearLines }));
+  const commandsRef = useRef(buildCommands({ setLines, clearLines, unlock }));
 
-  // Boot log hiện từng dòng 1 khi mở app, giống terminal thật đang khởi động
+  // Boot log hiện từng dòng 1 khi mở app
   useEffect(() => {
     let cancelled = false;
     BOOT_LINES.forEach((line, i) => {
@@ -134,7 +142,7 @@ const Terminal = () => {
         setInput(cmdHistory[nextIndex]);
       }
     } else {
-      // Tiếng gõ phím nhẹ, dùng lại đúng SFX của hiệu ứng typewriter ở Love Letter
+      // Tiếng gõ phím
       if (e.key.length === 1) playType();
     }
   };

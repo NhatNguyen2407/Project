@@ -9,7 +9,9 @@ import PixelPet from './components/PixelPet/PixelPet';
 import FloatingElements from './components/FloatingElements/FloatingElements';
 import FakeSystemScreen from './components/FakeSystemScreen/FakeSystemScreen';
 import CountdownWidget from './components/CountdownWidget/CountdownWidget';
+import AchievementToast from './components/AchievementToast/AchievementToast';
 import { useSound } from './hooks/useSound';
+import { useAchievements } from './context/AchievementsContext';
 
 // Import ảnh icon
 import galleryIcon from './assets/images/pixel/folder_icon_pixel.png';
@@ -18,6 +20,7 @@ import letterIcon from './assets/images/pixel/heart_letter_icon_pixel.png';
 import memoryMatchIcon from './assets/images/pixel/memory_match_icon.svg';
 import terminalIcon from './assets/images/pixel/terminal_icon.svg';
 import timelineIcon from './assets/images/pixel/timeline_icon.svg';
+import achievementsIcon from './assets/images/pixel/achievements_icon.svg';
 
 // Import các App
 import Gallery from './apps/Gallery/Gallery';
@@ -26,6 +29,7 @@ import Letter from './apps/Letter/Letter';
 import MemoryMatch from './apps/MemoryMatch/MemoryMatch';
 import Terminal from './apps/Terminal/Terminal';
 import Timeline from './apps/Timeline/Timeline';
+import Achievements from './apps/Achievements/Achievements';
 
 // Kho ứng dụng
 const APPS = [
@@ -34,7 +38,8 @@ const APPS = [
   { id: 'letter', title: 'LOVE_LETTER.TXT', icon: letterIcon, content: <Letter /> },
   { id: 'memory', title: 'MEMORY_MATCH.EXE', icon: memoryMatchIcon, content: <MemoryMatch /> },
   { id: 'terminal', title: 'TERMINAL.EXE', icon: terminalIcon, content: <Terminal /> },
-  { id: 'timeline', title: 'TIMELINE.EXE', icon: timelineIcon, content: <Timeline /> }
+  { id: 'timeline', title: 'TIMELINE.EXE', icon: timelineIcon, content: <Timeline /> },
+  { id: 'achievements', title: 'ACHIEVEMENTS.EXE', icon: achievementsIcon, content: <Achievements /> }
 ];
 
 const Desktop = () => {
@@ -45,24 +50,21 @@ const Desktop = () => {
   const [theme, setTheme] = useState('purple'); 
   const [isRefreshing, setIsRefreshing] = useState(false);
   const { playClick, playOpen, playClose } = useSound();
-  const [fakeScreen, setFakeScreen] = useState(null); // null | 'shutdown' | 'bsod'
-
-  // Easter egg: bấm tổ hợp Ctrl+Alt+B ("B" = BSOD) để "triệu hồi" màn hình troll
-  // Lưu ý: không dùng Ctrl+Alt+Delete vì tổ hợp đó bị Windows chặn ở tầng hệ điều hành,
-  // trình duyệt không bao giờ nhận được sự kiện này
+  const { unlock } = useAchievements();
+  const [fakeScreen, setFakeScreen] = useState(null); 
+  
   useEffect(() => {
     const handleSecretCombo = (e) => {
       if (e.ctrlKey && e.altKey && (e.key === 'b' || e.key === 'B')) {
         e.preventDefault();
         setFakeScreen('bsod');
+        unlock('prankster');
       }
     };
     window.addEventListener('keydown', handleSecretCombo);
     return () => window.removeEventListener('keydown', handleSecretCombo);
   }, []);
 
-  // Lắng nghe click toàn màn hình 1 lần duy nhất: hễ bấm vào <button> hoặc icon desktop
-  // thì phát tiếng "tách" - không cần thêm onClick riêng ở từng component
   useEffect(() => {
     const handleGlobalClick = (e) => {
       if (e.target.closest('button, [data-sfx="click"]')) {
@@ -83,6 +85,8 @@ const Desktop = () => {
       setOpenWindows([...openWindows, { id: appId, zIndex: newZIndex, isMinimized: false }]);
       setTopZIndex(newZIndex);
       playOpen();
+
+      unlock(`open_${appId}`);
     } else {
       handleRestoreAndFocus(appId);
     }
@@ -149,8 +153,6 @@ const Desktop = () => {
       width: '100vw',
       height: '100vh',
       backgroundColor: bgColor,
-      // Dither pattern: 2 lưới chấm bi xen kẽ (lệch nhau nửa ô) thay cho gradient mượt,
-      // tạo cảm giác texture pixel cổ điển kiểu desktop Windows 95/3.1
       backgroundImage: `
         radial-gradient(${dotColor} 1.5px, transparent 1.5px),
         radial-gradient(${dotColor} 1.5px, transparent 1.5px)
@@ -184,6 +186,7 @@ const Desktop = () => {
       <StickyNote />
       <PixelPet />
       <CountdownWidget />
+      <AchievementToast />
 
       {openWindows.map((openedApp) => {
         const appData = APPS.find(a => a.id === openedApp.id);
@@ -211,9 +214,10 @@ const Desktop = () => {
           onChangeWallpaper={(selectedTheme) => {
             setTheme(selectedTheme);
             setContextMenu(null);
+            unlock('change_theme');
           }}
           onLock={() => window.location.reload()}
-          onShutdown={() => setFakeScreen('shutdown')}
+          onShutdown={() => { setFakeScreen('shutdown'); unlock('shutdown_egg'); }}
         />
       )}
 
