@@ -1,0 +1,44 @@
+name: Claude Auto Review
+on:
+  push:
+    branches: [main]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get diff
+        id: diff
+        run: |
+          git diff HEAD^ HEAD > diff.txt
+          echo "Diff saved, $(wc -l < diff.txt) lines"
+
+      - name: Call Claude API
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          # Build the JSON payload safely using jq, reading the diff from a file
+          jq -n \
+            --rawfile diff diff.txt \
+            '{
+              model: "claude-sonnet-5",
+              max_tokens: 1000,
+              messages: [
+                { role: "user", content: ("Tóm tắt và review đoạn diff code sau:\n" + $diff) }
+              ]
+            }' > payload.json
+
+          curl -s -X POST https://api.anthropic.com/v1/messages \
+            -H "x-api-key: $ANTHROPIC_API_KEY" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d @payload.json \
+            > claude_response.json
+
+      - name: Show result
+        run: cat claude_response.json
