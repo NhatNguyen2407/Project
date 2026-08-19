@@ -1,0 +1,33 @@
+name: Claude Auto Review
+on:
+  push:
+    branches: [main]
+
+jobs:
+  claude-review:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get diff
+        id: diff
+        run: |
+          echo "diff<<EOF" >> $GITHUB_OUTPUT
+          git diff HEAD^ HEAD >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Call Claude API
+        run: |
+          curl -s -X POST https://api.anthropic.com/v1/messages \
+            -H "x-api-key: ${{ secrets.ANTHROPIC_API_KEY }}" \
+            -H "anthropic-version: 2023-06-01" \
+            -H "content-type: application/json" \
+            -d "$(jq -n --arg diff "${{ steps.diff.outputs.diff }}" \
+              '{model:"claude-sonnet-5", max_tokens:1000, messages:[{role:"user", content:("Tóm tắt và review đoạn diff code sau:\n" + $diff)}]}')" \
+            > claude_response.json
+
+      - name: Show result
+        run: cat claude_response.json
