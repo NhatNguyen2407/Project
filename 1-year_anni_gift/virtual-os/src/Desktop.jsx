@@ -9,6 +9,7 @@ import PixelPet from './components/PixelPet/PixelPet';
 import FloatingElements from './components/FloatingElements/FloatingElements';
 import FakeSystemScreen from './components/FakeSystemScreen/FakeSystemScreen';
 import CountdownWidget from './components/CountdownWidget/CountdownWidget';
+import Screensaver from './components/Screensaver/Screensaver';
 import AchievementToast from './components/AchievementToast/AchievementToast';
 import { useSound } from './hooks/useSound';
 import { useAchievements } from './context/AchievementsContext';
@@ -21,6 +22,7 @@ import memoryMatchIcon from './assets/images/pixel/memory_match_icon.svg';
 import terminalIcon from './assets/images/pixel/terminal_icon.svg';
 import timelineIcon from './assets/images/pixel/timeline_icon.svg';
 import achievementsIcon from './assets/images/pixel/achievements_icon.svg';
+import quizIcon from './assets/images/pixel/quiz_icon.svg';
 
 // Import các App
 import Gallery from './apps/Gallery/Gallery';
@@ -30,6 +32,7 @@ import MemoryMatch from './apps/MemoryMatch/MemoryMatch';
 import Terminal from './apps/Terminal/Terminal';
 import Timeline from './apps/Timeline/Timeline';
 import Achievements from './apps/Achievements/Achievements';
+import Quiz from './apps/Quiz/Quiz';
 
 // Kho ứng dụng
 const APPS = [
@@ -39,7 +42,8 @@ const APPS = [
   { id: 'memory', title: 'MEMORY_MATCH.EXE', icon: memoryMatchIcon, content: <MemoryMatch /> },
   { id: 'terminal', title: 'TERMINAL.EXE', icon: terminalIcon, content: <Terminal /> },
   { id: 'timeline', title: 'TIMELINE.EXE', icon: timelineIcon, content: <Timeline /> },
-  { id: 'achievements', title: 'ACHIEVEMENTS.EXE', icon: achievementsIcon, content: <Achievements /> }
+  { id: 'achievements', title: 'ACHIEVEMENTS.EXE', icon: achievementsIcon, content: <Achievements /> },
+  { id: 'quiz', title: 'QUIZ.EXE', icon: quizIcon, content: <Quiz /> }
 ];
 
 const Desktop = () => {
@@ -52,7 +56,7 @@ const Desktop = () => {
   const { playClick, playOpen, playClose } = useSound();
   const { unlock } = useAchievements();
   const [fakeScreen, setFakeScreen] = useState(null); 
-  
+
   useEffect(() => {
     const handleSecretCombo = (e) => {
       if (e.ctrlKey && e.altKey && (e.key === 'b' || e.key === 'B')) {
@@ -85,7 +89,6 @@ const Desktop = () => {
       setOpenWindows([...openWindows, { id: appId, zIndex: newZIndex, isMinimized: false }]);
       setTopZIndex(newZIndex);
       playOpen();
-
       unlock(`open_${appId}`);
     } else {
       handleRestoreAndFocus(appId);
@@ -242,6 +245,8 @@ const Desktop = () => {
           onDismiss={() => setFakeScreen(null)}
         />
       )}
+
+      <Screensaver />
     </div>
   );
 };

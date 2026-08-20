@@ -11,6 +11,27 @@
   height: 30px;
   transform-origin: center bottom;
   transition: transform 0.15s;
+  pointer-events: auto; /* Mở lại tương tác riêng cho pet, dù wrapper ngoài đang pointer-events: none */
+  cursor: url('../../assets/cursors/pointer-heart.svg') 2 2, pointer;
+}
+
+.petted {
+  animation: pettedBounce 0.4s ease-in-out;
+}
+
+.eating {
+  animation: eatingBounce 0.5s ease-in-out 2;
+}
+
+@keyframes pettedBounce {
+  0%, 100% { transform: scaleX(var(--dir, 1)) scale(1); }
+  40% { transform: scaleX(var(--dir, 1)) scale(1.15, 0.85); }
+  70% { transform: scaleX(var(--dir, 1)) scale(0.95, 1.08); }
+}
+
+@keyframes eatingBounce {
+  0%, 100% { transform: scaleX(var(--dir, 1)) translateY(0); }
+  50% { transform: scaleX(var(--dir, 1)) translateY(-3px); }
 }
 
 .head {
@@ -134,4 +155,63 @@
   .petWrapper {
     display: none;
   }
+}
+
+/* Con cá xuất hiện để cho pet ăn */
+.treat {
+  position: absolute;
+  bottom: 34px;
+  left: 6px;
+  background: none;
+  border: none;
+  font-size: 20px;
+  line-height: 1;
+  padding: 2px;
+  cursor: url('../../assets/cursors/pointer-heart.svg') 2 2, pointer;
+  pointer-events: auto;
+  animation: treatBob 0.9s ease-in-out infinite;
+  filter: drop-shadow(0 0 2px rgba(255, 255, 255, 0.8));
+}
+
+@keyframes treatBob {
+  0%, 100% { transform: translateY(0) rotate(-8deg); }
+  50% { transform: translateY(-5px) rotate(8deg); }
+}
+
+/* Tim bay lên khi vuốt ve/cho ăn */
+.heartParticle {
+  position: absolute;
+  bottom: 30px;
+  left: 16px;
+  font-size: 13px;
+  pointer-events: none;
+  animation: heartFloat 0.9s ease-out forwards;
+}
+
+@keyframes heartFloat {
+  0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+  20% { opacity: 1; }
+  100% { transform: translate(var(--dx, 0), -38px) scale(1); opacity: 0; }
+}
+
+/* Số đếm độ yêu thích, hiện thoáng qua rồi mờ dần sau mỗi lần tương tác */
+.affectionCounter {
+  position: absolute;
+  bottom: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #ad1457;
+  background-color: #ffffff;
+  border: 2px solid #f48fb1;
+  padding: 1px 8px;
+  white-space: nowrap;
+  pointer-events: none;
+  animation: counterPop 0.2s ease-out;
+}
+
+@keyframes counterPop {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
 }

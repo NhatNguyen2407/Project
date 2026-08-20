@@ -1,0 +1,29 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: #000000;
+  z-index: 99998;
+  overflow: hidden;
+  cursor: none;
+}
+
+.heart {
+  position: absolute;
+  font-size: 48px;
+  line-height: 1;
+  filter: drop-shadow(0 0 10px currentColor);
+  transition: color 0.25s ease;
+  user-select: none;
+}
+
+.hint {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #666;
+  opacity: 0.6;
+  white-space: nowrap;
+}
