@@ -1,0 +1,44 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100000; /* Trên cả LoginScreen (99999), luôn là màn hình đầu tiên nhìn thấy */
+  background-color: #0a0a0a;
+  display: flex;
+  align-items: flex-start;
+  padding: 40px;
+  box-sizing: border-box;
+  cursor: default;
+}
+
+.log {
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  color: #d6c8e6;
+  line-height: 1.6;
+}
+
+.line {
+  margin: 0;
+  white-space: pre-wrap;
+  animation: lineAppear 0.15s ease-out;
+}
+
+@keyframes lineAppear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.cursorBlink {
+  display: inline-block;
+  animation: cursorBlink 0.8s steps(1) infinite;
+}
+
+@keyframes cursorBlink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@media (max-width: 600px) {
+  .screen { padding: 20px; }
+  .log { font-size: 14px; }
+}

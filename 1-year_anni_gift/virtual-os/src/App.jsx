@@ -1,20 +1,24 @@
 import React, { useState } from 'react';
 import Desktop from './Desktop';
 import LoginScreen from './components/LoginScreen/LoginScreen';
+import BootScreen from './components/BootScreen/BootScreen';
 import CRTOverlay from './components/CRTOverlay/CRTOverlay';
 import { SoundSettingsProvider } from './context/SoundSettingsContext';
 import { AchievementsProvider } from './context/AchievementsContext';
 import './styles/global.css';
 
 function App() {
-  // Trạng thái khóa màn hình, mặc định ban đầu là false
+  const [isBooting, setIsBooting] = useState(true);
   const [isUnlocked, setIsUnlocked] = useState(false);
 
   return (
     <SoundSettingsProvider>
       <AchievementsProvider>
-        {/* Nếu chưa mở khóa thì hiện LoginScreen */}
-        {!isUnlocked && (
+        {isBooting && (
+          <BootScreen onComplete={() => setIsBooting(false)} />
+        )}
+
+        {!isBooting && !isUnlocked && (
           <LoginScreen onUnlock={() => setIsUnlocked(true)} />
         )}
         

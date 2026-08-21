@@ -10,6 +10,7 @@ import FloatingElements from './components/FloatingElements/FloatingElements';
 import FakeSystemScreen from './components/FakeSystemScreen/FakeSystemScreen';
 import CountdownWidget from './components/CountdownWidget/CountdownWidget';
 import Screensaver from './components/Screensaver/Screensaver';
+import WeatherWidget from './components/WeatherWidget/WeatherWidget';
 import AchievementToast from './components/AchievementToast/AchievementToast';
 import { useSound } from './hooks/useSound';
 import { useAchievements } from './context/AchievementsContext';
@@ -57,6 +58,7 @@ const Desktop = () => {
   const { unlock } = useAchievements();
   const [fakeScreen, setFakeScreen] = useState(null); 
 
+  // Easter egg: bấm tổ hợp Ctrl+Alt+B ("B" = BSOD) để gọi màn hình troll
   useEffect(() => {
     const handleSecretCombo = (e) => {
       if (e.ctrlKey && e.altKey && (e.key === 'b' || e.key === 'B')) {
@@ -89,6 +91,7 @@ const Desktop = () => {
       setOpenWindows([...openWindows, { id: appId, zIndex: newZIndex, isMinimized: false }]);
       setTopZIndex(newZIndex);
       playOpen();
+
       unlock(`open_${appId}`);
     } else {
       handleRestoreAndFocus(appId);
@@ -189,6 +192,7 @@ const Desktop = () => {
       <StickyNote />
       <PixelPet />
       <CountdownWidget />
+      <WeatherWidget />
       <AchievementToast />
 
       {openWindows.map((openedApp) => {
