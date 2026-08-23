@@ -1,7 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './MusicPlayer.module.css';
 import PixelProgressBar from '../../components/PixelProgressBar/PixelProgressBar';
+import MusicVisualizer from '../../components/MusicVisualizer/MusicVisualizer';
 import { useSoundSettings } from '../../context/SoundSettingsContext';
+import { getAudioContext } from '../../hooks/useSound';
 
 // 1. Import Ảnh
 import pastBibiImg from '../../assets/images/albumbibi.jpg';
@@ -36,11 +38,12 @@ const MusicPlayer = () => {
   const [playingId, setPlayingId] = useState(null);
   const [playProgress, setPlayProgress] = useState(0); // % tiến trình bài đang phát
   const [playElapsed, setPlayElapsed] = useState(0); // Giây hiện tại của bài đang phát
-  const [durations, setDurations] = useState({}); // { [songId]: giây } - tự điền khi mỗi <audio> tải xong metadata, độc lập theo từng bài
+  const [durations, setDurations] = useState({}); // { [songId]: giây } - tự điền khi tải xong metadata, độc lập theo từng bài
   const audioRefs = useRef({}); // Lưu trữ các thẻ <audio>
+  const analyserRefs = useRef({}); // Cache AnalyserNode theo từng song 
+  const [activeAnalyser, setActiveAnalyser] = useState(null); // AnalyserNode của bài đang phát, null nếu không có bài nào chạy
   const { effectiveVolume } = useSoundSettings(); // Volume dùng chung toàn OS (0-100)
 
-  // mm:ss - dùng chung cho cả thời lượng tổng và thời điểm đang phát
   const formatTime = (seconds) => {
     if (!seconds || !isFinite(seconds) || seconds < 0) return '0:00';
     const m = Math.floor(seconds / 60);
@@ -48,38 +51,54 @@ const MusicPlayer = () => {
     return `${m}:${s}`;
   };
 
-  // Áp dụng volume ngay khi bắt đầu phát, và cập nhật liên tục nếu người dùng
-  // kéo thanh volume/bấm mute trong lúc bài đang chạy
   useEffect(() => {
     if (playingId && audioRefs.current[playingId]) {
       audioRefs.current[playingId].volume = effectiveVolume / 100;
     }
   }, [effectiveVolume, playingId]);
 
+  const getOrCreateAnalyser = (id, audioEl) => {
+    if (analyserRefs.current[id]) return analyserRefs.current[id];
+    try {
+      const ctx = getAudioContext();
+      if (!ctx) return null; 
+
+      const source = ctx.createMediaElementSource(audioEl);
+      const analyser = ctx.createAnalyser();
+      analyser.fftSize = 64; 
+
+      source.connect(analyser);
+      analyser.connect(ctx.destination);
+
+      analyserRefs.current[id] = analyser;
+      return analyser;
+    } catch (e) {
+      return null;
+    }
+  };
+
   // Hàm xử lý Play/Pause nhạc
   const togglePlay = (id) => {
     const currentAudio = audioRefs.current[id];
 
     if (playingId === id) {
-      // Nếu bấm vào bài đang phát -> Tạm dừng (giữ nguyên vị trí đang nghe dở)
       currentAudio.pause();
       setPlayingId(null);
+      setActiveAnalyser(null);
     } else {
-      // Nếu có bài khác đang phát -> Dừng bài cũ
       if (playingId && audioRefs.current[playingId]) {
         audioRefs.current[playingId].pause();
-        audioRefs.current[playingId].currentTime = 0; // Trả về đầu bài
+        audioRefs.current[playingId].currentTime = 0; 
       }
-      // Phát bài mới - reset cả % tiến trình lẫn thời gian hiển thị về 0 cho bài mới này
       setPlayProgress(0);
       setPlayElapsed(0);
       currentAudio.volume = effectiveVolume / 100;
       currentAudio.play();
       setPlayingId(id);
+      setActiveAnalyser(getOrCreateAnalyser(id, currentAudio));
     }
   };
 
-  // Cập nhật % tiến trình + số giây hiện tại mỗi khi audio phát ra sự kiện timeupdate
   const handleTimeUpdate = (e) => {
     const { currentTime, duration } = e.target;
     setPlayElapsed(currentTime);
@@ -88,9 +107,6 @@ const MusicPlayer = () => {
     }
   };
 
-  // Ghi nhận thời lượng tổng của TỪNG bài ngay khi trình duyệt đọc xong metadata file -
-  // chạy độc lập cho mọi bài (kể cả chưa từng bấm play), lưu theo key = song.id nên
-  // không bao giờ bị lẫn/lỗi giữa các bài khi chuyển qua lại
   const handleLoadedMetadata = (songId) => (e) => {
     setDurations((prev) => ({ ...prev, [songId]: e.target.duration }));
   };
@@ -113,7 +129,12 @@ const MusicPlayer = () => {
         </button>
       </div>
 
-      {/* TAB 1: OUR MELODY (Playlist chung) */}
+      {/* Visualizer nhảy theo tần số âm thanh thực tế của bài đang phát */}
+      <div className={styles.visualizerWrap}>
+        <MusicVisualizer analyserNode={activeAnalyser} />
+      </div>
+
+      {/* melody*/}
       {activeTab === 'shared' && (
         <div className={styles.tabContent}>
           <p className={styles.description}>
@@ -141,13 +162,11 @@ const MusicPlayer = () => {
                 <div className={styles.songInfo}>
                   <h4 className={styles.songTitle}>{song.title}</h4>
                   <p className={styles.songArtist}>{song.artist}</p>
-                  {/* Thời gian: đang phát thì hiện "hiện tại / tổng", còn lại chỉ hiện tổng thời lượng của riêng file đó */}
                   <p className={styles.songDuration}>
                     {playingId === song.id
                       ? `${formatTime(playElapsed)} / ${formatTime(durations[song.id])}`
                       : formatTime(durations[song.id])}
                   </p>
-                  {/* Thanh tiến trình pixel, chỉ hiện ở bài đang phát */}
                   {playingId === song.id && (
                     <div className={styles.progressWrap}>
                       <PixelProgressBar progress={playProgress} segments={16} />
@@ -155,18 +174,16 @@ const MusicPlayer = () => {
                   )}
                 </div>
                 
-                {/* Nút Play ảo */}
                 <div className={styles.playIndicator}>
                   {playingId === song.id ? '⏸' : '▶'}
                 </div>
 
-                {/* Thẻ audio ẩn để xử lý logic */}
                 <audio 
                   ref={(el) => (audioRefs.current[song.id] = el)} 
                   src={song.src}
                   onLoadedMetadata={handleLoadedMetadata(song.id)}
                   onTimeUpdate={playingId === song.id ? handleTimeUpdate : undefined}
-                  onEnded={() => { setPlayingId(null); setPlayProgress(0); setPlayElapsed(0); }} // Hết bài tự tắt đĩa than
+                  onEnded={() => { setPlayingId(null); setPlayProgress(0); setPlayElapsed(0); setActiveAnalyser(null); }}
                 />
               </div>
             ))}
@@ -174,7 +191,7 @@ const MusicPlayer = () => {
         </div>
       )}
 
-      {/* TAB 2: QUÁ KHỨ */}
+      {/* past */}
       {activeTab === 'past' && (
         <div className={styles.tabContent}>
           <p className={styles.description}>

@@ -13,6 +13,10 @@
   padding-bottom: 8px;
 }
 
+.visualizerWrap {
+  flex-shrink: 0;
+}
+
 .tabBtn {
   font-family: 'VT323', monospace;
   font-size: 20px;
@@ -175,8 +179,6 @@
 .progressWrap {
   margin-top: 6px;
   max-width: 140px;
-  /* CSS variable này được PixelProgressBar đọc để tô màu khối đã lấp đầy,
-     dùng biến thay vì :global() vì CSS Modules hash tên class ở component con */
   --pixel-progress-fill: #ec407a;
   --pixel-progress-fill-border: #ad1457;
 }

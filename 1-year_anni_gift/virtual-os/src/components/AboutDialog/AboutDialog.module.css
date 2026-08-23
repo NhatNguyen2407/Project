@@ -1,0 +1,155 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(74, 20, 140, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100001;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.dialog {
+  width: 320px;
+  max-width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  background-color: #ffffff;
+  border: 3px solid #b39ddb;
+  box-shadow: 5px 5px 0px rgba(179, 157, 219, 0.4);
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
+  animation: popIn 0.15s ease-out;
+}
+
+@keyframes popIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.header {
+  position: sticky;
+  top: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f3e5f5;
+  border-bottom: 2px solid #ce93d8;
+  padding: 6px 10px;
+  font-family: 'VT323', monospace;
+  font-size: 18px;
+  color: #4a148c;
+}
+
+.closeBtn {
+  font-family: monospace;
+  font-weight: bold;
+  background-color: #ffffff;
+  border: 2px solid #b39ddb;
+  width: 22px;
+  height: 22px;
+  cursor: pointer;
+  color: #4a148c;
+}
+
+.closeBtn:active {
+  transform: translate(1px, 1px);
+}
+
+.body {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.logo {
+  font-size: 40px;
+  line-height: 1;
+  margin-bottom: 6px;
+  filter: drop-shadow(0 0 6px rgba(206, 147, 216, 0.6));
+}
+
+.osName {
+  font-family: 'VT323', monospace;
+  font-size: 22px;
+  color: #4a148c;
+  margin: 0;
+}
+
+.version {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #ab47bc;
+  margin: 2px 0 14px;
+}
+
+.specsBox {
+  width: 100%;
+  background-color: #f3e5f5;
+  border: 2px solid #e1bee7;
+  padding: 10px 12px;
+  margin-bottom: 16px;
+  text-align: left;
+}
+
+.specRow {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-family: 'VT323', monospace;
+  font-size: 13px;
+  padding: 2px 0;
+}
+
+.specLabel {
+  color: #7b1fa2;
+  flex-shrink: 0;
+}
+
+.specValue {
+  color: #4a148c;
+  text-align: right;
+}
+
+.personalMessage {
+  font-family: 'Itim', cursive;
+  font-size: 14px;
+  color: #5d4a1f;
+  background-color: #fff9c4;
+  border: 2px solid #e6d17a;
+  padding: 12px 14px;
+  line-height: 1.6;
+  white-space: pre-line;
+  text-align: left;
+  margin: 0 0 14px;
+}
+
+.signature {
+  font-family: 'Itim', cursive;
+  font-size: 13px;
+  color: #ad1457;
+  margin: 0 0 16px;
+}
+
+.okBtn {
+  width: calc(100% - 40px);
+  margin: 0 20px 18px;
+  font-family: 'VT323', monospace;
+  font-size: 16px;
+  background-color: #f48fb1;
+  color: white;
+  border: 2px solid #d81b60;
+  padding: 6px;
+  cursor: pointer;
+}
+
+.okBtn:active {
+  transform: translate(1px, 1px);
+}

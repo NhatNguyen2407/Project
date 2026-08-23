@@ -1,19 +1,22 @@
-import React from 'react';
+import React, { useState } from 'react';
 import styles from './StartMenu.module.css';
+import AboutDialog from '../AboutDialog/AboutDialog';
 
 const StartMenu = ({ APPS, onOpenApp, onLock }) => {
+  const [showAbout, setShowAbout] = useState(false);
+
   return (
     <div className={styles.startMenu}>
-      {/* Phần Header của Menu */}
-      <div className={styles.header}>
+      {/*Header của Menu*/}
+      <button className={styles.header} onClick={() => setShowAbout(true)} title="About BiBi-OS">
         <div className={styles.avatar}>💜</div>
         <div className={styles.userInfo}>
           <div className={styles.userName}>Bibi</div>
           <div className={styles.userStatus}>Administrator</div>
         </div>
-      </div>
+      </button>
 
-      {/* Danh sách Ứng dụng */}
+      {/* Ứng dụng */}
       <div className={styles.body}>
         <div className={styles.sectionTitle}>Pinned Apps</div>
         <div className={styles.appList}>
@@ -30,13 +33,19 @@ const StartMenu = ({ APPS, onOpenApp, onLock }) => {
         </div>
       </div>
 
-      {/* Phần Footer (Nút Nguồn) */}
+      {/* Nút Nguồn + About */}
       <div className={styles.footer}>
+        <button className={styles.aboutBtn} onClick={() => setShowAbout(true)} title="About BiBi-OS">
+          <span>ℹ️</span>
+          <span>About</span>
+        </button>
         <button className={styles.powerBtn} onClick={onLock} title="Lock OS">
           <span className={styles.powerIcon}>⏻</span> 
           <span>Lock</span>
         </button>
       </div>
+
+      {showAbout && <AboutDialog onClose={() => setShowAbout(false)} />}
     </div>
   );
 };

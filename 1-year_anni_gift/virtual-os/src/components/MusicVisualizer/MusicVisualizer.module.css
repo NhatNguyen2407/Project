@@ -1,0 +1,25 @@
+.visualizer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 3px;
+  height: 44px;
+  padding: 6px 8px;
+  box-sizing: border-box;
+  background-color: #2a1533;
+  border: 2px solid #ce93d8;
+  clip-path: polygon(
+    3px 0, calc(100% - 3px) 0,
+    100% 3px, 100% calc(100% - 3px),
+    calc(100% - 3px) 100%, 3px 100%,
+    0 calc(100% - 3px), 0 3px
+  );
+}
+
+.bar {
+  flex: 1;
+  min-width: 3px;
+  max-width: 10px;
+  min-height: 3px;
+  background-color: #f48fb1;
+}
