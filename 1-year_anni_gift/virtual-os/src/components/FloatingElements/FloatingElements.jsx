@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import styles from './FloatingElements.module.css';
+import { useSpecialDay } from '../../hooks/useSpecialDay';
 
 // 3 icon pixel nhỏ vẽ bằng SVG rect (không cần file ảnh), dùng currentColor để dễ đổi màu qua CSS
 const PixelHeart = () => (
@@ -59,9 +60,13 @@ const MIN_DURATION = 20; // giây
 const MAX_DURATION = 34;
 
 const FloatingElements = () => {
+  const specialDay = useSpecialDay();
+  // Ngày đặc biệt: tăng gấp ~2.5 lần số lượng cho desktop trông "sống động" hẳn khác ngày thường
+  const elementCount = specialDay ? ELEMENT_COUNT * 2.5 : ELEMENT_COUNT;
+
   // Random hoá 1 lần duy nhất lúc mount, giữ nguyên trong suốt vòng đời component
   const elements = useMemo(() => {
-    return Array.from({ length: ELEMENT_COUNT }).map((_, i) => {
+    return Array.from({ length: Math.round(elementCount) }).map((_, i) => {
       const duration = MIN_DURATION + Math.random() * (MAX_DURATION - MIN_DURATION);
       return {
         id: i,
@@ -75,7 +80,7 @@ const FloatingElements = () => {
         opacity: 0.15 + Math.random() * 0.2, // Mờ nhẹ, chỉ là điểm nhấn nền chứ không nổi bật
       };
     });
-  }, []);
+  }, [elementCount]);
 
   return (
     <div className={styles.wrapper} aria-hidden="true">

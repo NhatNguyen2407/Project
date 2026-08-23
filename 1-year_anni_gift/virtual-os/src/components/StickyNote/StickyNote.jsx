@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useRef } from 'react';
 import styles from './StickyNote.module.css';
 import { useDraggable } from '../../hooks/useDraggable';
+import { useSpecialDay } from '../../hooks/useSpecialDay';
 
 // Kho câu ngọt ngào - bro có thể tự thêm/sửa câu tuỳ ý, mỗi lần load lại trang sẽ random 1 câu
 const QUOTES = [
@@ -23,11 +24,16 @@ const getInitialPosition = () => ({
 });
 
 const StickyNote = () => {
-  // Chọn 1 câu ngẫu nhiên mỗi lần component mount (tức mỗi lần load/reload trang)
+  // Chọn 1 câu ngẫu nhiên mỗi lần component mount (tức mỗi lần load/reload trang) - dùng cho ngày thường
   const quoteRef = useRef(QUOTES[Math.floor(Math.random() * QUOTES.length)]);
   const [isVisible, setIsVisible] = useState(true);
   const [isPeeking, setIsPeeking] = useState(false);
   const { position, onDragMouseDown, justDraggedRef } = useDraggable(getInitialPosition, 'sticky-note-pos');
+  const specialDay = useSpecialDay();
+
+  // Đúng ngày đặc biệt (VD kỷ niệm) thì ưu tiên hiện lời nhắn riêng cho ngày đó,
+  // thay vì random như bình thường
+  const displayedText = specialDay ? specialDay.message : quoteRef.current;
 
   return (
     <div
@@ -50,7 +56,7 @@ const StickyNote = () => {
           ×
         </button>
         <div className={styles.pin}></div>
-        <p className={styles.quoteText}>{quoteRef.current}</p>
+        <p className={styles.quoteText}>{displayedText}</p>
       </div>
     </div>
   );

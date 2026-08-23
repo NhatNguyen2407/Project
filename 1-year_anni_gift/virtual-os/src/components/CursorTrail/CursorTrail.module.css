@@ -1,0 +1,27 @@
+.layer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none; /* Không bao giờ chặn click, chỉ để nhìn */
+  z-index: 99990;
+  overflow: hidden;
+}
+
+.particle {
+  position: fixed;
+  font-size: 14px;
+  line-height: 1;
+  transform: translate(-50%, -50%);
+  animation: particleFade 0.65s ease-out forwards;
+  user-select: none;
+}
+
+@keyframes particleFade {
+  0% {
+    opacity: 0.9;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--drift, 0px)), calc(-50% - 26px)) scale(0.6);
+  }
+}

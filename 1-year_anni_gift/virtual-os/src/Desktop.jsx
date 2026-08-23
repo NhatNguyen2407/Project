@@ -9,6 +9,7 @@ import PixelPet from './components/PixelPet/PixelPet';
 import FloatingElements from './components/FloatingElements/FloatingElements';
 import FakeSystemScreen from './components/FakeSystemScreen/FakeSystemScreen';
 import CountdownWidget from './components/CountdownWidget/CountdownWidget';
+import SpecialDayBanner from './components/SpecialDayBanner/SpecialDayBanner';
 import Screensaver from './components/Screensaver/Screensaver';
 import WeatherWidget from './components/WeatherWidget/WeatherWidget';
 import AchievementToast from './components/AchievementToast/AchievementToast';
@@ -57,8 +58,7 @@ const Desktop = () => {
   const { playClick, playOpen, playClose } = useSound();
   const { unlock } = useAchievements();
   const [fakeScreen, setFakeScreen] = useState(null); 
-
-  // Easter egg: bấm tổ hợp Ctrl+Alt+B ("B" = BSOD) để gọi màn hình troll
+  
   useEffect(() => {
     const handleSecretCombo = (e) => {
       if (e.ctrlKey && e.altKey && (e.key === 'b' || e.key === 'B')) {
@@ -192,6 +192,7 @@ const Desktop = () => {
       <StickyNote />
       <PixelPet />
       <CountdownWidget />
+      <SpecialDayBanner />
       <WeatherWidget />
       <AchievementToast />
 
