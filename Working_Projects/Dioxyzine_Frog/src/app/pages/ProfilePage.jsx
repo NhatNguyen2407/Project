@@ -49,7 +49,10 @@ export function ProfilePage() {
 
   const fetchMyOrders = async () => {
     try {
-      const { data, error } = await supabase.from('inquiries').select('*').order('created_at', { ascending: false });
+      // Explicitly scoped to this user's own orders. This is defense-in-depth:
+      // it should never rely on RLS alone to hide other customers' orders
+      // (name, email, phone, address) from this page.
+      const { data, error } = await supabase.from('inquiries').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
       if (error) throw error;
       setOrders(data || []);
     } catch (error) { console.error('Lỗi khi lấy danh sách đơn hàng:', error.message); } finally { setLoadingOrders(false); }

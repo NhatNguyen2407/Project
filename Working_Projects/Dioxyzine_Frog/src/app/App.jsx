@@ -35,6 +35,7 @@ import { Footer } from './components/layout/Footer';
 import { PixelTracker } from './components/common_components/PixelTracker';
 import { AnalyticsTracker } from '../app/components/common_components/AnalyticsTracker';
 import { CartDrawer } from './components/store/CartDrawer';
+import { ErrorBoundary } from './components/common_components/ErrorBoundary';
 
 //import context
 import { CartProvider } from './context/CartContext';
@@ -94,52 +95,53 @@ export default function App() {
                 <div className="min-h-screen relative z-10 bg-transparent text-foreground">
                   <Navbar />
 
-                  <Routes>
-                    <Route path="/" element={<HomePage />} />
-                    <Route path="/products" element={<ProductsPage />} />
-                    <Route path="/products/:activeTab" element={<ProductsPage />} />
-                    <Route path="/product/:id" element={<ProductDetailPage />} />
-                    
-                    {/* 🚀 ĐÃ CHUYỂN HƯỚNG PRICING VÀ ĐĂNG KÝ TOOLS MỚI */}
-                    <Route path="/pricing" element={<Navigate to="/tools/pricing-calculator" replace />} />
-                    <Route path="/tools/pricing-calculator" element={<PricingCalculatorPage />} />
-                    <Route path="/tools/prototype-generator" element={<PrototypeGeneratorPage />} />
-                    <Route path="/tools/color-matcher" element={<ColorMatcherPage />} />
-
-                    <Route path="/gallery" element={<GalleryPage />} />
-                    <Route path="/inquiry" element={<InquiryPage />} />
-                    <Route path="/tracking" element={<OrderTrackingPage />} />
-                    <Route path="/quote" element={<QuoteRequestPage />} />
-                    <Route path="/checkout" element={<CheckoutPage />} />
-                    <Route path="/admin" element={<AdminPage />} />
-
-                    {/* PublicRoute for Login and Register */}
-                    <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
-                    <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
-
-                    {/* ProtectedRoute for Profile */}
-                    <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
-                    
-                    {/*about and sub-about*/}
-                    <Route path="/about" element={<Navigate to="/about/contact" replace />} />
-                    <Route path="/about/contact" element={<AboutContactPage />} />
-                    <Route path="/about/feedback" element={<FeedbackPage />} />
+                  <ErrorBoundary>
+                    <Routes>
+                      <Route path="/" element={<HomePage />} />
+                      <Route path="/products" element={<ProductsPage />} />
+                      <Route path="/products/:activeTab" element={<ProductsPage />} />
+                      <Route path="/product/:id" element={<ProductDetailPage />} />
                       
-                      {/* sub-terms */} 
-                    <Route path="/about/terms" element={<TermsPage />}>
-                      <Route index element={<Navigate to="printing" replace />} />
-                      <Route path="printing" element={null} />
-                      <Route path="shipping" element={null} />
-                      <Route path="refund" element={null} />
-                      <Route path="membership" element={null} />
-                    </Route>
+                      <Route path="/pricing" element={<Navigate to="/tools/pricing-calculator" replace />} />
+                      <Route path="/tools/pricing-calculator" element={<PricingCalculatorPage />} />
+                      <Route path="/tools/prototype-generator" element={<PrototypeGeneratorPage />} />
+                      <Route path="/tools/color-matcher" element={<ColorMatcherPage />} />
 
-                    {/*blog and sub-blog*/}
-                    <Route path="/blog" element={<BlogPage />} />
-                    <Route path="/blog/:blogSlug" element={<BlogPage />} />
+                      <Route path="/gallery" element={<GalleryPage />} />
+                      <Route path="/inquiry" element={<InquiryPage />} />
+                      <Route path="/tracking" element={<OrderTrackingPage />} />
+                      <Route path="/quote" element={<QuoteRequestPage />} />
+                      <Route path="/checkout" element={<CheckoutPage />} />
+                      <Route path="/admin" element={<AdminPage />} />
 
-                    <Route path="*" element={<NotFoundPage />} />
-                  </Routes>
+                      {/* PublicRoute for Login and Register */}
+                      <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+                      <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+
+                      {/* ProtectedRoute for Profile */}
+                      <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
+                      
+                      {/*about and sub-about*/}
+                      <Route path="/about" element={<Navigate to="/about/contact" replace />} />
+                      <Route path="/about/contact" element={<AboutContactPage />} />
+                      <Route path="/about/feedback" element={<FeedbackPage />} />
+                        
+                        {/* sub-terms */} 
+                      <Route path="/about/terms" element={<TermsPage />}>
+                        <Route index element={<Navigate to="printing" replace />} />
+                        <Route path="printing" element={null} />
+                        <Route path="shipping" element={null} />
+                        <Route path="refund" element={null} />
+                        <Route path="membership" element={null} />
+                      </Route>
+
+                      {/*blog and sub-blog*/}
+                      <Route path="/blog" element={<BlogPage />} />
+                      <Route path="/blog/:blogSlug" element={<BlogPage />} />
+
+                      <Route path="*" element={<NotFoundPage />} />
+                    </Routes>
+                  </ErrorBoundary>
                   
                   <CartDrawer />
                   <Footer />
