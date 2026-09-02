@@ -50,13 +50,13 @@ export function ProductDetailPage() {
     const fetchLiveReviews = async () => {
       if (!product?.title) return;
       try {
+        // Uses a SECURITY DEFINER RPC (get_public_reviews) instead of a raw
+        // table select. The RPC itself only returns review-safe columns, so
+        // this holds even if someone queries the API directly rather than
+        // through the app — the database, not just this query, is what
+        // decides what's public. See supabase/fix_rls_part2.sql.
         const { data, error } = await supabase
-          .from('inquiries')
-          .select('customer_name, rating, review_comment, created_at, admin_reply')
-          .not('rating', 'is', null)
-          .eq('is_hidden', false) 
-          .ilike('product_name', `%${product.title}%`)
-          .order('created_at', { ascending: false });
+          .rpc('get_public_reviews', { p_product_title: product.title });
 
         if (error) throw error;
         

@@ -208,9 +208,9 @@ export function AdminPage() {
       if (coverFile) {
         const fileExt = coverFile.name.split('.').pop();
         const fileName = `cover-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('products').upload(fileName, coverFile);
+        const { error: uploadError } = await supabase.storage.from('products_upload').upload(fileName, coverFile);
         if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
+        const { data: { publicUrl } } = supabase.storage.from('products_upload').getPublicUrl(fileName);
         finalCoverUrl = publicUrl;
       }
 
@@ -219,9 +219,9 @@ export function AdminPage() {
         for (const file of galleryFiles) {
           const fileExt = file.name.split('.').pop();
           const fileName = `gallery-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-          const { error: uploadError } = await supabase.storage.from('products').upload(fileName, file);
+          const { error: uploadError } = await supabase.storage.from('products_upload').upload(fileName, file);
           if (uploadError) throw uploadError;
-          const { data: { publicUrl } } = supabase.storage.from('products').getPublicUrl(fileName);
+          const { data: { publicUrl } } = supabase.storage.from('products_upload').getPublicUrl(fileName);
           uploadedUrls.push(publicUrl);
         }
         finalGalleryUrls = [...finalGalleryUrls, ...uploadedUrls];

@@ -93,18 +93,22 @@ export function ProfilePage() {
     
     setSubmittingReview(true);
     try {
-      // 🚀 BỔ SUNG .select() ĐỂ BẮT LỖI TÀNG HÌNH CỦA SUPABASE
-      const { data, error } = await supabase.from('inquiries').update({ 
-        status: 'completed', 
-        rating: rating, 
-        review_comment: comment 
-      }).eq('id', reviewOrder.id).select();
+      // Uses submit_order_review RPC instead of a direct .update() on
+      // inquiries. Row-level security intentionally has no general "user
+      // can update own order" policy on inquiries (that table also holds
+      // payment_status/total_paid/admin_reply — a row-scoped policy alone
+      // can't stop a user editing the wrong columns on their own order).
+      // This RPC only ever touches status/rating/review_comment, and only
+      // for a row that belongs to the caller. See supabase/fix_rls_part2.sql.
+      const { data, error } = await supabase.rpc('submit_order_review', {
+        p_order_id: reviewOrder.id,
+        p_rating: rating,
+        p_comment: comment,
+      });
 
       if (error) throw error;
-
-      // Nếu Supabase từ chối Update, nó sẽ trả về mảng rỗng
-      if (!data || data.length === 0) {
-        throw new Error("Bị chặn quyền! Vui lòng chạy lệnh SQL cấp quyền UPDATE trên Supabase.");
+      if (data !== true) {
+        throw new Error("Không thể gửi đánh giá cho đơn hàng này. Vui lòng thử lại hoặc liên hệ hỗ trợ.");
       }
 
       setReviewOrder(null); 
