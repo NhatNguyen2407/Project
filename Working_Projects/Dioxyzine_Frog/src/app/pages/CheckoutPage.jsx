@@ -130,79 +130,45 @@ export function CheckoutPage() {
     return true;
   };
 
-  // lưu database sau khi trả tiền
-  const saveOrderToDatabase = async (transactionId) => {
+  // Sau khi capture-paypal-order xác nhận đơn hàng đã được lưu thành công,
+  // hàm này chỉ còn lo gửi email biên lai + cập nhật giao diện. Việc GHI
+  // đơn hàng vào database giờ nằm hoàn toàn ở server (capture-paypal-order),
+  // không còn ở đây nữa — tránh đúng lỗ hổng cũ: client tự quyết định
+  // "coi như đã lưu thành công" trong khi có thể chưa.
+  const sendConfirmationEmail = async (transactionId, capturedAmount) => {
+    const { email, firstName, lastName } = shippingForm;
+    const orderSummary = cart.map(item => `${item.qty}x ${item.name}`).join(' | ');
+
     try {
-      const { email, firstName, lastName, address, city, postalCode, countryCode, phoneCode, phoneNumber } = shippingForm;
-      const orderSummary = cart.map(item => `${item.qty}x ${item.name}`).join(' | ');
-      const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
-      const fullAddress = `${firstName} ${lastName} - ${address}, ${city}, ${postalCode} (${countryCode})`;
-      const fullPhone = `${phoneCode} ${phoneNumber}`;
-
-      const { error: orderError } = await supabase.from('inquiries').insert([{
-        user_id: user ? user.id : null, 
-        customer_email: email,          
-        customer_name: `${firstName} ${lastName}`,
-        subject: '[READY-MADE] Store Order',
-        contact_info: fullPhone,
-        image_link: cart[0]?.image || 'N/A', 
-        product_name: `[READY-MADE] ${orderSummary}`,
-        quantity: totalQty,
-        status: 'pending',
-        shipping_address: fullAddress,
-        phone_number: fullPhone,
-        total_amount: finalPrice,
-        payment_method: 'paypal',
-        payment_status: 'paid',
-        transaction_id: transactionId,
-        total_paid: finalPrice
-      }]);
-
-      if (orderError) throw orderError;
-
-      try {
-        await emailjs.send(
-          import.meta.env.VITE_EMAILJS_SERVICE_ID,
-          import.meta.env.VITE_EMAILJS_TEMPLATE_CONFIRMED_ID,
-          {
-            to_email: email,
-            customer_name: `${firstName} ${lastName}`,
-            order_id: transactionId, 
-            product_name: orderSummary,
-            total_amount: `$${finalPrice.toFixed(2)}`
-          },
-          import.meta.env.VITE_EMAILJS_PUBLIC_KEY
-        );
-        console.log("Đã gửi email biên lai thành công!");
-      } catch (emailError) {
-        console.error("Lỗi khi gửi email xác nhận:", emailError);
-      }
-
-      // +1 Voucher bảo mật bằng RPC
-      if (appliedVoucher) {
-        const { error: voucherError } = await supabase
-          .rpc('increment_voucher_usage', { voucher_id: appliedVoucher.id });
-        
-        if (voucherError) {
-          console.error('Lỗi khi cập nhật số lượt dùng Voucher:', voucherError);
-        }
-      }
-
-      setOrderComplete(true);
-      setTimeout(() => {
-        setOrderComplete(false);
-        setAcceptedStoreTerms(false);
-        setAppliedVoucher(null);
-        clearCart(); 
-        setShippingForm({
-          email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '', countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
-        });
-      }, 4000);
-
-    } catch (error) {
-      console.error('Lỗi khi chốt đơn:', error);
-      showToast('Database Error! Please contact support with your Transaction ID.', 'error');
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_CONFIRMED_ID,
+        {
+          to_email: email,
+          customer_name: `${firstName} ${lastName}`,
+          order_id: transactionId,
+          product_name: orderSummary,
+          total_amount: `$${Number(capturedAmount).toFixed(2)}`
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+      console.log("Đã gửi email biên lai thành công!");
+    } catch (emailError) {
+      // Gửi email lỗi không ảnh hưởng gì đến việc đơn hàng đã được lưu hay
+      // chưa — đơn hàng đã chắc chắn được lưu trước khi hàm này chạy.
+      console.error("Lỗi khi gửi email xác nhận:", emailError);
     }
+
+    setOrderComplete(true);
+    setTimeout(() => {
+      setOrderComplete(false);
+      setAcceptedStoreTerms(false);
+      setAppliedVoucher(null);
+      clearCart();
+      setShippingForm({
+        email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '', countryCode: 'VN', phoneCode: '+84', phoneNumber: ''
+      });
+    }, 4000);
   };
 
   return (
@@ -436,14 +402,19 @@ export function CheckoutPage() {
                         // Xóa cái createOrder cũ và thay bằng cái này:
                         createOrder={async () => {
                           try {
-                            // 🚀 GỌI BACKEND: Nhờ Supabase Edge Function tạo đơn hàng giúp
+                            // 🚀 GỌI BACKEND: gửi GIỎ HÀNG + mã voucher, không gửi
+                            // số tiền trực tiếp nữa — server tự tính lại từ giá
+                            // thật trong database (xem create-paypal-order).
                             const { data, error } = await supabase.functions.invoke('create-paypal-order', {
-                              body: { amount: finalPrice.toFixed(2) }
+                              body: {
+                                items: cart.map(item => ({ id: item.id, qty: item.qty })),
+                                voucherCode: appliedVoucher?.code || null,
+                              }
                             });
 
                             if (error || !data || !data.id || data.error) {
                               console.error("Lỗi từ Supabase Function:", error || data);
-                              showToast("Server error when connecting to PayPal.", "error");
+                              showToast(data?.error || "Server error when connecting to PayPal.", "error");
                               return null;
                             }
                             // data.id chính là mã đơn hàng (Order ID) an toàn tuyệt đối do PayPal cấp
@@ -454,11 +425,34 @@ export function CheckoutPage() {
                             return null;
                           }
                         }}
-                        onApprove={async (data, actions) => {
+                        onApprove={async (data) => {
                           try {
                             setIsFinalizing(true);
-                            const details = await actions.order.capture();
-                            await saveOrderToDatabase(details.id);
+                            // 🚀 Capture diễn ra Ở SERVER (không còn actions.order.capture()
+                            // phía client) — server tự xác minh với PayPal rồi mới ghi đơn
+                            // hàng, xem capture-paypal-order.
+                            const { data: result, error } = await supabase.functions.invoke('capture-paypal-order', {
+                              body: {
+                                orderID: data.orderID,
+                                shipping: shippingForm,
+                                cart: cart.map(item => ({ qty: item.qty, name: item.name, image: item.image })),
+                                voucherId: appliedVoucher?.id || null,
+                              }
+                            });
+
+                            if (error || !result?.success) {
+                              if (result?.paymentCaptured) {
+                                // Tiền đã bị trừ nhưng lưu đơn hàng thất bại — cho khách
+                                // biết rõ mã giao dịch để liên hệ hỗ trợ, không giấu đi.
+                                showToast(`${result.error} (Transaction ID: ${result.transactionId})`, "error");
+                              } else {
+                                showToast(result?.error || "Transaction failed or was canceled.", "error");
+                              }
+                              setIsFinalizing(false);
+                              return;
+                            }
+
+                            await sendConfirmationEmail(result.transactionId, result.capturedAmount);
                             setIsFinalizing(false);
                           } catch (error) {
                             showToast("Transaction failed or was canceled.", "error");
