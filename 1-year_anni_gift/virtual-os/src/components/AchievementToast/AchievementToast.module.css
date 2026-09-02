@@ -1,0 +1,98 @@
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100005; /* Trên mọi cửa sổ/dialog khác trong OS */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none; /* Chỉ để thông báo, không chặn thao tác bên dưới */
+}
+
+.popup {
+  min-width: 300px;
+  max-width: 380px;
+  background-color: #1a0d24;
+  border: 3px solid #ffd54f;
+  padding: 18px 26px;
+  box-shadow: 0 0 30px rgba(255, 213, 79, 0.45), 6px 6px 0px rgba(0, 0, 0, 0.35);
+  clip-path: polygon(
+    8px 0, calc(100% - 8px) 0,
+    100% 8px, 100% calc(100% - 8px),
+    calc(100% - 8px) 100%, 8px 100%,
+    0 calc(100% - 8px), 0 8px
+  );
+  animation: popupIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), popupOut 0.3s ease-in 3.1s forwards;
+}
+
+.header {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #ffd54f;
+  letter-spacing: 2px;
+  text-align: center;
+  margin: 0 0 12px;
+}
+
+.body {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.icon {
+  font-size: 42px;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.textGroup {
+  min-width: 0;
+}
+
+.title {
+  font-family: 'Itim', cursive;
+  font-size: 18px;
+  color: #ffffff;
+  margin: 0 0 4px;
+}
+
+.description {
+  font-family: 'Itim', cursive;
+  font-size: 13px;
+  color: #d6c8e6;
+  margin: 0;
+  line-height: 1.4;
+}
+
+@keyframes popupIn {
+  from {
+    opacity: 0;
+    transform: scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes popupOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@media (max-width: 600px) {
+  .popup {
+    min-width: 240px;
+    max-width: 80vw;
+    padding: 14px 18px;
+  }
+  .icon { font-size: 32px; }
+  .title { font-size: 15px; }
+  .description { font-size: 12px; }
+}

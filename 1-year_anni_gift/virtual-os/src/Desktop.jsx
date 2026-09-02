@@ -58,7 +58,7 @@ const Desktop = () => {
   const { playClick, playOpen, playClose } = useSound();
   const { unlock } = useAchievements();
   const [fakeScreen, setFakeScreen] = useState(null); 
-  
+
   useEffect(() => {
     const handleSecretCombo = (e) => {
       if (e.ctrlKey && e.altKey && (e.key === 'b' || e.key === 'B')) {
@@ -101,7 +101,7 @@ const Desktop = () => {
   const handleRestoreAndFocus = (appId) => {
     const newZIndex = topZIndex + 1;
     setOpenWindows(openWindows.map(w => 
-      w.id === appId ? { ...w, isMinimized: false, zIndex: newZIndex } : w
+      w.id === appId ? { ...w, isMinimized: false, isClosing: false, zIndex: newZIndex } : w
     ));
     setTopZIndex(newZIndex);
   };
@@ -114,8 +114,13 @@ const Desktop = () => {
   };
 
   const handleCloseApp = (appId) => {
-    setOpenWindows(openWindows.filter(w => w.id !== appId));
+    setOpenWindows(openWindows.map(w =>
+      w.id === appId ? { ...w, isClosing: true } : w
+    ));
     playClose();
+    setTimeout(() => {
+      setOpenWindows(prev => prev.filter(w => !(w.id === appId && w.isClosing)));
+    }, 180);
   };
 
   const handleTaskbarClick = (appId) => {
@@ -204,6 +209,7 @@ const Desktop = () => {
             title={appData.title} 
             zIndex={openedApp.zIndex}
             isMinimized={openedApp.isMinimized}
+            isClosing={openedApp.isClosing}
             onFocus={() => handleRestoreAndFocus(openedApp.id)}
             onClose={() => handleCloseApp(openedApp.id)}
             onMinimize={() => handleMinimizeApp(openedApp.id)}

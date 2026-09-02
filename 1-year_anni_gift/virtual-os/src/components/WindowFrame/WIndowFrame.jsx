@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styles from './WindowFrame.module.css';
 
-// 8 hướng resize: 4 cạnh (n/s/e/w) + 4 góc (ne/nw/se/sw), đúng như 1 cửa sổ hệ điều hành thật
 const RESIZE_HANDLES = [
   { dir: 'n', className: styles.handleN },
   { dir: 's', className: styles.handleS },
@@ -16,7 +15,7 @@ const RESIZE_HANDLES = [
 const MIN_WIDTH = 320;
 const MIN_HEIGHT = 220;
 
-const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, isMinimized }) => {
+const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, isMinimized, isClosing }) => {
   const [isMaximized, setIsMaximized] = useState(false);
 
   const [size, setSize] = useState({ width: 750, height: 450 });
@@ -26,8 +25,6 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
   });
 
   const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, initialX: 0, initialY: 0 });
-  // resizeRef lưu đầy đủ trạng thái ban đầu (vị trí + kích thước) và hướng đang kéo,
-  // để tính toán độc lập cho từng cạnh/góc mà không bị lệch nhau
   const resizeRef = useRef({
     isResizing: false,
     dir: null,
@@ -88,22 +85,17 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
         let nextX = initialX;
         let nextY = initialY;
 
-        // Cạnh/góc bên phải: kéo ra ngoài -> rộng ra, vị trí trái không đổi
         if (dir.includes('e')) {
           nextWidth = Math.max(MIN_WIDTH, initialWidth + deltaX);
         }
-        // Cạnh/góc bên trái: kéo sang trái -> rộng ra VÀ đẩy vị trí trái theo,
-        // kéo sang phải -> hẹp lại, clamp để không vọt qua kích thước tối thiểu
         if (dir.includes('w')) {
           const proposedWidth = initialWidth - deltaX;
           nextWidth = Math.max(MIN_WIDTH, proposedWidth);
           nextX = initialX + (initialWidth - nextWidth);
         }
-        // Cạnh/góc dưới: kéo xuống -> cao ra
         if (dir.includes('s')) {
           nextHeight = Math.max(MIN_HEIGHT, initialHeight + deltaY);
         }
-        // Cạnh/góc trên: kéo lên -> cao ra VÀ đẩy vị trí trên theo
         if (dir.includes('n')) {
           const proposedHeight = initialHeight - deltaY;
           nextHeight = Math.max(MIN_HEIGHT, proposedHeight);
@@ -130,7 +122,6 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
     };
   }, []);
 
-  // Khoá bôi đen chữ + ép cursor đúng hướng trong suốt lúc kéo, tránh giật/chọn nhầm text
   const handleResizeMouseDown = (e, dir) => {
     onMouseDownResize(e, dir);
     document.body.classList.add(styles.noSelect);
@@ -143,7 +134,6 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
     document.body.style.cursor = cursorMap[dir];
   };
 
-  // Đẩy position và zIndex trực tiếp vào thẻ ngoài cùng
   const frameStyle = {
     position: 'absolute',
     top: isMaximized ? 0 : position.y,
@@ -156,7 +146,7 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
 
   return (
     <div
-      className={`${styles.window} ${isMaximized ? styles.maximized : ''}`}
+      className={`${styles.window} ${isMaximized ? styles.maximized : ''} ${isClosing ? styles.closing : ''}`}
       style={frameStyle}
       onMouseDown={onFocus}
     >
@@ -183,7 +173,6 @@ const WindowFrame = ({ title, children, onClose, onMinimize, zIndex, onFocus, is
         />
       ))}
 
-      {/* Giữ lại chấm pixel trang trí ở góc dưới-phải cho dễ nhận biết bằng mắt */}
       {!isMaximized && <div className={styles.resizerVisual}></div>}
     </div>
   );

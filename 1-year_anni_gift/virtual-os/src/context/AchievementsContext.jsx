@@ -19,12 +19,12 @@ const getAppAchievementIds = () =>
 
 export const AchievementsProvider = ({ children }) => {
   const [unlockedIds, setUnlockedIds] = useState(loadUnlocked);
-  const [toasts, setToasts] = useState([]);
+  const [toasts, setToasts] = useState([]); 
   const toastIdCounter = useRef(0);
   const prevUnlockedRef = useRef(unlockedIds);
 
   const unlock = useCallback((achievementId) => {
-    if (!ACHIEVEMENTS[achievementId]) return;
+    if (!ACHIEVEMENTS[achievementId]) return; // id không tồn tại trong registry -> bỏ qua an toàn
 
     setUnlockedIds((prev) => {
       if (prev.has(achievementId)) return prev;
@@ -50,18 +50,23 @@ export const AchievementsProvider = ({ children }) => {
     const prev = prevUnlockedRef.current;
     const newlyUnlocked = [...unlockedIds].filter((id) => !prev.has(id));
 
-    newlyUnlocked.forEach((id) => {
-      const meta = ACHIEVEMENTS[id];
-      if (!meta) return;
-      const toastId = toastIdCounter.current++;
-      setToasts((current) => [...current, { toastId, id, ...meta }]);
-      setTimeout(() => {
-        setToasts((current) => current.filter((t) => t.toastId !== toastId));
-      }, 4500);
-    });
+    if (newlyUnlocked.length > 0) {
+      const newToasts = newlyUnlocked
+        .map((id) => {
+          const meta = ACHIEVEMENTS[id];
+          if (!meta) return null;
+          return { toastId: toastIdCounter.current++, id, ...meta };
+        })
+        .filter(Boolean);
+      setToasts((current) => [...current, ...newToasts]);
+    }
 
     prevUnlockedRef.current = unlockedIds;
   }, [unlockedIds]);
+
+  const dismissCurrentToast = useCallback(() => {
+    setToasts((prev) => prev.slice(1));
+  }, []);
 
   const isUnlocked = useCallback((id) => unlockedIds.has(id), [unlockedIds]);
 
@@ -70,6 +75,7 @@ export const AchievementsProvider = ({ children }) => {
     isUnlocked,
     unlockedIds,
     toasts,
+    dismissCurrentToast,
     totalCount: Object.keys(ACHIEVEMENTS).length,
     unlockedCount: unlockedIds.size,
   };

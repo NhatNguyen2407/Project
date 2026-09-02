@@ -1,35 +1,42 @@
 import React, { useEffect, useRef } from 'react';
-import styles from '../../apps/Achievements/Achievements.module.css';
+import styles from './AchievementToast.module.css';
 import { useAchievements } from '../../context/AchievementsContext';
 import { useSound } from '../../hooks/useSound';
 
+const DISPLAY_DURATION_MS = 3500;
+
 const AchievementToast = () => {
-  const { toasts } = useAchievements();
+  const { toasts, dismissCurrentToast } = useAchievements();
   const { playAchievement } = useSound();
-  const prevCountRef = useRef(0);
+  const current = toasts[0] || null;
+  const lastPlayedIdRef = useRef(null);
 
-  // Phát tiếng "ting~" mỗi khi có toast
   useEffect(() => {
-    if (toasts.length > prevCountRef.current) {
-      playAchievement();
-    }
-    prevCountRef.current = toasts.length;
-  }, [toasts.length, playAchievement]);
+    if (!current) return;
 
-  if (toasts.length === 0) return null;
+    if (lastPlayedIdRef.current !== current.toastId) {
+      playAchievement();
+      lastPlayedIdRef.current = current.toastId;
+    }
+
+    const timer = setTimeout(dismissCurrentToast, DISPLAY_DURATION_MS);
+    return () => clearTimeout(timer);
+  }, [current, dismissCurrentToast, playAchievement]);
+
+  if (!current) return null;
 
   return (
-    <div className={styles.wrapper} aria-hidden="true">
-      {toasts.map((t) => (
-        <div key={t.toastId} className={styles.toast}>
-          <span className={styles.trophy}>{t.icon || '🏆'}</span>
-          <div>
-            <p className={styles.unlockLabel}>Đã mở khoá thành tích</p>
-            <p className={styles.title}>{t.title}</p>
-            <p className={styles.description}>{t.description}</p>
+    <div className={styles.backdrop} aria-hidden="true">
+      <div key={current.toastId} className={styles.popup}>
+        <p className={styles.header}>🏆 ACHIEVEMENT UNLOCKED</p>
+        <div className={styles.body}>
+          <span className={styles.icon}>{current.icon || '🏆'}</span>
+          <div className={styles.textGroup}>
+            <p className={styles.title}>{current.title}</p>
+            <p className={styles.description}>{current.description}</p>
           </div>
         </div>
-      ))}
+      </div>
     </div>
   );
 };

@@ -24,10 +24,39 @@
     var(--pixel-u) var(--pixel-u),
     calc(var(--pixel-u) * 2) var(--pixel-u)
   );
-  /* box-shadow thường bị clip-path cắt mất phần đổ ra ngoài, nên dùng filter drop-shadow */
+  
   filter: drop-shadow(4px 4px 0px rgba(179, 157, 219, 0.4));
   flex-direction: column;
   overflow: hidden;
+  transform-origin: center center;
+  animation: windowOpen 0.18s ease-out;
+}
+
+@keyframes windowOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.closing {
+  animation: windowClose 0.18s ease-in forwards;
+  pointer-events: none; /* Không cho thao tác gì trong lúc đang biến mất */
+}
+
+@keyframes windowClose {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
 }
 
 .maximized {
@@ -106,8 +135,7 @@
   bottom: calc(var(--pixel-u) * 2);
   width: 16px;
   height: 16px;
-  pointer-events: none; /* Chỉ để trang trí, việc kéo thật do .handleSE đảm nhiệm */
-  /* 3 khối vuông pixel bậc thang thay cho gradient chéo mượt */
+  pointer-events: none;
   background-image:
     linear-gradient(#b39ddb, #b39ddb),
     linear-gradient(#b39ddb, #b39ddb),
@@ -118,14 +146,12 @@
   z-index: 10;
 }
 
-/* ===== Hệ thống 8 vùng kéo resize: 4 cạnh + 4 góc, đúng như 1 cửa sổ hệ điều hành thật ===== */
 .resizeHandle {
   position: absolute;
-  z-index: 20; /* Trên cả resizerVisual và content, để luôn bắt được sự kiện chuột */
+  z-index: 20;
   background: transparent;
 }
 
-/* Cạnh trên/dưới: kéo dọc, chừa khoảng trống 2 đầu cho góc */
 .handleN, .handleS {
   left: 14px;
   right: 14px;
@@ -135,7 +161,6 @@
 .handleN { top: -5px; }
 .handleS { bottom: -5px; }
 
-/* Cạnh trái/phải: kéo ngang */
 .handleE, .handleW {
   top: 14px;
   bottom: 14px;
@@ -145,7 +170,6 @@
 .handleE { right: -5px; }
 .handleW { left: -5px; }
 
-/* 4 góc: vùng bấm to hơn hẳn (16x16) cho dễ trúng, đè lên trên phần giao của 2 cạnh */
 .handleNE, .handleNW, .handleSE, .handleSW {
   width: 16px;
   height: 16px;
@@ -155,7 +179,6 @@
 .handleSE { bottom: -5px; right: -5px; cursor: nwse-resize; }
 .handleSW { bottom: -5px; left: -5px; cursor: nesw-resize; }
 
-/* Gán vào document.body trong lúc đang kéo resize/drag để tránh bôi đen chữ lung tung */
 .noSelect {
   user-select: none;
   -webkit-user-select: none;

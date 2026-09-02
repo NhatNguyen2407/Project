@@ -1,0 +1,45 @@
+.screen {
+  position: fixed;
+  inset: 0;
+  z-index: 100000; /* Cùng tầng BootScreen, luôn trên cả LoginScreen */
+  background-color: #1a0d24;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  cursor: default;
+}
+
+.logo {
+  font-size: 64px;
+  line-height: 1;
+  animation: logoPulse 1.4s ease-in-out infinite;
+  filter: drop-shadow(0 0 12px rgba(244, 143, 177, 0.6));
+}
+
+@keyframes logoPulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+.title {
+  font-family: 'VT323', monospace;
+  font-size: 28px;
+  color: #e6d6f5;
+  letter-spacing: 2px;
+  margin: 0;
+}
+
+.progressWrap {
+  width: 220px;
+  margin-top: 10px;
+}
+
+.caption {
+  font-family: 'VT323', monospace;
+  font-size: 14px;
+  color: #9575cd;
+  margin: 0;
+  letter-spacing: 1px;
+}
