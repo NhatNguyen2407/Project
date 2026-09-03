@@ -31,6 +31,9 @@ export function ProfilePage() {
 
   const [profileForm, setProfileForm] = useState({ fullName: '', avatarUrl: '', email: '' });
   const [newPassword, setNewPassword] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteConfirmText, setDeleteConfirmText] = useState('');
+  const [deletingAccount, setDeletingAccount] = useState(false);
   
   const [avatarFile, setAvatarFile] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState(null);
@@ -120,6 +123,25 @@ export function ProfilePage() {
       toast.error('Lỗi cập nhật: ' + error.message); 
     } finally { 
       setSubmittingReview(false); 
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    if (deleteConfirmText !== 'DELETE') return;
+    setDeletingAccount(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('delete-account');
+      if (error || !data?.success) {
+        throw new Error(data?.error || error?.message || 'Không thể xóa tài khoản.');
+      }
+      // Tài khoản đã bị xóa khỏi Supabase Auth ở server — session hiện tại
+      // trên trình duyệt không còn hợp lệ nữa, đăng xuất để dọn sạch state.
+      await supabase.auth.signOut();
+      navigate('/');
+    } catch (err) {
+      console.error('Lỗi khi xóa tài khoản:', err);
+      alert(err.message || 'Có lỗi xảy ra, vui lòng thử lại hoặc liên hệ hỗ trợ.');
+      setDeletingAccount(false);
     }
   };
 
@@ -367,6 +389,20 @@ export function ProfilePage() {
                     {updatingProfile ? 'Saving...' : 'Save Changes'}
                   </button>
                 </form>
+
+                <div className="mt-10 pt-8 border-t border-red-500/20">
+                  <h4 className="text-red-400 font-bold flex items-center gap-2 mb-2"><Trash2 className="w-5 h-5" /> Danger Zone</h4>
+                  <p className="text-sm text-[var(--silver-gray)] mb-4">
+                    Deleting your account is permanent. Your order history will be kept for accounting records but disconnected from your name and contact info.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setShowDeleteModal(true)}
+                    className="px-6 py-3 border border-red-500/50 text-red-400 hover:bg-red-500/10 font-bold rounded-xl transition-colors cursor-pointer"
+                  >
+                    Delete my account
+                  </button>
+                </div>
               </motion.div>
             )}
 
@@ -402,6 +438,49 @@ export function ProfilePage() {
                   <button type="submit" disabled={submittingReview} className="flex-1 py-3 bg-[var(--primary)] text-white font-bold rounded-xl text-sm hover:opacity-90 cursor-pointer">{submittingReview ? 'Đang gửi...' : 'Gửi Đánh Giá'}</button>
                 </div>
               </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {showDeleteModal && (
+          <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#1A1528] border border-red-500/30 rounded-3xl p-6 max-w-md w-full space-y-5">
+              <div className="text-center">
+                <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
+                  <Trash2 className="w-7 h-7 text-red-400" />
+                </div>
+                <h3 className="text-xl font-bold text-white">Delete your account?</h3>
+                <p className="text-sm text-[var(--silver-gray)] mt-2">
+                  This cannot be undone. Your login will be permanently deleted{user?.email ? ` (${user.email})` : ''}. Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm.
+                </p>
+              </div>
+              <input
+                type="text"
+                value={deleteConfirmText}
+                onChange={(e) => setDeleteConfirmText(e.target.value)}
+                placeholder="DELETE"
+                className="w-full px-4 py-3 bg-black/40 border border-red-500/30 rounded-xl text-white text-center font-mono focus:border-red-500 outline-none"
+              />
+              <div className="flex gap-3">
+                <button
+                  type="button"
+                  onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(''); }}
+                  disabled={deletingAccount}
+                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-gray-300 font-bold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleDeleteAccount}
+                  disabled={deleteConfirmText !== 'DELETE' || deletingAccount}
+                  className="flex-1 py-3 bg-red-500 hover:bg-red-600 text-white font-bold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {deletingAccount ? 'Deleting...' : 'Delete permanently'}
+                </button>
+              </div>
             </motion.div>
           </div>
         )}

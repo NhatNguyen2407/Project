@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { User, Mail, Lock, Eye, EyeOff, Loader2, Chrome, Facebook, UserPlus } from 'lucide-react';
+import { User, Mail, Lock, Eye, EyeOff, Loader2, Chrome, Facebook, UserPlus, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { supabase } from '../service/supabase';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
@@ -97,6 +97,7 @@ export function RegisterPage() {
   });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
+  const [registrationSent, setRegistrationSent] = useState(false);
 
   const [isTermsOpen, setIsTermsOpen] = useState(false);
   const [isPrivacyOpen, setIsPrivacyOpen] = useState(false);
@@ -168,7 +169,17 @@ export function RegisterPage() {
       if (error) throw error;
       
       console.log('Tạo tài khoản thành công:', data);
-      navigate('/profile');
+
+      // Nếu project bật "Confirm email" trong Supabase Auth, signUp() sẽ
+      // KHÔNG trả về session — nghĩa là khách chưa thực sự đăng nhập. Điều
+      // hướng thẳng tới /profile lúc này chỉ khiến ProtectedRoute đá họ
+      // ngược về /login mà không một lời giải thích. Thay vào đó, hiển thị
+      // rõ ràng "kiểm tra email để xác nhận".
+      if (data.session) {
+        navigate('/profile');
+      } else {
+        setRegistrationSent(true);
+      }
       
     } catch (error) {
       console.error(error);
@@ -214,6 +225,23 @@ export function RegisterPage() {
         </div>
 
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(139,114,190,0.12)]">
+          {registrationSent ? (
+            <div className="text-center py-4">
+              <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
+                <CheckCircle2 className="w-8 h-8 text-green-400" />
+              </div>
+              <h2 className="text-xl font-bold text-white mb-2">Check your inbox</h2>
+              <p className="text-[var(--silver-gray)] mb-6">
+                We've sent a confirmation link to <span className="text-white font-semibold">{formData.email}</span>. Click it to activate your account, then come back and log in.
+              </p>
+              <Link
+                to="/login"
+                className="inline-flex items-center justify-center px-6 py-3 rounded-full bg-[var(--primary)] text-white font-bold shadow-[0_0_20px_rgba(139,114,190,0.4)] hover:scale-[1.02] transition-all"
+              >
+                Go to login
+              </Link>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-5" noValidate>
             
             {errors.form && (
@@ -302,7 +330,9 @@ export function RegisterPage() {
             </AuthButton>
 
           </form>
+          )}
 
+          {!registrationSent && (
           <div className="mt-8">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
@@ -329,6 +359,7 @@ export function RegisterPage() {
               />
             </div>
           </div>
+          )}
         </div>
 
         <p className="text-center text-[var(--silver-gray)] mt-8 text-sm">

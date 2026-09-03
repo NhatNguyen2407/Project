@@ -23,6 +23,8 @@ import { CheckoutPage } from './pages/CheckoutPage';
 import { BlogPage } from './pages/BlogPage';
 import { LoginPage } from './pages/LoginPage';
 import { RegisterPage } from './pages/RegisterPage';
+import { ForgotPasswordPage } from './pages/ForgotPasswordPage';
+import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { OrderTrackingPage } from './pages/OrderTrackingPage';
@@ -102,6 +104,7 @@ export default function App() {
                       <Route path="/products/:activeTab" element={<ProductsPage />} />
                       <Route path="/product/:id" element={<ProductDetailPage />} />
                       
+                      {/* 🚀 ĐÃ CHUYỂN HƯỚNG PRICING VÀ ĐĂNG KÝ TOOLS MỚI */}
                       <Route path="/pricing" element={<Navigate to="/tools/pricing-calculator" replace />} />
                       <Route path="/tools/pricing-calculator" element={<PricingCalculatorPage />} />
                       <Route path="/tools/prototype-generator" element={<PrototypeGeneratorPage />} />
@@ -117,6 +120,11 @@ export default function App() {
                       {/* PublicRoute for Login and Register */}
                       <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
                       <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
+                      <Route path="/forgot-password" element={<PublicRoute><ForgotPasswordPage /></PublicRoute>} />
+                      {/* reset-password KHÔNG dùng PublicRoute — khách bấm link từ
+                          email sẽ có 1 session tạm thời (recovery), PublicRoute có
+                          thể hiểu nhầm là "đã đăng nhập" rồi đá họ đi chỗ khác. */}
+                      <Route path="/reset-password" element={<ResetPasswordPage />} />
 
                       {/* ProtectedRoute for Profile */}
                       <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
