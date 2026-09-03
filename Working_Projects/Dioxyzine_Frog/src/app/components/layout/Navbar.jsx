@@ -31,7 +31,10 @@ export function Navbar() {
   const navLinks = [
     { path: '/', label: 'Home' },
     { path: '/products', label: 'Products' },
-    { path: '/tools', label: 'Tools' },
+    // Tools (Prototype Generator, Pricing Calculator, Color Matcher) tạm ẩn
+    // khỏi menu — chưa dùng tới, chưa qua audit. Bật lại bằng cách bỏ
+    // comment dòng dưới khi sẵn sàng dùng.
+    // { path: '/tools', label: 'Tools' },
     { path: '/gallery', label: 'Gallery' }, 
     { path: '/blog', label: 'Blog' }, 
     { path: '/about', label: 'About' },
@@ -272,4 +275,4 @@ export function Navbar() {
       </AnimatePresence>
     </>
   );
-}
+} 

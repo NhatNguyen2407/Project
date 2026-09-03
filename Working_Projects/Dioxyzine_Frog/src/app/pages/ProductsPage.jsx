@@ -3,7 +3,7 @@ import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
-import { Search, Filter, Paintbrush, ShoppingBag, SlidersHorizontal } from 'lucide-react'; 
+import { Search, Filter, Paintbrush, ShoppingBag, SlidersHorizontal, RefreshCw, WifiOff } from 'lucide-react'; 
 import { useProducts } from '../context/ProductContext';
 import { ReadyUsePage } from './ReadyUsePage';
 import { SEO } from '../components/common_components/SEO';
@@ -14,7 +14,7 @@ const categories = ['All', 'Plushie', 'Doll', 'Customize'];
 
 export function ProductsPage() {
   const location = useLocation();
-  const { products, loading } = useProducts();
+  const { products, loading, error, refetch } = useProducts();
   
   const navigate = useNavigate();
   const { activeTab: urlTab } = useParams();
@@ -187,6 +187,20 @@ export function ProductsPage() {
               <div className="text-center py-24 text-[var(--primary)] font-bold text-xl animate-pulse">
                 Fetching data...
               </div>
+            ) : error ? (
+              // Lỗi tải dữ liệu (mạng/server) — KHÁC với "danh mục trống" hay
+              // "không khớp bộ lọc". Trước đây 3 trường hợp này trông y hệt
+              // nhau, khiến khách không biết là do họ lọc quá hẹp hay web bị lỗi.
+              <div className="text-center py-24 text-[var(--muted-foreground)] bg-[var(--card)] rounded-3xl border border-[var(--border)]">
+                <WifiOff className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="text-xl font-medium mb-2">{error}</p>
+                <button
+                  onClick={refetch}
+                  className="mt-4 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--primary)] text-white font-bold hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+                >
+                  <RefreshCw className="w-4 h-4" /> Try again
+                </button>
+              </div>
             ) : filteredProducts.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                 {filteredProducts.map((product) => (
@@ -196,6 +210,13 @@ export function ProductsPage() {
                     category={product.category[0]} pricingType={product.pricingType}
                   />
                 ))}
+              </div>
+            ) : products.length === 0 ? (
+              // Danh mục thực sự trống (không phải do bộ lọc) — ví dụ store
+              // mới setup chưa có sản phẩm nào.
+              <div className="text-center py-24 text-[var(--muted-foreground)] bg-[var(--card)] rounded-3xl border border-[var(--border)]">
+                <ShoppingBag className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p className="text-xl font-medium">No products available yet. Check back soon!</p>
               </div>
             ) : (
               <div className="text-center py-24 text-[var(--muted-foreground)] bg-[var(--card)] rounded-3xl border border-[var(--border)]">

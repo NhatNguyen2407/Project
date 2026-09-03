@@ -12,6 +12,7 @@ import { ToastNotification } from '../components/common_components/ToastNotifica
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
+import { trackPurchase, trackInitiateCheckout } from '../utils/analytics';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
@@ -112,6 +113,16 @@ export function CheckoutPage() {
   const discountValue = getDiscountAmount();
   const finalPrice = Math.max(0, cartTotal + SHIPPING_FEE - discountValue);
 
+  // Bắn sự kiện InitiateCheckout 1 lần khi khách vào trang checkout với giỏ
+  // hàng có sản phẩm — giúp đo được tỷ lệ bỏ giỏ giữa chừng (vào checkout
+  // nhưng không hoàn tất thanh toán).
+  useEffect(() => {
+    if (cart.length > 0) {
+      trackInitiateCheckout(cart, finalPrice);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   // kiểm tra form
   const validateCheckoutForm = () => {
     const { email, firstName, lastName, address, city, phoneNumber } = shippingForm;
@@ -138,6 +149,12 @@ export function CheckoutPage() {
   const sendConfirmationEmail = async (transactionId, capturedAmount) => {
     const { email, firstName, lastName } = shippingForm;
     const orderSummary = cart.map(item => `${item.qty}x ${item.name}`).join(' | ');
+
+    // Bắn sự kiện Purchase ngay tại đây — vì hàm này chỉ được gọi SAU KHI
+    // capture-paypal-order đã xác nhận thanh toán thành công ở server,
+    // không phải ngay khi client vừa bấm nút (tránh đếm cả những giao dịch
+    // thất bại/bị hủy giữa chừng vào số liệu quảng cáo).
+    trackPurchase(transactionId, Number(capturedAmount), cart);
 
     try {
       await emailjs.send(

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, MessageSquare, Plus, Minus, Clock, Component, Package, Tag, Check, Shield } from 'lucide-react';
+import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, MessageSquare, Plus, Minus, Clock, Component, Package, Tag, Check, Shield, RefreshCw } from 'lucide-react';
 
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
@@ -12,7 +12,7 @@ import { supabase } from '../service/supabase';
 
 export function ProductDetailPage() {
   const { id } = useParams();
-  const { products, loading } = useProducts();
+  const { products, loading, error, refetch } = useProducts();
   const { addToCart } = useCart();
   
   const isReadyUse = id?.startsWith('RDY-');
@@ -76,6 +76,23 @@ export function ProductDetailPage() {
 
   if (loading && !isReadyUse) {
     return <div className="min-h-screen pt-32 text-center text-2xl text-[var(--primary)] font-bold animate-pulse">Loading product data...</div>;
+  }
+
+  // Lỗi tải dữ liệu (mạng/server) khác với "sản phẩm này thực sự không tồn
+  // tại" — trước đây 2 trường hợp trông y hệt nhau ("Product not found"),
+  // khiến khách tưởng nhầm link hỏng dù chỉ là mất mạng tạm thời.
+  if (error && !isReadyUse) {
+    return (
+      <div className="min-h-screen pt-32 text-center px-4">
+        <p className="text-2xl text-foreground font-bold mb-2">{error}</p>
+        <button
+          onClick={refetch}
+          className="mt-4 inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[var(--primary)] text-white font-bold hover:scale-[1.02] active:scale-[0.98] transition-all cursor-pointer"
+        >
+          <RefreshCw className="w-4 h-4" /> Try again
+        </button>
+      </div>
+    );
   }
 
   if (!product) {

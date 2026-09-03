@@ -60,7 +60,10 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* CỘT CÔNG CỤ TOOLS (Chiếm 3/12 cột) */}
+          {/* CỘT CÔNG CỤ TOOLS (Chiếm 3/12 cột) — TẠM ẨN, chưa dùng tới các
+              tool này, bỏ comment khi sẵn sàng dùng lại (nhớ bỏ comment
+              chung với footerLinks.tools ở đầu file). */}
+          {/*
           <div className="lg:col-span-3 space-y-4">
             <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--heading-color)]">Creator Tools</h4>
             <ul className="space-y-2.5">
@@ -73,9 +76,11 @@ export function Footer() {
               ))}
             </ul>
           </div>
+          */}
 
-          {/* CỘT HỖ TRỢ (Chiếm 3/12 cột) */}
-          <div className="lg:col-span-3 space-y-4">
+          {/* CỘT HỖ TRỢ (Chiếm 6/12 cột — mở rộng từ 3 để lấp khoảng trống
+              do cột Creator Tools đang tạm ẩn ở trên) */}
+          <div className="lg:col-span-6 space-y-4">
             <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--heading-color)]">Support & Policy</h4>
             <ul className="space-y-2.5">
               {footerLinks.support.map((link, idx) => (

@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
+import { trackAddToCart } from '../utils/analytics';
 
 const CartContext = createContext();
 
@@ -20,17 +21,20 @@ export function CartProvider({ children }) {
   const addToCart = (product) => {
     // Tạo khóa duy nhất kết hợp ID và Size để phân biệt sản phẩm khác size
     const productKey = `${product.id}_${product.selectedSize || 'default'}`;
-    
+    const addQty = Number(product.qty) || 1;
+    let wasAdded = true;
+
     setCart(prev => {
       const existingIndex = prev.findIndex(item => `${item.id}_${item.selectedSize || 'default'}` === productKey);
-      
-      const addQty = Number(product.qty) || 1;
 
       if (existingIndex > -1) {
         const existing = prev[existingIndex];
         const newQty = existing.qty + addQty;
         // Kiểm tra stock nếu có
-        if (product.stock && newQty > product.stock) return prev;
+        if (product.stock && newQty > product.stock) {
+          wasAdded = false;
+          return prev;
+        }
         
         const updated = [...prev];
         updated[existingIndex] = { ...existing, qty: newQty };
@@ -39,6 +43,10 @@ export function CartProvider({ children }) {
       
       return [...prev, { ...product, cartKey: productKey, qty: addQty }];
     });
+
+    // Chỉ bắn sự kiện AddToCart khi thực sự thêm được — không bắn nếu bị
+    // chặn do vượt tồn kho.
+    if (wasAdded) trackAddToCart(product, addQty);
     setIsCartOpen(true); 
   };
 

@@ -38,6 +38,7 @@ import { PixelTracker } from './components/common_components/PixelTracker';
 import { AnalyticsTracker } from '../app/components/common_components/AnalyticsTracker';
 import { CartDrawer } from './components/store/CartDrawer';
 import { ErrorBoundary } from './components/common_components/ErrorBoundary';
+import { OfflineBanner } from './components/common_components/OfflineBanner';
 
 //import context
 import { CartProvider } from './context/CartContext';
@@ -95,6 +96,7 @@ export default function App() {
                 </div>
 
                 <div className="min-h-screen relative z-10 bg-transparent text-foreground">
+                  <OfflineBanner />
                   <Navbar />
 
                   <ErrorBoundary>
@@ -105,10 +107,16 @@ export default function App() {
                       <Route path="/product/:id" element={<ProductDetailPage />} />
                       
                       {/* 🚀 ĐÃ CHUYỂN HƯỚNG PRICING VÀ ĐĂNG KÝ TOOLS MỚI */}
+                      {/* Prototype Generator, Pricing Calculator, Color Matcher
+                          TẠM ẨN — chưa dùng tới, chưa qua audit/test. Bỏ
+                          comment 4 dòng dưới khi sẵn sàng dùng lại (nhớ bỏ
+                          comment tương ứng ở Navbar.jsx và Footer.jsx). */}
+                      {/*
                       <Route path="/pricing" element={<Navigate to="/tools/pricing-calculator" replace />} />
                       <Route path="/tools/pricing-calculator" element={<PricingCalculatorPage />} />
                       <Route path="/tools/prototype-generator" element={<PrototypeGeneratorPage />} />
                       <Route path="/tools/color-matcher" element={<ColorMatcherPage />} />
+                      */}
 
                       <Route path="/gallery" element={<GalleryPage />} />
                       <Route path="/inquiry" element={<InquiryPage />} />
