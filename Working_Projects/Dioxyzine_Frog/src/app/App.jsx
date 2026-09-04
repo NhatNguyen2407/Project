@@ -34,7 +34,6 @@ import { PrototypeGeneratorPage } from './pages/PrototypeGeneratorPage';
 import { ScrollToTop } from './components/ScrollToTop';
 import { Navbar } from './components/layout/Navbar';
 import { Footer } from './components/layout/Footer';
-import { PixelTracker } from './components/common_components/PixelTracker';
 import { AnalyticsTracker } from '../app/components/common_components/AnalyticsTracker';
 import { CartDrawer } from './components/store/CartDrawer';
 import { ErrorBoundary } from './components/common_components/ErrorBoundary';
@@ -76,7 +75,6 @@ export default function App() {
             <CartProvider>
               <BrowserRouter>
                 <AnalyticsTracker />
-                <PixelTracker />
                 <ScrollToTop />
                 
                 {/* floating elements */}
