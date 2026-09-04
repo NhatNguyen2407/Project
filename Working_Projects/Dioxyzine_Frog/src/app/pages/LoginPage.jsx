@@ -33,6 +33,7 @@ const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
             className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
           >
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -83,7 +84,7 @@ const SocialButton = ({ icon: Icon, label, onClick }) => {
 
 export function LoginPage() {
   const navigate = useNavigate();
-  const [formData, setFormData] = useState({ email: '', password: '', rememberMe: false });
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
@@ -122,13 +123,17 @@ export function LoginPage() {
       console.log('Đăng nhập thành công:', data);
       
       if (data.user) {
-        setTimeout(() => {
-          if (formData.email === 'dioxyzinefrog@gmail.com') {
-            navigate('/admin');
-          } else {
-            navigate('/profile');
-          }
-        }, 500);
+        // Truy vấn role trực tiếp tại đây thay vì dựa vào AuthContext cập
+        // nhật kịp lúc — AuthContext fetch role bất đồng bộ riêng, không có
+        // gì đảm bảo nó xong trước dòng code tiếp theo (trước đây dùng
+        // setTimeout 500ms để "đoán" là đủ thời gian, không chắc chắn).
+        const { data: roleData } = await supabase
+          .from('user_roles')
+          .select('role')
+          .eq('user_id', data.user.id)
+          .maybeSingle();
+
+        navigate(roleData?.role === 'admin' ? '/admin' : '/profile');
       }
       
     } catch (error) {
@@ -207,20 +212,7 @@ export function LoginPage() {
               />
             </div>
 
-            <div className="flex items-center justify-between mt-4">
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  id="rememberMe"
-                  name="rememberMe"
-                  checked={formData.rememberMe}
-                  onChange={handleChange}
-                  className="w-4 h-4 rounded border-[var(--border)] bg-[#1A1528] text-[var(--primary)] focus:ring-[var(--primary)]/30 cursor-pointer"
-                />
-                <label htmlFor="rememberMe" className="text-sm text-[var(--silver-gray)] cursor-pointer select-none">
-                  Remember me
-                </label>
-              </div>
+            <div className="flex items-center justify-end mt-4">
               <Link to="/forgot-password" className="text-sm font-bold text-[var(--primary)] hover:text-white transition-colors">
                 Forgot password?
               </Link>

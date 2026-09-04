@@ -58,7 +58,19 @@ export function ProfilePage() {
       const { data, error } = await supabase.from('inquiries').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
       if (error) throw error;
       setOrders(data || []);
-    } catch (error) { console.error('Lỗi khi lấy danh sách đơn hàng:', error.message); } finally { setLoadingOrders(false); }
+    } catch (error) {
+      console.error('Lỗi khi lấy danh sách đơn hàng:', error.message);
+      const isAuthError = error.code === 'PGRST301'
+        || error.message?.toLowerCase().includes('jwt')
+        || error.status === 401;
+      if (isAuthError) {
+        toast.error('Your session has expired. Please log in again.');
+        await supabase.auth.signOut();
+        navigate('/login');
+      } else {
+        toast.error('Could not load your orders. Please try again.');
+      }
+    } finally { setLoadingOrders(false); }
   };
 
   useEffect(() => {
@@ -209,7 +221,7 @@ export function ProfilePage() {
           <div className="md:col-span-1 space-y-4">
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 shadow-sm text-center">
               <div className="w-24 h-24 bg-[#1A1528] rounded-full flex items-center justify-center border-2 border-[var(--primary)] mx-auto mb-4 overflow-hidden">
-                {user.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} className="w-full h-full object-cover" /> : <User className="w-10 h-10 text-[var(--primary)]" />}
+                {user.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} alt="Your profile avatar" className="w-full h-full object-cover" /> : <User className="w-10 h-10 text-[var(--primary)]" />}
               </div>
               <h2 className="text-xl font-bold text-[var(--primary)] truncate">{user.user_metadata?.full_name || 'Froggy Member'}</h2>
               <div className="flex items-center justify-center gap-2 text-[var(--primary)] opacity-80 mt-2"><Mail className="w-4 h-4" /><span className="text-xs truncate">{user.email}</span></div>

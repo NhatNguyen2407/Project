@@ -135,12 +135,20 @@ export function OrderTrackingPage() {
 
               <div className="relative">
                 <div className="absolute left-6 md:left-10 top-0 bottom-0 w-0.5 md:w-auto md:h-0.5 md:top-6 md:bottom-auto md:left-[10%] md:right-[10%] bg-white/10 -z-10"></div>
-                <div 
-                  className="absolute left-6 md:left-10 top-0 w-0.5 md:w-auto md:h-0.5 md:top-6 md:left-[10%] bg-[var(--primary)] transition-all duration-1000 -z-10 shadow-[0_0_10px_var(--primary)]"
-                  style={{ 
-                    height: window.innerWidth < 768 ? `${(currentStepIndex / (TRACKING_STEPS.length - 1)) * 100}%` : 'auto',
-                    width: window.innerWidth >= 768 ? `${(currentStepIndex / (TRACKING_STEPS.length - 1)) * 100}%` : 'auto'
-                  }}
+                {/* Thanh cho mobile (chiều cao %) — chỉ hiện dưới md. Trước
+                    đây dùng window.innerWidth đọc 1 lần lúc render, không tự
+                    cập nhật khi xoay màn hình/resize. Giờ để CSS tự quyết
+                    định thanh nào hiển thị theo breakpoint, cả 2 giá trị
+                    luôn được tính đúng, không phụ thuộc JS đọc kích thước
+                    màn hình. */}
+                <div
+                  className="absolute left-6 top-0 w-0.5 md:hidden bg-[var(--primary)] transition-all duration-1000 -z-10 shadow-[0_0_10px_var(--primary)]"
+                  style={{ height: `${(currentStepIndex / (TRACKING_STEPS.length - 1)) * 100}%` }}
+                ></div>
+                {/* Thanh cho desktop (chiều rộng %) — chỉ hiện từ md trở lên */}
+                <div
+                  className="absolute hidden md:block md:h-0.5 md:top-6 md:left-[10%] bg-[var(--primary)] transition-all duration-1000 -z-10 shadow-[0_0_10px_var(--primary)]"
+                  style={{ width: `${(currentStepIndex / (TRACKING_STEPS.length - 1)) * 100}%` }}
                 ></div>
 
                 <div className="flex flex-col md:flex-row justify-between gap-8 md:gap-4 relative z-0">

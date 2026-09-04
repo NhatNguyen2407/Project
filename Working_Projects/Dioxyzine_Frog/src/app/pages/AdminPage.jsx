@@ -73,11 +73,31 @@ export function AdminPage() {
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('vouchers').select('*').order('created_at', { ascending: false }) 
       ]);
+
+      // Trước đây không kiểm tra .error của từng query — nếu session hết
+      // hạn (JWT expired) hay RLS chặn vì lý do khác, trang sẽ im lặng
+      // hoàn toàn, không có bất kỳ thông báo nào cho admin biết.
+      const firstError = resOrders.error || resProducts.error || resVouchers.error;
+      if (firstError) {
+        const isAuthError = firstError.code === 'PGRST301'
+          || firstError.message?.toLowerCase().includes('jwt')
+          || firstError.status === 401;
+
+        if (isAuthError) {
+          toast.error('Your session has expired. Please log in again.');
+          await supabase.auth.signOut();
+          navigate('/login');
+          return;
+        }
+        throw firstError;
+      }
+
       if (resOrders.data) setOrders(resOrders.data);
       if (resProducts.data) setProducts(resProducts.data);
       if (resVouchers.data) setVouchers(resVouchers.data);
     } catch (err) {
       console.error(err);
+      toast.error('Could not load admin data. Please try refreshing the page.');
     } finally {
       setLoading(false);
     }
@@ -583,10 +603,10 @@ export function AdminPage() {
                     </label>
                     <div className="flex flex-wrap gap-3">
                       {productForm.images_gallery && productForm.images_gallery.split('|').filter(Boolean).map((img, i) => (
-                        <img key={`db-${i}`} src={img} className="w-16 h-16 object-cover rounded-lg border border-white/10" />
+                        <img key={`db-${i}`} src={img} alt={`Gallery image ${i + 1}`} className="w-16 h-16 object-cover rounded-lg border border-white/10" />
                       ))}
                       {galleryPreviews.map((img, i) => (
-                        <img key={`new-${i}`} src={img} className="w-16 h-16 object-cover rounded-lg border border-[var(--primary)]" />
+                        <img key={`new-${i}`} src={img} alt={`New gallery image preview ${i + 1}`} className="w-16 h-16 object-cover rounded-lg border border-[var(--primary)]" />
                       ))}
                       <div className="w-16 h-16 bg-black/40 border-2 border-dashed border-white/20 rounded-lg flex items-center justify-center relative cursor-pointer hover:border-[var(--primary)] transition-colors">
                         <PlusCircle className="w-6 h-6 text-gray-500" />
