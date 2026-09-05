@@ -47,7 +47,7 @@ export function Footer() {
           </div>
 
           {/* CỘT DANH MỤC SHOP (Chiếm 2/12 cột) */}
-          <div className="lg:col-span-2 space-y-4">
+          <div className="lg:col-span-6 space-y-4">
             <h4 className="text-sm font-bold uppercase tracking-wider text-[var(--heading-color)]">Shop Merch</h4>
             <ul className="space-y-2.5">
               {footerLinks.shop.map((link, idx) => (
