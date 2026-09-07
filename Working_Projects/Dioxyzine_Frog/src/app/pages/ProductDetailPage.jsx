@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, Me
 
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
-import { MOCK_PRODUCTS } from '../data/storeData';
+// import { MOCK_PRODUCTS } from '../data/storeData';
 import { CartDrawer } from '../components/store/CartDrawer';
 import { SEO } from '../components/common_components/SEO';
 import { supabase } from '../service/supabase';
@@ -30,9 +30,7 @@ export function ProductDetailPage() {
   const [reviews, setReviews] = useState([]);
   const [liveRating, setLiveRating] = useState(0);
 
-  const product = isReadyUse 
-    ? MOCK_PRODUCTS.find((p) => p.id === id)
-    : products.find((p) => p.id === id);
+  const product = products.find((p) => p.id === id);
 
   useEffect(() => {
     if (product) {
@@ -74,14 +72,14 @@ export function ProductDetailPage() {
     fetchLiveReviews();
   }, [product]);
 
-  if (loading && !isReadyUse) {
+  if (loading) {
     return <div className="min-h-screen pt-32 text-center text-2xl text-[var(--primary)] font-bold animate-pulse">Loading product data...</div>;
   }
 
   // Lỗi tải dữ liệu (mạng/server) khác với "sản phẩm này thực sự không tồn
   // tại" — trước đây 2 trường hợp trông y hệt nhau ("Product not found"),
   // khiến khách tưởng nhầm link hỏng dù chỉ là mất mạng tạm thời.
-  if (error && !isReadyUse) {
+  if (error) {
     return (
       <div className="min-h-screen pt-32 text-center px-4">
         <p className="text-2xl text-foreground font-bold mb-2">{error}</p>
@@ -112,7 +110,10 @@ export function ProductDetailPage() {
     }
   }
 
-  const listToUse = isReadyUse ? MOCK_PRODUCTS : products;
+  const listToUse = isReadyUse
+  ? products.filter((p) => p.type === 'readyuse')
+  : products;
+
   const currentIndex = listToUse.findIndex((p) => p.id === id);
   const prevProduct = currentIndex > 0 ? listToUse[currentIndex - 1] : listToUse[listToUse.length - 1];
   const nextProduct = currentIndex < listToUse.length - 1 ? listToUse[currentIndex + 1] : listToUse[0];
