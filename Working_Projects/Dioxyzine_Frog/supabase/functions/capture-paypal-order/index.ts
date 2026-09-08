@@ -74,15 +74,19 @@ Deno.serve(async req => {
       throw new Error('Supabase configuration missing');
     }
 
+    // Guest checkout is supported. If a signed-in user is present, keep
+    // their user id; otherwise the order is stored with user_id = null.
+    let userId: string | null = null;
     const auth = req.headers.get('Authorization');
-    if (!auth) throw new Error('Authentication required');
 
-    const authClient = createClient(supabaseUrl, anonKey, {
-      global: { headers: { Authorization: auth } },
-    });
+    if (auth) {
+      const authClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: auth } },
+      });
 
-    const { data: { user } } = await authClient.auth.getUser();
-    if (!user) throw new Error('Authentication required');
+      const { data: { user } } = await authClient.auth.getUser();
+      if (user) userId = user.id;
+    }
 
     const {
       orderID,
@@ -101,7 +105,6 @@ Deno.serve(async req => {
 
     const token = await paypalToken();
 
-    // Verify the PayPal order before capturing it.
     const orderRes = await fetch(
       `${PAYPAL_API_BASE}/v2/checkout/orders/${encodeURIComponent(orderID)}`,
       {
@@ -123,7 +126,6 @@ Deno.serve(async req => {
       throw new Error('PayPal order does not match the cart');
     }
 
-    // Capture payment.
     const captureRes = await fetch(
       `${PAYPAL_API_BASE}/v2/checkout/orders/${encodeURIComponent(orderID)}/capture`,
       {
@@ -171,12 +173,12 @@ Deno.serve(async req => {
       .trim();
 
     const customerEmail =
-      shipping?.email?.trim() || user.email?.trim();
+      shipping?.email?.trim() || null;
 
     const { data: orderId, error } = await supabase.rpc(
       'process_paid_order',
       {
-        p_user_id: user.id,
+        p_user_id: userId,
         p_customer_name: customerName,
         p_customer_email: customerEmail,
         p_phone_number: phone || null,
