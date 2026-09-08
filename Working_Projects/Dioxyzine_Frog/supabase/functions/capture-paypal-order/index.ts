@@ -99,24 +99,26 @@ Deno.serve(async req => {
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
-    // The reservation is created before PayPal checkout. A consumed
-    // reservation is also valid for an idempotent retry of a completed order.
-    const { data: reservation, error: reservationError } = await supabase
+    // One PayPal order can have multiple reservation rows (one per product).
+    const { data: reservations, error: reservationError } = await supabase
       .from('stock_reservations')
       .select('status, expires_at')
       .eq('paypal_order_id', orderID)
-      .in('status', ['active', 'consumed'])
-      .maybeSingle();
+      .in('status', ['active', 'consumed']);
 
     if (reservationError) throw reservationError;
-    if (!reservation) {
+    if (!reservations?.length) {
       throw new Error('Stock reservation is missing or no longer available. Please restart checkout.');
     }
 
-    if (
-      reservation.status === 'active' &&
-      new Date(reservation.expires_at) <= new Date()
-    ) {
+    const allConsumed = reservations.every(r => r.status === 'consumed');
+    const allActive = reservations.every(r => r.status === 'active');
+
+    if (!allConsumed && !allActive) {
+      throw new Error('Stock reservation is in an invalid state. Please restart checkout.');
+    }
+
+    if (allActive && reservations.some(r => new Date(r.expires_at) <= new Date())) {
       throw new Error('Checkout reservation expired. Please restart checkout.');
     }
 
@@ -142,8 +144,6 @@ Deno.serve(async req => {
 
     let capture = paypalOrder;
 
-    // PayPal returns COMPLETED for an already-captured order. Reuse its
-    // existing capture instead of attempting a second capture.
     if (paypalOrder?.status !== 'COMPLETED') {
       if (paypalOrder?.status !== 'APPROVED') {
         throw new Error('PayPal order is not approved for capture');
@@ -228,7 +228,6 @@ Deno.serve(async req => {
       );
     }
 
-    // Convert the reservation to consumed only after the order is recorded.
     const { error: consumeError } = await supabase
       .from('stock_reservations')
       .update({ status: 'consumed' })
