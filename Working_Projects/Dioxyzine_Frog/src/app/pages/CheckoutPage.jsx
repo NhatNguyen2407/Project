@@ -452,8 +452,13 @@ export function CheckoutPage() {
                               body: {
                                 orderID: data.orderID,
                                 shipping: shippingForm,
-                                cart: cart.map(item => ({ qty: item.qty, name: item.name, image: item.image })),
-                                voucherId: appliedVoucher?.id || null,
+                                cart: cart.map(item => ({
+                                  id: item.id,
+                                  qty: item.qty,
+                                  name: item.name,
+                                  image: item.image
+                                })),
+                                voucherCode: appliedVoucher?.code || null,
                               }
                             });
 
