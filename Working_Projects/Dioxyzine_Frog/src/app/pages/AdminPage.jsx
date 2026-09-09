@@ -23,6 +23,7 @@ export function AdminPage() {
   // 🚀 ĐÃ BỔ SUNG: Tab 'reviews'
   const [activeTab, setActiveTab] = useState('orders'); 
   const [orders, setOrders] = useState([]);
+  const [paypalOrders, setPaypalOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [vouchers, setVouchers] = useState([]); 
   const [loading, setLoading] = useState(true);
@@ -57,19 +58,20 @@ export function AdminPage() {
   }, [user, role, navigate]);
 
   const STATUS_FLOW = [
-    { value: 'Pending', color: 'text-yellow-500 bg-yellow-500/10' },
-    { value: 'Confirmed', color: 'text-blue-500 bg-blue-500/10' },
-    { value: 'Processing', color: 'text-purple-500 bg-purple-500/10' },
-    { value: 'Shipping', color: 'text-indigo-500 bg-indigo-500/10' },
-    { value: 'Completed', color: 'text-green-500 bg-green-500/10' },
-    { value: 'Returned', color: 'text-red-500 bg-red-500/10' },
-  ];
+  { value: 'pending', label: 'Pending', color: 'text-yellow-500 bg-yellow-500/10' },
+  { value: 'confirmed', label: 'Confirmed', color: 'text-blue-500 bg-blue-500/10' },
+  { value: 'processing', label: 'Processing', color: 'text-purple-500 bg-purple-500/10' },
+  { value: 'shipping', label: 'Shipping', color: 'text-indigo-500 bg-indigo-500/10' },
+  { value: 'completed', label: 'Completed', color: 'text-green-500 bg-green-500/10' },
+  { value: 'returned', label: 'Returned', color: 'text-red-500 bg-red-500/10' },
+];
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resOrders, resProducts, resVouchers] = await Promise.all([
+      const [resOrders, resPaypalOrders, resProducts, resVouchers] = await Promise.all([
         supabase.from('inquiries').select('*').order('created_at', { ascending: false }),
+        supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('vouchers').select('*').order('created_at', { ascending: false }) 
       ]);
@@ -77,7 +79,7 @@ export function AdminPage() {
       // Trước đây không kiểm tra .error của từng query — nếu session hết
       // hạn (JWT expired) hay RLS chặn vì lý do khác, trang sẽ im lặng
       // hoàn toàn, không có bất kỳ thông báo nào cho admin biết.
-      const firstError = resOrders.error || resProducts.error || resVouchers.error;
+      const firstError = resOrders.error || resPaypalOrders.error || resProducts.error || resVouchers.error;
       if (firstError) {
         const isAuthError = firstError.code === 'PGRST301'
           || firstError.message?.toLowerCase().includes('jwt')
@@ -93,6 +95,7 @@ export function AdminPage() {
       }
 
       if (resOrders.data) setOrders(resOrders.data);
+      if (resPaypalOrders.data) setPaypalOrders(resPaypalOrders.data);
       if (resProducts.data) setProducts(resProducts.data);
       if (resVouchers.data) setVouchers(resVouchers.data);
     } catch (err) {
@@ -110,10 +113,10 @@ export function AdminPage() {
   const handleUpdateStatus = async (order, newStatus) => {
     setUpdatingId(order.id);
     try {
-      let updateData = { status: newStatus };
+      let updateData = { order_status: newStatus };
       let trackingCode = order.tracking_code;
 
-      if (newStatus === 'Shipping') {
+      if (newStatus === 'shipping') {
         trackingCode = window.prompt("Vui lòng nhập mã vận đơn Viettel Post cho đơn này:");
         if (!trackingCode) {
           setUpdatingId(null);
@@ -122,11 +125,14 @@ export function AdminPage() {
         updateData.tracking_code = trackingCode;
       }
 
-      const { error } = await supabase.from('inquiries').update(updateData).eq('id', order.id);
+      const { error } = await supabase.from('orders').update(updateData).eq('id', order.id);
       if (error) throw error;
-      setOrders(orders.map(o => o.id === order.id ? { ...o, ...updateData } : o));
 
-      if (newStatus === 'Shipping') {
+      setPaypalOrders(paypalOrders.map(o =>
+        o.id === order.id ? { ...o, ...updateData } : o
+      ));
+
+      if (newStatus === 'shipping') {
         const customerEmail = order.customer_email || order.user_email;
         if (customerEmail) {
           try {
@@ -137,7 +143,9 @@ export function AdminPage() {
                 to_email: customerEmail, 
                 customer_name: order.customer_name || 'Quý khách',
                 order_id: order.id.substring(0, 8), 
-                product_name: order.product_name,
+                product_name: Array.isArray(order.cart_items)
+                  ? order.cart_items.map(item => `${item.id} × ${item.qty}`).join(', ')
+                  : 'Your order',
                 tracking_code: trackingCode, 
                 tracking_link: 'https://viettelpost.com.vn/tra-cuu-hanh-trinh-don/'
               },
@@ -155,13 +163,13 @@ export function AdminPage() {
     } catch (err) { toast.error("Lỗi khi cập nhật trạng thái!"); } finally { setUpdatingId(null); }
   };
 
-  const handleUpdateShippingDate = async (orderId, newDate) => {
-    try {
-      await supabase.from('inquiries').update({ estimated_shipping_date: newDate }).eq('id', orderId);
-      setOrders(orders.map(o => o.id === orderId ? { ...o, estimated_shipping_date: newDate } : o));
-      toast.success("Cập nhật ngày giao hàng thành công!");
-    } catch (err) { console.error(err); toast.error("Lỗi cập nhật ngày giao!"); }
-  };
+  // const handleUpdateShippingDate = async (orderId, newDate) => {
+  //   try {
+  //     await supabase.from('inquiries').update({ estimated_shipping_date: newDate }).eq('id', orderId);
+  //     setOrders(orders.map(o => o.id === orderId ? { ...o, estimated_shipping_date: newDate } : o));
+  //     toast.success("Cập nhật ngày giao hàng thành công!");
+  //   } catch (err) { console.error(err); toast.error("Lỗi cập nhật ngày giao!"); }
+  // };
 
   // 🚀 ĐÃ BỔ SUNG: Tính năng Admin Reply Review
   const handleSaveReply = async (id) => {
@@ -313,7 +321,7 @@ export function AdminPage() {
   if (!user || role !== 'admin') return <div className="min-h-screen pt-28 text-center text-white">Checking Auth...</div>;
 
   // Lọc ra các đơn hàng có đánh giá
-  const reviewsList = orders.filter(o => o.rating != null);
+  const reviewsList = inquiries.filter(o => o.rating != null && !o.is_hidden);
 
   return (
     <>
@@ -326,7 +334,7 @@ export function AdminPage() {
           <div className="flex flex-col md:flex-row justify-between items-center mb-8 gap-4 border-b border-white/10 pb-6 relative z-0">
             <div className="flex flex-wrap gap-2 bg-[#1A1528] p-1.5 rounded-xl border border-[var(--border)]">
               <button onClick={() => setActiveTab('orders')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'orders' ? 'bg-[var(--primary)] text-white' : 'text-gray-400 hover:text-white cursor-pointer'}`}>
-                Orders ({orders.length})
+                Orders ({paypalOrders.length})
               </button>
               <button onClick={() => setActiveTab('products')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'products' ? 'bg-[var(--primary)] text-white' : 'text-gray-400 hover:text-white cursor-pointer'}`}>
                 CMS Products ({products.length})
@@ -363,22 +371,34 @@ export function AdminPage() {
                       <th className="p-5 font-semibold">Order ID</th>
                       <th className="p-5 font-semibold">Customer</th>
                       <th className="p-5 font-semibold">Product Info</th>
-                      <th className="p-5 font-semibold">Est. Shipping</th>
+                      {/* <th className="p-5 font-semibold">Est. Shipping</th> */}
                       <th className="p-5 font-semibold">Status Control</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-white/5">
-                    {orders.map((order) => (
+                    {paypalOrders.map((order) => (
                       <tr key={order.id} className="hover:bg-white/5">
                         <td className="p-5 font-mono text-[var(--primary)] text-sm">#{order.id.substring(0, 8)}</td>
                         <td className="p-5 text-gray-300 text-sm truncate max-w-[150px]">{order.customer_email || order.user_email || 'Unknown'}</td>
-                        <td className="p-5"><div className="font-bold text-white text-sm">{order.product_name}</div><div className="text-xs text-gray-400">Qty: {order.quantity} | {order.product_type}</div></td>
+
                         <td className="p-5">
-                          <input type="date" value={order.estimated_shipping_date || ''} onChange={(e) => handleUpdateShippingDate(order.id, e.target.value)} onClick={(e) => e.target.showPicker && e.target.showPicker()} className="bg-black/40 border border-white/10 text-[var(--primary)] text-xs rounded-xl p-2 outline-none cursor-pointer" />
+                          <div className="font-bold text-white text-sm">
+                            {Array.isArray(order.cart_items)
+                              ? order.cart_items.map(item => `${item.id} × ${item.qty}`).join(', ')
+                              : 'Order'}
+                          </div>
+                          <div className="text-xs text-gray-400">
+                            Total: ${Number(order.total_amount).toFixed(2)}
+                          </div>
                         </td>
+
+                        {/* <td className="p-5">
+                          <input type="date" value={order.estimated_shipping_date || ''} onChange={(e) => handleUpdateShippingDate(order.id, e.target.value)} onClick={(e) => e.target.showPicker && e.target.showPicker()} className="bg-black/40 border border-white/10 text-[var(--primary)] text-xs rounded-xl p-2 outline-none cursor-pointer" />
+                        </td> */}
                         <td className="p-5">
-                          <select value={order.status || 'Pending'} onChange={(e) => handleUpdateStatus(order, e.target.value)} disabled={updatingId === order.id} className="bg-black/50 border border-white/10 text-white text-xs rounded-lg p-2 outline-none cursor-pointer">
-                            {STATUS_FLOW.map(s => <option key={s.value} value={s.value}>{s.value}</option>)}
+                          <select value={order.order_status || 'pending'}
+                          onChange={(e) => handleUpdateStatus(order, e.target.value)} disabled={updatingId === order.id} className="bg-black/50 border border-white/10 text-white text-xs rounded-lg p-2 outline-none cursor-pointer">
+                            {STATUS_FLOW.map(s =><option key={s.value} value={s.value}>{s.label}</option>)}
                           </select>
                         </td>
                       </tr>

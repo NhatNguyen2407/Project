@@ -1,5 +1,5 @@
 //import react
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { HelmetProvider } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
@@ -9,8 +9,6 @@ import { ThemeProvider } from 'next-themes';
 import { HomePage } from './pages/HomePage';
 import { ProductsPage } from './pages/ProductsPage';
 // Đã xóa PricingPage cũ
-import { PricingCalculatorPage } from './pages/PricingCalculatorPage'; // MỚI
-import { ColorMatcherPage } from './pages/ColorMatcherPage'; // MỚI: Dành cho Tool hút màu
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { InquiryPage } from './pages/InquiryPage';
@@ -28,7 +26,6 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { OrderTrackingPage } from './pages/OrderTrackingPage';
-import { PrototypeGeneratorPage } from './pages/PrototypeGeneratorPage';
 
 //import componenets
 import { ScrollToTop } from './components/ScrollToTop';
@@ -104,7 +101,7 @@ export default function App() {
                       <Route path="/products/:activeTab" element={<ProductsPage />} />
                       <Route path="/product/:id" element={<ProductDetailPage />} />
                       
-                      {/* 🚀 ĐÃ CHUYỂN HƯỚNG PRICING VÀ ĐĂNG KÝ TOOLS MỚI */}
+                      
                       {/* Prototype Generator, Pricing Calculator, Color Matcher
                           TẠM ẨN — chưa dùng tới, chưa qua audit/test. Bỏ
                           comment 4 dòng dưới khi sẵn sàng dùng lại (nhớ bỏ

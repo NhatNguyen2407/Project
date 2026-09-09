@@ -123,7 +123,7 @@ export function Navbar() {
 
               <button onClick={() => setIsCartOpen(true)} className="relative p-2 text-foreground hover:text-[var(--primary)] transition-colors cursor-pointer">
                 <ShoppingCart className="w-6 h-6" />
-                {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-white {theme === 'light' ? 'bg-purple-500' : ''} text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md">{totalItems}</span>}
+                {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md">{totalItems}</span>}
               </button>
 
               {user ? (
@@ -275,4 +275,4 @@ export function Navbar() {
       </AnimatePresence>
     </>
   );
-} 
+}

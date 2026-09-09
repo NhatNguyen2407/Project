@@ -12,9 +12,6 @@ serve(async (req) => {
   }
 
   try {
-    // 1. Xác định chính xác người đang gọi TỪ JWT — một user chỉ có thể tự
-    // xóa TÀI KHOẢN CỦA CHÍNH MÌNH, không thể truyền id người khác vào để
-    // xóa hộ (id không hề được nhận từ request body).
     const authHeader = req.headers.get('Authorization') ?? ''
     const anonClient = createClient(
       Deno.env.get('SUPABASE_URL'),
@@ -32,11 +29,22 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
     )
 
-    // 2. Ẩn danh hóa lịch sử đơn hàng thay vì xóa hẳn — đơn hàng đã thanh
-    // toán thường cần giữ lại cho mục đích kế toán/đối soát, nhưng thông
-    // tin cá nhân (tên, email, sđt, địa chỉ) phải được xóa để tôn trọng
-    // yêu cầu xóa tài khoản.
-    const { error: anonymizeError } = await supabase
+    // Keep paid order history, but detach and anonymize the customer's PII.
+    const { error: ordersError } = await supabase
+      .from('orders')
+      .update({
+        user_id: null,
+        customer_name: 'Deleted User',
+        customer_email: 'deleted@deleted.local',
+        phone_number: null,
+        shipping_address: null,
+      })
+      .eq('user_id', user.id)
+
+    if (ordersError) throw ordersError
+
+    // Legacy inquiry records are anonymized too.
+    const { error: inquiryError } = await supabase
       .from('inquiries')
       .update({
         user_id: null,
@@ -48,13 +56,11 @@ serve(async (req) => {
       })
       .eq('user_id', user.id)
 
-    if (anonymizeError) throw anonymizeError
+    if (inquiryError) throw inquiryError
 
-    // 3. Xóa dữ liệu cá nhân thuần túy, không cần giữ lại.
     await supabase.from('wishlists').delete().eq('user_id', user.id)
     await supabase.from('user_roles').delete().eq('user_id', user.id)
 
-    // 4. Xóa file avatar trong storage (nếu có) — tên file bắt đầu bằng user id.
     const { data: avatarFiles } = await supabase.storage.from('avatars').list('', {
       search: user.id,
     })
@@ -62,8 +68,6 @@ serve(async (req) => {
       await supabase.storage.from('avatars').remove(avatarFiles.map((f) => f.name))
     }
 
-    // 5. Cuối cùng, xóa hẳn tài khoản khỏi Supabase Auth — thao tác này
-    // BẮT BUỘC cần service role key, không thể làm từ client.
     const { error: deleteError } = await supabase.auth.admin.deleteUser(user.id)
     if (deleteError) throw deleteError
 

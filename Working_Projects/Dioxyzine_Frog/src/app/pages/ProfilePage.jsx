@@ -40,7 +40,7 @@ export function ProfilePage() {
   const [updatingProfile, setUpdatingProfile] = useState(false);
 
   // 🚀 Cập nhật lại các bước Tracking cho chuẩn hóa
-  const STEPS = ['Pending', 'Prototyping', 'Production', 'Shipping', 'Completed'];
+  const STEPS = ['Pending', 'Confirmed', 'Processing', 'Shipping', 'Completed'];
 
   const fetchMyWishlist = async () => {
     try {
@@ -55,7 +55,7 @@ export function ProfilePage() {
       // Explicitly scoped to this user's own orders. This is defense-in-depth:
       // it should never rely on RLS alone to hide other customers' orders
       // (name, email, phone, address) from this page.
-      const { data, error } = await supabase.from('inquiries').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
+      const { data, error } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
       if (error) throw error;
       setOrders(data || []);
     } catch (error) {
@@ -86,7 +86,7 @@ export function ProfilePage() {
     navigate('/login');
   };
 
-  const completedCount = orders.filter((order) => order.status?.toLowerCase() === 'completed').length;
+  const completedCount = orders.filter((order) => order.order_status?.toLowerCase() === 'completed').length;
 
   const getMembershipDetails = () => {
     if (completedCount >= 10) return { tierName: 'GOLD VIP MEMBER', perks: 'Free Shipping + 10% OFF Total Bill', gradient: 'from-[#4A154B] via-[#2C1654] to-[#120C1F]' };
@@ -191,25 +191,39 @@ export function ProfilePage() {
   };
 
   const handleOrderAgain = async (order) => {
-    const type = (order.product_type || '').toLowerCase();
-    if (type === 'readyuse' || type === 'ready-made') {
-      try {
-        const { data: dbProduct } = await supabase.from('products').select('*').eq('title', order.product_name).single();
-        let prodData = dbProduct;
-        if (!prodData) prodData = MOCK_PRODUCTS.find(p => p.title === order.product_name);
+  if (!Array.isArray(order.cart_items) || order.cart_items.length === 0) {
+    toast.error('Không thể đặt lại đơn hàng này.');
+    return;
+  }
 
-        if (prodData) {
-          addToCart({ ...prodData, qty: order.quantity, selectedSize: order.size });
-          setIsCartOpen(true); 
-          toast.success("Đã ném sản phẩm cũ vào giỏ hàng! 🛒");
-        } else {
-          toast.error("Sản phẩm này hiện không còn trong kho.");
-        }
-      } catch (err) { toast.error('Không thể tự động đặt lại đơn này.'); }
-    } else {
-      navigate('/inquiry', { state: { passedProduct: order.product_name, passedQty: order.quantity, passedSize: order.size || '', passedAccQty: order.addons || 0, isReorder: true } });
+  try {
+    for (const item of order.cart_items) {
+      const productId = item.id;
+      const quantity = Number(item.qty || 1);
+
+      const { data: dbProduct, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', productId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (dbProduct) {
+        addToCart({
+          ...dbProduct,
+          qty: quantity,
+        });
+      }
     }
-  };
+
+    setIsCartOpen(true);
+    toast.success('Đã thêm các sản phẩm từ đơn cũ vào giỏ hàng! 🛒');
+  } catch (error) {
+    console.error('Order Again error:', error);
+    toast.error('Không thể tự động đặt lại đơn này.');
+  }
+};
 
   if (!user) return <div className="min-h-screen pt-24 pb-16 flex items-center justify-center text-[var(--primary)] text-lg font-medium">Please login to view this page...</div>;
 
@@ -274,7 +288,7 @@ export function ProfilePage() {
                   ) : (
                     <div className="space-y-6">
                       {orders.map((order) => {
-                        const status = (order.status || 'pending').toLowerCase();
+                        const status = (order.order_status || 'pending').toLowerCase();
                         const currentStepIdx = getStepIndex(status);
                         const isReturned = status === 'returned';
                         const isCompleted = status === 'completed';
@@ -297,12 +311,21 @@ export function ProfilePage() {
                               <div className="space-y-1.5 flex-1">
                                 <div className="flex items-center gap-2">
                                   <span className="text-xs font-mono text-[var(--primary)] opacity-50">#{order.id.slice(0, 8)}</span>
-                                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20 font-semibold">{order.status || 'Pending'}</span>
+                                  <span className="text-xs px-2.5 py-0.5 rounded-full bg-[var(--primary)]/10 text-[var(--primary)] border border-[var(--primary)]/20 font-semibold">{order.order_status || 'Pending'}</span>
                                 </div>
-                                <h4 className="text-lg font-bold text-[var(--primary)] pr-24">{order.product_name}</h4>
-                                
+                                <h4 className="text-lg font-bold text-[var(--primary)] pr-24">
+                                  {Array.isArray(order.cart_items)
+                                    ? order.cart_items.map((item) => item.title || item.name || item.id).join(', ')
+                                    : 'Custom Order'}
+                                </h4>
+
                                 <div className="flex flex-col gap-1 text-xs text-[var(--primary)] opacity-80 mt-2">
-                                  <span className="flex items-center gap-1.5"><Tag className="w-3.5 h-3.5" /> Qty: {order.quantity}</span>
+                                  <span className="flex items-center gap-1.5">
+                                    <Tag className="w-3.5 h-3.5" />
+                                    Qty: {Array.isArray(order.cart_items)
+                                      ? order.cart_items.reduce((sum, item) => sum + Number(item.qty || 0), 0)
+                                      : 0}
+                                  </span>
                                   <span className="flex items-center gap-1.5"><Calendar className="w-3.5 h-3.5" /> Date: {new Date(order.created_at).toLocaleDateString('vi-VN')}</span>
                                 </div>
                               </div>
