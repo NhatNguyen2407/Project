@@ -22,6 +22,8 @@ const normalizeItems = (items: any[]) =>
 
     const id = item.id.trim();
     map.set(id, (map.get(id) || 0) + item.qty);
+    const id = item.id.trim();
+    map.set(id, (map.get(id) || 0) + item.qty);
     return map;
   }, new Map())]
     .map(([id, qty]) => ({ id, qty }))
@@ -76,13 +78,23 @@ Deno.serve(async req => {
     }
 
     let userId: string | null = null;
+    let userId: string | null = null;
     const auth = req.headers.get('Authorization');
 
     if (auth) {
       const authClient = createClient(supabaseUrl, anonKey, {
         global: { headers: { Authorization: auth } },
       });
+    if (auth) {
+      const authClient = createClient(supabaseUrl, anonKey, {
+        global: { headers: { Authorization: auth } },
+      });
 
+      const { data: { user } } = await authClient.auth.getUser();
+      if (user) userId = user.id;
+    }
+
+    const { orderID, shipping, cart, voucherCode } = await req.json();
       const { data: { user } } = await authClient.auth.getUser();
       if (user) userId = user.id;
     }
@@ -96,6 +108,31 @@ Deno.serve(async req => {
       typeof voucherCode === 'string' && voucherCode.trim()
         ? voucherCode.trim()
         : null;
+
+    const supabase = createClient(supabaseUrl, serviceKey);
+
+    // One PayPal order can have multiple reservation rows (one per product).
+    const { data: reservations, error: reservationError } = await supabase
+      .from('stock_reservations')
+      .select('status, expires_at')
+      .eq('paypal_order_id', orderID)
+      .in('status', ['active', 'consumed']);
+
+    if (reservationError) throw reservationError;
+    if (!reservations?.length) {
+      throw new Error('Stock reservation is missing or no longer available. Please restart checkout.');
+    }
+
+    const allConsumed = reservations.every(r => r.status === 'consumed');
+    const allActive = reservations.every(r => r.status === 'active');
+
+    if (!allConsumed && !allActive) {
+      throw new Error('Stock reservation is in an invalid state. Please restart checkout.');
+    }
+
+    if (allActive && reservations.some(r => new Date(r.expires_at) <= new Date())) {
+      throw new Error('Checkout reservation expired. Please restart checkout.');
+    }
 
     const supabase = createClient(supabaseUrl, serviceKey);
 
@@ -145,6 +182,7 @@ Deno.serve(async req => {
 
     const expectedFingerprint = await fingerprint(items, code);
     const paypalFingerprint = paypalOrder?.purchase_units?.[0]?.custom_id;
+    const paypalFingerprint = paypalOrder?.purchase_units?.[0]?.custom_id;
 
     if (paypalFingerprint !== expectedFingerprint) {
       throw new Error('PayPal order does not match the cart');
@@ -167,9 +205,30 @@ Deno.serve(async req => {
           },
         },
       );
+    let capture = paypalOrder;
+
+    if (paypalOrder?.status !== 'COMPLETED') {
+      if (paypalOrder?.status !== 'APPROVED') {
+        throw new Error('PayPal order is not approved for capture');
+      }
+
+      const captureRes = await fetch(
+        `${PAYPAL_API_BASE}/v2/checkout/orders/${encodeURIComponent(orderID)}/capture`,
+        {
+          method: 'POST',
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        },
+      );
 
       capture = await captureRes.json();
+      capture = await captureRes.json();
 
+      if (!captureRes.ok || capture.status !== 'COMPLETED') {
+        throw new Error('PayPal payment was not completed');
+      }
       if (!captureRes.ok || capture.status !== 'COMPLETED') {
         throw new Error('PayPal payment was not completed');
       }
@@ -195,15 +254,18 @@ Deno.serve(async req => {
       .join(', ');
 
     const phone = [shipping?.phoneCode, shipping?.phoneNumber]
+    const phone = [shipping?.phoneCode, shipping?.phoneNumber]
       .filter(Boolean)
       .join(' ')
       .trim();
 
     const customerEmail = shipping?.email?.trim() || null;
+    const customerEmail = shipping?.email?.trim() || null;
 
     const { data: orderId, error } = await supabase.rpc(
       'process_paid_order',
       {
+        p_user_id: userId,
         p_user_id: userId,
         p_customer_name: customerName,
         p_customer_email: customerEmail,
@@ -225,6 +287,7 @@ Deno.serve(async req => {
           paymentCaptured: true,
           transactionId: captureUnit.id,
           error: 'Payment was captured but the order could not be recorded.',
+          error: 'Payment was captured but the order could not be recorded.',
         }),
         {
           status: 200,
@@ -234,6 +297,16 @@ Deno.serve(async req => {
           },
         },
       );
+    }
+
+    const { error: consumeError } = await supabase
+      .from('stock_reservations')
+      .update({ status: 'consumed' })
+      .eq('paypal_order_id', orderID)
+      .eq('status', 'active');
+
+    if (consumeError) {
+      console.error('Reservation consume failed:', consumeError);
     }
 
     const { error: consumeError } = await supabase
@@ -266,6 +339,7 @@ Deno.serve(async req => {
     return new Response(
       JSON.stringify({
         success: false,
+        error: error instanceof Error ? error.message : 'Payment capture failed',
         error: error instanceof Error ? error.message : 'Payment capture failed',
       }),
       {
