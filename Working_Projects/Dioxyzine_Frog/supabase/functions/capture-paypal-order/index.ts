@@ -161,17 +161,11 @@ Deno.serve(async req => {
 
     const token = await paypalToken();
 
-<<<<<<< HEAD
     // Verify the PayPal order before capturing it.
     const orderRes = await fetch(`${PAYPAL_API_BASE}/v2/checkout/orders/${encodeURIComponent(orderID)}`,
       {
         headers: { Authorization: `Bearer ${token}` },
       },
-=======
-    const orderRes = await fetch(
-      `${PAYPAL_API_BASE}/v2/checkout/orders/${encodeURIComponent(orderID)}`,
-      { headers: { Authorization: `Bearer ${token}` } },
->>>>>>> 83fc7630207684b4175746357c9572f796b5c3a4
     );
 
     const paypalOrder = await orderRes.json();
