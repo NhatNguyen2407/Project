@@ -120,7 +120,10 @@ export function LoginPage() {
       });
 
       if (error) throw error;
-      console.log('Đăng nhập thành công:', data);
+      // console.log('Đăng nhập thành công:', data);
+      console.log('LOGIN DATA:', data);
+console.log('LOGIN USER:', data?.user);
+console.log('LOGIN SESSION:', data?.session);
       
       if (data.user) {
         // Truy vấn role trực tiếp tại đây thay vì dựa vào AuthContext cập
@@ -149,7 +152,7 @@ export function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: 'https://dioxyzinefrog.vercel.app' 
+          redirectTo: window.location.origin
         }
       });
       if (error) throw error;

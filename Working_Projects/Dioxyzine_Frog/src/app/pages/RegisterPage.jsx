@@ -195,7 +195,7 @@ export function RegisterPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: 'https://dioxyzinefrog.vercel.app' 
+          redirectTo: window.location.origin
         }
       });
       if (error) throw error;

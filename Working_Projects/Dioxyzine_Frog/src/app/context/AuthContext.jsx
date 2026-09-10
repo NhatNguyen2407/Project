@@ -26,6 +26,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('AUTH getSession:', session);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
@@ -37,6 +38,7 @@ export const AuthProvider = ({ children }) => {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      console.log('AUTH state change:', _event, session);
       const currentUser = session?.user ?? null;
       setUser(currentUser);
       if (currentUser) {
