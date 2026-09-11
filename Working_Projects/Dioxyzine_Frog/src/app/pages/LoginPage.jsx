@@ -152,7 +152,7 @@ console.log('LOGIN SESSION:', data?.session);
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: window.location.origin
+          redirectTo: `${window.location.origin}/profile`
         }
       });
       if (error) throw error;
