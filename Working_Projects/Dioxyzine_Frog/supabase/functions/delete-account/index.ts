@@ -38,10 +38,22 @@ serve(async (req) => {
         customer_email: 'deleted@deleted.local',
         phone_number: null,
         shipping_address: null,
+        rating: null,
+        review_comment: null,
+        admin_reply: null,
       })
       .eq('user_id', user.id)
 
     if (ordersError) throw ordersError
+
+    // Remove the separate order review record because its user_id is required
+    // and cannot be anonymized after the Auth user is deleted.
+    const { error: orderReviewError } = await supabase
+      .from('order_reviews')
+      .delete()
+      .eq('user_id', user.id)
+
+    if (orderReviewError) throw orderReviewError
 
     // Legacy inquiry records are anonymized too.
     const { error: inquiryError } = await supabase
