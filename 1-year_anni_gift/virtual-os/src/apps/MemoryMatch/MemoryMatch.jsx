@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import styles from './MemoryMatch.module.css';
 import { useSound } from '../../hooks/useSound';
+import { useAchievements } from '../../context/AchievementsContext';
 
 import us1 from '../../assets/images/us1.jpg';
 import us2 from '../../assets/images/us2.jpg';
@@ -51,6 +52,7 @@ const MemoryMatch = () => {
   const [moves, setMoves] = useState(0);
   const [isLocked, setIsLocked] = useState(false); // Khoá click tạm khi đang so 2 lá
   const { playMatch, playWin } = useSound();
+  const { unlock } = useAchievements();
 
   const isWon = matched.size === deck.length;
 
@@ -86,8 +88,11 @@ const MemoryMatch = () => {
   };
 
   useEffect(() => {
-    if (isWon) playWin();
-  }, [isWon, playWin]);
+    if (isWon) {
+      playWin();
+      unlock('memory_master');
+    }
+  }, [isWon, playWin, unlock]);
 
   const handleRestart = () => {
     setDeck(buildDeck());
