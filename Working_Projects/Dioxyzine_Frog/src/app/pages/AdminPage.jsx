@@ -321,7 +321,7 @@ export function AdminPage() {
   if (!user || role !== 'admin') return <div className="min-h-screen pt-28 text-center text-white">Checking Auth...</div>;
 
   // Lọc ra các đơn hàng có đánh giá
-  const reviewsList = inquiries.filter(o => o.rating != null && !o.is_hidden);
+  const reviewsList = orders.filter(o => o.rating != null && !o.is_hidden);
 
   return (
     <>
