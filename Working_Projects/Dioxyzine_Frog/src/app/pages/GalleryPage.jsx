@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'motion/react';
 import { X, ChevronLeft, ChevronRight, Filter } from 'lucide-react';
 import { useProducts } from '../context/ProductContext';
@@ -156,21 +157,24 @@ export function GalleryPage() {
         )}
       </div>
 
-      {/* MODAL XEM ẢNH (LIGHTBOX) - Đã tương thích 2 theme */}
-      <AnimatePresence>
-        {selectedImage && (
-          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-md p-4">
-            <button onClick={() => setSelectedImage(null)} className="absolute top-6 right-6 p-3 bg-card border border-border hover:bg-secondary rounded-full text-foreground transition-colors cursor-pointer shadow-md">
-              <X className="w-6 h-6" />
-            </button>
-            <motion.img
-              initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
-              src={selectedImage.image} alt={selectedImage.title}
-              className="max-w-full max-h-[90vh] rounded-2xl object-contain shadow-2xl border border-border bg-muted/50"
-            />
-          </div>
-        )}
-      </AnimatePresence>
+      {/* MODAL XEM ẢNH (LIGHTBOX) - Rendered via portal to escape page stacking contexts */}
+      {createPortal(
+        <AnimatePresence>
+          {selectedImage && (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-background/95 backdrop-blur-md p-4">
+              <button onClick={() => setSelectedImage(null)} className="absolute top-6 right-6 p-3 bg-card border border-border hover:bg-secondary rounded-full text-foreground transition-colors cursor-pointer shadow-md">
+                <X className="w-6 h-6" />
+              </button>
+              <motion.img
+                initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.9 }}
+                src={selectedImage.image} alt={selectedImage.title}
+                className="max-w-full max-h-[90vh] rounded-2xl object-contain shadow-2xl border border-border bg-muted/50"
+              />
+            </div>
+          )}
+        </AnimatePresence>,
+        document.body
+      )}
     </div>
   );
 }
