@@ -11,7 +11,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
   
   const displayPrice = () => {
     if (isContactPricing) return 'Custom Quote';
-    if (!basePriceObj) return 'Contact for price';
+    if (!basePriceObj) return 'Custom Quote';
     const prices = Object.values(basePriceObj);
     const minPrice = Math.min(...prices);
     return `From $${minPrice.toFixed(2)}`;
