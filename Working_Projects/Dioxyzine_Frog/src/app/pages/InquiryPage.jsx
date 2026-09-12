@@ -6,6 +6,7 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
 import { uploadImageToCloudinary } from '../service/cloudinary';
+import { supabase } from '../service/supabase';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { SEO } from '../components/common_components/SEO';
@@ -134,6 +135,19 @@ export function InquiryPage() {
     setStatus('loading');
     
     try {
+      const token = await executeRecaptcha('inquiry_submit');
+
+      const { data: verifyData, error: verifyError } =
+        await supabase.functions.invoke('verify-recaptcha', {
+          body: { token }
+        });
+
+      if (verifyError || !verifyData?.success) {
+        showToast('Security verification failed. Please try again.', 'error');
+        setStatus('idle');
+        return;
+      }
+
       const payload = {
         ...formData,
         productName: currentProduct?.name || 'Custom Requirements'
