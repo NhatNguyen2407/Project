@@ -12,7 +12,6 @@ import { ProductsPage } from './pages/ProductsPage';
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { InquiryPage } from './pages/InquiryPage';
-import { QuoteRequestPage } from './pages/QuoteRequestPage';
 import { AboutContactPage } from './pages/AboutContactPage';
 import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -116,7 +115,6 @@ export default function App() {
                       <Route path="/gallery" element={<GalleryPage />} />
                       <Route path="/inquiry" element={<InquiryPage />} />
                       <Route path="/tracking" element={<OrderTrackingPage />} />
-                      <Route path="/quote" element={<QuoteRequestPage />} />
                       <Route path="/checkout" element={<CheckoutPage />} />
                       <Route path="/admin" element={<AdminPage />} />
 
