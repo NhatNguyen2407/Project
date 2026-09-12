@@ -8,6 +8,7 @@ import { SmartImage } from '../components/common_components/SmartImage';
 
 export function ProductCard({ id, title, image, basePriceObj, moq, category, pricingType }) {
   const isContactPricing = pricingType === 'contact';
+  const isQuote = isContactPricing || !basePriceObj;
   
   const displayPrice = () => {
     if (isContactPricing) return 'Custom Quote';
@@ -102,7 +103,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
         </h3>
         
         <div className="mt-auto pt-4 border-t border-[var(--border)]">
-          <p className={`font-bold ${isContactPricing ? 'text-[var(--silver-gray)] text-sm' : 'text-[var(--primary)] text-xl drop-shadow-[0_0_8px_rgba(139,114,190,0.5)]'}`}>
+          <p className={`font-bold ${isQuote ? 'text-[var(--silver-gray)] text-sm' : 'text-[var(--primary)] text-xl drop-shadow-[0_0_8px_rgba(139,114,190,0.5)]'}`}>
             {displayPrice()}
           </p>
         </div>
