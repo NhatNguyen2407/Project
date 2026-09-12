@@ -24,6 +24,8 @@ serve(async (req) => {
     const data = await response.json()
 
     if (!data.success) {
+      console.error('reCAPTCHA verification failed', data['error-codes'] ?? [])
+
       return new Response(JSON.stringify({ success: false, message: "Phát hiện nghi vấn Bot spam!" }), { 
         status: 400, 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' } 
