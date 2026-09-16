@@ -97,18 +97,13 @@ export function ProductDetailPage() {
     return <div className="min-h-screen pt-32 text-center text-foreground font-bold text-2xl">Product not found.</div>;
   }
 
-  let images = [];
-  if (product.images && product.images.length > 0) {
-    images = product.images; 
-  } else {
-    const cover = product.image_cover || product.image;
-    if (cover) images.push(cover);
-    
-    if (product.images_gallery) {
-      const gallery = product.images_gallery.split('|').map(img => img.trim()).filter(img => img !== '');
-      images = [...images, ...gallery];
-    }
-  }
+  const coverImage = product.image || '';
+  const galleryImages = Array.isArray(product.images) ? product.images : [];
+
+  const images = [
+    coverImage,
+    ...galleryImages,
+  ].filter(Boolean);
 
   const listToUse = isReadyUse
   ? products.filter((p) => p.type === 'readyuse')
@@ -123,6 +118,9 @@ export function ProductDetailPage() {
 
   const nextImage = () => setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   const prevImage = () => setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  const selectImage = (index) => {
+    setCurrentImage(index);
+  };
 
   const calculateLivePrice = () => {
     if (isReadyUse) {
@@ -213,15 +211,43 @@ export function ProductDetailPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="space-y-4">
+              {/* main image */}
               <div className="relative aspect-square rounded-3xl overflow-hidden bg-card shadow-lg border border-border group">
-                <img src={images[currentImage]} alt="Product" className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105" />
+                <img src={images[currentImage]} alt={`${displayTitle} image ${currentImage + 1}`} className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105"/>
                 {images.length > 1 && (
                   <>
-                    <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronLeft className="w-5 h-5" /></button>
-                    <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronRight className="w-5 h-5" /></button>
+                    <button onClick={prevImage} aria-label="Previous product image" className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronLeft className="w-5 h-5" /></button>
+                    <button onClick={nextImage} aria-label="Next product image" className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronRight className="w-5 h-5" /></button>
                   </>
                 )}
               </div>
+
+              {images.length > 1 && (
+                <div className="overflow-x-auto pb-1 scrollbar-thin">
+                  <div className="flex gap-3 min-w-max">
+                    {images.map((image, index) => (
+                      <button
+                        key={`${image}-${index}`}
+                        type="button"
+                        onClick={() => selectImage(index)}
+                        aria-label={`View product image ${index + 1}`}
+                        aria-current={currentImage === index ? 'true' : undefined}
+                        className={`relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border-2 transition-all ${
+                          currentImage === index
+                            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/20'
+                            : 'border-border hover:border-[var(--primary)]/50'
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`${displayTitle} image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-6">
