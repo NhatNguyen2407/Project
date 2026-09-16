@@ -56,11 +56,19 @@ export function Navbar() {
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20">
-            <Link to="/" className="flex items-center space-x-3 group flex-shrink-0">
-              <motion.div whileHover={{ scale: 1.05 }} className="relative">
-                <img src={Logo} alt="Dioxyzine Frog" className="w-12 h-12 object-contain scale-125 rounded-full border border-border shadow-sm" />
+            <Link to="/" className="flex items-center space-x-2 sm:space-x-3 group min-w-0">
+              <motion.div whileHover={{ scale: 1.05 }} className="relative flex-shrink-0">
+                <img
+                  src={Logo}
+                  alt="Dioxyzine Frog"
+                  className="w-10 h-10 sm:w-12 sm:h-12 object-contain scale-110 sm:scale-125 rounded-full border border-border shadow-sm"
+                />
               </motion.div>
-              <span className="text-2xl sm:text-3xl tracking-wide ml-2 font-heading animate-in fade-in" style={{ color: "var(--primary)" }}>
+
+              <span
+                className="text-lg sm:text-2xl lg:text-3xl tracking-wide font-heading animate-in fade-in truncate"
+                style={{ color: "var(--primary)" }}
+              >
                 Dioxyzine Frog
               </span>
             </Link>
@@ -121,7 +129,7 @@ export function Navbar() {
             <div className="hidden xl:flex items-center space-x-4">
               <ThemeToggle /> 
 
-              <button onClick={() => setIsCartOpen(true)} className="relative p-2 text-foreground hover:text-[var(--primary)] transition-colors cursor-pointer">
+              <button  type="button" onClick={() => setIsCartOpen(true)} className="relative p-2 text-foreground hover:text-[var(--primary)] transition-colors cursor-pointer">
                 <ShoppingCart className="w-6 h-6" />
                 {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md">{totalItems}</span>}
               </button>
@@ -162,13 +170,20 @@ export function Navbar() {
             </div>
 
             {/* Mobile Actions */}
-            <div className="xl:hidden flex items-center gap-4 z-50 relative">
+            <div className="xl:hidden flex items-center gap-2 sm:gap-4 z-50 relative flex-shrink-0">
               <ThemeToggle />
-              <button onClick={() => setIsCartOpen(true)} className="relative p-2 text-foreground hover:text-[var(--primary)] transition-colors cursor-pointer">
+              <button type="button" onClick={() => setIsCartOpen(true)} className="relative flex items-center justify-center w-11 h-11 text-foreground hover:text-[var(--primary)] transition-colors cursor-pointer">
                 <ShoppingCart className="w-6 h-6" />
                 {totalItems > 0 && <span className="absolute -top-1 -right-1 bg-[var(--primary)] text-white text-[10px] font-bold w-4 h-4 flex items-center justify-center rounded-full shadow-md">{totalItems}</span>}
               </button>
-              <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="text-foreground cursor-pointer">
+              <button
+                type="button"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                className="flex items-center justify-center w-11 h-11 text-foreground cursor-pointer"
+                aria-label={isMobileMenuOpen ? 'Close menu' : 'Open menu'}
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-navigation"
+              >
                 {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
               </button>
             </div>
@@ -180,7 +195,7 @@ export function Navbar() {
       {/* MOBILE MENU */}
       <AnimatePresence>
         {isMobileMenuOpen && (
-          <motion.div initial={{ opacity: 0, x: '100%' }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: '100%' }} transition={{ type: 'spring', damping: 25 }} className="fixed inset-y-0 right-0 z-40 w-full max-w-sm bg-card border-l border-border shadow-2xl xl:hidden">
+          <motion.div id="mobile-navigation" initial={{ opacity: 0, x: '100%' }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: '100%' }} transition={{ type: 'spring', damping: 25 }} className="fixed inset-y-0 right-0 z-40 w-full max-w-sm bg-card border-l border-border shadow-2xl xl:hidden">
             <div className="flex flex-col h-full pt-24 pb-8 px-6 overflow-y-auto">
               
               <div className="mb-8 pb-8 border-b border-border">
