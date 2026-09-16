@@ -97,9 +97,19 @@ export default function App() {
                     <Routes>
                       <Route path="/" element={<HomePage />} />
                       <Route path="/products" element={<ProductsPage />} />
-                      <Route path="/products/:activeTab" element={<ProductsPage />} />
+
+                      {/* Custom products */}
+                      <Route path="/products/custom" element={<ProductsPage />} />
+                      <Route path="/products/custom/:category" element={<ProductsPage />} />
+                      <Route path="/products/custom/:category/:id" element={<ProductDetailPage />} />
+
+                      {/* Ready-made products */}
+                      <Route path="/products/readyuse" element={<ProductsPage />} />
+                      <Route path="/products/readyuse/:id" element={<ProductDetailPage />} />
+
+                      {/* Legacy product URL — keep for backward compatibility */}
                       <Route path="/product/:id" element={<ProductDetailPage />} />
-                      
+                                            
                       
                       {/* Prototype Generator, Pricing Calculator, Color Matcher
                           TẠM ẨN — chưa dùng tới, chưa qua audit/test. Bỏ
