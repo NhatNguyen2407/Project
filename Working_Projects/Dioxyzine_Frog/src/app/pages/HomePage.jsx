@@ -24,7 +24,7 @@ const slides = [
 ];
 
 export function HomePage() {
-  const { products, loading } = useProducts();
+  const { products, loading, error } = useProducts();
   const [currentSlide, setCurrentSlide] = useState(0);
 
   useEffect(() => {
@@ -39,7 +39,7 @@ export function HomePage() {
       <SEO title="Home" description="Dioxyzine Frog - The leading manufacturer of premium custom plushies, fan merchandise, and high-quality handmade crafts." />
       
       {/* Hero Section */}
-      <section className="relative h-screen overflow-hidden">
+      <section className="relative min-h-[100svh] overflow-hidden">
         {slides.map((slide, index) => (
           <motion.div key={index} initial={{ opacity: 0 }} animate={{ opacity: currentSlide === index ? 1 : 0 }} transition={{ duration: 1 }} className="absolute inset-0" style={{ pointerEvents: currentSlide === index ? 'auto' : 'none' }}>
             {/* Lớp phủ dốc gradient chuyển sang dùng tone nền tím sữa động */}
@@ -57,14 +57,20 @@ export function HomePage() {
                   <div className="flex flex-col gap-6">
                     <div className="flex flex-wrap gap-4">
                       <Link to="/products">
-                        <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold shadow-md flex items-center gap-2 cursor-pointer">
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold shadow-md flex items-center gap-2 cursor-pointer"
+                        >
                           Browse products <ArrowRight className="w-5 h-5" />
-                        </motion.button>
+                        </motion.span>
                       </Link>
                       <Link to="/inquiry">
-                        <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-card text-[var(--primary)] font-bold border-2 border-[var(--primary)] hover:bg-muted cursor-pointer transition-colors shadow-sm">
+                        <motion.span
+                          whileHover={{ scale: 1.05 }}
+                          className="px-8 py-4 rounded-full bg-card text-[var(--primary)] font-bold border-2 border-[var(--primary)] hover:bg-muted cursor-pointer transition-colors shadow-sm"
+                        >
                           Get a quote
-                        </motion.button>
+                        </motion.span>
                       </Link>
                     </div>
 
@@ -121,24 +127,40 @@ export function HomePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
             {loading ? (
-              <div className="col-span-4 text-center py-10 text-[var(--primary)] font-bold animate-pulse text-lg">
+              <div className="col-span-full text-center py-10 text-[var(--primary)] font-bold animate-pulse text-lg">
                 Loading database...
+              </div>
+            ) : error ? (
+              <div className="col-span-full text-center py-10 text-muted-foreground font-medium">
+                Unable to load featured products. Please try again later.
+              </div>
+            ) : products.length === 0 ? (
+              <div className="col-span-full text-center py-10 text-muted-foreground font-medium">
+                No featured products available yet.
               </div>
             ) : (
               products.slice(0, 4).map((product) => (
-                <ProductCard 
-                  key={product.id} id={product.id} title={product.title} image={product.image}
-                  basePriceObj={product.priceBrackets?.[0]?.prices} moq={product.moq}
-                  category={product.category[0]} pricingType={product.pricingType}
+                <ProductCard
+                  key={product.id}
+                  id={product.id}
+                  title={product.title}
+                  image={product.image}
+                  basePriceObj={product.priceBrackets?.[0]?.prices}
+                  moq={product.moq}
+                  category={product.category[0]}
+                  pricingType={product.pricingType}
                 />
               ))
             )}
           </div>
           <div className="text-center mt-12">
             <Link to="/products">
-              <motion.button whileHover={{ scale: 1.05 }} className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold flex items-center gap-2 mx-auto cursor-pointer shadow-md">
+              <motion.span
+                whileHover={{ scale: 1.05 }}
+                className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold flex items-center gap-2 mx-auto cursor-pointer shadow-md"
+              >
                 View All Products <ArrowRight className="w-5 h-5" />
-              </motion.button>
+              </motion.span>
             </Link>
           </div>
         </div>
@@ -150,9 +172,12 @@ export function HomePage() {
           <h2 className="font-heading text-4xl md:text-5xl mb-6 drop-shadow-sm">Ready to Bring Your Ideas to Life?</h2>
           <p className="text-xl text-foreground mb-8 max-w-2xl mx-auto font-semibold">Get a custom quote for your project in under 24 hours. No commitments, just possibilities.</p>
           <Link to="/inquiry">
-            <motion.button whileHover={{ scale: 1.05 }} className="px-10 py-5 rounded-full bg-[var(--primary)] text-white font-bold text-lg shadow-md cursor-pointer">
+            <motion.span
+              whileHover={{ scale: 1.05 }}
+              className="px-10 py-5 rounded-full bg-[var(--primary)] text-white font-bold text-lg shadow-md cursor-pointer"
+            >
               Start Your Inquiry
-            </motion.button>
+            </motion.span>
           </Link>
         </div>
       </section>
