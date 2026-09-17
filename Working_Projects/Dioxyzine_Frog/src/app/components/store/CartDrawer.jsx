@@ -47,9 +47,9 @@ export function CartDrawer() {
                 cart.map(item => {
                   const itemKey = item.cartKey || `${item.id}_${item.selectedSize || 'default'}`;
                   return (
-                    <div key={itemKey} className="flex gap-4 bg-muted p-4 rounded-2xl border border-border relative shadow-sm">
+                    <div key={itemKey} className="flex gap-4 bg-muted p-4 rounded-2xl border border-border relative shadow-sm min-w-0">
                       <img src={item.image} className="w-20 h-20 rounded-xl object-cover border border-border shrink-0 bg-card" alt={item.title || item.name} />
-                      <div className="flex-grow flex flex-col justify-between">
+                      <div className="flex-grow min-w-0 flex flex-col justify-between">
                         <div>
                           <h4 className="text-foreground font-bold text-sm line-clamp-1 pr-6">{item.title || item.name}</h4>
                           {/* Hiển thị Size nếu sản phẩm có chọn size */}
@@ -69,10 +69,10 @@ export function CartDrawer() {
                           <X className="w-4 h-4" />
                         </button>
 
-                        <div className="flex items-center justify-between mt-3">
-                          <span className="text-[var(--primary)] font-black text-base">${((item.price || 0) * (item.qty || 1)).toFixed(2)}</span>
+                        <div className="flex flex-wrap items-center justify-between gap-2 mt-3">
+                          <span className="text-[var(--primary)] font-black text-base shrink-0">${((item.price || 0) * (item.qty || 1)).toFixed(2)}</span>
                           
-                          <div className="flex items-center bg-card rounded-lg border border-border shadow-sm">
+                          <div className="flex items-center bg-card rounded-lg border border-border shadow-sm shrink-0">
                             <button
                               type="button"
                               onClick={() => updateCartQty(itemKey, -1)}
@@ -81,7 +81,7 @@ export function CartDrawer() {
                             >
                               <Minus className="w-3.5 h-3.5" />
                             </button>
-                            <span className="px-2 text-sm text-foreground font-bold">{item.qty}</span>
+                            <span className="px-2 text-sm text-foreground font-bold min-w-[2rem] text-center">{item.qty}</span>
                             <button
                               type="button"
                               onClick={() => updateCartQty(itemKey, 1)}
