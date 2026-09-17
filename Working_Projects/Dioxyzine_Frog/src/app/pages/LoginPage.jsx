@@ -163,7 +163,7 @@ console.log('LOGIN SESSION:', data?.session);
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex items-center justify-center p-4 sm:p-6 relative overflow-hidden z-10">
+    <div className="min-h-screen bg-transparent flex items-center justify-center p-4 sm:p-6 pt-24 pb-16 relative overflow-hidden z-10">
       
       <div className="absolute top-[20%] left-[20%] w-96 h-96 bg-[var(--primary)]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
