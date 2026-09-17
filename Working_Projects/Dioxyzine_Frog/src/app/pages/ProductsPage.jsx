@@ -1,6 +1,6 @@
 // src/app/pages/ProductsPage.jsx
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useState } from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
 import { Search, Filter, Paintbrush, ShoppingBag, SlidersHorizontal, RefreshCw, WifiOff } from 'lucide-react'; 
@@ -8,35 +8,41 @@ import { useProducts } from '../context/ProductContext';
 import { ReadyUsePage } from './ReadyUsePage';
 import { SEO } from '../components/common_components/SEO';
 
-import { useParams, useNavigate } from 'react-router';
 
 const categories = ['All', 'Plushie', 'Doll', 'Customize'];
 
 export function ProductsPage() {
   const location = useLocation();
   const { products, loading, error, refetch } = useProducts();
-  
-  const navigate = useNavigate();
-  const { activeTab: urlTab } = useParams();
-  
-  const activeTab = urlTab || 'custom';
-  
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
 
+  const navigate = useNavigate();
+  const { category } = useParams();
+
+  const categoryMap = {
+    plushie: 'Plushie',
+    doll: 'Doll',
+    customize: 'Customize',
+  };
+
+  const selectedCategory = categoryMap[category] || 'All';
+  const isReadyUse = location.pathname === '/products/readyuse';
+
+  const [searchQuery, setSearchQuery] = useState('');
   const [cutStyleFilter, setCutStyleFilter] = useState('All');
 
-  useEffect(() => {
-    if (location.state?.tab) {
-      navigate(`/products/${location.state.tab}`, { replace: true });
-    }
-  }, [location.state, navigate]);
-
   const handleTabChange = (tabName) => {
-    navigate(`/products/${tabName}`);
-    setSelectedCategory('All');
+    const routes = {
+      All: '/products/custom',
+      Plushie: '/products/custom/plushie',
+      Doll: '/products/custom/doll',
+      Customize: '/products/custom/customize',
+      custom: '/products/custom',
+      readyuse: '/products/readyuse',
+    };
+
+    navigate(routes[tabName] || '/products/custom');
     setSearchQuery('');
-    setCutStyleFilter('All'); 
+    setCutStyleFilter('All');
   };
 
   const filteredProducts = products.filter((product) => {
@@ -69,7 +75,7 @@ export function ProductsPage() {
           <button 
             onClick={() => handleTabChange('custom')}
             className={`flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold transition-all duration-300 cursor-pointer ${
-              activeTab === 'custom' 
+              !isReadyUse 
                 ? 'bg-[var(--primary)] text-white shadow-[0_0_20px_rgba(139,114,190,0.5)] scale-105' 
                 : 'bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:bg-[#2C1A29]'
             }`}
@@ -81,7 +87,7 @@ export function ProductsPage() {
           <button 
             onClick={() => handleTabChange('readyuse')}
             className={`flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold transition-all duration-300 cursor-pointer ${
-              activeTab === 'readyuse' 
+              isReadyUse 
                 ? 'bg-[var(--primary)] text-white shadow-[0_0_20px_rgba(139,114,190,0.5)] scale-105' 
                 : 'bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:bg-[#2C1A29]'
             }`}
@@ -91,7 +97,7 @@ export function ProductsPage() {
           </button>
         </div>
 
-        {activeTab === 'custom' ? (
+        {!isReadyUse ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <div className="flex flex-col md:flex-row gap-6 mb-6 items-center justify-between">
               <div className="flex flex-wrap justify-center gap-2">
@@ -99,8 +105,7 @@ export function ProductsPage() {
                   <button
                     key={category}
                     onClick={() => {
-                      setSelectedCategory(category);
-                      setCutStyleFilter('All'); 
+                      handleTabChange(category);
                     }}
                     className={`px-6 py-2 rounded-full font-medium transition-all cursor-pointer ${
                       selectedCategory === category
