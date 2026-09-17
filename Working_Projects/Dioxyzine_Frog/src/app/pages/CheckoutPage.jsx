@@ -235,14 +235,15 @@ export function CheckoutPage() {
                   </h3>
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <label className="text-xs text-[var(--silver-gray)] font-semibold">Email Contact *</label>
-                      <input required type="email" name="email" value={shippingForm.email} onChange={handleInputChange} placeholder="example@gmail.com" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                      <label htmlFor="email" className="text-xs text-[var(--silver-gray)] font-semibold">Email Contact *</label>
+                      <input required type="email" name="email" id="email" value={shippingForm.email} onChange={handleInputChange} placeholder="example@gmail.com" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-[var(--silver-gray)] font-semibold">Country / Region *</label>
+                      <label htmlFor="countryCode" className="text-xs text-[var(--silver-gray)] font-semibold">Country / Region *</label>
                       <div className="relative">
                         <select 
                           name="countryCode" 
+                          id="countryCode"
                           value={shippingForm.countryCode} 
                           onChange={handleInputChange} 
                           className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none appearance-none cursor-pointer font-medium"
@@ -260,30 +261,30 @@ export function CheckoutPage() {
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-xs text-[var(--silver-gray)] font-semibold">First Name *</label>
-                        <input required type="text" name="firstName" value={shippingForm.firstName} onChange={handleInputChange} placeholder="John" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                        <label htmlFor="firstName" className="text-xs text-[var(--silver-gray)] font-semibold">First Name *</label>
+                        <input required type="text" name="firstName" id="firstName" value={shippingForm.firstName} onChange={handleInputChange} placeholder="John" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs text-[var(--silver-gray)] font-semibold">Last Name *</label>
-                        <input required type="text" name="lastName" value={shippingForm.lastName} onChange={handleInputChange} placeholder="Doe" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                        <label htmlFor="lastName" className="text-xs text-[var(--silver-gray)] font-semibold">Last Name *</label>
+                        <input required type="text" name="lastName" id="lastName" value={shippingForm.lastName} onChange={handleInputChange} placeholder="Doe" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-[var(--silver-gray)] font-semibold">Street Address *</label>
-                      <input required type="text" name="address" value={shippingForm.address} onChange={handleInputChange} placeholder="House number, Street name..." className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                      <label htmlFor="address" className="text-xs text-[var(--silver-gray)] font-semibold">Street Address *</label>
+                      <input required type="text" name="address" id="address" value={shippingForm.address} onChange={handleInputChange} placeholder="House number, Street name..." className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label className="text-xs text-[var(--silver-gray)] font-semibold">City *</label>
-                        <input required type="text" name="city" value={shippingForm.city} onChange={handleInputChange} placeholder="Hanoi" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                        <label htmlFor="city" className="text-xs text-[var(--silver-gray)] font-semibold">City *</label>
+                        <input required type="text" name="city" id="city" value={shippingForm.city} onChange={handleInputChange} placeholder="Hanoi" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
                       </div>
                       <div className="space-y-1">
-                        <label className="text-xs text-[var(--silver-gray)] font-semibold">Postal Code (Optional)</label>
-                        <input type="text" name="postalCode" value={shippingForm.postalCode} onChange={handleInputChange} placeholder="100000" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                        <label htmlFor="postalCode" className="text-xs text-[var(--silver-gray)] font-semibold">Postal Code (Optional)</label>
+                        <input type="text" name="postalCode" id="postalCode" value={shippingForm.postalCode} onChange={handleInputChange} placeholder="100000" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label className="text-xs text-[var(--silver-gray)] font-semibold">Phone Number *</label>
+                      <label htmlFor="phoneNumber" className="text-xs text-[var(--silver-gray)] font-semibold">Phone Number *</label>
                       <div className="flex bg-[#1A1528] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-[var(--primary)] transition-colors">
                         <span className="bg-white/5 px-4 flex items-center gap-2 text-[var(--silver-gray)] text-sm font-bold border-r border-[var(--border)] select-none">
                           <span className="text-lg">{COUNTRY_LIST.find(c => c.code === shippingForm.countryCode)?.flag}</span>
@@ -292,7 +293,8 @@ export function CheckoutPage() {
                         <input 
                           required 
                           type="tel" 
-                          name="phoneNumber" 
+                          name="phoneNumber"
+                          id="phoneNumber" 
                           value={shippingForm.phoneNumber} 
                           onChange={handleInputChange} 
                           placeholder="987 654 321" 
@@ -334,7 +336,7 @@ export function CheckoutPage() {
                   </div>
 
                   <div className="mb-6 border-b border-[var(--border)] pb-6">
-                    <label className="text-xs text-[var(--silver-gray)] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5"><Ticket className="w-3.5 h-3.5" /> Promo Code</label>
+                    <label htmlFor="promoCode" className="text-xs text-[var(--silver-gray)] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5"><Ticket className="w-3.5 h-3.5" /> Promo Code</label>
                     {appliedVoucher ? (
                       <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
                         <div>
@@ -343,7 +345,7 @@ export function CheckoutPage() {
                             {appliedVoucher.discount_type === 'percent' ? `${appliedVoucher.discount_value}% discount applied` : `$${appliedVoucher.discount_value} fixed discount applied`}
                           </p>
                         </div>
-                        <button onClick={handleRemoveVoucher} className="p-1.5 text-green-500 hover:bg-green-500/20 rounded-lg cursor-pointer transition-colors">
+                        <button type="button" onClick={handleRemoveVoucher} aria-label="Remove promo code" className="p-1.5 text-green-500 hover:bg-green-500/20 rounded-lg cursor-pointer transition-colors">
                           <XCircle className="w-5 h-5" />
                         </button>
                       </div>
@@ -351,6 +353,7 @@ export function CheckoutPage() {
                       <div className="flex gap-2">
                         <input 
                           type="text" 
+                          id="promoCode"
                           value={promoCodeInput} 
                           onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
                           placeholder="Enter your code" 
