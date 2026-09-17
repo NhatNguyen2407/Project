@@ -350,20 +350,20 @@ export function CheckoutPage() {
                         </button>
                       </div>
                     ) : (
-                      <div className="flex gap-2">
+                      <div className="flex flex-col sm:flex-row gap-2">
                         <input 
                           type="text" 
                           id="promoCode"
                           value={promoCodeInput} 
                           onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
                           placeholder="Enter your code" 
-                          className="flex-1 px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white font-mono uppercase focus:border-[var(--primary)] outline-none transition-colors text-sm" 
+                          className="flex-1 min-w-0 w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white font-mono uppercase focus:border-[var(--primary)] outline-none transition-colors text-sm" 
                         />
                         <button 
                           type="button" 
                           onClick={handleApplyVoucher}
                           disabled={!promoCodeInput.trim() || checkingVoucher}
-                          className="px-5 py-3 bg-[var(--card)] hover:bg-[var(--primary)] text-white border border-[var(--border)] hover:border-transparent font-bold rounded-xl text-sm transition-all cursor-pointer disabled:opacity-50"
+                          className="w-full sm:w-auto shrink-0 px-5 py-3 bg-[var(--card)] hover:bg-[var(--primary)] text-white border border-[var(--border)] hover:border-transparent font-bold rounded-xl text-sm transition-all cursor-pointer disabled:opacity-50"
                         >
                           {checkingVoucher ? '...' : 'Apply'}
                         </button>
