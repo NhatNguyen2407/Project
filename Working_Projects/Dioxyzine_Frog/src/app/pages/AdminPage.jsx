@@ -698,7 +698,7 @@ export function AdminPage() {
                     </button>
                   </div>
                   {hasExpiration && (
-                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="flex gap-3">
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div className="flex-1">
                         <label className="text-[10px] text-gray-500 font-bold ml-1 mb-1 block">DATE</label>
                         <input 
