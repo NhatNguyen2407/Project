@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router';
+import { useLocation, useParams, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, MessageSquare, Plus, Minus, Clock, Component, Package, Tag, Check, Shield, RefreshCw } from 'lucide-react';
 
@@ -11,11 +11,20 @@ import { SEO } from '../components/common_components/SEO';
 import { supabase } from '../service/supabase';
 
 export function ProductDetailPage() {
-  const { id } = useParams();
+  const { category, id } = useParams();
+  const location = useLocation();
   const { products, loading, error, refetch } = useProducts();
   const { addToCart } = useCart();
-  
-  const isReadyUse = id?.startsWith('RDY-');
+
+  const isReadyUse = location.pathname.startsWith('/products/readyuse');
+
+  const customCategoryMap = {
+    plushie: 'Plushie',
+    doll: 'Doll',
+    customize: 'Customize',
+  };
+
+  const selectedCategory = customCategoryMap[category];
   
   const [currentImage, setCurrentImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -107,7 +116,15 @@ export function ProductDetailPage() {
 
   const listToUse = isReadyUse
   ? products.filter((p) => p.type === 'readyuse')
-  : products;
+  : selectedCategory
+    ? products.filter((p) => {
+        const categories = Array.isArray(p.category)
+          ? p.category
+          : [p.category];
+
+        return categories.includes(selectedCategory);
+      })
+    : products;
 
   const currentIndex = listToUse.findIndex((p) => p.id === id);
   const prevProduct = currentIndex > 0 ? listToUse[currentIndex - 1] : listToUse[listToUse.length - 1];
@@ -121,6 +138,24 @@ export function ProductDetailPage() {
   const selectImage = (index) => {
     setCurrentImage(index);
   };
+
+  const getProductUrl = (productId) => {
+  if (isReadyUse) {
+    return `/products/readyuse/${productId}`;
+  }
+
+  if (selectedCategory) {
+    return `/products/custom/${category}/${productId}`;
+  }
+
+  return `/product/${productId}`;
+};
+
+const backUrl = isReadyUse
+  ? '/products/readyuse'
+  : selectedCategory
+    ? `/products/custom/${category}`
+    : '/products/custom';
 
   const calculateLivePrice = () => {
     if (isReadyUse) {
@@ -192,17 +227,17 @@ export function ProductDetailPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-            <Link to={`/products/${isReadyUse ? 'readyuse' : 'custom'}`} className="inline-flex items-center gap-2 text-muted-foreground hover:text-[var(--primary)] transition-colors font-bold">
+            <Link to={backUrl} className="inline-flex items-center gap-2 text-muted-foreground hover:text-[var(--primary)] transition-colors font-bold">
               <ChevronLeft className="w-4 h-4" />
               Back to Products
             </Link>
 
             <div className="flex items-center gap-3">
-              <Link to={`/product/${prevProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
+              <Link to={getProductUrl(prevProduct.id)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
                 <ChevronLeft className="w-4 h-4" />
                 <span className="hidden sm:inline text-sm font-bold">Previous</span>
               </Link>
-              <Link to={`/product/${nextProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
+              <Link to={getProductUrl(nextProduct.id)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
                 <span className="hidden sm:inline text-sm font-bold">Next</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
