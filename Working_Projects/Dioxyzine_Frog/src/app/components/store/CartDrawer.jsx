@@ -31,7 +31,7 @@ export function CartDrawer() {
             {/* Header giỏ hàng - Màu nền linh hoạt theo theme */}
             <div className="p-6 border-b border-border flex items-center justify-between bg-muted">
               <h2 className="text-2xl font-bold text-foreground font-heading">Your Cart ({cartCount})</h2>
-              <button type="button" onClick={() => setIsCartOpen(false)} className="p-2 rounded-full hover:bg-card text-foreground cursor-pointer transition-colors relative z-10">
+              <button type="button" aria-label="Close cart" onClick={() => setIsCartOpen(false)} className="p-2 rounded-full hover:bg-card text-foreground cursor-pointer transition-colors relative z-10">
                 <X className="w-6 h-6" />
               </button>
             </div>
@@ -60,7 +60,12 @@ export function CartDrawer() {
                           )}
                         </div>
 
-                        <button type="button" onClick={() => removeFromCart(itemKey)} className="absolute top-3 right-3 text-muted-foreground hover:text-red-500 cursor-pointer">
+                        <button
+                          type="button"
+                          onClick={() => removeFromCart(itemKey)}
+                          aria-label={`Remove ${item.title || item.name} from cart`}
+                          className="absolute top-3 right-3 text-muted-foreground hover:text-red-500 cursor-pointer"
+                        >
                           <X className="w-4 h-4" />
                         </button>
 
@@ -68,11 +73,21 @@ export function CartDrawer() {
                           <span className="text-[var(--primary)] font-black text-base">${((item.price || 0) * (item.qty || 1)).toFixed(2)}</span>
                           
                           <div className="flex items-center bg-card rounded-lg border border-border shadow-sm">
-                            <button type="button" onClick={() => updateCartQty(itemKey, -1)} className="px-2.5 py-1 text-muted-foreground hover:text-[var(--primary)] cursor-pointer">
+                            <button
+                              type="button"
+                              onClick={() => updateCartQty(itemKey, -1)}
+                              aria-label={`Decrease quantity of ${item.title || item.name}`}
+                              className="px-2.5 py-1 text-muted-foreground hover:text-[var(--primary)] cursor-pointer"
+                            >
                               <Minus className="w-3.5 h-3.5" />
                             </button>
                             <span className="px-2 text-sm text-foreground font-bold">{item.qty}</span>
-                            <button type="button" onClick={() => updateCartQty(itemKey, 1)} className="px-2.5 py-1 text-muted-foreground hover:text-[var(--primary)] cursor-pointer">
+                            <button
+                              type="button"
+                              onClick={() => updateCartQty(itemKey, 1)}
+                              aria-label={`Increase quantity of ${item.title || item.name}`}
+                              className="px-2.5 py-1 text-muted-foreground hover:text-[var(--primary)] cursor-pointer"
+                            >
                               <Plus className="w-3.5 h-3.5" />
                             </button>
                           </div>
