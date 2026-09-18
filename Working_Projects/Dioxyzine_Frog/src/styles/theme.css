@@ -4,40 +4,40 @@
   --font-size: 16px;
   --radius: 1.25rem;
 
-  /* 🎨 REDESIGNED CUTE THEME (LIGHT MODE) - LAVENDER FROG */
-  --background: #FAF5FF; /* Nền trắng tím sữa nhạt siêu mịn */
-  --foreground: #4B5563; /* Chữ xám đậm tương phản cao dễ đọc */
+  /* 🎨 BRAND THEME (LIGHT MODE) - CREAM / MINT / LILAC / GRAPE */
+  --background: #F7F7EF; /* Cream / paper background */
+  --foreground: #4F4A55; /* Soft charcoal-purple text */
   
-  --card: #FFFFFF; /* Khối thẻ/form trắng tinh tinh tế */
-  --card-foreground: #4B5563;
+  --card: #FFFDF7; /* Warm white cards */
+  --card-foreground: #4F4A55;
   
-  --popover: #FFFFFF;
-  --popover-foreground: #4B5563;
+  --popover: #FFFDF7;
+  --popover-foreground: #4F4A55;
   
-  --primary: #A78BFA; /* Tím Lavender Oải Hương từ Logo thương hiệu */
+  --primary: #8B63B5; /* Soft grape / lilac brand accent */
   --primary-foreground: #FFFFFF;
   
-  --secondary: #D1FAE5; /* Xanh Lá Ếch nhạt nịnh mắt từ Logo */
-  --secondary-foreground: #065F46;
+  --secondary: #DCECCB; /* Soft frog mint */
+  --secondary-foreground: #4E6B3D;
   
-  --muted: #F3E8FF; /* Các mảng màu nền phụ nhạt */
-  --muted-foreground: #6B7280;
+  --muted: #EEF2E8; /* Soft muted sage */
+  --muted-foreground: #918B96;
   
-  --accent: #F3E8FF;
-  --accent-foreground: #4B5563;
+  --accent: #E8DDF2;
+  --accent-foreground: #514B57;
   
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
   
-  --border: #E9D5FF; /* Viền tím sữa mềm mại, không lo bị chói */
-  --input: #E9D5FF;
-  --input-background: #FFFFFF;
+  --border: #D8D8C9; /* Warm neutral border */
+  --input: #D8D8C9;
+  --input-background: #FFFDF7;
   --switch-background: #E5E7EB;
   
-  --ring: #A78BFA;
+  --ring: #8B63B5;
   
-  /* Token màu chữ to/Heading ở chế độ Sáng (Tím Lavender đậm đà sắc nét) */
-  --heading-color: #7C3AED;
+  /* Deep grape brand color for headings */
+  --heading-color: #6A3196;
 }
 
 /* 🌌 CYBER THEME (DARK MODE) - KHÔI PHỤC NGUYÊN BẢN CẤU HÌNH GỐC */
