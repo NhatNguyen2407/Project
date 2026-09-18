@@ -30,6 +30,7 @@
   --destructive-foreground: #FFFFFF;
   
   --border: #D8D8C9; /* Warm neutral border */
+  --grid-color: rgba(216, 216, 201, 0.38); /* Very subtle paper grid */
   --input: #D8D8C9;
   --input-background: #FFFDF7;
   --switch-background: #E5E7EB;
@@ -67,6 +68,7 @@
   --destructive-foreground: #FFFFFF;
   
   --border: rgba(139, 114, 190, 0.3);
+  --grid-color: rgba(139, 114, 190, 0.3);
   --input: rgba(139, 114, 190, 0.2);
   --input-background: rgba(8, 8, 12, 0.6);
   --switch-background: #171226;
@@ -123,8 +125,8 @@
     font-family: 'Montserrat', sans-serif; 
     
     background-image: 
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
     background-size: 40px 40px;
     background-attachment: fixed;
   }
