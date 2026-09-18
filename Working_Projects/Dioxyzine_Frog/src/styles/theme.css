@@ -6,13 +6,13 @@
 
   /* 🎨 BRAND THEME (LIGHT MODE) - CREAM / MINT / LILAC / GRAPE */
   --background: #F7F7EF; /* Cream / paper background */
-  --foreground: #4F4A55; /* Soft charcoal-purple text */
+  --foreground: #4A4450; /* Soft charcoal-purple text */
   
   --card: #FFFDF7; /* Warm white cards */
-  --card-foreground: #4F4A55;
+  --card-foreground: #4A4450;
   
   --popover: #FFFDF7;
-  --popover-foreground: #4F4A55;
+  --popover-foreground: #4A4450;
   
   --primary: #8B63B5; /* Soft grape / lilac brand accent */
   --primary-foreground: #FFFFFF;
@@ -21,7 +21,7 @@
   --secondary-foreground: #4E6B3D;
   
   --muted: #EEF2E8; /* Soft muted sage */
-  --muted-foreground: #918B96;
+  --muted-foreground: #756F7D;
   
   --accent: #E8DDF2;
   --accent-foreground: #514B57;
