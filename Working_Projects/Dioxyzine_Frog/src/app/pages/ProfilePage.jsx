@@ -234,7 +234,7 @@ export function ProfilePage() {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           <div className="md:col-span-1 space-y-4">
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 shadow-sm text-center">
-              <div className="w-24 h-24 bg-[#1A1528] rounded-full flex items-center justify-center border-2 border-[var(--primary)] mx-auto mb-4 overflow-hidden">
+              <div className="w-24 h-24 bg-[var(--muted)] dark:bg-[#1A1528] rounded-full flex items-center justify-center border-2 border-[var(--primary)] mx-auto mb-4 overflow-hidden">
                 {user.user_metadata?.avatar_url ? <img src={user.user_metadata.avatar_url} alt="Your profile avatar" className="w-full h-full object-cover" /> : <User className="w-10 h-10 text-[var(--primary)]" />}
               </div>
               <h2 className="text-xl font-bold text-[var(--primary)] truncate">{user.user_metadata?.full_name || 'Froggy Member'}</h2>
@@ -242,9 +242,18 @@ export function ProfilePage() {
             </div>
 
             <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-3 shadow-sm space-y-2">
-              <button onClick={() => setActiveView('orders')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeView === 'orders' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}><Package className="w-5 h-5" /> My Orders</button>
-              <button onClick={() => setActiveView('wishlist')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeView === 'wishlist' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}><Heart className="w-5 h-5" /> My Wishlist</button>
-              <button onClick={() => setActiveView('settings')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeView === 'settings' ? 'bg-[var(--primary)]/10 text-[var(--primary)]' : 'hover:bg-white/5 text-gray-400 hover:text-white'}`}><Settings className="w-5 h-5" /> Settings</button>
+              <button onClick={() => setActiveView('orders')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeView === 'orders'
+                ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
+                : 'hover:bg-[var(--accent)]/50 text-[var(--foreground)] dark:text-gray-400 dark:hover:text-white'}`}>
+                <Package className="w-5 h-5" /> My Orders</button>
+              <button onClick={() => setActiveView('wishlist')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeView === 'wishlist'
+                ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
+                : 'hover:bg-[var(--accent)]/50 text-[var(--foreground)] dark:text-gray-400 dark:hover:text-white'}`}>
+                <Heart className="w-5 h-5" /> My Wishlist</button>
+              <button onClick={() => setActiveView('settings')} className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold transition-all ${activeView === 'settings'
+                ? 'bg-[var(--primary)]/10 text-[var(--primary)]'
+                : 'hover:bg-[var(--accent)]/50 text-[var(--foreground)] dark:text-gray-400 dark:hover:text-white'}`}>
+                <Settings className="w-5 h-5" /> Settings</button>
               <div className="border-t border-[var(--border)] my-2"></div>
               <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-400 hover:bg-red-400/10 transition-colors"><LogOut className="w-5 h-5" /> Sign Out</button>
             </div>
@@ -282,7 +291,7 @@ export function ProfilePage() {
                   {loadingOrders ? (
                     <div className="text-center py-8 text-[var(--primary)] opacity-60">Loading your orders...</div>
                   ) : orders.length === 0 ? (
-                    <div className="bg-[#1A1528] rounded-2xl p-8 text-center border border-[var(--border)] border-dashed">
+                    <div className="bg-[var(--muted)] dark:bg-[#1A1528] rounded-2xl p-8 text-center border border-[var(--border)] border-dashed">
                       <p className="text-[var(--primary)] opacity-70">You don't have any orders yet.</p>
                     </div>
                   ) : (
@@ -294,7 +303,7 @@ export function ProfilePage() {
                         const isCompleted = status === 'completed';
 
                         return (
-                          <div key={order.id} className="bg-[#1A1528] border border-[var(--border)] rounded-2xl p-5 space-y-5 hover:border-[var(--primary)]/30 transition-colors relative overflow-hidden">
+                          <div key={order.id} className="bg-[var(--muted)] dark:bg-[#1A1528] border border-[var(--border)] rounded-2xl p-5 space-y-5 hover:border-[var(--primary)]/30 transition-colors relative overflow-hidden">
                             
                             {/* Nút Order Again siêu vip */}
                             {isCompleted && (
@@ -333,17 +342,20 @@ export function ProfilePage() {
                               <div className="flex flex-col w-full sm:w-auto mt-4 sm:mt-0 gap-3">
                                 {/* Khối vận chuyển chỉ hiện khi đang Shipping */}
                                 {status === 'shipping' && (
-                                  <div className="bg-white/5 border border-white/10 rounded-xl p-4 w-full sm:w-[280px]">
+                                  <div className="bg-[var(--card)] dark:bg-white/5 border border-[var(--border)] dark:border-white/10 rounded-xl p-4 w-full sm:w-[280px]">
                                     <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
                                       <div className="flex items-center gap-2">
                                         <div className="w-8 h-8 rounded-full bg-[#EE0033]/20 flex items-center justify-center"><Truck className="w-4 h-4 text-[#EE0033]" /></div>
                                         <div>
-                                          <p className="text-[10px] text-[var(--silver-gray)] uppercase tracking-wider">Vận chuyển</p>
-                                          <p className="text-sm font-bold text-white">Viettel Post</p>
+                                          <p className="text-[10px] text-[var(--muted-foreground)] dark:text-gray-400 uppercase tracking-wider">Vận chuyển</p>
+                                          <p className="text-sm font-bold text-[var(--foreground)] dark:text-white">
+                                            Viettel Post
+                                          </p>
                                         </div>
                                       </div>
+
                                       <div className="text-right">
-                                        <p className="text-[10px] text-[var(--silver-gray)] uppercase tracking-wider">Mã Vận Đơn</p>
+                                        <p className="text-[10px] text-[var(--muted-foreground)] dark:text-gray-400 uppercase tracking-wider">Mã Vận Đơn</p>
                                         <p className="text-sm font-bold text-[var(--primary)] font-mono">{order.tracking_code || 'Updating...'}</p>
                                       </div>
                                     </div>
@@ -360,14 +372,14 @@ export function ProfilePage() {
                             {isCompleted ? (
                               <div className="pt-2 border-t border-[var(--border)] mt-4">
                                 {order.rating ? (
-                                  <div className="p-4 bg-black/20 rounded-xl border border-white/5">
+                                  <div className="p-4 bg-[var(--muted)] dark:bg-black/20 rounded-xl border border-[var(--border)] dark:border-white/5">
                                     <div className="flex items-center gap-1 mb-1.5">
                                       {[1, 2, 3, 4, 5].map((star) => (
                                         <Star key={star} className={`w-3.5 h-3.5 ${star <= order.rating ? 'fill-yellow-500 text-yellow-500' : 'text-gray-600'}`} />
                                       ))}
                                       <span className="text-xs text-yellow-500 font-bold ml-2">My Review</span>
                                     </div>
-                                    <p className="text-xs text-gray-400 italic">"{order.review_comment}"</p>
+                                    <p className="text-xs text-[var(--foreground)] dark:text-gray-400 italic">"{order.review_comment}"</p>
                                   </div>
                                 ) : (
                                   <div className="flex items-center justify-between bg-green-500/10 border border-green-500/20 p-4 rounded-xl">
@@ -381,7 +393,7 @@ export function ProfilePage() {
                             ) : !isReturned ? (
                               <div className="pt-4 mt-2 border-t border-[var(--border)]">
                                 <div className="relative flex justify-between items-center w-full">
-                                  <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-white/5 -translate-y-1/2 z-0"></div>
+                                  <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-[var(--border)] dark:bg-white/5 -translate-y-1/2 z-0"></div>
                                   <div className="absolute top-1/2 left-0 h-0.5 bg-[var(--primary)] -translate-y-1/2 z-0 transition-all duration-500" style={{ width: `${(currentStepIdx / (STEPS.length - 1)) * 100}%` }}></div>
 
                                   {STEPS.map((step, index) => {
@@ -389,8 +401,19 @@ export function ProfilePage() {
                                     const isCurrent = index === currentStepIdx;
                                     return (
                                       <div key={step} className="flex flex-col items-center relative z-10">
-                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center border text-[10px] font-bold transition-all duration-300 ${isPassed ? 'bg-[var(--primary)] border-[var(--primary)] text-black' : 'bg-[#1A1528] border-white/10 text-gray-500'} ${isCurrent ? 'ring-4 ring-[var(--primary)]/20 scale-110' : ''}`}>{index + 1}</div>
-                                        <span className={`text-[10px] mt-1.5 font-medium tracking-wide transition-colors hidden sm:block ${isPassed ? 'text-[var(--primary)]' : 'text-gray-600'} ${isCurrent ? 'font-bold' : ''}`}>{step}</span>
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center border text-[10px] font-bold transition-all duration-300 
+                                            ${isPassed
+                                              ? 'bg-[var(--primary)] border-[var(--primary)] text-white'
+                                              : 'bg-[var(--card)] dark:bg-[#1A1528] border-[var(--border)] dark:border-white/10 text-[var(--muted-foreground)]'
+                                            } 
+                                            ${isCurrent ? 'ring-4 ring-[var(--primary)]/20 scale-110' : ''}`
+                                          }>{index + 1}
+                                        </div>
+                                        <span className={`text-[10px] mt-1.5 font-medium tracking-wide transition-colors hidden sm:block 
+                                              ${isPassed ? 'text-[var(--primary)]' : 'text-[var(--muted-foreground)] dark:text-gray-600'} 
+                                              ${isCurrent ? 'font-bold' : ''}`
+                                            }>{step}
+                                          </span>
                                       </div>
                                     );
                                   })}
@@ -417,7 +440,7 @@ export function ProfilePage() {
                 <form onSubmit={handleUpdateProfile} className="space-y-6">
                   {/* ...Phần avatar và email settings giữ nguyên để không làm dài code... */}
                   <div className="space-y-2">
-                    <label className="text-sm text-[var(--silver-gray)] font-semibold flex items-center gap-2"><User className="w-4 h-4"/> Display Name</label>
+                    <label className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white focus:border-[var(--primary)] outline-none"><User className="w-4 h-4"/> Display Name</label>
                     <input required type="text" value={profileForm.fullName} onChange={e => setProfileForm({...profileForm, fullName: e.target.value})} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none" />
                   </div>
                   <button type="submit" disabled={updatingProfile} className="w-full sm:w-auto px-8 py-3.5 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl shadow-lg cursor-pointer">
@@ -427,7 +450,7 @@ export function ProfilePage() {
 
                 <div className="mt-10 pt-8 border-t border-red-500/20">
                   <h4 className="text-red-400 font-bold flex items-center gap-2 mb-2"><Trash2 className="w-5 h-5" /> Danger Zone</h4>
-                  <p className="text-sm text-[var(--silver-gray)] mb-4">
+                  <p className="text-sm text-[var(--muted-foreground)] mb-4">
                     Deleting your account is permanent. Your order history will be kept for accounting records but disconnected from your name and contact info.
                   </p>
                   <button
@@ -448,14 +471,14 @@ export function ProfilePage() {
       <AnimatePresence>
         {reviewOrder && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#1A1528] border border-[var(--border)] rounded-3xl p-6 max-w-md w-full space-y-6">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--card)] dark:bg-[#1A1528] border border-[var(--border)] rounded-3xl p-6 max-w-md w-full space-y-6">
               <div className="text-center">
-                <h3 className="text-xl font-bold text-white flex items-center justify-center gap-2"><MessageSquare className="text-[var(--primary)]" /> Confirm & Review</h3>
+                <h3 className="text-xl font-bold text-[var(--foreground)] dark:text-white flex items-center justify-center gap-2"><MessageSquare className="text-[var(--primary)]" /> Confirm & Review</h3>
                 <p className="text-xs text-[var(--silver-gray)] mt-1">Xác nhận đơn hàng: <span className="text-[var(--primary)] font-mono">#{reviewOrder.id.slice(0, 8)}</span></p>
               </div>
               <form onSubmit={handleSubmitReview} className="space-y-5">
                 <div className="flex flex-col items-center gap-2">
-                  <label className="text-sm font-semibold text-gray-300">Đánh giá sản phẩm</label>
+                  <label className="text-sm font-semibold text-[var(--foreground)] dark:text-gray-300">Đánh giá sản phẩm</label>
                   <div className="flex gap-1.5">
                     {[1, 2, 3, 4, 5].map((star) => (
                       <button key={star} type="button" onClick={() => setRating(star)} className="p-1 transition-transform hover:scale-125 cursor-pointer">
@@ -465,8 +488,8 @@ export function ProfilePage() {
                   </div>
                 </div>
                 <div className="space-y-1.5">
-                  <label className="text-sm font-semibold text-gray-300">Nhận xét (Tùy chọn)</label>
-                  <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Sản phẩm rất tuyệt vời..." rows={4} className="w-full bg-black/40 border border-white/10 rounded-2xl p-4 text-sm text-white focus:border-[var(--primary)] outline-none resize-none" />
+                  <label className="text-sm font-semibold text-[var(--foreground)] dark:text-gray-300">Nhận xét (Tùy chọn)</label>
+                  <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Sản phẩm rất tuyệt vời..." rows={4} className="w-full bg-[var(--input-background)] dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-2xl p-4 text-sm text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none resize-none"/>
                 </div>
                 <div className="flex gap-3">
                   <button type="button" onClick={() => setReviewOrder(null)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-gray-300 font-bold rounded-xl text-sm transition-colors cursor-pointer">Hủy</button>
@@ -481,13 +504,13 @@ export function ProfilePage() {
       <AnimatePresence>
         {showDeleteModal && (
           <div className="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[#1A1528] border border-red-500/30 rounded-3xl p-6 max-w-md w-full space-y-5">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="bg-[var(--card)] dark:bg-[#1A1528] border border-red-500/30 rounded-3xl p-6 max-w-md w-full space-y-5">
               <div className="text-center">
                 <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
                   <Trash2 className="w-7 h-7 text-red-400" />
                 </div>
-                <h3 className="text-xl font-bold text-white">Delete your account?</h3>
-                <p className="text-sm text-[var(--silver-gray)] mt-2">
+                <h3 className="text-xl font-bold text-[var(--foreground)] dark:text-white">Delete your account?</h3>
+                <p className="text-sm text-[var(--muted-foreground)] mt-2">
                   This cannot be undone. Your login will be permanently deleted{user?.email ? ` (${user.email})` : ''}. Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm.
                 </p>
               </div>
@@ -496,7 +519,7 @@ export function ProfilePage() {
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder="DELETE"
-                className="w-full px-4 py-3 bg-black/40 border border-red-500/30 rounded-xl text-white text-center font-mono focus:border-red-500 outline-none"
+                className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-black/40 border border-red-500/30 rounded-xl text-[var(--foreground)] dark:text-white text-center font-mono focus:border-red-500 outline-none"
               />
               <div className="flex gap-3">
                 <button

@@ -67,7 +67,7 @@ export function HomePage() {
                       <Link to="/inquiry">
                         <motion.span
                           whileHover={{ scale: 1.05 }}
-                          className="px-8 py-4 rounded-full bg-card text-[var(--primary)] font-bold border-2 border-[var(--primary)] hover:bg-muted cursor-pointer transition-colors shadow-sm"
+                          className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-card text-[var(--primary)] font-bold border-2 border-[var(--primary)] hover:bg-muted cursor-pointer transition-colors shadow-sm"
                         >
                           Get a quote
                         </motion.span>
@@ -154,10 +154,10 @@ export function HomePage() {
             )}
           </div>
           <div className="text-center mt-12">
-            <Link to="/products">
+            <Link to="/products" className="inline-flex">
               <motion.span
                 whileHover={{ scale: 1.05 }}
-                className="px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold flex items-center gap-2 mx-auto cursor-pointer shadow-md"
+                className="inline-flex items-center justify-center px-8 py-4 rounded-full bg-[var(--primary)] text-white font-bold gap-2 cursor-pointer shadow-md"
               >
                 View All Products <ArrowRight className="w-5 h-5" />
               </motion.span>

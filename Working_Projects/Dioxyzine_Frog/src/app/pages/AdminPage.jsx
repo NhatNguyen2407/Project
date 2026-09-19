@@ -20,7 +20,7 @@ export function AdminPage() {
     else toast(msg);
   };
 
-  // 🚀 ĐÃ BỔ SUNG: Tab 'reviews'
+  // Tab 'reviews'
   const [activeTab, setActiveTab] = useState('orders'); 
   const [orders, setOrders] = useState([]);
   const [paypalOrders, setPaypalOrders] = useState([]);
@@ -29,7 +29,7 @@ export function AdminPage() {
   const [loading, setLoading] = useState(true);
   const [updatingId, setUpdatingId] = useState(null);
 
-  // 🚀 ĐÃ BỔ SUNG: Quản lý Textbox trả lời Review
+  // Quản lý Textbox trả lời Review
   const [replyInputs, setReplyInputs] = useState({});
 
   const [coverFile, setCoverFile] = useState(null);
@@ -171,7 +171,7 @@ export function AdminPage() {
   //   } catch (err) { console.error(err); toast.error("Lỗi cập nhật ngày giao!"); }
   // };
 
-  // 🚀 ĐÃ BỔ SUNG: Tính năng Admin Reply Review
+  // Tính năng Admin Reply Review
   const handleSaveReply = async (id) => {
     const replyText = replyInputs[id];
     if (!replyText) return toast.error("Vui lòng nhập câu trả lời!");
@@ -183,7 +183,7 @@ export function AdminPage() {
     } catch (err) { toast.error(err.message); }
   };
 
-  // 🚀 ĐÃ BỔ SUNG: Tính năng Ẩn/Hiện Review
+  // Tính năng Ẩn/Hiện Review
   const handleToggleReviewVisibility = async (id, isHidden) => {
     try {
       const { error } = await supabase.from('inquiries').update({ is_hidden: !isHidden }).eq('id', id);
@@ -342,7 +342,7 @@ export function AdminPage() {
               <button onClick={() => setActiveTab('vouchers')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'vouchers' ? 'bg-[var(--primary)] text-white' : 'text-gray-400 hover:text-white cursor-pointer'}`}>
                 Promo Codes
               </button>
-              {/* 🚀 ĐÃ BỔ SUNG: Nút Tab Reviews */}
+              {/* Nút Tab Reviews */}
               <button onClick={() => setActiveTab('reviews')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'reviews' ? 'bg-yellow-500 text-black' : 'text-gray-400 hover:text-yellow-500 cursor-pointer'}`}>
                 Reviews ({reviewsList.length})
               </button>
@@ -408,7 +408,7 @@ export function AdminPage() {
               </div>
             </div>
           ) : activeTab === 'reviews' ? (
-            /* 🚀 ĐÃ BỔ SUNG: BẢNG QUẢN LÝ REVIEWS DÀNH CHO ADMIN */
+            /* BẢNG QUẢN LÝ REVIEWS DÀNH CHO ADMIN */
             <div className="space-y-6 max-w-4xl mx-auto">
               {reviewsList.length === 0 ? (
                 <div className="text-center py-10 text-gray-500">Chưa có đánh giá nào từ khách hàng.</div>
