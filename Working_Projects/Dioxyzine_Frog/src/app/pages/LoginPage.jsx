@@ -13,20 +13,20 @@ const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
 
   return (
     <div className="space-y-2 w-full">
-      <label className="block text-sm font-semibold text-white/90">
+      <label className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">
         {label}
       </label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-500'}`} />
+          <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-[var(--muted-foreground)] dark:text-gray-500'}`} />
         </div>
         <input
           type={inputType}
-          className={`w-full pl-11 pr-12 py-3.5 bg-[#1A1528] border ${
+          className={`w-full pl-11 pr-12 py-3.5 bg-[var(--input-background)] border ${
             error 
               ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' 
               : 'border-[var(--border)] focus:border-[var(--primary)] focus:ring-[var(--primary)]/10'
-          } rounded-xl text-white placeholder-gray-500 transition-all outline-none focus:ring-4`}
+          } rounded-xl text-[var(--foreground)] placeholder-[var(--muted-foreground)] dark:bg-[#1A1528] dark:text-white dark:placeholder-gray-500 transition-all outline-none focus:ring-4`}
           {...props}
         />
         {isPassword && (
@@ -34,7 +34,7 @@ const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
-            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
+            className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--muted-foreground)] dark:text-gray-500 hover:text-[var(--foreground)] dark:hover:text-gray-300 transition-colors cursor-pointer"
           >
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
@@ -74,7 +74,7 @@ const SocialButton = ({ icon: Icon, label, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-1 items-center justify-center gap-2 py-3.5 bg-[#1A1528] border border-[var(--border)] hover:border-[var(--primary)]/50 hover:bg-[#221B34] rounded-xl text-gray-300 font-semibold transition-all cursor-pointer"
+      className="flex flex-1 items-center justify-center gap-2 py-3.5 bg-[var(--card)] border border-[var(--border)] hover:border-[var(--primary)]/50 hover:bg-[var(--accent)] rounded-xl text-[var(--foreground)] dark:bg-[#1A1528] dark:hover:bg-[#221B34] dark:text-gray-300 font-semibold transition-all cursor-pointer"
     >
       <Icon className="h-5 w-5 text-[var(--primary)]" />
       <span className="text-sm">{label}</span>
@@ -233,7 +233,7 @@ console.log('LOGIN SESSION:', data?.session);
                 <div className="w-full border-t border-[var(--border)]"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-[#161224] text-gray-500 font-medium bg-[var(--card)]">
+                <span className="px-4 bg-[#161224] text-[var(--muted-foreground)] font-medium bg-[var(--card)]">
                   Or continue with
                 </span>
               </div>
