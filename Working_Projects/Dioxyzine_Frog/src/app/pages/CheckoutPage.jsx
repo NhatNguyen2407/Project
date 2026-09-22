@@ -148,7 +148,9 @@ export function CheckoutPage() {
   // "coi như đã lưu thành công" trong khi có thể chưa.
   const sendConfirmationEmail = async (transactionId, capturedAmount) => {
     const { email, firstName, lastName } = shippingForm;
-    const orderSummary = cart.map(item => `${item.qty}x ${item.name}`).join(' | ');
+    const orderSummary = cart
+      .map(item => `${item.qty}x ${item.title || item.name}`)
+      .join(' | ');
 
     // Bắn sự kiện Purchase ngay tại đây — vì hàm này chỉ được gọi SAU KHI
     // capture-paypal-order đã xác nhận thanh toán thành công ở server,
@@ -196,7 +198,7 @@ export function CheckoutPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="mb-6">
-          <Link to="/products" className="inline-flex items-center gap-2 text-[var(--silver-gray)] hover:text-white transition-colors text-sm font-medium">
+          <Link to="/products" className="inline-flex items-center gap-2 text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] hover:text-[var(--primary)] dark:hover:text-white transition-colors text-sm font-medium">
             <ArrowLeft className="w-4 h-4" /> Back to Shopping
           </Link>
         </div>
@@ -209,11 +211,11 @@ export function CheckoutPage() {
                 initial={{ opacity: 0 }} 
                 animate={{ opacity: 1 }} 
                 exit={{ opacity: 0 }}
-                className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[#0d0a14]/90 backdrop-blur-md"
+                className="absolute inset-0 z-[100] flex flex-col items-center justify-center bg-[var(--card)]/95 dark:bg-[#0d0a14]/90 backdrop-blur-md"
               >
                 <Loader2 className="w-16 h-16 text-[var(--primary)] animate-spin mb-6" />
-                <h2 className="text-2xl font-bold text-white mb-2 font-heading tracking-wider">Processing Your Order...</h2>
-                <p className="text-[var(--silver-gray)] text-center max-w-md px-4 animate-pulse">
+                <h2 className="text-2xl font-bold text-[var(--heading-color)] dark:text-white mb-2 font-heading tracking-wider">Processing Your Order...</h2>
+                <p className="text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] text-center max-w-md px-4 animate-pulse">
                   Please do not close or refresh this page. We are finalizing your receipt and updating the system.
                 </p>
               </motion.div>
@@ -223,70 +225,70 @@ export function CheckoutPage() {
           {orderComplete ? (
             <div className="w-full p-16 flex flex-col items-center justify-center text-center bg-[var(--card)]">
               <CheckCircle2 className="w-24 h-24 text-green-500 mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-full" />
-              <h2 className="text-4xl font-bold text-white mb-4 font-heading">Order Confirmed!</h2>
-              <p className="text-[var(--silver-gray)] text-lg max-w-md mb-8">Thank you for your purchase. We have received your payment and will process your order shortly.</p>
+              <h2 className="text-4xl font-bold text-[var(--heading-color)] dark:text-white mb-4 font-heading">Order Confirmed!</h2>
+              <p className="text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] text-lg max-w-md mb-8">Thank you for your purchase. We have received your payment and will process your order shortly.</p>
             </div>
           ) : (
             <>
               <div className="w-full md:w-3/5 p-8 md:p-12 border-b md:border-b-0 md:border-r border-[var(--border)] space-y-8">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-[var(--heading-color)] dark:text-white mb-4 flex items-center gap-2">
                     <Truck className="w-5 h-5 text-[var(--primary)]" /> Delivery Information
                   </h3>
                   <div className="space-y-4">
                     <div className="space-y-1">
-                      <label htmlFor="email" className="text-xs text-[var(--silver-gray)] font-semibold">Email Contact *</label>
-                      <input required type="email" name="email" id="email" value={shippingForm.email} onChange={handleInputChange} placeholder="example@gmail.com" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                      <label htmlFor="email" className="text-xs text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] font-semibold">Email Contact *</label>
+                      <input required type="email" name="email" id="email" value={shippingForm.email} onChange={handleInputChange} placeholder="example@gmail.com" className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none transition-colors" />
                     </div>
                     <div className="space-y-1">
-                      <label htmlFor="countryCode" className="text-xs text-[var(--silver-gray)] font-semibold">Country / Region *</label>
+                      <label htmlFor="countryCode" className="text-xs text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] font-semibold">Country / Region *</label>
                       <div className="relative">
                         <select 
                           name="countryCode" 
                           id="countryCode"
                           value={shippingForm.countryCode} 
                           onChange={handleInputChange} 
-                          className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none appearance-none cursor-pointer font-medium"
+                          className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl text-[var(--foreground)] dark:text-white focus:border-[var(--primary)] outline-none appearance-none cursor-pointer font-medium"
                         >
                           {COUNTRY_LIST.map(country => (
-                            <option key={country.code} value={country.code} className="bg-[#1A1528] text-white">
+                            <option key={country.code} value={country.code} className="bg-[var(--input-background)] dark:bg-[#1A1528] text-[var(--foreground)] dark:text-white">
                               {country.flag} {country.name} ({country.dialCode})
                             </option>
                           ))}
                         </select>
-                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[var(--silver-gray)]">
+                        <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-[var(--muted-foreground)] dark:text-[var(--silver-gray)]">
                           <svg className="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
                         </div>
                       </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label htmlFor="firstName" className="text-xs text-[var(--silver-gray)] font-semibold">First Name *</label>
-                        <input required type="text" name="firstName" id="firstName" value={shippingForm.firstName} onChange={handleInputChange} placeholder="John" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                        <label htmlFor="firstName" className="text-xs text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] font-semibold">First Name *</label>
+                        <input required type="text" name="firstName" id="firstName" value={shippingForm.firstName} onChange={handleInputChange} placeholder="John" className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none transition-colors" />
                       </div>
                       <div className="space-y-1">
-                        <label htmlFor="lastName" className="text-xs text-[var(--silver-gray)] font-semibold">Last Name *</label>
-                        <input required type="text" name="lastName" id="lastName" value={shippingForm.lastName} onChange={handleInputChange} placeholder="Doe" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                        <label htmlFor="lastName" className="text-xs text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] font-semibold">Last Name *</label>
+                        <input required type="text" name="lastName" id="lastName" value={shippingForm.lastName} onChange={handleInputChange} placeholder="Doe" className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none transition-colors" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label htmlFor="address" className="text-xs text-[var(--silver-gray)] font-semibold">Street Address *</label>
-                      <input required type="text" name="address" id="address" value={shippingForm.address} onChange={handleInputChange} placeholder="House number, Street name..." className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                      <label htmlFor="address" className="text-xs text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] font-semibold">Street Address *</label>
+                      <input required type="text" name="address" id="address" value={shippingForm.address} onChange={handleInputChange} placeholder="House number, Street name..." className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none transition-colors" />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div className="space-y-1">
-                        <label htmlFor="city" className="text-xs text-[var(--silver-gray)] font-semibold">City *</label>
-                        <input required type="text" name="city" id="city" value={shippingForm.city} onChange={handleInputChange} placeholder="Hanoi" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                        <label htmlFor="city" className="text-xs text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] font-semibold">City *</label>
+                        <input required type="text" name="city" id="city" value={shippingForm.city} onChange={handleInputChange} placeholder="Hanoi" className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none transition-colors" />
                       </div>
                       <div className="space-y-1">
-                        <label htmlFor="postalCode" className="text-xs text-[var(--silver-gray)] font-semibold">Postal Code (Optional)</label>
-                        <input type="text" name="postalCode" id="postalCode" value={shippingForm.postalCode} onChange={handleInputChange} placeholder="100000" className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none transition-colors" />
+                        <label htmlFor="postalCode" className="text-xs text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] font-semibold">Postal Code (Optional)</label>
+                        <input type="text" name="postalCode" id="postalCode" value={shippingForm.postalCode} onChange={handleInputChange} placeholder="100000" className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none transition-colors" />
                       </div>
                     </div>
                     <div className="space-y-1">
-                      <label htmlFor="phoneNumber" className="text-xs text-[var(--silver-gray)] font-semibold">Phone Number *</label>
-                      <div className="flex bg-[#1A1528] border border-[var(--border)] rounded-xl overflow-hidden focus-within:border-[var(--primary)] transition-colors">
-                        <span className="bg-white/5 px-4 flex items-center gap-2 text-[var(--silver-gray)] text-sm font-bold border-r border-[var(--border)] select-none">
+                      <label htmlFor="phoneNumber" className="text-xs text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] font-semibold">Phone Number *</label>
+                      <div className="flex bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl overflow-hidden focus-within:border-[var(--primary)] transition-colors">
+                        <span className="bg-[var(--muted)] dark:bg-white/5 px-4 flex items-center gap-2 text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] text-sm font-bold border-r border-[var(--border)] dark:border-white/10 select-none">
                           <span className="text-lg">{COUNTRY_LIST.find(c => c.code === shippingForm.countryCode)?.flag}</span>
                           {shippingForm.phoneCode}
                         </span>
@@ -298,7 +300,7 @@ export function CheckoutPage() {
                           value={shippingForm.phoneNumber} 
                           onChange={handleInputChange} 
                           placeholder="987 654 321" 
-                          className="w-full px-4 py-3 bg-transparent text-white outline-none" 
+                          className="w-full px-4 py-3 bg-transparent text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] outline-none"
                         />
                       </div>
                     </div>
@@ -306,37 +308,37 @@ export function CheckoutPage() {
                 </div>
 
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-4 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-[var(--heading-color)] dark:text-white mb-4 flex items-center gap-2">
                     <CreditCard className="w-5 h-5 text-[var(--primary)]" /> Payment Options
                   </h3>
-                  <div className="p-4 bg-[#1A1528] border border-[var(--border)] rounded-xl">
-                    <div className="flex items-center gap-3 text-[var(--silver-gray)]">
+                  <div className="p-4 bg-[var(--muted)] dark:bg-[#1A1528] border border-[var(--border)] dark:border-white/10 rounded-xl">
+                    <div className="flex items-center gap-3 text-[var(--muted-foreground)] dark:text-[var(--silver-gray)]">
                       <input type="radio" checked readOnly className="w-4 h-4 accent-[var(--primary)]" />
-                      <span className="font-semibold text-white">Secure E-Commerce Gateway</span>
+                      <span className="font-semibold text-[var(--foreground)] dark:text-white">Secure E-Commerce Gateway</span>
                     </div>
-                    <p className="text-sm mt-2 opacity-70">Redirects to secure payment validation interface after placement confirmation. Supports PayPal & Credit Cards.</p>
+                    <p className="text-sm mt-2 text-[var(--muted-foreground)] dark:text-gray-400">Redirects to secure payment validation interface after placement confirmation. Supports PayPal & Credit Cards.</p>
                   </div>
                 </div>
               </div>
 
-              <div className="w-full md:w-2/5 p-8 md:p-12 bg-[#1A1528] flex flex-col justify-between">
+              <div className="w-full md:w-2/5 p-8 md:p-12 bg-[var(--muted)] dark:bg-[#1A1528] flex flex-col justify-between">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-6 font-heading">Order Summary</h3>
+                  <h3 className="text-xl font-bold text-[var(--heading-color)] dark:text-white mb-6 font-heading">Order Summary</h3>
                   <div className="space-y-4 max-h-[40vh] overflow-y-auto mb-6 pr-2 border-b border-[var(--border)] pb-6">
                     {cart.map(item => (
-                      <div key={item.id} className="flex items-center gap-4 relative">
+                      <div key={item.id} className="flex items-center gap-4 relative min-w-0">
                         <div className="relative flex-shrink-0">
                           <img src={item.image} className="w-16 h-16 rounded-lg object-cover border border-[var(--border)]" alt={item.name} />
-                          <span className="absolute -top-2 -right-2 bg-[var(--muted-foreground)] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{item.qty}</span>
+                          <span className="absolute -top-2 -right-2 bg-[var(--primary)] text-white text-xs w-5 h-5 flex items-center justify-center rounded-full font-bold">{item.qty}</span>
                         </div>
-                        <p className="text-sm text-white font-semibold flex-grow line-clamp-2">{item.name}</p>
-                        <p className="text-sm text-[var(--silver-gray)] font-bold">${(item.price * item.qty).toFixed(2)}</p>
+                        <p className="min-w-0 flex-1 text-sm text-[var(--foreground)] dark:text-white font-semibold line-clamp-2">{item.title || item.name}</p>
+                        <p className="shrink-0 text-sm text-[var(--foreground)] dark:text-[var(--silver-gray)] font-bold">${(item.price * item.qty).toFixed(2)}</p>
                       </div>
                     ))}
                   </div>
 
                   <div className="mb-6 border-b border-[var(--border)] pb-6">
-                    <label htmlFor="promoCode" className="text-xs text-[var(--silver-gray)] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5"><Ticket className="w-3.5 h-3.5" /> Promo Code</label>
+                    <label htmlFor="promoCode" className="text-xs text-[var(--foreground)] dark:text-[var(--silver-gray)] font-bold uppercase tracking-wider mb-2 flex items-center gap-1.5"><Ticket className="w-3.5 h-3.5" /> Promo Code</label>
                     {appliedVoucher ? (
                       <div className="flex items-center justify-between bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
                         <div>
@@ -357,13 +359,13 @@ export function CheckoutPage() {
                           value={promoCodeInput} 
                           onChange={(e) => setPromoCodeInput(e.target.value.toUpperCase())}
                           placeholder="Enter your code" 
-                          className="flex-1 min-w-0 w-full px-4 py-3 bg-black/40 border border-white/10 rounded-xl text-white font-mono uppercase focus:border-[var(--primary)] outline-none transition-colors text-sm" 
+                          className="flex-1 min-w-0 w-full px-4 py-3 bg-[var(--input-background)] dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] font-mono uppercase focus:border-[var(--primary)] outline-none transition-colors text-sm" 
                         />
                         <button 
                           type="button" 
                           onClick={handleApplyVoucher}
                           disabled={!promoCodeInput.trim() || checkingVoucher}
-                          className="w-full sm:w-auto shrink-0 px-5 py-3 bg-[var(--card)] hover:bg-[var(--primary)] text-white border border-[var(--border)] hover:border-transparent font-bold rounded-xl text-sm transition-all cursor-pointer disabled:opacity-50"
+                          className="w-full sm:w-auto shrink-0 px-5 py-3 bg-[var(--card)] dark:bg-[#171226] hover:bg-[var(--primary)] text-[var(--foreground)] dark:text-white border border-[var(--border)] dark:border-white/10 hover:border-transparent hover:text-white font-bold rounded-xl text-sm transition-all cursor-pointer disabled:opacity-50"
                         >
                           {checkingVoucher ? '...' : 'Apply'}
                         </button>
@@ -371,13 +373,29 @@ export function CheckoutPage() {
                     )}
                   </div>
 
-                  <div className="space-y-3 text-sm text-[var(--silver-gray)] border-b border-[var(--border)] pb-6 mb-6">
-                    <div className="flex justify-between"><span>Subtotal</span> <span className="font-semibold text-white">${cartTotal.toFixed(2)}</span></div>
-                    <div className="flex justify-between"><span>Shipping Fee</span> <span className="font-semibold text-white">${SHIPPING_FEE.toFixed(2)}</span></div>
+                  <div className="space-y-3 text-sm text-[var(--foreground)] dark:text-[var(--silver-gray)] border-b border-[var(--border)] pb-6 mb-6">
+                    <div className="flex justify-between">
+                      <span>Subtotal</span>
+                      <span className="font-semibold text-[var(--foreground)] dark:text-white">
+                        ${cartTotal.toFixed(2)}
+                      </span>
+                    </div>
+
+                    <div className="flex justify-between">
+                      <span>Shipping Fee</span>
+                      <span className="font-semibold text-[var(--foreground)] dark:text-white">
+                        ${SHIPPING_FEE.toFixed(2)}
+                      </span>
+                    </div>
                     
                     <AnimatePresence>
                       {appliedVoucher && (
-                        <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} className="flex justify-between text-yellow-500 font-bold overflow-hidden mt-3">
+                        <motion.div
+                          initial={{ opacity: 0, height: 0 }}
+                          animate={{ opacity: 1, height: 'auto' }}
+                          exit={{ opacity: 0, height: 0 }}
+                          className="flex justify-between text-yellow-600 dark:text-yellow-500 font-bold overflow-hidden mt-3"
+                        >
                           <span>Discount ({appliedVoucher.code})</span> 
                           <span>-${discountValue.toFixed(2)}</span>
                         </motion.div>
@@ -386,21 +404,38 @@ export function CheckoutPage() {
                   </div>
 
                   <div className="flex justify-between items-center mb-6">
-                    <span className="text-lg font-bold text-white">Total Amount</span>
+                    <span className="text-lg font-bold text-[var(--heading-color)] dark:text-white">
+                      Total Amount
+                    </span>
+
                     <div className="text-right">
                       {appliedVoucher && (
-                        <p className="text-sm text-gray-500 line-through">${(cartTotal + SHIPPING_FEE).toFixed(2)}</p>
+                        <p className="text-sm text-[var(--muted-foreground)] dark:text-gray-500 line-through">
+                          ${(cartTotal + SHIPPING_FEE).toFixed(2)}
+                        </p>
                       )}
-                      <span className="text-3xl font-bold text-[var(--primary)]">${finalPrice.toFixed(2)}</span>
+
+                      <span className="text-3xl font-bold text-[var(--primary)]">
+                        ${finalPrice.toFixed(2)}
+                      </span>
                     </div>
                   </div>
                 </div>
 
                 <div className="space-y-4 mt-auto">
-                  <div className="flex items-center gap-3 bg-[var(--cyber-black)] p-4 rounded-xl border border-[var(--border)]">
+                  <div className="flex items-center gap-3 bg-[var(--card)] dark:bg-[var(--cyber-black)] p-4 rounded-xl border border-[var(--border)] dark:border-white/10">
                     <input type="checkbox" id="storeTermsCheck" checked={acceptedStoreTerms} onChange={(e) => setAcceptedStoreTerms(e.target.checked)} className="w-5 h-5 accent-[var(--primary)] cursor-pointer flex-shrink-0" />
-                    <label htmlFor="storeTermsCheck" className="text-sm text-[var(--silver-gray)] cursor-pointer select-none">
-                      I have read and agree to the <span onClick={(e) => { e.preventDefault(); setShowTermsOfServiceModal(true); }} className="text-[var(--primary)] font-bold underline ml-1 hover:text-white transition-colors">Terms of Service</span> *
+                    <label htmlFor="storeTermsCheck" className="text-sm text-[var(--foreground)] dark:text-[var(--silver-gray)] cursor-pointer select-none">
+                      I have read and agree to the 
+                      <span
+                        onClick={(e) => {
+                          e.preventDefault();
+                          setShowTermsOfServiceModal(true);
+                        }}
+                        className="text-[var(--primary)] font-bold underline ml-1 hover:text-[var(--heading-color)] dark:hover:text-white transition-colors"
+                      >
+                        Terms of Service
+                    </span> *
                     </label>
                   </div>
 
@@ -458,7 +493,7 @@ export function CheckoutPage() {
                                 cart: cart.map(item => ({
                                   id: item.id,
                                   qty: item.qty,
-                                  name: item.name,
+                                  name: item.title || item.name,
                                   image: item.image
                                 })),
                                 voucherCode: appliedVoucher?.code || null,
