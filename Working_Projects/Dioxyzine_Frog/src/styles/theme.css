@@ -25,6 +25,8 @@
   --silver-gray: #756F7D;
   
   --accent: #E8DDF2;
+  --soft-lilac: #E8DDF2;
+  --soft-mint: #DCECCB;
   --accent-foreground: #514B57;
   
   --destructive: #EF4444;
@@ -62,6 +64,9 @@
   --muted: #1A1528; 
   --muted-foreground: #9CA3AF;
   --silver-gray: #9CA3AF;
+
+  --soft-lilac: #2C2144;
+  --soft-mint: #24311F;
   
   --accent: #2C2144;
   --accent-foreground: #E2E8F0;
