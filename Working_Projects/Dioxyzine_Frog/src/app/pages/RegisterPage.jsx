@@ -29,7 +29,7 @@ const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
             error 
               ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' 
               : 'border-[var(--border)] focus:border-[var(--primary)] focus:ring-[var(--primary)]/10'
-          } rounded-xl text-[var(--foreground)] placeholder-[var(--muted-foreground)] dark:bg-[#1A1528] dark:text-white dark:placeholder-gray-500 transition-all outline-none focus:ring-4`}
+          } rounded-xl text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] dark:bg-[#1A1528] dark:text-white dark:placeholder-gray-500 transition-all outline-none focus:ring-4`}
           {...props}
         />
         {isPassword && (
@@ -217,7 +217,7 @@ export function RegisterPage() {
         className="w-full max-w-xl relative z-20"
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
+          <h1 className="text-3xl font-heading font-bold text-[var(--heading-color)] dark:text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
             Create an Account
           </h1>
           <p className="text-[var(--muted-foreground)] mt-2 font-medium">
@@ -231,9 +231,9 @@ export function RegisterPage() {
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Check your inbox</h2>
+              <h2 className="text-xl font-bold text-[var(--heading-color)] dark:text-white mb-2">Check your inbox</h2>
               <p className="text-[var(--silver-gray)] mb-6">
-                We've sent a confirmation link to <span className="text-white font-semibold">{formData.email}</span>. Click it to activate your account, then come back and log in.
+                We've sent a confirmation link to <span className="text-[var(--foreground)] dark:text-white font-semibold">{formData.email}</span>. Click it to activate your account, then come back and log in.
               </p>
               <Link
                 to="/login"
@@ -297,16 +297,16 @@ export function RegisterPage() {
               />
             </div>
 
-            <div className="flex items-start gap-3 mt-4 bg-[#1A1528] p-4 rounded-xl border border-[var(--border)]">
+            <div className="flex items-start gap-3 mt-4 bg-[var(--muted)] dark:bg-[#1A1528] p-4 rounded-xl border border-[var(--border)]">
               <input
                 type="checkbox"
                 id="acceptedTerms"
                 name="acceptedTerms"
                 checked={formData.acceptedTerms}
                 onChange={handleChange}
-                className="w-5 h-5 mt-0.5 rounded border-[var(--border)] bg-[#1A1528] accent-[var(--primary)] text-[var(--primary)] focus:ring-[var(--primary)]/30 cursor-pointer flex-shrink-0"
+                className="w-5 h-5 mt-0.5 rounded border-[var(--border)] bg-[var(--input-background)] dark:bg-[#1A1528] accent-[var(--primary)] text-[var(--primary)] focus:ring-[var(--primary)]/30 cursor-pointer flex-shrink-0"
               />
-              <label className="text-sm text-[var(--silver-gray)] leading-relaxed">
+              <label className="text-sm text-[var(--foreground)] dark:text-[var(--silver-gray)] leading-relaxed">
                 I agree to the{' '}
                 <button 
                   type="button" 
@@ -365,7 +365,7 @@ export function RegisterPage() {
 
         <p className="text-center text-[var(--silver-gray)] mt-8 text-sm">
           Already have an account?{' '}
-          <Link to="/login" className="font-bold text-[var(--primary)] hover:text-white underline ml-1 transition-colors">
+          <Link to="/login" className="font-bold text-[var(--primary)] hover:text-[var(--heading-color)] dark:hover:text-white underline ml-1 transition-colors">
             Sign in
           </Link>
         </p>
