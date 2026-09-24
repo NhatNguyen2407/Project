@@ -441,7 +441,7 @@ export function ProfilePage() {
                   {/* ...Phần avatar và email settings giữ nguyên để không làm dài code... */}
                   <div className="space-y-2">
                     <label className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white focus:border-[var(--primary)] outline-none"><User className="w-4 h-4"/> Display Name</label>
-                    <input required type="text" value={profileForm.fullName} onChange={e => setProfileForm({...profileForm, fullName: e.target.value})} className="w-full px-4 py-3 bg-[#1A1528] border border-[var(--border)] rounded-xl text-white focus:border-[var(--primary)] outline-none" />
+                    <input required type="text" value={profileForm.fullName} onChange={e => setProfileForm({...profileForm, fullName: e.target.value})} className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white focus:border-[var(--primary)] outline-none" />
                   </div>
                   <button type="submit" disabled={updatingProfile} className="w-full sm:w-auto px-8 py-3.5 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl shadow-lg cursor-pointer">
                     {updatingProfile ? 'Saving...' : 'Save Changes'}
