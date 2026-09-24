@@ -134,7 +134,7 @@ export function TermsPage() {
       
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-heading font-bold drop-shadow-sm">Terms & Conditions</h1>
+          <h1 className="text-4xl md:text-5xl font-heading font-bold text-[var(--heading-color)] dark:text-white drop-shadow-sm">Terms & Conditions</h1>
         </div>
 
         <div className="flex flex-col md:flex-row gap-8">
