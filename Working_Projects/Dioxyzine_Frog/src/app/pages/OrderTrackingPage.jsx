@@ -125,7 +125,7 @@ export function OrderTrackingPage() {
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-12">
-          <h1 className="font-heading text-4xl md:text-5xl text-white mb-4 drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
+          <h1 className="font-heading text-4xl md:text-5xl text-[var(--heading-color)] dark:text-white mb-4 drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
             Track Your Order
           </h1>
 
@@ -142,7 +142,7 @@ export function OrderTrackingPage() {
               placeholder="Enter your Order ID (e.g., 123e4567-...)"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
-              className="w-full pl-6 pr-16 py-4 bg-[#1A1528] border border-[var(--border)] rounded-full text-white focus:outline-none focus:border-[var(--primary)] shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-all"
+              className="w-full pl-6 pr-16 py-4 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-full text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:outline-none focus:border-[var(--primary)] shadow-[0_0_20px_rgba(0,0,0,0.08)] dark:shadow-[0_0_20px_rgba(0,0,0,0.3)] transition-all"
               required
             />
 
@@ -180,9 +180,9 @@ export function OrderTrackingPage() {
               animate={{ opacity: 1, y: 0 }}
               className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 md:p-10 shadow-2xl"
             >
-              <div className="flex flex-col md:flex-row justify-between md:items-center gap-6 border-b border-white/10 pb-8 mb-8">
+              <div className="flex flex-col md:flex-row justify-between md:items-center gap-6 border-b border-[var(--border)] dark:border-white/10 pb-8 mb-8">
                 <div>
-                  <h3 className="text-xl font-bold text-white mb-2 flex items-center gap-2">
+                  <h3 className="text-xl font-bold text-[var(--foreground)] dark:text-white mb-2 flex items-center gap-2">
                     <Package className="w-5 h-5 text-[var(--primary)]" />
                     {orderData.product_name || 'Custom Merchandise'}
                   </h3>
@@ -205,7 +205,7 @@ export function OrderTrackingPage() {
                 </div>
 
                 {orderData.tracking_code && (
-                  <div className="bg-[#1A1528] px-5 py-3 rounded-xl border border-[var(--primary)]/30 text-right">
+                  <div className="bg-[var(--muted)] dark:bg-[#1A1528] px-5 py-3 rounded-xl border border-[var(--primary)]/30 text-right">
                     <p className="text-xs text-[var(--muted-foreground)] uppercase font-bold tracking-wider mb-1">
                       Tracking Code
                     </p>
@@ -219,7 +219,7 @@ export function OrderTrackingPage() {
 
               <div className="relative">
                 {/* Background progress line - desktop */}
-                <div className="absolute hidden md:block h-0.5 top-6 left-[10%] right-[10%] bg-white/10 -z-10" />
+                <div className="absolute hidden md:block h-0.5 top-6 left-[10%] right-[10%] bg-[var(--border)] dark:bg-white/10 -z-10" />
 
                 {/* Active progress line - desktop */}
                 <div
@@ -230,7 +230,7 @@ export function OrderTrackingPage() {
                 />
 
                 {/* Background progress line - mobile */}
-                <div className="absolute left-6 md:hidden top-0 bottom-0 w-0.5 bg-white/10 -z-10" />
+                <div className="absolute left-6 md:hidden top-0 bottom-0 w-0.5 bg-[var(--border)] dark:bg-white/10 -z-10" />
 
                 {/* Active progress line - mobile */}
                 <div
@@ -257,7 +257,7 @@ export function OrderTrackingPage() {
                               ? 'bg-[var(--primary)] border-[var(--card)] text-white'
                               : isCurrent
                               ? 'bg-[var(--card)] border-[var(--primary)] text-[var(--primary)] shadow-[0_0_15px_rgba(139,114,190,0.5)]'
-                              : 'bg-[#1A1528] border-[var(--card)] text-gray-600'
+                              : 'bg-[var(--muted)] dark:bg-[#1A1528] border-[var(--card)] text-[var(--muted-foreground)] dark:text-gray-600'
                           }`}
                         >
                           <StepIcon className="w-5 h-5 md:w-6 md:h-6" />
@@ -267,8 +267,8 @@ export function OrderTrackingPage() {
                           <h4
                             className={`font-bold mb-1 ${
                               isCompleted || isCurrent
-                                ? 'text-white'
-                                : 'text-gray-500'
+                                ? 'text-[var(--foreground)] dark:text-white'
+                                : 'text-[var(--muted-foreground)] dark:text-gray-500'
                             }`}
                           >
                             {step.label}
@@ -278,7 +278,7 @@ export function OrderTrackingPage() {
                             className={`text-xs md:text-sm ${
                               isCurrent
                                 ? 'text-[var(--primary)]'
-                                : 'text-gray-500'
+                                : 'text-[var(--muted-foreground)] dark:text-gray-500'
                             } hidden md:block max-w-[120px] mx-auto`}
                           >
                             {step.desc}
