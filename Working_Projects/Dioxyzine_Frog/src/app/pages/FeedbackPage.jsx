@@ -146,7 +146,7 @@ export function FeedbackPage() {
               <p className="text-sm text-foreground leading-relaxed font-medium"><span className="font-bold text-[var(--primary)]">Privacy Note:</span> Your feedback is securely processed and strictly used to help us improve Dioxyzine Frog's products and services.</p>
             </div>
 
-            <button type="submit" disabled={status === 'loading'} className={`w-full flex items-center justify-center gap-2 py-4 rounded-full font-bold text-lg transition-all shadow-md ${status !== 'loading' ? 'bg-[var(--primary)] text-white hover:scale-[1.01] cursor-pointer' : 'bg-muted text-gray-400 cursor-not-allowed'}`}>
+            <button type="submit" disabled={status === 'loading'} className={`w-full flex items-center justify-center gap-2 py-4 rounded-full font-bold text-lg transition-all shadow-md ${status !== 'loading' ? 'bg-[var(--primary)] text-white hover:scale-[1.01] cursor-pointer' : 'bg-muted border border-border text-muted-foreground cursor-not-allowed'}`}>
               {status === 'loading' ? <><Loader2 className="w-6 h-6 animate-spin" /> Sending...</> : <><MessageSquareQuote className="w-6 h-6" /> Submit Feedback</>}
             </button>
           </form>

@@ -29,7 +29,7 @@ export function BlogPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-12 border-b border-[var(--border)] pb-6">
-          <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)] flex items-center justify-center gap-3">
+          <h1 className="font-heading text-4xl md:text-5xl mb-4 text-[var(--heading-color)] dark:text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)] flex items-center justify-center gap-3">
             <BookOpen className="w-10 h-10 text-[var(--primary)]" /> Creator Blog
           </h1>
           <p className="text-lg text-[var(--muted-foreground)]">
@@ -66,20 +66,20 @@ export function BlogPage() {
                 animate={{ opacity: 1, y: 0 }} 
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.3 }}
-                className="bg-[#1A1528] border border-[var(--border)] rounded-3xl p-10 md:p-16 shadow-[0_0_30px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center min-h-[400px]"
+                className="bg-[var(--card)] dark:bg-[#1A1528] border border-[var(--border)] rounded-3xl p-10 md:p-16 shadow-[0_0_30px_rgba(0,0,0,0.3)] flex flex-col items-center justify-center text-center min-h-[400px]"
               >
                 <div className="w-24 h-24 mb-6 rounded-full bg-[var(--primary)]/20 flex items-center justify-center text-[var(--primary)] shadow-[0_0_20px_rgba(139,114,190,0.3)]">
                   <Wrench className="w-12 h-12" />
                 </div>
                 
-                <h2 className="text-3xl font-bold text-white mb-4 font-heading">
+                <h2 className="text-3xl font-bold text-[var(--heading-color)] dark:text-white mb-4 font-heading">
                   {currentTutorial?.label}
                 </h2>
                 <h3 className="text-xl font-semibold text-[var(--primary)] mb-4">
                   Documentation Under Construction.
                 </h3>
                 
-                <p className="text-[var(--silver-gray)] text-lg max-w-lg leading-relaxed">
+                <p className="text-[var(--muted-foreground)] text-lg max-w-lg leading-relaxed">
                   Our team is actively compiling the technical blueprints and canvas specifications for this asset. Comprehensive documentation will be deployed shortly. Thank you for your patience! 🐸💜
                 </p>
               </motion.div>

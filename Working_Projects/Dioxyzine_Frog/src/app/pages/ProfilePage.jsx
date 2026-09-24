@@ -343,7 +343,7 @@ export function ProfilePage() {
                                 {/* Khối vận chuyển chỉ hiện khi đang Shipping */}
                                 {status === 'shipping' && (
                                   <div className="bg-[var(--card)] dark:bg-white/5 border border-[var(--border)] dark:border-white/10 rounded-xl p-4 w-full sm:w-[280px]">
-                                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-white/10">
+                                    <div className="flex items-center justify-between mb-3 pb-3 border-b border-[var(--border)] dark:border-white/10">
                                       <div className="flex items-center gap-2">
                                         <div className="w-8 h-8 rounded-full bg-[#EE0033]/20 flex items-center justify-center"><Truck className="w-4 h-4 text-[#EE0033]" /></div>
                                         <div>
@@ -492,7 +492,7 @@ export function ProfilePage() {
                   <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Sản phẩm rất tuyệt vời..." rows={4} className="w-full bg-[var(--input-background)] dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-2xl p-4 text-sm text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none resize-none"/>
                 </div>
                 <div className="flex gap-3">
-                  <button type="button" onClick={() => setReviewOrder(null)} className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-gray-300 font-bold rounded-xl text-sm transition-colors cursor-pointer">Hủy</button>
+                  <button type="button" onClick={() => setReviewOrder(null)} className="flex-1 py-3 bg-[var(--muted)] dark:bg-white/5 hover:bg-[var(--accent)] dark:hover:bg-white/10 text-[var(--foreground)] dark:text-gray-300 font-bold rounded-xl text-sm transition-colors cursor-pointer">Hủy</button>
                   <button type="submit" disabled={submittingReview} className="flex-1 py-3 bg-[var(--primary)] text-white font-bold rounded-xl text-sm hover:opacity-90 cursor-pointer">{submittingReview ? 'Đang gửi...' : 'Gửi Đánh Giá'}</button>
                 </div>
               </form>
@@ -526,7 +526,7 @@ export function ProfilePage() {
                   type="button"
                   onClick={() => { setShowDeleteModal(false); setDeleteConfirmText(''); }}
                   disabled={deletingAccount}
-                  className="flex-1 py-3 bg-white/5 hover:bg-white/10 text-gray-300 font-bold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50"
+                  className="flex-1 py-3 bg-[var(--muted)] dark:bg-white/5 hover:bg-[var(--accent)] dark:hover:bg-white/10 text-[var(--foreground)] dark:text-gray-300 font-bold rounded-xl text-sm transition-colors cursor-pointer disabled:opacity-50"
                 >
                   Cancel
                 </button>
