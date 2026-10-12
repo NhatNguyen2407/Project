@@ -120,16 +120,11 @@ export function LoginPage() {
       });
 
       if (error) throw error;
-      // console.log('Đăng nhập thành công:', data);
       console.log('LOGIN DATA:', data);
-console.log('LOGIN USER:', data?.user);
-console.log('LOGIN SESSION:', data?.session);
+      console.log('LOGIN USER:', data?.user);
+      console.log('LOGIN SESSION:', data?.session);
       
       if (data.user) {
-        // Truy vấn role trực tiếp tại đây thay vì dựa vào AuthContext cập
-        // nhật kịp lúc — AuthContext fetch role bất đồng bộ riêng, không có
-        // gì đảm bảo nó xong trước dòng code tiếp theo (trước đây dùng
-        // setTimeout 500ms để "đoán" là đủ thời gian, không chắc chắn).
         const { data: roleData } = await supabase
           .from('user_roles')
           .select('role')
@@ -163,7 +158,7 @@ console.log('LOGIN SESSION:', data?.session);
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex items-center justify-center p-4 sm:p-6 pt-24 pb-16 relative overflow-hidden z-10">
+    <div className="min-h-screen bg-transparent flex items-start justify-center p-4 sm:p-6 pt-32 sm:pt-36 pb-16 relative overflow-x-hidden z-10">
       
       <div className="absolute top-[20%] left-[20%] w-96 h-96 bg-[var(--primary)]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
@@ -174,7 +169,7 @@ console.log('LOGIN SESSION:', data?.session);
         className="w-full max-w-md relative z-20"
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
+          <h1 className="text-3xl font-heading font-bold text-[var(--heading-color)] tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
             Welcome Back!
           </h1>
           <p className="text-[var(--muted-foreground)] mt-2 font-medium">
@@ -216,7 +211,7 @@ console.log('LOGIN SESSION:', data?.session);
             </div>
 
             <div className="flex items-center justify-end mt-4">
-              <Link to="/forgot-password" className="text-sm font-bold text-[var(--primary)] hover:text-white transition-colors">
+              <Link to="/forgot-password" className="text-sm font-bold text-[var(--primary)] hover:text-[var(--heading-color)] dark:hover:text-white transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -233,13 +228,12 @@ console.log('LOGIN SESSION:', data?.session);
                 <div className="w-full border-t border-[var(--border)]"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-[#161224] text-[var(--muted-foreground)] font-medium bg-[var(--card)]">
+                <span className="px-4 text-[var(--muted-foreground)] font-medium bg-[var(--card)]">
                   Or continue with
                 </span>
               </div>
             </div>
 
-            {/*Social Logins*/}
             <div className="mt-6 flex gap-4">
               <SocialButton 
                 icon={Chrome} 
@@ -257,7 +251,7 @@ console.log('LOGIN SESSION:', data?.session);
 
         <p className="text-center text-[var(--silver-gray)] mt-8 text-sm">
           Don't have an account?{' '}
-          <Link to="/register" className="font-bold text-[var(--primary)] hover:text-white underline ml-1 transition-colors">
+          <Link to="/register" className="font-bold text-[var(--primary)] hover:text-[var(--heading-color)] dark:hover:text-white underline ml-1 transition-colors">
             Sign up for free
           </Link>
         </p>
