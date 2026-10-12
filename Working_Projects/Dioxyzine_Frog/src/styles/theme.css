@@ -138,6 +138,24 @@
     background-attachment: fixed;
   }
 
+  /* Keep browser-saved credentials readable in both themes. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--foreground);
+    -webkit-box-shadow: 0 0 0 1000px var(--input-background) inset;
+    transition: background-color 9999s ease-out 0s;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
+    -webkit-text-fill-color: #FFFFFF;
+    -webkit-box-shadow: 0 0 0 1000px #1A1528 inset;
+  }
+
   /* 🚀 ÉP FONT CHỮ BÉO TRÒN COINY CHO TOÀN BỘ CHỮ TO & TIÊU ĐỀ */
   h1, h2, h3, h4, h5, h6, .font-heading {
     font-family: 'Coiny', cursive !important;
