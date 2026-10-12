@@ -4,6 +4,7 @@ import { User, Mail, LogOut, Package, Calendar, Tag, CreditCard, Crown, Check, S
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../service/supabase';
+import { useProducts } from '../context/ProductContext';
 
 import { useCart } from '../context/CartContext';
 import { MOCK_PRODUCTS } from '../data/storeData';
@@ -14,6 +15,7 @@ export function ProfilePage() {
   const navigate = useNavigate();
   
   const { addToCart, setIsCartOpen } = useCart();
+  const { products, loading: loadingProducts } = useProducts();
   const [activeView, setActiveView] = useState('orders'); 
 
   const [orders, setOrders] = useState([]);
@@ -43,11 +45,48 @@ export function ProfilePage() {
   const STEPS = ['Pending', 'Confirmed', 'Processing', 'Shipping', 'Completed'];
 
   const fetchMyWishlist = async () => {
+    if (!user?.id) {
+      setWishlist([]);
+      setLoadingWishlist(false);
+      return;
+    }
+
+    setLoadingWishlist(true);
     try {
-      const { data, error } = await supabase.from('wishlists').select('product_id, created_at').eq('user_id', user.id).order('created_at', { ascending: false });
+      const { data, error } = await supabase
+        .from('wishlists')
+        .select('product_id, created_at')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false });
+
       if (error) throw error;
       setWishlist(data || []);
-    } catch (error) { console.error('Lỗi khi lấy Wishlist:', error.message); } finally { setLoadingWishlist(false); }
+    } catch (error) {
+      console.error('Lỗi khi lấy Wishlist:', error);
+      toast.error('Could not load your wishlist. Please try again.');
+    } finally {
+      setLoadingWishlist(false);
+    }
+  };
+
+  const handleRemoveFromWishlist = async (productId) => {
+    try {
+      const { error } = await supabase
+        .from('wishlists')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('product_id', productId);
+
+      if (error) throw error;
+
+      setWishlist((current) =>
+        current.filter((item) => String(item.product_id) !== String(productId))
+      );
+      toast.success('Removed from your wishlist.');
+    } catch (error) {
+      console.error('Could not remove wishlist item:', error);
+      toast.error('Could not remove this item. Please try again.');
+    }
   };
 
   const fetchMyOrders = async () => {
@@ -431,6 +470,122 @@ export function ProfilePage() {
                     </div>
                   )}
                 </div>
+              </motion.div>
+            )}
+
+            {activeView === 'wishlist' && (
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-sm"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
+                  <h3 className="text-xl font-bold text-[var(--primary)] flex items-center gap-2">
+                    <Heart className="w-6 h-6" /> My Wishlist ({wishlist.length})
+                  </h3>
+                  <button
+                    type="button"
+                    onClick={fetchMyWishlist}
+                    disabled={loadingWishlist}
+                    className="px-4 py-2 rounded-xl border border-[var(--border)] text-sm font-semibold hover:border-[var(--primary)] disabled:opacity-50"
+                  >
+                    {loadingWishlist ? 'Refreshing...' : 'Refresh'}
+                  </button>
+                </div>
+
+                {loadingWishlist || loadingProducts ? (
+                  <div className="text-center py-10 text-[var(--muted-foreground)]">
+                    Loading your wishlist...
+                  </div>
+                ) : wishlist.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-[var(--border)] p-8 sm:p-10 text-center">
+                    <Heart className="w-10 h-10 mx-auto mb-3 text-[var(--primary)] opacity-70" />
+                    <h4 className="font-bold text-[var(--foreground)] mb-2">Your wishlist is empty</h4>
+                    <p className="text-sm text-[var(--muted-foreground)] mb-5">
+                      Save products with the heart button and they will appear here.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => navigate('/products')}
+                      className="px-5 py-3 rounded-xl bg-[var(--primary)] text-white font-bold hover:opacity-90"
+                    >
+                      Browse Products
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                    {wishlist.map((item) => {
+                      const product = products.find(
+                        (candidate) => String(candidate.id) === String(item.product_id)
+                      );
+
+                      return (
+                        <div
+                          key={item.product_id}
+                          className="overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)]"
+                        >
+                          {product ? (
+                            <>
+                              <button
+                                type="button"
+                                onClick={() => navigate(`/product/${product.id}`)}
+                                className="block w-full text-left"
+                                aria-label={`View ${product.title}`}
+                              >
+                                <div className="aspect-square bg-[var(--muted)] overflow-hidden">
+                                  <img
+                                    src={product.image}
+                                    alt={product.title}
+                                    loading="lazy"
+                                    className="w-full h-full object-cover transition-transform duration-300 hover:scale-105"
+                                  />
+                                </div>
+                                <div className="p-4">
+                                  <h4 className="font-bold text-[var(--foreground)] line-clamp-2">
+                                    {product.title}
+                                  </h4>
+                                  <p className="text-xs text-[var(--muted-foreground)] mt-2">
+                                    Saved {item.created_at ? new Date(item.created_at).toLocaleDateString() : ''}
+                                  </p>
+                                </div>
+                              </button>
+                              <div className="flex gap-2 px-4 pb-4">
+                                <button
+                                  type="button"
+                                  onClick={() => navigate(`/product/${product.id}`)}
+                                  className="flex-1 px-3 py-2 rounded-xl bg-[var(--primary)] text-white text-sm font-bold hover:opacity-90"
+                                >
+                                  View Product
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleRemoveFromWishlist(item.product_id)}
+                                  className="px-3 py-2 rounded-xl border border-red-500/40 text-red-500 text-sm font-bold hover:bg-red-500/10"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </>
+                          ) : (
+                            <div className="p-5">
+                              <p className="font-semibold text-[var(--foreground)]">Product unavailable</p>
+                              <p className="text-sm text-[var(--muted-foreground)] mt-1 mb-4">
+                                This product may have been removed from the store.
+                              </p>
+                              <button
+                                type="button"
+                                onClick={() => handleRemoveFromWishlist(item.product_id)}
+                                className="px-3 py-2 rounded-xl border border-red-500/40 text-red-500 text-sm font-bold hover:bg-red-500/10"
+                              >
+                                Remove from Wishlist
+                              </button>
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
               </motion.div>
             )}
 
