@@ -38,9 +38,9 @@ export function AboutContactPage() {
     <div className="min-h-screen pt-24 pb-16 bg-transparent relative z-10">
       
       {/* 1. HERO BANNER */}
-      <section className="relative py-24 bg-gradient-to-br from-[#2C2144] via-[#08080C] to-[#171226] border-b border-[var(--border)] text-center">
+      <section className="relative py-24 bg-gradient-to-br from-[var(--soft-lilac)] via-[var(--background)] to-[var(--soft-mint)] dark:from-[#2C2144] dark:via-[#08080C] dark:to-[#171226] border-b border-[var(--border)] text-center">
         <div className="max-w-4xl mx-auto px-4 z-10">
-          <h1 className="font-heading text-5xl md:text-6xl mb-6 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">About Dioxyzine Frog</h1>
+          <h1 className="font-heading text-5xl md:text-6xl mb-6 text-[var(--heading-color)] dark:text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.25)]">About Dioxyzine Frog</h1>
           <p className="text-xl text-[var(--silver-gray)] leading-relaxed max-w-2xl mx-auto">
             Production workshop and design studio specializing in fan merch, custom merchandise, and exclusive handmade fabric gifts. Bringing the best prices to artists and brands.
           </p>
@@ -48,9 +48,9 @@ export function AboutContactPage() {
       </section>
 
       {/* 2. SOCIAL SECTION */}
-      <section className="py-12 bg-[#09090B] border-b border-[var(--border)] text-center">
+      <section className="py-12 bg-[var(--muted)] dark:bg-[#09090B] border-b border-[var(--border)] text-center">
         <div className="max-w-4xl mx-auto px-4">
-          <h2 className="text-2xl font-bold text-white mb-6 font-heading tracking-wide">Follow us now on:</h2>
+          <h2 className="text-2xl font-bold text-[var(--heading-color)] dark:text-white mb-6 font-heading tracking-wide">Follow us now on:</h2>
           <div className="flex flex-wrap justify-center gap-6">
             <a href="https://facebook.com/dioxyzinefrog" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center px-10 py-4 rounded-full bg-[#1877F2] text-white font-bold text-lg hover:scale-105 transition-transform shadow-[0_0_15px_rgba(24,119,242,0.4)] min-w-[160px]">
               Facebook
@@ -66,7 +66,7 @@ export function AboutContactPage() {
       <section className="py-24 bg-transparent relative z-10">
         <div className="max-w-7xl mx-auto px-4 grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
           <motion.div initial={{ opacity: 0, x: -50 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}>
-            <h2 className="font-heading text-4xl mb-6 text-white drop-shadow-[0_0_10px_rgba(139,114,190,0.3)]">Our Creative Story</h2>
+            <h2 className="font-heading text-4xl mb-6 text-[var(--heading-color)] dark:text-white drop-shadow-[0_0_10px_rgba(139,114,190,0.2)]">Our Creative Story</h2>
             <div className="space-y-4 text-[var(--muted-foreground)] leading-relaxed text-lg">
               <p>Founded by an independent artist, Dioxyzine Frog was born from a passion for 2D characters and the desire to bring them to life. We deeply understand the difficulties creators face finding a reliable tailor who understands your vision without requiring thousands of pieces.</p>
               <p>Our mission is: Democratize high-end custom plushie making, bringing production closer to all creators and businesses. Whether you want a few for unique gifts or mass production for commercialization, we will try our best to make it come true.</p>
@@ -89,7 +89,7 @@ export function AboutContactPage() {
             <div className="w-14 h-14 bg-[var(--primary)]/20 rounded-2xl flex items-center justify-center mb-6 border border-[var(--primary)]/50">
               <Factory className="w-7 h-7 text-[var(--primary)]" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-4">In-House Production</h3>
+            <h3 className="text-xl font-bold text-[var(--foreground)] dark:text-white mb-4">In-House Production</h3>
             <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-4">
               We own the entire production line from digital embroidery, fabric cutting, sewing, to stuffing. This ensures rapid prototyping and strictly controlled timelines.
             </p>
@@ -103,7 +103,7 @@ export function AboutContactPage() {
             <div className="w-14 h-14 bg-[var(--primary)]/20 rounded-2xl flex items-center justify-center mb-6 border border-[var(--primary)]/50">
               <ShieldCheck className="w-7 h-7 text-[var(--primary)]" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-4">100% Quality Control</h3>
+            <h3 className="text-xl font-bold text-[var(--foreground)] dark:text-white mb-4">100% Quality Control</h3>
             <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-4">
               Every single plushie undergoes a rigorous 3-step QC process before shipping. We check for seam strength, embroidery accuracy, and overall shape symmetry.
             </p>
@@ -117,7 +117,7 @@ export function AboutContactPage() {
             <div className="w-14 h-14 bg-[var(--primary)]/20 rounded-2xl flex items-center justify-center mb-6 border border-[var(--primary)]/50">
               <PackageCheck className="w-7 h-7 text-[var(--primary)]" />
             </div>
-            <h3 className="text-xl font-bold text-white mb-4">B2B & White Label</h3>
+            <h3 className="text-xl font-bold text-[var(--foreground)] dark:text-white mb-4">B2B & White Label</h3>
             <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-4">
               We empower your brand. Ship your products directly to your customers with blind packaging. We act as your silent, reliable back-end factory.
             </p>
@@ -130,7 +130,7 @@ export function AboutContactPage() {
       </section>
 
       {/* 5. VALUES SECTION */}
-      <section className="py-24 bg-[#09090B] border-y border-[var(--border)]">
+      <section className="py-24 bg-[var(--muted)] dark:bg-[#09090B] border-y border-[var(--border)]">
         <div className="max-w-7xl mx-auto px-4">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold mb-4 font-heading text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">
@@ -145,12 +145,12 @@ export function AboutContactPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.1 }}
-                className="bg-[#130D1E] rounded-3xl p-8 border border-[var(--border)] shadow-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.3)] transition-all text-center group"
+                className="bg-[var(--card)] dark:bg-[#130D1E] rounded-3xl p-8 border border-[var(--border)] shadow-lg hover:shadow-[0_0_20px_rgba(139,114,190,0.3)] transition-all text-center group"
               >
-                <div className="w-16 h-16 rounded-2xl bg-[#1A1528] border border-[var(--border)] group-hover:border-[var(--primary)] flex items-center justify-center text-[var(--primary)] mx-auto mb-4 transition-colors">
+                <div className="w-16 h-16 rounded-2xl bg-[var(--accent)] dark:bg-[#1A1528] border border-[var(--border)] group-hover:border-[var(--primary)] flex items-center justify-center text-[var(--primary)] mx-auto mb-4 transition-colors">
                   {value.icon}
                 </div>
-                <h3 className="text-xl font-semibold mb-3 text-white">{value.title}</h3>
+                <h3 className="text-xl font-semibold mb-3 text-[var(--foreground)] dark:text-white">{value.title}</h3>
                 <p className="text-[var(--muted-foreground)] leading-relaxed">{value.desc}</p>
               </motion.div>
             ))}
@@ -162,7 +162,7 @@ export function AboutContactPage() {
       <section className="py-24 bg-transparent border-b border-[var(--border)]">
         <div className="max-w-5xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="font-heading text-4xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Our Production Process</h2>
+            <h2 className="font-heading text-4xl mb-4 text-[var(--heading-color)] dark:text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.25)]">Our Production Process</h2>
             <p className="text-lg text-[var(--muted-foreground)]">A structured, transparent, and collaborative workflow</p>
           </div>
           <div className="space-y-6">
@@ -172,11 +172,11 @@ export function AboutContactPage() {
                 initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: index * 0.1 }}
                 className="flex flex-col sm:flex-row gap-6 items-start sm:items-center bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 md:p-8 shadow-md hover:shadow-[0_0_15px_rgba(139,114,190,0.1)] transition-shadow"
               >
-                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-[#1A1528] border border-[var(--border)] flex items-center justify-center text-[var(--primary)] font-bold text-2xl font-heading shadow-[0_0_10px_rgba(139,114,190,0.2)]">
+                <div className="flex-shrink-0 w-16 h-16 rounded-2xl bg-[var(--accent)] dark:bg-[#1A1528] border border-[var(--border)] flex items-center justify-center text-[var(--primary)] font-bold text-2xl font-heading shadow-[0_0_10px_rgba(139,114,190,0.2)]">
                   {item.step}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold mb-2 text-white">{item.title}</h3>
+                  <h3 className="text-xl font-bold mb-2 text-[var(--foreground)] dark:text-white">{item.title}</h3>
                   <p className="text-[var(--silver-gray)] leading-relaxed">{item.desc}</p>
                 </div>
               </motion.div>
@@ -186,17 +186,17 @@ export function AboutContactPage() {
       </section>
 
       {/* 7. FAQ SECTION */}
-      <section className="py-24 bg-[#09090B] border-b border-[var(--border)]">
+      <section className="py-24 bg-[var(--muted)] dark:bg-[#09090B] border-b border-[var(--border)]">
         <div className="max-w-4xl mx-auto px-4">
           <div className="text-center mb-16">
-            <h2 className="font-heading text-4xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Frequently Asked Questions</h2>
+            <h2 className="font-heading text-4xl mb-4 text-[var(--heading-color)] dark:text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Frequently Asked Questions</h2>
             <p className="text-lg text-[var(--muted-foreground)]">Everything you need to know about working with our workshop</p>
           </div>
           <div className="space-y-4">
             {faqs.map((faq, index) => (
-              <div key={index} className="bg-[#130D1E] border border-[var(--border)] rounded-2xl overflow-hidden shadow-md">
-                <button onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)} className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-[#1A1528] transition-colors cursor-pointer">
-                  <h3 className="font-semibold text-lg pr-4 text-white">{faq.question}</h3>
+              <div key={index} className="bg-[var(--card)] dark:bg-[#130D1E] border border-[var(--border)] rounded-2xl overflow-hidden shadow-md">
+                <button onClick={() => setOpenFaqIndex(openFaqIndex === index ? null : index)} className="w-full px-6 py-5 text-left flex items-center justify-between hover:bg-[var(--accent)] dark:hover:bg-[#1A1528] transition-colors cursor-pointer">
+                  <h3 className="font-semibold text-lg pr-4 text-[var(--foreground)] dark:text-white">{faq.question}</h3>
                   <span className={`text-[var(--primary)] text-2xl font-bold transition-transform duration-300 ${openFaqIndex === index ? 'rotate-45' : 'rotate-0'}`}>+</span>
                 </button>
                 <AnimatePresence>
@@ -215,7 +215,7 @@ export function AboutContactPage() {
       {/* 8. REVIEWS */}
       <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-24">
         <div className="text-center mb-12">
-          <h2 className="font-heading text-3xl md:text-4xl text-white mb-4">What Creators Say About Us</h2>
+          <h2 className="font-heading text-3xl md:text-4xl text-[var(--heading-color)] dark:text-white mb-4">What Creators Say About Us</h2>
           <p className="text-[var(--silver-gray)]">Trusted by independent artists and brands worldwide.</p>
         </div>
         
@@ -232,7 +232,7 @@ export function AboutContactPage() {
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-purple-500 to-pink-500 flex items-center justify-center text-white font-bold">S</div>
               <div>
-                <p className="text-white font-bold text-sm">Sarah J.</p>
+                <p className="text-[var(--foreground)] dark:text-white font-bold text-sm">Sarah J.</p>
                 <p className="text-[var(--muted-foreground)] text-xs">Indie Illustrator</p>
               </div>
             </div>
@@ -244,13 +244,13 @@ export function AboutContactPage() {
             <div className="flex gap-1 mb-4">
               {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />)}
             </div>
-            <p className="text-white text-sm leading-relaxed mb-6 italic">
+            <p className="text-[var(--foreground)] dark:text-white text-sm leading-relaxed mb-6 italic">
               "White-label dropshipping has saved my Etsy business. They handle production, blind-packaging, and global shipping seamlessly. My customers are always thrilled with the plushie quality."
             </p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-blue-500 to-cyan-500 flex items-center justify-center text-white font-bold">M</div>
               <div>
-                <p className="text-white font-bold text-sm">Mark T.</p>
+                <p className="text-[var(--foreground)] dark:text-white font-bold text-sm">Mark T.</p>
                 <p className="text-[var(--primary)] text-xs">Etsy Store Owner</p>
               </div>
             </div>
@@ -262,13 +262,13 @@ export function AboutContactPage() {
             <div className="flex gap-1 mb-4">
               {[1,2,3,4,5].map(i => <Star key={i} className="w-4 h-4 fill-yellow-500 text-yellow-500" />)}
             </div>
-            <p className="text-[var(--silver-gray)] text-sm leading-relaxed mb-6 italic">
+            <p className="text-[var(--foreground)] dark:text-white text-sm leading-relaxed mb-6 italic">
               "Low MOQ is a game changer! I only needed 30 pieces for my Kickstarter campaign, and the final products looked exactly like my 2D references. The premium Velboa fabric is so soft."
             </p>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-green-500 to-emerald-500 flex items-center justify-center text-white font-bold">L</div>
               <div>
-                <p className="text-white font-bold text-sm">Lina P.</p>
+                <p className="text-[var(--foreground)] dark:text-white font-bold text-sm">Lina P.</p>
                 <p className="text-[var(--muted-foreground)] text-xs">Kickstarter Creator</p>
               </div>
             </div>
@@ -279,21 +279,21 @@ export function AboutContactPage() {
       {/* 9. CONTACT INFO */}
       <section className="py-24 bg-transparent text-center">
         <div className="max-w-7xl mx-auto px-4">
-          <h2 className="font-heading text-4xl mb-12 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Contact Details</h2>
+          <h2 className="font-heading text-4xl mb-12 text-[var(--heading-color)] dark:text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.25)]">Contact Details</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 hover:shadow-[0_0_20px_rgba(139,114,190,0.2)] transition-shadow">
               <Mail className="w-10 h-10 text-[var(--primary)] mx-auto mb-4 drop-shadow-[0_0_10px_rgba(139,114,190,0.5)]" />
-              <h3 className="font-bold mb-2 text-white text-lg">Email</h3>
+              <h3 className="font-bold mb-2 text-[var(--foreground)] dark:text-white text-lg">Email</h3>
               <a href="mailto:dioxyzinefrog@gmail.com" className="text-[var(--primary)] font-medium hover:underline">dioxyzinefrog@gmail.com</a>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.1 }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 hover:shadow-[0_0_20px_rgba(139,114,190,0.2)] transition-shadow">
               <MapPin className="w-10 h-10 text-[var(--primary)] mx-auto mb-4 drop-shadow-[0_0_10px_rgba(139,114,190,0.5)]" />
-              <h3 className="font-bold mb-2 text-white text-lg">Location</h3>
+              <h3 className="font-bold mb-2 text-[var(--foreground)] dark:text-white text-lg">Location</h3>
               <p className="font-medium text-[var(--muted-foreground)]">Hanoi, Vietnam</p>
             </motion.div>
             <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-8 flex flex-col items-center justify-center hover:shadow-[0_0_20px_rgba(139,114,190,0.2)] transition-shadow">
               <Clock className="w-10 h-10 text-[var(--primary)] mx-auto mb-4 drop-shadow-[0_0_10px_rgba(139,114,190,0.5)]" />
-              <h3 className="font-bold mb-2 text-white text-lg">Business Hours</h3>
+              <h3 className="font-bold mb-2 text-[var(--foreground)] dark:text-white text-lg">Business Hours</h3>
               <p className="font-medium text-[var(--muted-foreground)]">Mon - Sat: 10:00 AM - 10:00 PM (GMT+7)</p>
               <p className="text-sm text-[var(--silver-gray)] italic mt-1">Sun: Flexible (Online when available)</p>
             </motion.div>

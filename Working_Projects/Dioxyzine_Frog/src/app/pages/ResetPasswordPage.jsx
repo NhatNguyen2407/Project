@@ -8,25 +8,25 @@ const AuthInput = ({ label, error, ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="space-y-2 w-full">
-      <label className="block text-sm font-semibold text-white/90">{label}</label>
+      <label className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">{label}</label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
           <Lock className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-500'}`} />
         </div>
         <input
           type={showPassword ? 'text' : 'password'}
-          className={`w-full pl-11 pr-12 py-3.5 bg-[#1A1528] border ${
+          className={`w-full pl-11 pr-12 py-3.5 bg-[var(--input-background)] dark:bg-[#1A1528] border ${
             error
               ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10'
               : 'border-[var(--border)] focus:border-[var(--primary)] focus:ring-[var(--primary)]/10'
-          } rounded-xl text-white placeholder-gray-500 transition-all outline-none focus:ring-4`}
+          } rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] dark:placeholder-gray-500 transition-all outline-none focus:ring-4`}
           {...props}
         />
         <button
           type="button"
           onClick={() => setShowPassword(!showPassword)}
           aria-label={showPassword ? 'Hide password' : 'Show password'}
-          className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
+          className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--muted-foreground)] dark:text-gray-500 hover:text-[var(--foreground)] dark:hover:text-gray-300 transition-colors cursor-pointer"
         >
           {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
         </button>
@@ -125,7 +125,7 @@ export function ResetPasswordPage() {
         className="w-full max-w-md relative z-20"
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
+          <h1 className="text-3xl font-heading font-bold text-[var(--heading-color)] dark:text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
             Reset Password
           </h1>
         </div>
@@ -143,7 +143,7 @@ export function ResetPasswordPage() {
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-500/10 flex items-center justify-center">
                 <XCircle className="w-8 h-8 text-red-400" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Link expired or invalid</h2>
+              <h2 className="text-xl font-bold text-[var(--heading-color)] dark:text-white mb-2">Link expired or invalid</h2>
               <p className="text-[var(--silver-gray)] mb-6">
                 This password reset link is no longer valid — reset links only work once and expire after a while. Request a new one below.
               </p>
@@ -186,7 +186,7 @@ export function ResetPasswordPage() {
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Password updated!</h2>
+              <h2 className="text-xl font-bold text-[var(--heading-color)] dark:text-white mb-2">Password updated!</h2>
               <p className="text-[var(--silver-gray)]">Redirecting you to login...</p>
             </div>
           )}

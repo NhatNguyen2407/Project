@@ -1,5 +1,5 @@
 //import react
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router';
 import { HelmetProvider } from 'react-helmet-async';
 import { motion } from 'motion/react';
 import { GoogleReCaptchaProvider } from 'react-google-recaptcha-v3';
@@ -9,12 +9,9 @@ import { ThemeProvider } from 'next-themes';
 import { HomePage } from './pages/HomePage';
 import { ProductsPage } from './pages/ProductsPage';
 // Đã xóa PricingPage cũ
-import { PricingCalculatorPage } from './pages/PricingCalculatorPage'; // MỚI
-import { ColorMatcherPage } from './pages/ColorMatcherPage'; // MỚI: Dành cho Tool hút màu
 import { ProductDetailPage } from './pages/ProductDetailPage';
 import { GalleryPage } from './pages/GalleryPage';
 import { InquiryPage } from './pages/InquiryPage';
-import { QuoteRequestPage } from './pages/QuoteRequestPage';
 import { AboutContactPage } from './pages/AboutContactPage';
 import { TermsPage } from './pages/TermsPage';
 import { NotFoundPage } from './pages/NotFoundPage';
@@ -28,7 +25,6 @@ import { ResetPasswordPage } from './pages/ResetPasswordPage';
 import { ProfilePage } from './pages/ProfilePage';
 import { AdminPage } from './pages/AdminPage';
 import { OrderTrackingPage } from './pages/OrderTrackingPage';
-import { PrototypeGeneratorPage } from './pages/PrototypeGeneratorPage';
 
 //import componenets
 import { ScrollToTop } from './components/ScrollToTop';
@@ -101,10 +97,20 @@ export default function App() {
                     <Routes>
                       <Route path="/" element={<HomePage />} />
                       <Route path="/products" element={<ProductsPage />} />
-                      <Route path="/products/:activeTab" element={<ProductsPage />} />
+
+                      {/* Custom products */}
+                      <Route path="/products/custom" element={<ProductsPage />} />
+                      <Route path="/products/custom/:category" element={<ProductsPage />} />
+                      <Route path="/products/custom/:category/:id" element={<ProductDetailPage />} />
+
+                      {/* Ready-made products */}
+                      <Route path="/products/readyuse" element={<ProductsPage />} />
+                      <Route path="/products/readyuse/:id" element={<ProductDetailPage />} />
+
+                      {/* Legacy product URL — keep for backward compatibility */}
                       <Route path="/product/:id" element={<ProductDetailPage />} />
+                                            
                       
-                      {/* 🚀 ĐÃ CHUYỂN HƯỚNG PRICING VÀ ĐĂNG KÝ TOOLS MỚI */}
                       {/* Prototype Generator, Pricing Calculator, Color Matcher
                           TẠM ẨN — chưa dùng tới, chưa qua audit/test. Bỏ
                           comment 4 dòng dưới khi sẵn sàng dùng lại (nhớ bỏ
@@ -119,7 +125,6 @@ export default function App() {
                       <Route path="/gallery" element={<GalleryPage />} />
                       <Route path="/inquiry" element={<InquiryPage />} />
                       <Route path="/tracking" element={<OrderTrackingPage />} />
-                      <Route path="/quote" element={<QuoteRequestPage />} />
                       <Route path="/checkout" element={<CheckoutPage />} />
                       <Route path="/admin" element={<AdminPage />} />
 

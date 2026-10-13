@@ -13,20 +13,20 @@ const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
 
   return (
     <div className="space-y-2 w-full">
-      <label className="block text-sm font-semibold text-white/90">
+      <label className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">
         {label}
       </label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-          <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-500'}`} />
+          <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-[var(--muted-foreground)] dark:text-gray-500'}`} />
         </div>
         <input
           type={inputType}
-          className={`w-full pl-11 pr-12 py-3.5 bg-[#1A1528] border ${
+          className={`w-full pl-11 pr-12 py-3.5 bg-[var(--input-background)] border ${
             error 
               ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10' 
               : 'border-[var(--border)] focus:border-[var(--primary)] focus:ring-[var(--primary)]/10'
-          } rounded-xl text-white placeholder-gray-500 transition-all outline-none focus:ring-4`}
+          } rounded-xl text-[var(--foreground)] placeholder-[var(--muted-foreground)] dark:bg-[#1A1528] dark:text-white dark:placeholder-gray-500 transition-all outline-none focus:ring-4`}
           {...props}
         />
         {isPassword && (
@@ -34,7 +34,7 @@ const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             aria-label={showPassword ? 'Hide password' : 'Show password'}
-            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-gray-300 transition-colors cursor-pointer"
+            className="absolute inset-y-0 right-0 pr-4 flex items-center text-[var(--muted-foreground)] dark:text-gray-500 hover:text-[var(--foreground)] dark:hover:text-gray-300 transition-colors cursor-pointer"
           >
             {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
@@ -74,7 +74,7 @@ const SocialButton = ({ icon: Icon, label, onClick }) => {
     <button
       type="button"
       onClick={onClick}
-      className="flex flex-1 items-center justify-center gap-2 py-3.5 bg-[#1A1528] border border-[var(--border)] hover:border-[var(--primary)]/50 hover:bg-[#221B34] rounded-xl text-gray-300 font-semibold transition-all cursor-pointer"
+      className="flex flex-1 items-center justify-center gap-2 py-3.5 bg-[var(--card)] border border-[var(--border)] hover:border-[var(--primary)]/50 hover:bg-[var(--accent)] rounded-xl text-[var(--foreground)] dark:bg-[#1A1528] dark:hover:bg-[#221B34] dark:text-gray-300 font-semibold transition-all cursor-pointer"
     >
       <Icon className="h-5 w-5 text-[var(--primary)]" />
       <span className="text-sm">{label}</span>
@@ -120,13 +120,11 @@ export function LoginPage() {
       });
 
       if (error) throw error;
-      console.log('Đăng nhập thành công:', data);
+      console.log('LOGIN DATA:', data);
+      console.log('LOGIN USER:', data?.user);
+      console.log('LOGIN SESSION:', data?.session);
       
       if (data.user) {
-        // Truy vấn role trực tiếp tại đây thay vì dựa vào AuthContext cập
-        // nhật kịp lúc — AuthContext fetch role bất đồng bộ riêng, không có
-        // gì đảm bảo nó xong trước dòng code tiếp theo (trước đây dùng
-        // setTimeout 500ms để "đoán" là đủ thời gian, không chắc chắn).
         const { data: roleData } = await supabase
           .from('user_roles')
           .select('role')
@@ -149,7 +147,7 @@ export function LoginPage() {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: provider,
         options: {
-          redirectTo: 'https://dioxyzinefrog.vercel.app' 
+          redirectTo: `${window.location.origin}/profile`
         }
       });
       if (error) throw error;
@@ -160,7 +158,7 @@ export function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-transparent flex items-center justify-center p-4 sm:p-6 relative overflow-hidden z-10">
+    <div className="min-h-screen bg-transparent flex items-start justify-center p-4 sm:p-6 pt-32 sm:pt-36 pb-16 relative overflow-x-hidden z-10">
       
       <div className="absolute top-[20%] left-[20%] w-96 h-96 bg-[var(--primary)]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
@@ -171,7 +169,7 @@ export function LoginPage() {
         className="w-full max-w-md relative z-20"
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
+          <h1 className="text-3xl font-heading font-bold text-[var(--heading-color)] tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
             Welcome Back!
           </h1>
           <p className="text-[var(--muted-foreground)] mt-2 font-medium">
@@ -213,7 +211,7 @@ export function LoginPage() {
             </div>
 
             <div className="flex items-center justify-end mt-4">
-              <Link to="/forgot-password" className="text-sm font-bold text-[var(--primary)] hover:text-white transition-colors">
+              <Link to="/forgot-password" className="text-sm font-bold text-[var(--primary)] hover:text-[var(--heading-color)] dark:hover:text-white transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -230,13 +228,12 @@ export function LoginPage() {
                 <div className="w-full border-t border-[var(--border)]"></div>
               </div>
               <div className="relative flex justify-center text-sm">
-                <span className="px-4 bg-[#161224] text-gray-500 font-medium bg-[var(--card)]">
+                <span className="px-4 text-[var(--muted-foreground)] font-medium bg-[var(--card)]">
                   Or continue with
                 </span>
               </div>
             </div>
 
-            {/*Social Logins*/}
             <div className="mt-6 flex gap-4">
               <SocialButton 
                 icon={Chrome} 
@@ -254,7 +251,7 @@ export function LoginPage() {
 
         <p className="text-center text-[var(--silver-gray)] mt-8 text-sm">
           Don't have an account?{' '}
-          <Link to="/register" className="font-bold text-[var(--primary)] hover:text-white underline ml-1 transition-colors">
+          <Link to="/register" className="font-bold text-[var(--primary)] hover:text-[var(--heading-color)] dark:hover:text-white underline ml-1 transition-colors">
             Sign up for free
           </Link>
         </p>

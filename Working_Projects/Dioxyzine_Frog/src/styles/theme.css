@@ -4,40 +4,44 @@
   --font-size: 16px;
   --radius: 1.25rem;
 
-  /* 🎨 REDESIGNED CUTE THEME (LIGHT MODE) - LAVENDER FROG */
-  --background: #FAF5FF; /* Nền trắng tím sữa nhạt siêu mịn */
-  --foreground: #4B5563; /* Chữ xám đậm tương phản cao dễ đọc */
+  /* 🎨 BRAND THEME (LIGHT MODE) - CREAM / MINT / LILAC / GRAPE */
+  --background: #F7F7EF; /* Cream / paper background */
+  --foreground: #4A4450; /* Soft charcoal-purple text */
   
-  --card: #FFFFFF; /* Khối thẻ/form trắng tinh tinh tế */
-  --card-foreground: #4B5563;
+  --card: #FFFDF7; /* Warm white cards */
+  --card-foreground: #4A4450;
   
-  --popover: #FFFFFF;
-  --popover-foreground: #4B5563;
+  --popover: #FFFDF7;
+  --popover-foreground: #4A4450;
   
-  --primary: #A78BFA; /* Tím Lavender Oải Hương từ Logo thương hiệu */
+  --primary: #8B63B5; /* Soft grape / lilac brand accent */
   --primary-foreground: #FFFFFF;
   
-  --secondary: #D1FAE5; /* Xanh Lá Ếch nhạt nịnh mắt từ Logo */
-  --secondary-foreground: #065F46;
+  --secondary: #DCECCB; /* Soft frog mint */
+  --secondary-foreground: #4E6B3D;
   
-  --muted: #F3E8FF; /* Các mảng màu nền phụ nhạt */
-  --muted-foreground: #6B7280;
+  --muted: #EEF2E8; /* Soft muted sage */
+  --muted-foreground: #756F7D;
+  --silver-gray: #756F7D;
   
-  --accent: #F3E8FF;
-  --accent-foreground: #4B5563;
+  --accent: #E8DDF2;
+  --soft-lilac: #E8DDF2;
+  --soft-mint: #DCECCB;
+  --accent-foreground: #514B57;
   
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
   
-  --border: #E9D5FF; /* Viền tím sữa mềm mại, không lo bị chói */
-  --input: #E9D5FF;
-  --input-background: #FFFFFF;
+  --border: #D8D8C9; /* Warm neutral border */
+  --grid-color: rgba(216, 216, 201, 0.38); /* Very subtle paper grid */
+  --input: #D8D8C9;
+  --input-background: #FFFDF7;
   --switch-background: #E5E7EB;
   
-  --ring: #A78BFA;
+  --ring: #8B63B5;
   
-  /* Token màu chữ to/Heading ở chế độ Sáng (Tím Lavender đậm đà sắc nét) */
-  --heading-color: #7C3AED;
+  /* Deep grape brand color for headings */
+  --heading-color: #6A3196;
 }
 
 /* 🌌 CYBER THEME (DARK MODE) - KHÔI PHỤC NGUYÊN BẢN CẤU HÌNH GỐC */
@@ -59,6 +63,10 @@
   
   --muted: #1A1528; 
   --muted-foreground: #9CA3AF;
+  --silver-gray: #9CA3AF;
+
+  --soft-lilac: #2C2144;
+  --soft-mint: #24311F;
   
   --accent: #2C2144;
   --accent-foreground: #E2E8F0;
@@ -67,6 +75,7 @@
   --destructive-foreground: #FFFFFF;
   
   --border: rgba(139, 114, 190, 0.3);
+  --grid-color: rgba(139, 114, 190, 0.3);
   --input: rgba(139, 114, 190, 0.2);
   --input-background: rgba(8, 8, 12, 0.6);
   --switch-background: #171226;
@@ -123,10 +132,28 @@
     font-family: 'Montserrat', sans-serif; 
     
     background-image: 
-      linear-gradient(var(--border) 1px, transparent 1px),
-      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      linear-gradient(var(--grid-color) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
     background-size: 40px 40px;
     background-attachment: fixed;
+  }
+
+  /* Keep browser-saved credentials readable in both themes. */
+  input:-webkit-autofill,
+  input:-webkit-autofill:hover,
+  input:-webkit-autofill:focus,
+  input:-webkit-autofill:active {
+    -webkit-text-fill-color: var(--foreground);
+    -webkit-box-shadow: 0 0 0 1000px var(--input-background) inset;
+    transition: background-color 9999s ease-out 0s;
+  }
+
+  .dark input:-webkit-autofill,
+  .dark input:-webkit-autofill:hover,
+  .dark input:-webkit-autofill:focus,
+  .dark input:-webkit-autofill:active {
+    -webkit-text-fill-color: #FFFFFF;
+    -webkit-box-shadow: 0 0 0 1000px #1A1528 inset;
   }
 
   /* 🚀 ÉP FONT CHỮ BÉO TRÒN COINY CHO TOÀN BỘ CHỮ TO & TIÊU ĐỀ */

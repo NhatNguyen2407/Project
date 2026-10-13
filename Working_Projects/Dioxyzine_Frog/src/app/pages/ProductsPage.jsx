@@ -1,6 +1,6 @@
 // src/app/pages/ProductsPage.jsx
-import { useState, useEffect } from 'react';
-import { useLocation } from 'react-router';
+import { useState } from 'react';
+import { useLocation, useParams, useNavigate } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ProductCard } from '../components/ProductCard';
 import { Search, Filter, Paintbrush, ShoppingBag, SlidersHorizontal, RefreshCw, WifiOff } from 'lucide-react'; 
@@ -8,35 +8,41 @@ import { useProducts } from '../context/ProductContext';
 import { ReadyUsePage } from './ReadyUsePage';
 import { SEO } from '../components/common_components/SEO';
 
-import { useParams, useNavigate } from 'react-router';
 
 const categories = ['All', 'Plushie', 'Doll', 'Customize'];
 
 export function ProductsPage() {
   const location = useLocation();
   const { products, loading, error, refetch } = useProducts();
-  
-  const navigate = useNavigate();
-  const { activeTab: urlTab } = useParams();
-  
-  const activeTab = urlTab || 'custom';
-  
-  const [selectedCategory, setSelectedCategory] = useState('All');
-  const [searchQuery, setSearchQuery] = useState('');
 
+  const navigate = useNavigate();
+  const { category } = useParams();
+
+  const categoryMap = {
+    plushie: 'Plushie',
+    doll: 'Doll',
+    customize: 'Customize',
+  };
+
+  const selectedCategory = categoryMap[category] || 'All';
+  const isReadyUse = location.pathname === '/products/readyuse';
+
+  const [searchQuery, setSearchQuery] = useState('');
   const [cutStyleFilter, setCutStyleFilter] = useState('All');
 
-  useEffect(() => {
-    if (location.state?.tab) {
-      navigate(`/products/${location.state.tab}`, { replace: true });
-    }
-  }, [location.state, navigate]);
-
   const handleTabChange = (tabName) => {
-    navigate(`/products/${tabName}`);
-    setSelectedCategory('All');
+    const routes = {
+      All: '/products/custom',
+      Plushie: '/products/custom/plushie',
+      Doll: '/products/custom/doll',
+      Customize: '/products/custom/customize',
+      custom: '/products/custom',
+      readyuse: '/products/readyuse',
+    };
+
+    navigate(routes[tabName] || '/products/custom');
     setSearchQuery('');
-    setCutStyleFilter('All'); 
+    setCutStyleFilter('All');
   };
 
   const filteredProducts = products.filter((product) => {
@@ -61,7 +67,7 @@ export function ProductsPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div className="text-center mb-10">
-          <h1 className="font-heading text-4xl md:text-5xl mb-4 text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Our Products</h1>
+          <h1 className="font-heading text-4xl md:text-5xl mb-4 text-[var(--heading-color)] dark:text-white drop-shadow-[0_0_15px_rgba(139,114,190,0.5)]">Our Products</h1>
           <p className="text-lg text-[var(--muted-foreground)] max-w-2xl mx-auto">Explore our full range of high-quality customizable merchandise</p>
         </div>
 
@@ -69,7 +75,7 @@ export function ProductsPage() {
           <button 
             onClick={() => handleTabChange('custom')}
             className={`flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold transition-all duration-300 cursor-pointer ${
-              activeTab === 'custom' 
+              !isReadyUse 
                 ? 'bg-[var(--primary)] text-white shadow-[0_0_20px_rgba(139,114,190,0.5)] scale-105' 
                 : 'bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:bg-[#2C1A29]'
             }`}
@@ -81,7 +87,7 @@ export function ProductsPage() {
           <button 
             onClick={() => handleTabChange('readyuse')}
             className={`flex items-center justify-center gap-2 px-8 py-4 rounded-xl font-bold transition-all duration-300 cursor-pointer ${
-              activeTab === 'readyuse' 
+              isReadyUse 
                 ? 'bg-[var(--primary)] text-white shadow-[0_0_20px_rgba(139,114,190,0.5)] scale-105' 
                 : 'bg-[var(--card)] text-[var(--muted-foreground)] border border-[var(--border)] hover:bg-[#2C1A29]'
             }`}
@@ -91,7 +97,7 @@ export function ProductsPage() {
           </button>
         </div>
 
-        {activeTab === 'custom' ? (
+        {!isReadyUse ? (
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }}>
             <div className="flex flex-col md:flex-row gap-6 mb-6 items-center justify-between">
               <div className="flex flex-wrap justify-center gap-2">
@@ -99,13 +105,12 @@ export function ProductsPage() {
                   <button
                     key={category}
                     onClick={() => {
-                      setSelectedCategory(category);
-                      setCutStyleFilter('All'); 
+                      handleTabChange(category);
                     }}
                     className={`px-6 py-2 rounded-full font-medium transition-all cursor-pointer ${
                       selectedCategory === category
                         ? 'bg-[var(--primary)] text-white shadow-md'
-                        : 'bg-[var(--card)] text-[var(--silver-gray)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-white'
+                        : 'bg-[var(--card)] text-[var(--foreground)] border border-[var(--border)] hover:border-[var(--primary)] hover:text-[var(--primary)]'
                     }`}
                   >
                     {category}
@@ -119,7 +124,7 @@ export function ProductsPage() {
                   placeholder="Search products..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-12 pr-4 py-3 rounded-full bg-[var(--card)] border border-[var(--border)] text-white focus:outline-none focus:border-[var(--primary)] transition-colors shadow-sm"
+                  className="w-full pl-12 pr-4 py-3 rounded-full bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] placeholder:text-[var(--muted-foreground)] dark:text-white dark:placeholder:text-gray-400 focus:outline-none focus:border-[var(--primary)] transition-colors shadow-sm"
                 />
                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--muted-foreground)]" />
               </div>
@@ -131,9 +136,9 @@ export function ProductsPage() {
                   initial={{ opacity: 0, y: -10, height: 0 }}
                   animate={{ opacity: 1, y: 0, height: 'auto' }}
                   exit={{ opacity: 0, y: -10, height: 0 }}
-                  className="flex flex-wrap items-center gap-3 mb-10 bg-[#1A1528]/50 border border-[var(--border)] p-3 rounded-2xl w-fit mx-auto md:mx-0 overflow-hidden"
+                  className="flex flex-wrap items-center gap-3 mb-10 bg-[var(--card)] dark:bg-[#1A1528]/50 border border-[var(--border)] p-3 rounded-2xl w-fit mx-auto md:mx-0 overflow-hidden shadow-sm"
                 >
-                  <span className="text-xs font-bold text-gray-400 flex items-center gap-1 uppercase tracking-wider ml-1">
+                 <span className="text-xs font-bold text-[var(--muted-foreground)] flex items-center gap-1 uppercase tracking-wider ml-1 dark:text-gray-400">
                     <SlidersHorizontal className="w-3.5 h-3.5 text-[var(--primary)]" /> Cut Style:
                   </span>
                   <div className="flex flex-wrap gap-1.5">
@@ -147,8 +152,8 @@ export function ProductsPage() {
                         onClick={() => setCutStyleFilter(style.key)}
                         className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                           cutStyleFilter === style.key
-                            ? 'bg-white/10 text-[var(--primary)] border border-[var(--primary)]/30'
-                            : 'text-gray-400 hover:text-white hover:bg-white/5'
+                            ? 'bg-[var(--accent)] text-[var(--primary)] border border-[var(--primary)]/30'
+                            : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--accent)]/50'
                         }`}
                       >
                         {style.label}
@@ -170,10 +175,10 @@ export function ProductsPage() {
                   <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-[var(--primary)]/20 blur-3xl rounded-full"></div>
                   <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6">
                     <div>
-                      <h3 className="font-heading text-2xl md:text-3xl text-white mb-2 drop-shadow-[0_0_10px_rgba(139,114,190,0.5)]">
+                      <h3 className="font-heading text-2xl md:text-3xl text-[var(--heading-color)] dark:text-white mb-2 drop-shadow-[0_0_10px_rgba(139,114,190,0.5)]">
                         You have an idea no one ever thinks of?
                       </h3>
-                      <p className="text-[var(--silver-gray)] text-lg">Let us make it come true. 🌟</p>
+                      <p className="text-[var(--muted-foreground)] text-lg dark:text-gray-300">Let us make it come true. 🌟</p>
                     </div>
                     <Paintbrush className="w-16 h-16 text-[var(--primary)] opacity-80 flex-shrink-0" />
                   </div>

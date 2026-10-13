@@ -6,17 +6,17 @@ import { supabase } from '../service/supabase';
 
 const AuthInput = ({ label, icon: Icon, error, ...props }) => (
   <div className="space-y-2 w-full">
-    <label className="block text-sm font-semibold text-white/90">{label}</label>
+    <label className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">{label}</label>
     <div className="relative">
       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
         <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-500'}`} />
       </div>
       <input
-        className={`w-full pl-11 pr-4 py-3.5 bg-[#1A1528] border ${
+        className={`w-full pl-11 pr-4 py-3.5 bg-[var(--input-background)] dark:bg-[#1A1528] border ${
           error
             ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10'
             : 'border-[var(--border)] focus:border-[var(--primary)] focus:ring-[var(--primary)]/10'
-        } rounded-xl text-white placeholder-gray-500 transition-all outline-none focus:ring-4`}
+          } rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] dark:placeholder-gray-500 transition-all outline-none focus:ring-4`}
         {...props}
       />
     </div>
@@ -82,7 +82,7 @@ export function ForgotPasswordPage() {
         className="w-full max-w-md relative z-20"
       >
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-heading font-bold text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
+          <h1 className="text-3xl font-heading font-bold text-[var(--heading-color)] dark:text-white tracking-tight drop-shadow-[0_0_15px_rgba(139,114,190,0.3)]">
             Forgot Password?
           </h1>
           <p className="text-[var(--muted-foreground)] mt-2 font-medium">
@@ -96,13 +96,13 @@ export function ForgotPasswordPage() {
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-green-400" />
               </div>
-              <h2 className="text-xl font-bold text-white mb-2">Check your inbox</h2>
+              <h2 className="text-xl font-bold text-[var(--heading-color)] dark:text-white mb-2">Check your inbox</h2>
               <p className="text-[var(--silver-gray)] mb-6">
-                If an account exists for <span className="text-white font-semibold">{email}</span>, a password reset link has been sent. It may take a minute to arrive — check your spam folder too.
+                If an account exists for <span className="text-[var(--foreground)] dark:text-white font-semibold">{email}</span>, a password reset link has been sent. It may take a minute to arrive — check your spam folder too.
               </p>
               <Link
                 to="/login"
-                className="inline-flex items-center gap-2 text-[var(--primary)] font-bold hover:text-white transition-colors"
+                className="inline-flex items-center gap-2 text-[var(--primary)] font-bold hover:text-[var(--heading-color)] dark:hover:text-white transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" /> Back to login
               </Link>
@@ -126,7 +126,7 @@ export function ForgotPasswordPage() {
               <div className="text-center">
                 <Link
                   to="/login"
-                  className="inline-flex items-center gap-2 text-sm text-[var(--silver-gray)] hover:text-white transition-colors"
+                  className="inline-flex items-center gap-2 text-sm text-[var(--silver-gray)] hover:text-[var(--primary)] dark:hover:text-white transition-colors"
                 >
                   <ArrowLeft className="w-4 h-4" /> Back to login
                 </Link>

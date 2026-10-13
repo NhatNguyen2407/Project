@@ -39,7 +39,7 @@ export function NotFoundPage() {
           transition={{ delay: 0.2 }}
           className="mb-12"
         >
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Page Not Found</h2>
+          <h2 className="text-3xl md:text-4xl font-bold text-[var(--heading-color)] dark:text-white mb-4">Page Not Found</h2>
           <p className="text-lg text-[var(--muted-foreground)] leading-relaxed">
             Oops! Looks like this page wandered off into the craft studio. Let's get you back on track.
           </p>
@@ -91,7 +91,7 @@ export function NotFoundPage() {
               <Link
                 key={link.path}
                 to={link.path}
-                className="text-sm font-medium text-[var(--silver-gray)] hover:text-white hover:underline transition-colors"
+                className="text-sm font-medium text-[var(--silver-gray)] hover:text-[var(--heading-color)] dark:hover:text-white hover:underline transition-colors"
               >
                 {link.label}
               </Link>

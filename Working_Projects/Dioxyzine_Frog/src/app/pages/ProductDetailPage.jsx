@@ -1,21 +1,30 @@
 import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router';
+import { useLocation, useParams, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, MessageSquare, Plus, Minus, Clock, Component, Package, Tag, Check, Shield, RefreshCw } from 'lucide-react';
 
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
-import { MOCK_PRODUCTS } from '../data/storeData';
+// import { MOCK_PRODUCTS } from '../data/storeData';
 import { CartDrawer } from '../components/store/CartDrawer';
 import { SEO } from '../components/common_components/SEO';
 import { supabase } from '../service/supabase';
 
 export function ProductDetailPage() {
-  const { id } = useParams();
+  const { category, id } = useParams();
+  const location = useLocation();
   const { products, loading, error, refetch } = useProducts();
   const { addToCart } = useCart();
-  
-  const isReadyUse = id?.startsWith('RDY-');
+
+  const isReadyUse = location.pathname.startsWith('/products/readyuse');
+
+  const customCategoryMap = {
+    plushie: 'Plushie',
+    doll: 'Doll',
+    customize: 'Customize',
+  };
+
+  const selectedCategory = customCategoryMap[category];
   
   const [currentImage, setCurrentImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
@@ -30,9 +39,7 @@ export function ProductDetailPage() {
   const [reviews, setReviews] = useState([]);
   const [liveRating, setLiveRating] = useState(0);
 
-  const product = isReadyUse 
-    ? MOCK_PRODUCTS.find((p) => p.id === id)
-    : products.find((p) => p.id === id);
+  const product = products.find((p) => p.id === id);
 
   useEffect(() => {
     if (product) {
@@ -74,14 +81,14 @@ export function ProductDetailPage() {
     fetchLiveReviews();
   }, [product]);
 
-  if (loading && !isReadyUse) {
+  if (loading) {
     return <div className="min-h-screen pt-32 text-center text-2xl text-[var(--primary)] font-bold animate-pulse">Loading product data...</div>;
   }
 
   // Lỗi tải dữ liệu (mạng/server) khác với "sản phẩm này thực sự không tồn
   // tại" — trước đây 2 trường hợp trông y hệt nhau ("Product not found"),
   // khiến khách tưởng nhầm link hỏng dù chỉ là mất mạng tạm thời.
-  if (error && !isReadyUse) {
+  if (error) {
     return (
       <div className="min-h-screen pt-32 text-center px-4">
         <p className="text-2xl text-foreground font-bold mb-2">{error}</p>
@@ -99,20 +106,26 @@ export function ProductDetailPage() {
     return <div className="min-h-screen pt-32 text-center text-foreground font-bold text-2xl">Product not found.</div>;
   }
 
-  let images = [];
-  if (product.images && product.images.length > 0) {
-    images = product.images; 
-  } else {
-    const cover = product.image_cover || product.image;
-    if (cover) images.push(cover);
-    
-    if (product.images_gallery) {
-      const gallery = product.images_gallery.split('|').map(img => img.trim()).filter(img => img !== '');
-      images = [...images, ...gallery];
-    }
-  }
+  const coverImage = product.image || '';
+  const galleryImages = Array.isArray(product.images) ? product.images : [];
 
-  const listToUse = isReadyUse ? MOCK_PRODUCTS : products;
+  const images = [
+    coverImage,
+    ...galleryImages,
+  ].filter(Boolean);
+
+  const listToUse = isReadyUse
+  ? products.filter((p) => p.type === 'readyuse')
+  : selectedCategory
+    ? products.filter((p) => {
+        const categories = Array.isArray(p.category)
+          ? p.category
+          : [p.category];
+
+        return categories.includes(selectedCategory);
+      })
+    : products;
+
   const currentIndex = listToUse.findIndex((p) => p.id === id);
   const prevProduct = currentIndex > 0 ? listToUse[currentIndex - 1] : listToUse[listToUse.length - 1];
   const nextProduct = currentIndex < listToUse.length - 1 ? listToUse[currentIndex + 1] : listToUse[0];
@@ -122,6 +135,27 @@ export function ProductDetailPage() {
 
   const nextImage = () => setCurrentImage((prev) => (prev === images.length - 1 ? 0 : prev + 1));
   const prevImage = () => setCurrentImage((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  const selectImage = (index) => {
+    setCurrentImage(index);
+  };
+
+  const getProductUrl = (productId) => {
+  if (isReadyUse) {
+    return `/products/readyuse/${productId}`;
+  }
+
+  if (selectedCategory) {
+    return `/products/custom/${category}/${productId}`;
+  }
+
+  return `/product/${productId}`;
+};
+
+const backUrl = isReadyUse
+  ? '/products/readyuse'
+  : selectedCategory
+    ? `/products/custom/${category}`
+    : '/products/custom';
 
   const calculateLivePrice = () => {
     if (isReadyUse) {
@@ -193,17 +227,17 @@ export function ProductDetailPage() {
         
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-            <Link to={`/products/${isReadyUse ? 'readyuse' : 'custom'}`} className="inline-flex items-center gap-2 text-muted-foreground hover:text-[var(--primary)] transition-colors font-bold">
+            <Link to={backUrl} className="inline-flex items-center gap-2 text-muted-foreground hover:text-[var(--primary)] transition-colors font-bold">
               <ChevronLeft className="w-4 h-4" />
               Back to Products
             </Link>
 
             <div className="flex items-center gap-3">
-              <Link to={`/product/${prevProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
+              <Link to={getProductUrl(prevProduct.id)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
                 <ChevronLeft className="w-4 h-4" />
                 <span className="hidden sm:inline text-sm font-bold">Previous</span>
               </Link>
-              <Link to={`/product/${nextProduct.id}`} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
+              <Link to={getProductUrl(nextProduct.id)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
                 <span className="hidden sm:inline text-sm font-bold">Next</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
@@ -212,15 +246,43 @@ export function ProductDetailPage() {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div className="space-y-4">
+              {/* main image */}
               <div className="relative aspect-square rounded-3xl overflow-hidden bg-card shadow-lg border border-border group">
-                <img src={images[currentImage]} alt="Product" className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105" />
+                <img src={images[currentImage]} alt={`${displayTitle} image ${currentImage + 1}`} className="w-full h-full object-cover opacity-90 transition-all duration-300 group-hover:scale-105"/>
                 {images.length > 1 && (
                   <>
-                    <button onClick={prevImage} className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronLeft className="w-5 h-5" /></button>
-                    <button onClick={nextImage} className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronRight className="w-5 h-5" /></button>
+                    <button onClick={prevImage} aria-label="Previous product image" className="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronLeft className="w-5 h-5" /></button>
+                    <button onClick={nextImage} aria-label="Next product image" className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-card/80 text-foreground opacity-0 group-hover:opacity-100 hover:text-white hover:bg-[var(--primary)] flex items-center justify-center z-10 transition-all shadow-md"><ChevronRight className="w-5 h-5" /></button>
                   </>
                 )}
               </div>
+
+              {images.length > 1 && (
+                <div className="overflow-x-auto pb-1 scrollbar-thin">
+                  <div className="flex gap-3 min-w-max">
+                    {images.map((image, index) => (
+                      <button
+                        key={`${image}-${index}`}
+                        type="button"
+                        onClick={() => selectImage(index)}
+                        aria-label={`View product image ${index + 1}`}
+                        aria-current={currentImage === index ? 'true' : undefined}
+                        className={`relative flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden border-2 transition-all ${
+                          currentImage === index
+                            ? 'border-[var(--primary)] ring-2 ring-[var(--primary)]/20'
+                            : 'border-border hover:border-[var(--primary)]/50'
+                        }`}
+                      >
+                        <img
+                          src={image}
+                          alt={`${displayTitle} image ${index + 1}`}
+                          className="w-full h-full object-cover"
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-6">
