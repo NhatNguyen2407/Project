@@ -435,21 +435,120 @@ export function ProfilePage() {
             )}
 
             {activeView === 'settings' && (
-              <motion.div initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-sm">
-                <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2"><Settings className="w-6 h-6"/> Account Settings</h3>
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-sm"
+              >
+                <h3 className="text-xl font-bold text-[var(--primary)] mb-6 flex items-center gap-2">
+                  <Settings className="w-6 h-6" /> Account Settings
+                </h3>
+
                 <form onSubmit={handleUpdateProfile} className="space-y-6">
-                  {/* ...Phần avatar và email settings giữ nguyên để không làm dài code... */}
-                  <div className="space-y-2">
-                    <label className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white focus:border-[var(--primary)] outline-none"><User className="w-4 h-4"/> Display Name</label>
-                    <input required type="text" value={profileForm.fullName} onChange={e => setProfileForm({...profileForm, fullName: e.target.value})} className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white focus:border-[var(--primary)] outline-none" />
+                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-5 border-b border-[var(--border)]">
+                    <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-[var(--muted)] dark:bg-[#1A1528] border-2 border-[var(--primary)]/60 shrink-0">
+                      {(avatarPreview || profileForm.avatarUrl) ? (
+                        <img
+                          src={avatarPreview || profileForm.avatarUrl}
+                          alt="Profile avatar preview"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="w-8 h-8 text-[var(--primary)]" />
+                      )}
+                    </div>
+                    <div className="space-y-2">
+                      <label htmlFor="profile-avatar" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--primary)] cursor-pointer font-semibold text-sm">
+                        <Camera className="w-4 h-4" /> Choose avatar
+                      </label>
+                      <input
+                        id="profile-avatar"
+                        type="file"
+                        accept="image/png,image/jpeg,image/webp"
+                        className="sr-only"
+                        onChange={(e) => {
+                          const file = e.target.files?.[0] || null;
+                          if (!file) return;
+                          if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+                            toast.error('Please choose a PNG, JPEG, or WebP image.');
+                            e.target.value = '';
+                            return;
+                          }
+                          if (file.size > 5 * 1024 * 1024) {
+                            toast.error('Avatar must be 5 MB or smaller.');
+                            e.target.value = '';
+                            return;
+                          }
+                          setAvatarFile(file);
+                          setAvatarPreview(URL.createObjectURL(file));
+                        }}
+                      />
+                      <p className="text-xs text-[var(--muted-foreground)]">PNG, JPEG or WebP · Maximum 5 MB</p>
+                    </div>
                   </div>
-                  <button type="submit" disabled={updatingProfile} className="w-full sm:w-auto px-8 py-3.5 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl shadow-lg cursor-pointer">
+
+                  <div className="space-y-2">
+                    <label htmlFor="profile-display-name" className="block text-sm font-semibold text-[var(--foreground)]">
+                      <User className="w-4 h-4 inline-block mr-2 align-text-bottom" /> Display Name
+                    </label>
+                    <input
+                      id="profile-display-name"
+                      required
+                      type="text"
+                      autoComplete="name"
+                      value={profileForm.fullName}
+                      onChange={(e) => setProfileForm({ ...profileForm, fullName: e.target.value })}
+                      className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="profile-email" className="block text-sm font-semibold text-[var(--foreground)]">
+                      <Mail className="w-4 h-4 inline-block mr-2 align-text-bottom" /> Email Address
+                    </label>
+                    <input
+                      id="profile-email"
+                      required
+                      type="email"
+                      autoComplete="email"
+                      value={profileForm.email}
+                      onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                      className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
+                    />
+                    <p className="text-xs text-[var(--muted-foreground)]">Changing your email may require confirmation through your email inbox.</p>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label htmlFor="profile-new-password" className="block text-sm font-semibold text-[var(--foreground)]">
+                      <Lock className="w-4 h-4 inline-block mr-2 align-text-bottom" /> New Password <span className="font-normal text-[var(--muted-foreground)]">(optional)</span>
+                    </label>
+                    <input
+                      id="profile-new-password"
+                      type="password"
+                      autoComplete="new-password"
+                      minLength={8}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Leave blank to keep your current password"
+                      className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
+                    />
+                    <p className="text-xs text-[var(--muted-foreground)]">Use at least 8 characters if you want to change it.</p>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={updatingProfile}
+                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl shadow-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <Save className="w-4 h-4" />
                     {updatingProfile ? 'Saving...' : 'Save Changes'}
                   </button>
                 </form>
 
                 <div className="mt-10 pt-8 border-t border-red-500/20">
-                  <h4 className="text-red-400 font-bold flex items-center gap-2 mb-2"><Trash2 className="w-5 h-5" /> Danger Zone</h4>
+                  <h4 className="text-red-400 font-bold flex items-center gap-2 mb-2">
+                    <Trash2 className="w-5 h-5" /> Danger Zone
+                  </h4>
                   <p className="text-sm text-[var(--muted-foreground)] mb-4">
                     Deleting your account is permanent. Your order history will be kept for accounting records but disconnected from your name and contact info.
                   </p>
