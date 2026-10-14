@@ -20,6 +20,7 @@ export function CheckoutPage() {
   const { user } = useAuth();
   const { cart, cartTotal, clearCart } = useCart();
   const [orderComplete, setOrderComplete] = useState(false);
+  const [orderConfirmationWarning, setOrderConfirmationWarning] = useState('');
   
   const [shippingForm, setShippingForm] = useState({
     email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '',
@@ -227,6 +228,11 @@ export function CheckoutPage() {
               <CheckCircle2 className="w-24 h-24 text-green-500 mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-full" />
               <h2 className="text-4xl font-bold text-[var(--heading-color)] dark:text-white mb-4 font-heading">Order Confirmed!</h2>
               <p className="text-[var(--muted-foreground)] dark:text-[var(--silver-gray)] text-lg max-w-md mb-8">Thank you for your purchase. We have received your payment and will process your order shortly.</p>
+              {orderConfirmationWarning && (
+                <p role="alert" className="max-w-xl p-4 rounded-lg border border-yellow-500/40 text-[var(--foreground)]">
+                  {orderConfirmationWarning}
+                </p>
+              )}
             </div>
           ) : (
             <>
@@ -513,13 +519,19 @@ export function CheckoutPage() {
                             }
 
                             if (!result.orderId) {
-                               console.error('Payment was captured and recorded, but the order ID is missing from the response.');
-                               showToast('Payment succeeded, but the order reference could not be retrieved. Please contact support with your PayPal transaction ID.', 'error');
-                               setIsFinalizing(false);
-                               return;
-                             }
+                              // A captured payment must never return the customer to PayPal checkout.
+                              console.error('Payment succeeded, but the order ID is missing from the response.');
+                              trackPurchase(result.transactionId, Number(result.capturedAmount), cart);
+                              setOrderConfirmationWarning(
+                                `Payment succeeded, but we could not retrieve the order reference. Contact support and provide PayPal transaction ID: ${result.transactionId || 'unavailable'}. Please do not pay again.`
+                              );
+                              setOrderComplete(true);
+                              clearCart();
+                              setIsFinalizing(false);
+                              return;
+                            }
 
-                             await sendConfirmationEmail(result.orderId, result.transactionId, result.capturedAmount);
+                            await sendConfirmationEmail(result.orderId, result.transactionId, result.capturedAmount);
                             setIsFinalizing(false);
                           } catch (error) {
                             showToast("Transaction failed or was canceled.", "error");
