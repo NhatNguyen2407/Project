@@ -22,6 +22,7 @@ export function CheckoutPage() {
   const { cart, cartTotal, clearCart } = useCart();
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderConfirmationWarning, setOrderConfirmationWarning] = useState('');
+  const [paymentReview, setPaymentReview] = useState(null);
   
   const [shippingForm, setShippingForm] = useState({
     email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '',
@@ -224,7 +225,24 @@ export function CheckoutPage() {
             )}
           </AnimatePresence>
 
-          {orderComplete ? (
+          {paymentReview ? (
+            <div className="w-full p-10 md:p-16 flex flex-col items-center justify-center text-center bg-[var(--card)]">
+              <h2 className="text-3xl font-bold text-[var(--heading-color)] dark:text-white mb-4 font-heading">
+                Payment needs review
+              </h2>
+              <p role="alert" className="text-[var(--foreground)] max-w-xl mb-4">
+                {paymentReview.message}
+              </p>
+              {paymentReview.transactionId && (
+                <p className="font-mono text-sm break-all mb-4">
+                  PayPal Transaction ID: {paymentReview.transactionId}
+                </p>
+              )}
+              <p className="max-w-xl text-[var(--muted-foreground)]">
+                Please do not attempt this payment again until support has checked its status.
+              </p>
+            </div>
+          ) : orderComplete ? (
             <div className="w-full p-16 flex flex-col items-center justify-center text-center bg-[var(--card)]">
               <CheckCircle2 className="w-24 h-24 text-green-500 mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-full" />
               <h2 className="text-4xl font-bold text-[var(--heading-color)] dark:text-white mb-4 font-heading">Order Confirmed!</h2>
@@ -508,10 +526,17 @@ export function CheckoutPage() {
                             });
 
                             if (error || !result?.success) {
-                              if (result?.paymentCaptured) {
-                                // Tiền đã bị trừ nhưng lưu đơn hàng thất bại — cho khách
-                                // biết rõ mã giao dịch để liên hệ hỗ trợ, không giấu đi.
-                                showToast(`${result.error} (Transaction ID: ${result.transactionId})`, "error");
+                              if (result?.paymentCaptured || error) {
+                                // Capture may have succeeded even if the function response failed.
+                                // Keep the checkout UI locked to avoid an accidental second payment.
+                                setPaymentReview({
+                                  message: result?.paymentCaptured
+                                    ? 'PayPal captured the payment, but your order could not be recorded automatically.'
+                                    : 'We could not confirm whether PayPal captured this payment. Contact support before trying again.',
+                                  transactionId: typeof result?.transactionId === 'string'
+                                    ? result.transactionId
+                                    : null,
+                                });
                               } else {
                                 showToast(result?.error || "Transaction failed or was canceled.", "error");
                               }
@@ -536,7 +561,11 @@ export function CheckoutPage() {
                             await sendConfirmationEmail(canonicalOrderId, result.transactionId, result.capturedAmount);
                             setIsFinalizing(false);
                           } catch (error) {
-                            showToast("Transaction failed or was canceled.", "error");
+                            console.error('Payment approval outcome could not be confirmed:', error);
+                            setPaymentReview({
+                              message: 'We could not confirm the final payment status. Contact support and check PayPal before trying again.',
+                              transactionId: null,
+                            });
                             setIsFinalizing(false);
                           }
                         }}
