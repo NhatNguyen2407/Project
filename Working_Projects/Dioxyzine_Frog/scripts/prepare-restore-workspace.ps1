@@ -1,11 +1,13 @@
 <#
-Dioxyzine Frog - prepare a separate LOCAL restore drill workspace.
-Creates only local configuration on D:. No production network calls,
-database restores, Docker containers, or customer data copies.
-Run from the Dioxyzine_Frog app directory:
+Dioxyzine Frog - prepare an isolated local Supabase restore workspace.
+
+This script ONLY creates or updates a local Supabase config.toml in a
+separate, unlinked directory. It never starts Docker containers, imports
+SQL, accesses the remote database, or deletes a directory.
+
+Run from the application:
   .\scripts\prepare-restore-workspace.ps1
 #>
-
 [CmdletBinding()]
 param()
 
@@ -15,257 +17,161 @@ $ErrorActionPreference = 'Stop'
 $appRoot = Split-Path -Parent $PSScriptRoot
 $sourceRoot = (Resolve-Path -LiteralPath (Join-Path $appRoot '..\..')).Path
 $backupRoot = Split-Path -Parent $sourceRoot
-$backupParent = Split-Path -Parent $backupRoot
-$workspace = Join-Path $backupParent 'DioxyzineFrog-RestoreDrill'
+$workParent = Split-Path -Parent $backupRoot
+$workspace = Join-Path $workParent 'DioxyzineFrog-RestoreDrill'
 $privateRoot = Join-Path $backupRoot 'Private-Backups'
-$expectedRef = 'xeljnocizvlmefqovvfw'
-
-if (-not (Get-Command 'supabase' -ErrorAction SilentlyContinue)) {
-    throw 'Supabase CLI is not available.'
-}
 
 if (-not (Test-Path -LiteralPath $privateRoot -PathType Container)) {
-    throw 'Private-Backups was not found. The existing backup folder must remain intact.'
+    throw 'Private-Backups is missing. Nothing was changed.'
 }
-foreach ($path in @(
-    'Auth\auth-data.sql',
-    'Auth\manifest.json',
-    'Storage\manifest.json'
-)) {
-    if (-not (Test-Path -LiteralPath (Join-Path $privateRoot $path) -PathType Leaf)) {
-        throw ('Required private backup item is missing: ' + $path)
-    }
+if (-not (Get-Command supabase -ErrorAction SilentlyContinue)) {
+    throw 'Supabase CLI is not installed. Nothing was changed.'
 }
 
-# A sibling workspace is intentional. Resume only a previously initialized,
-# unlinked and unused local CLI workspace. Never overwrite other user projects.
-$existingWorkspace = Test-Path -LiteralPath $workspace -PathType Container
-if ($existingWorkspace) {
-    $existingConfig = Join-Path $workspace 'supabase\config.toml'
-    if (-not (Test-Path -LiteralPath $existingConfig -PathType Leaf)) {
-        throw 'RestoreDrill exists without a Supabase config. Refusing to overwrite it.'
-    }
-    $unexpected = @(Get-ChildItem -LiteralPath $workspace -Force |
-        Where-Object { $_.Name -notin @('supabase', '.vscode', '.gitignore') })
-    if ($unexpected.Count -gt 0) {
-        throw 'RestoreDrill contains unexpected files. Refusing to modify it.'
-    }
-    foreach ($unsafePath in @('supabase\.temp\project-ref', '.git', 'supabase\seed.sql')) {
-        if (Test-Path -LiteralPath (Join-Path $workspace $unsafePath)) {
-            throw 'RestoreDrill contains linked, versioned or seed data. Refusing to modify it.'
-        }
-    }
-    $migrationFolder = Join-Path $workspace 'supabase\migrations'
-    if (Test-Path -LiteralPath $migrationFolder -PathType Container) {
-        if (@(Get-ChildItem -LiteralPath $migrationFolder -File -Recurse).Count -gt 0) {
-            throw 'RestoreDrill contains migration files. Refusing to modify it.'
-        }
-    }
-}
-$ancestor = $backupParent
+# Prevent writing inside any enclosing Git repository.
+$ancestor = $workParent
 while ($true) {
     if (Test-Path -LiteralPath (Join-Path $ancestor '.git')) {
-        throw 'RestoreDrill would be inside a Git repository. Move DioxyzineFrog-Backup outside the repository.'
+        throw 'The restore workspace would be inside a Git repository.'
     }
-    $next = Split-Path -Parent $ancestor
-    if ([string]::IsNullOrEmpty($next) -or $next -eq $ancestor) { break }
-    $ancestor = $next
+    $parent = Split-Path -Parent $ancestor
+    if ([string]::IsNullOrWhiteSpace($parent) -or $parent -eq $ancestor) {
+        break
+    }
+    $ancestor = $parent
 }
 
-if (-not $existingWorkspace) {
-    New-Item -ItemType Directory -Path $workspace -ErrorAction Stop | Out-Null
-}
-Write-Host ('Preparing isolated workspace: ' + $workspace)
-
-Push-Location -LiteralPath $workspace
-try {
-    if (-not $existingWorkspace) {
-        & supabase init --yes
-        if ($LASTEXITCODE -ne 0) {
-            throw 'Supabase init failed. Check the isolated workspace manually.'
-        }
-    }
-    else {
-        Write-Host 'Resuming existing initialized workspace. No files or backups were deleted.'
-    }
-
+$existing = Test-Path -LiteralPath $workspace -PathType Container
+if ($existing) {
     $configPath = Join-Path $workspace 'supabase\config.toml'
     if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
-        throw 'Supabase init did not create config.toml.'
+        throw 'The existing restore directory has no config.toml. Refusing to overwrite.'
     }
-    $content = [IO.File]::ReadAllText($configPath)
-    $projectPattern = '(?m)^project_id\s*=\s*"[^"]*"'
-    if (-not [regex]::IsMatch($content, $projectPattern)) {
-        throw 'Could not find project_id in isolated Supabase config.'
+    $unknown = @(Get-ChildItem -LiteralPath $workspace -Force |
+        Where-Object { $_.Name -notin @('supabase', '.vscode', '.gitignore') })
+    if ($unknown.Count -gt 0) {
+        throw 'The existing restore directory contains unrelated files. Refusing to overwrite.'
     }
-    $content = [regex]::Replace(
-        $content, $projectPattern, 'project_id = "dioxyzine_frog_restore_drill"'
-    )
-
-    # In this workspace the remote app's incomplete migrations are NEVER copied.
-    # Explicitly disable migrations and seed when starting the local database.
-    foreach ($section in @('db.migrations', 'db.seed')) {
-        $escapedSection = [regex]::Escape($section)
-        $pattern = '(?m)(^\[' + $escapedSection +
-            '\]\r?\n(?:(?!^\[).*\r?\n)*?^\s*enabled\s*=\s*)(?:true|false)\b'
-        if (-not [regex]::IsMatch($content, $pattern)) {
-            throw ('Unable to safely disable ' + $section + '. No containers were started.')
+}
+else {
+    New-Item -ItemType Directory -Path $workspace | Out-Null
+    Push-Location -LiteralPath $workspace
+    try {
+        & supabase init --yes
+        if ($LASTEXITCODE -ne 0) {
+            throw 'Supabase init failed. No data has been imported.'
         }
-        $content = [regex]::Replace($content, $pattern, '${1}false')
     }
-
-    # Keep the drill off the default database port used by other local projects.
-    $dbPortPattern = '(?m)(^\[db\]\r?\n(?:(?!^\[).*\r?\n)*?^\s*port\s*=\s*)(?:54322|55432)\b'
-    if (-not [regex]::IsMatch($content, $dbPortPattern)) {
-        throw 'Unable to identify default local DB port in config.toml.'
+    finally {
+        Pop-Location
     }
-    $content = [regex]::Replace($content, $dbPortPattern, '${1}55432')
-
-    $shadowPortPattern = '(?m)(^\[db\]\r?\n(?:(?!^\[).*\r?\n)*?^\s*shadow_port\s*=\s*)(?:54320|55420)\b'
-    if ([regex]::IsMatch($content, $shadowPortPattern)) {
-        $content = [regex]::Replace($content, $shadowPortPattern, '${1}55420')
-    }
-    # Ensure remote and local Postgres major versions align.
-    $majorPattern = '(?m)(^\[db\]\r?\n(?:(?!^\[).*\r?\n)*?^\s*major_version\s*=\s*)\d+\b'
-    if ([regex]::IsMatch($content, $majorPattern)) {
-        $content = [regex]::Replace($content, $majorPattern, '${1}17')
-    }
-    else {
-        # Some Supabase CLI templates omit or comment out major_version.
-        # Add the explicit setting under [db] rather than assuming its presence.
-        $dbSection = [regex]::Match($content, '(?m)^\[db\][ \t]*\r?
-
-    [IO.File]::WriteAllText(
-        $configPath, $content, (New-Object System.Text.UTF8Encoding($false))
-    )
-
-    if (Test-Path -LiteralPath (Join-Path $workspace 'supabase\.temp\project-ref')) {
-        throw 'Unexpected remote project link found in isolated workspace.'
-    }
-
-    Write-Host ''
-    Write-Host 'Isolated local Supabase configuration prepared.'
-    Write-Host 'Local project id: dioxyzine_frog_restore_drill'
-    Write-Host 'Local Postgres port: 55432'
-    Write-Host 'Local Postgres major version: 17'
-    Write-Host 'Automatic schema migrations: disabled'
-    Write-Host 'Automatic seed: disabled'
-    Write-Host 'Remote project link: absent'
-    Write-Host 'No databases, containers or backups were altered.'
-    Write-Host ''
-    Write-Host 'Next step (NOT executed): validate CLI db start help and start only the local database.'
 }
-finally {
-    Pop-Location
+
+# This directory must never have been linked to a remote project.
+$linkedRefPath = Join-Path $workspace 'supabase\.temp\project-ref'
+if (Test-Path -LiteralPath $linkedRefPath) {
+    throw 'The restore workspace contains a remote project link. Refusing to proceed.'
 }
+if (Test-Path -LiteralPath (Join-Path $workspace '.git')) {
+    throw 'The restore workspace is itself a Git repository. Refusing to proceed.'
+}
+if (Test-Path -LiteralPath (Join-Path $workspace 'supabase\seed.sql')) {
+    throw 'The restore workspace contains seed data. Refusing to proceed.'
+}
+$migrationsPath = Join-Path $workspace 'supabase\migrations'
+if (Test-Path -LiteralPath $migrationsPath -PathType Container) {
+    $migrationFiles = @(Get-ChildItem -LiteralPath $migrationsPath -Recurse -File)
+    if ($migrationFiles.Count -gt 0) {
+        throw 'The restore workspace has migrations. Refusing to proceed.'
+    }
+}
+
+$configPath = Join-Path $workspace 'supabase\config.toml'
+if (-not (Test-Path -LiteralPath $configPath -PathType Leaf)) {
+    throw 'Supabase config.toml was not created.'
+}
+
+# Edit active TOML keys by section. Avoid regex substitution back-references.
+$lines = New-Object 'System.Collections.Generic.List[string]'
+foreach ($line in (Get-Content -LiteralPath $configPath)) {
+    [void]$lines.Add([string]$line)
+}
+
+$section = ''
+$found = @{
+    project = $false
+    db_port = $false
+    db_major = $false
+    migrations = $false
+    seed = $false
+}
+for ($i = 0; $i -lt $lines.Count; $i++) {
+    $line = $lines[$i]
+    if ($line -match '^\s*\[([^\]]+)\]\s*$') {
+        $section = $Matches[1]
+        continue
+    }
+
+    if ($section -eq '' -and $line -match '^\s*project_id\s*=') {
+        $lines[$i] = 'project_id = "dioxyzine_frog_restore_drill"'
+        $found.project = $true
+    }
+    elseif ($section -eq 'db' -and $line -match '^\s*port\s*=') {
+        $lines[$i] = 'port = 55432'
+        $found.db_port = $true
+    }
+    elseif ($section -eq 'db' -and $line -match '^\s*shadow_port\s*=') {
+        $lines[$i] = 'shadow_port = 55420'
+    }
+    elseif ($section -eq 'db' -and $line -match '^\s*major_version\s*=') {
+        $lines[$i] = 'major_version = 17'
+        $found.db_major = $true
+    }
+    elseif ($section -eq 'db.migrations' -and $line -match '^\s*enabled\s*=') {
+        $lines[$i] = 'enabled = false'
+        $found.migrations = $true
+    }
+    elseif ($section -eq 'db.seed' -and $line -match '^\s*enabled\s*=') {
+        $lines[$i] = 'enabled = false'
+        $found.seed = $true
+    }
+}
+
+# Some CLI-generated TOML files have only a commented-out major_version.
+if (-not $found.db_major) {
+    $dbIndex = -1
+    for ($i = 0; $i -lt $lines.Count; $i++) {
+        if ($lines[$i] -match '^\s*\[db\]\s*$') {
+            $dbIndex = $i
+            break
+        }
+    }
+    if ($dbIndex -lt 0) {
+        throw 'Could not find [db] in config.toml. Nothing was written.'
+    }
+    $lines.Insert($dbIndex + 1, 'major_version = 17')
+    $found.db_major = $true
+}
+
+foreach ($name in @('project', 'db_port', 'db_major', 'migrations', 'seed')) {
+    if (-not $found[$name]) {
+        throw ('Missing required config key: ' + $name + '. Nothing was written.')
+    }
+}
+
+$updated = [string]::Join([Environment]::NewLine, $lines) + [Environment]::NewLine
+[System.IO.File]::WriteAllText(
+    $configPath,
+    $updated,
+    (New-Object System.Text.UTF8Encoding($false))
 )
-        if (-not $dbSection.Success) {
-            throw 'Supabase config has no [db] section. Refusing to alter it.'
-        }
-        $content = $content.Insert($dbSection.Index + $dbSection.Length, "`nmajor_version = 17")
-    }
 
-    if (-not ($content -match '(?m)^\[db\][ \t]*\r?
-
-    [IO.File]::WriteAllText(
-        $configPath, $content, (New-Object System.Text.UTF8Encoding($false))
-    )
-
-    if (Test-Path -LiteralPath (Join-Path $workspace 'supabase\.temp\project-ref')) {
-        throw 'Unexpected remote project link found in isolated workspace.'
-    }
-
-    Write-Host ''
-    Write-Host 'Isolated local Supabase configuration prepared.'
-    Write-Host 'Local project id: dioxyzine_frog_restore_drill'
-    Write-Host 'Local Postgres port: 55432'
-    Write-Host 'Local Postgres major version: 17'
-    Write-Host 'Automatic schema migrations: disabled'
-    Write-Host 'Automatic seed: disabled'
-    Write-Host 'Remote project link: absent'
-    Write-Host 'No databases, containers or backups were altered.'
-    Write-Host ''
-    Write-Host 'Next step (NOT executed): validate CLI db start help and start only the local database.'
-}
-finally {
-    Pop-Location
-}
-) -or
-        -not ($content -match '(?m)^\[db\.migrations\][ \t]*\r?
-
-    [IO.File]::WriteAllText(
-        $configPath, $content, (New-Object System.Text.UTF8Encoding($false))
-    )
-
-    if (Test-Path -LiteralPath (Join-Path $workspace 'supabase\.temp\project-ref')) {
-        throw 'Unexpected remote project link found in isolated workspace.'
-    }
-
-    Write-Host ''
-    Write-Host 'Isolated local Supabase configuration prepared.'
-    Write-Host 'Local project id: dioxyzine_frog_restore_drill'
-    Write-Host 'Local Postgres port: 55432'
-    Write-Host 'Local Postgres major version: 17'
-    Write-Host 'Automatic schema migrations: disabled'
-    Write-Host 'Automatic seed: disabled'
-    Write-Host 'Remote project link: absent'
-    Write-Host 'No databases, containers or backups were altered.'
-    Write-Host ''
-    Write-Host 'Next step (NOT executed): validate CLI db start help and start only the local database.'
-}
-finally {
-    Pop-Location
-}
-) -or
-        -not ($content -match '(?m)^\[db\.seed\][ \t]*\r?
-
-    [IO.File]::WriteAllText(
-        $configPath, $content, (New-Object System.Text.UTF8Encoding($false))
-    )
-
-    if (Test-Path -LiteralPath (Join-Path $workspace 'supabase\.temp\project-ref')) {
-        throw 'Unexpected remote project link found in isolated workspace.'
-    }
-
-    Write-Host ''
-    Write-Host 'Isolated local Supabase configuration prepared.'
-    Write-Host 'Local project id: dioxyzine_frog_restore_drill'
-    Write-Host 'Local Postgres port: 55432'
-    Write-Host 'Local Postgres major version: 17'
-    Write-Host 'Automatic schema migrations: disabled'
-    Write-Host 'Automatic seed: disabled'
-    Write-Host 'Remote project link: absent'
-    Write-Host 'No databases, containers or backups were altered.'
-    Write-Host ''
-    Write-Host 'Next step (NOT executed): validate CLI db start help and start only the local database.'
-}
-finally {
-    Pop-Location
-}
-)) {
-        throw 'Configuration sections were not preserved. Refusing to save an invalid config.'
-    }
-
-    [IO.File]::WriteAllText(
-        $configPath, $content, (New-Object System.Text.UTF8Encoding($false))
-    )
-
-    if (Test-Path -LiteralPath (Join-Path $workspace 'supabase\.temp\project-ref')) {
-        throw 'Unexpected remote project link found in isolated workspace.'
-    }
-
-    Write-Host ''
-    Write-Host 'Isolated local Supabase configuration prepared.'
-    Write-Host 'Local project id: dioxyzine_frog_restore_drill'
-    Write-Host 'Local Postgres port: 55432'
-    Write-Host 'Local Postgres major version: 17'
-    Write-Host 'Automatic schema migrations: disabled'
-    Write-Host 'Automatic seed: disabled'
-    Write-Host 'Remote project link: absent'
-    Write-Host 'No databases, containers or backups were altered.'
-    Write-Host ''
-    Write-Host 'Next step (NOT executed): validate CLI db start help and start only the local database.'
-}
-finally {
-    Pop-Location
-}
+Write-Host 'Isolated Supabase workspace configuration prepared.'
+Write-Host ('Workspace: ' + $workspace)
+Write-Host 'Project ID: dioxyzine_frog_restore_drill'
+Write-Host 'Local DB port: 55432'
+Write-Host 'PostgreSQL major version: 17'
+Write-Host 'Auto migrations: disabled'
+Write-Host 'Auto seed: disabled'
+Write-Host 'Remote project link: absent'
+Write-Host 'No Docker services started. No database restored.'
