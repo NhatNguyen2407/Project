@@ -1,9 +1,9 @@
-# Dioxyzine Frog — System Inventory
+# Dioxyzine Frog - System Inventory
 
 > **Baseline (read-only):** 2026-10-14 (Asia/Bangkok)  
-> **Workstream:** Phase 1 / Step 1 — Establish baseline & safe working branch  
+> **Workstream:** Phase 1 / Step 1 - Establish baseline & safe working branch  
 > **Status:** Documentation only. No production, database, payment, or Sheet changes.  
-> **Repository visibility:** PUBLIC — never add secrets, customer records, financial detail, or nonpublic Sheet links.
+> **Repository visibility:** PUBLIC - never add secrets, customer records, financial detail, or nonpublic Sheet links.
 
 ## 1. Source-control baseline
 
@@ -12,7 +12,7 @@
 | Repository | `NhatNguyen2407/Project` |
 | Default branch | `main` |
 | Baseline commit | `f3cb525306caf7a69d5b3ded7a4b4485804ed1a2` |
-| Baseline commit description | Merge PR #6 — pre-launch hardening |
+| Baseline commit description | Merge PR #6 - pre-launch hardening |
 | Application root | `Working_Projects/Dioxyzine_Frog/` |
 | Phase 1 working branch | `audit/production-hardening` |
 | Vercel production | `https://dioxyzinefrog.vercel.app` |
@@ -53,8 +53,8 @@ Repository SQL files:
 - `supabase/migrations/202610130002_order_tracking_rpc_shape.sql`
 
 Live migration history includes:
-- `20261012140001` — `security_hardening_20261013`
-- `20261012140254` — `order_tracking_rpc_shape_20261013`
+- `20261012140001` - `security_hardening_20261013`
+- `20261012140254` - `order_tracking_rpc_shape_20261013`
 
 The names describe similar changes but versions differ. **Do not blindly replay these files or alter migration history.** Reconcile live schema, code and migration records during Step 2.
 
@@ -88,17 +88,17 @@ The names describe similar changes but versions differ. **Do not blindly replay 
 
 ## 5. Roadmap gates
 
-**Step 1 — Baseline:** inventory + issue register + test plan committed on a non-main branch. No production changes.
+**Step 1 - Baseline:** inventory + issue register + test plan committed on a non-main branch. No production changes.
 
-**Step 2 — Recovery readiness:** backup Google Sheets and Supabase; verify restore; reconcile migration history; establish DB staging. Requires an explicit follow-up.
+**Step 2 - Recovery readiness:** backup Google Sheets and Supabase; verify restore; reconcile migration history; establish DB staging. Requires an explicit follow-up.
 
-**Step 3 — Regression safety:** add automated tests and CI. Requires an explicit follow-up.
+**Step 3 - Regression safety:** add automated tests and CI. Requires an explicit follow-up.
 
-**Phase 2 — Product fixes:** inquiry/backend reCAPTCHA, tracking identifiers, Admin write errors, payment resilience, observability.
+**Phase 2 - Product fixes:** inquiry/backend reCAPTCHA, tracking identifiers, Admin write errors, payment resilience, observability.
 
-**Phase 3 — Business data:** financial reconciliation, immutable production IDs, normalization, one-way Sheets synchronization.
+**Phase 3 - Business data:** financial reconciliation, immutable production IDs, normalization, one-way Sheets synchronization.
 
-**Phase 4–5 — Operations and AI:** RBAC/task/calendar/reminders, then LLM read tools and approval-based actions.
+**Phase 4–5 - Operations and AI:** RBAC/task/calendar/reminders, then LLM read tools and approval-based actions.
 
 ## 6. Verification log
 
