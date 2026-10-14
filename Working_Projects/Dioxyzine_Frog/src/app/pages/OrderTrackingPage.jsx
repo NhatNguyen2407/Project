@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import { supabase } from '../service/supabase';
 import { SEO } from '../components/common_components/SEO';
+import { normalizeOrderId } from '../utils/orderIntegrity';
 
 const TRACKING_STEPS = [
   {
@@ -61,10 +62,7 @@ export function OrderTrackingPage() {
 
     if (!idToSearch) return;
 
-    const uuidRegex =
-      /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
-
-    if (!uuidRegex.test(idToSearch)) {
+    if (!normalizeOrderId(idToSearch)) {
       setError(
         'Invalid Order ID format. Please make sure you copied the full ID including dashes.'
       );
