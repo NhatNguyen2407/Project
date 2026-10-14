@@ -103,6 +103,19 @@ Do not:
 
 Until all required recovery checks pass, **Step 2 remains open**.
 
+## Isolated local restore preparation (not yet executed)
+
+Docker Desktop reported its WSL disk location on the encrypted data drive after restart; subsequent local preflight reported the Docker Engine reachable and all application, Storage, and Auth backup hashes matching their local manifests. This confirms neither a database restore nor an end-to-end recovery.
+
+A new preparatory helper is available at `scripts/prepare-restore-workspace.ps1`. It builds a disposable local Supabase CLI project in a directory alongside the backup repository, separate from the live-linked application clone. It refuses to overwrite a pre-existing workspace, assigns a distinct local project identifier and database port, and disables the normal migration and seed workflow in its generated configuration. **It does not start Docker containers, import SQL, execute production queries or restore customer data.** CLI behavior must be checked on the operator's installed version before attempting any local database start.
+
+Recovery drill design constraints:
+- The canonical live migration history has six entries, while the repository has only the two most recent SQL files. Do not replay these as a substitute for restoring the schema snapshot.
+- Inspect roles/schema/data/Auth SQL for compatibility before choosing restore order and commands. If any ambiguity exists, stop before import.
+- Keep real Auth dumps and any restored credentials on encrypted local storage only. Never expose a local instance containing copied real accounts or let a test app connect to live services.
+- A full platform recovery plan still needs non-SQL settings, Edge Function secrets, and tested Storage object re-upload, plus an off-device protected copy.
+- Do not apply `supabase db reset`, migrations, or restore commands against the linked Production project.
+
 ## 5. Reference
 
 Supabase documentation: https://supabase.com/docs/guides/platform/backups
