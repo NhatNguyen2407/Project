@@ -1,4 +1,4 @@
-# Dioxyzine Frog — Audit Issue Register
+# Dioxyzine Frog - Audit Issue Register
 
 > Snapshot: 2026-10-14. This file is in a **public repository** and intentionally contains no customer data, internal financial amounts, private operational document links, credentials or tokens.
 >
@@ -6,7 +6,7 @@
 >
 > Priority: P0 = fix before expanding functionality; P1 = necessary before AI write access; P2 = incremental improvement.
 
-## Phase 1 — Safeguards and baseline
+## Phase 1 - Safeguards and baseline
 
 | ID | Priority | Issue / risk | Evidence | Proposed remedy | Verification |
 | --- | --- | --- | --- | --- | --- |
@@ -16,7 +16,7 @@
 | DF-004 | P1 | Automated testing is not configured in app | Only `dev`/`build` scripts; no observed test suite; CONFIRMED | Add unit, integration, RLS and browser smoke tests | CI runs tests on PRs |
 | DF-005 | P1 | No comprehensive release and rollback runbook | REQUIRES VALIDATION | Record release checklist, rollback boundary, ownership and post-deploy smoke checks | Dry-run process documented |
 
-## Phase 2 — Customer and application safety
+## Phase 2 - Customer and application safety
 
 | ID | Priority | Issue / risk | Evidence | Proposed remedy | Verification |
 | --- | --- | --- | --- | --- | --- |
@@ -36,7 +36,7 @@
 | DF-019 | P2 | Legacy Apps Script catalog reads coexist with Supabase product catalog | `service/api.js` vs `ProductContext.jsx`; CONFIRMED | Inventory references and deprecate unused path | Exactly one supported storefront product source |
 | DF-020 | P2 | Advisor reports possible RLS performance/index optimizations | Supabase performance advisor; CONFIRMED warnings | Measure and optimize safe, high-impact queries | Query plans and smoke tests improve / remain correct |
 
-## Phase 3 — Business-data consistency
+## Phase 3 - Business-data consistency
 
 | ID | Priority | Issue / risk | Evidence | Proposed remedy | Verification |
 | --- | --- | --- | --- | --- | --- |
@@ -51,7 +51,7 @@
 | DF-029 | P1 | Finance and e-commerce transactions have different currencies/sources | Source systems; CONFIRMED | Monetary amount+currency+exchange-rate metadata; sandbox tagging | Correct segmented reporting |
 | DF-030 | P1 | Worker sheet synchronization mechanism not verified | Read-only snapshot matches; mechanism REQUIRES VALIDATION | Establish authoritative source and conflict resolution rules | Update simulation and round-trip verification in copies |
 
-## Phase 4–5 — Required PA capabilities (PLANNED)
+## Phase 4–5 - Required PA capabilities (PLANNED)
 
 | ID | Priority | Required capability | Proposed implementation | Verification |
 | --- | --- | --- | --- | --- |
