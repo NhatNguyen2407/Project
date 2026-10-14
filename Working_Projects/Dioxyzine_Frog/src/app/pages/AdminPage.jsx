@@ -8,6 +8,7 @@ import emailjs from '@emailjs/browser';
 import { toast } from 'sonner';
 
 import { ToastNotification } from '../components/common_components/ToastNotification';
+import { assertConfirmedMutation, requireOrderId } from '../utils/orderIntegrity';
 
 export function AdminPage() {
   const { user, role } = useAuth();
@@ -139,7 +140,7 @@ export function AdminPage() {
               {
                 to_email: customerEmail, 
                 customer_name: order.customer_name || 'Quý khách',
-                order_id: order.id, 
+                order_id: requireOrderId(order.id), 
                 product_name: Array.isArray(order.cart_items)
                   ? order.cart_items.map(item => `${item.id} × ${item.qty}`).join(', ')
                   : 'Your order',
@@ -270,8 +271,7 @@ export function AdminPage() {
     if(!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
     try {
       const { data, error } = await supabase.from('products').delete().eq('id', id).select('id');
-       if (error) throw error;
-       if (!data?.length) throw new Error('No product was deleted. Refresh the page and check your permissions.');
+       assertConfirmedMutation({ data, error }, id);
        setProducts(current => current.filter(p => p.id !== id));
       toast.success("Đã xóa sản phẩm");
     } catch (err) { toast.error(err.message); }
@@ -303,8 +303,7 @@ export function AdminPage() {
   const handleToggleVoucher = async (id, currentStatus) => {
     try {
       const { data, error } = await supabase.from('vouchers').update({ is_active: !currentStatus }).eq('id', id).select('id');
-       if (error) throw error;
-       if (!data?.length) throw new Error('No voucher was updated. Refresh the page and check your permissions.');
+       assertConfirmedMutation({ data, error }, id);
        setVouchers(current => current.map(v => v.id === id ? { ...v, is_active: !currentStatus } : v));
       toast.success("Đã cập nhật trạng thái mã!");
     } catch (err) { toast.error(err.message); }
@@ -314,8 +313,7 @@ export function AdminPage() {
     if(!window.confirm("Bạn có chắc chắn muốn xóa mã giảm giá này vĩnh viễn?")) return;
     try {
       const { data, error } = await supabase.from('vouchers').delete().eq('id', id).select('id');
-       if (error) throw error;
-       if (!data?.length) throw new Error('No voucher was deleted. Refresh the page and check your permissions.');
+       assertConfirmedMutation({ data, error }, id);
        setVouchers(current => current.filter(v => v.id !== id));
       toast.success("Đã xóa mã giảm giá!");
     } catch (err) { toast.error(err.message); }

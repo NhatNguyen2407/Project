@@ -13,6 +13,7 @@ import { TermsOfServiceModal } from '../components/common_components/TermsOfServ
 import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
 import { trackPurchase, trackInitiateCheckout } from '../utils/analytics';
+import { normalizeOrderId } from '../utils/orderIntegrity';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
@@ -518,7 +519,8 @@ export function CheckoutPage() {
                               return;
                             }
 
-                            if (!result.orderId) {
+                            const canonicalOrderId = normalizeOrderId(result.orderId);
+                            if (!canonicalOrderId) {
                               // A captured payment must never return the customer to PayPal checkout.
                               console.error('Payment succeeded, but the order ID is missing from the response.');
                               trackPurchase(result.transactionId, Number(result.capturedAmount), cart);
@@ -531,7 +533,7 @@ export function CheckoutPage() {
                               return;
                             }
 
-                            await sendConfirmationEmail(result.orderId, result.transactionId, result.capturedAmount);
+                            await sendConfirmationEmail(canonicalOrderId, result.transactionId, result.capturedAmount);
                             setIsFinalizing(false);
                           } catch (error) {
                             showToast("Transaction failed or was canceled.", "error");

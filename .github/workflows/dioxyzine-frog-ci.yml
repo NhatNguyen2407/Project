@@ -1,0 +1,46 @@
+name: Dioxyzine Frog CI
+
+on:
+  pull_request:
+    paths:
+      - 'Working_Projects/Dioxyzine_Frog/**'
+      - '.github/workflows/dioxyzine-frog-ci.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Working_Projects/Dioxyzine_Frog/**'
+      - '.github/workflows/dioxyzine-frog-ci.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dioxyzine-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: Working_Projects/Dioxyzine_Frog
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: Working_Projects/Dioxyzine_Frog/pnpm-lock.yaml
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Test order and admin safety checks
+        run: pnpm test
+      - name: Build Vite app
+        run: pnpm build
