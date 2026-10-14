@@ -32,6 +32,23 @@ Read-only permission inspection found:
 
 The source files' permissions were **not changed** to avoid interrupting existing team workflows. Review and restrict access based on actual required roles before using these files as AI input sources.
 
+## 2026-10-14 local backup verification update
+
+A local operator performed the following steps on a BitLocker-protected Windows data volume, outside any Git working tree:
+
+- Application database: separate roles, schema and data SQL exports were created. The SHA-256 hashes and byte sizes of the three SQL files matched their local manifest.
+- Storage: both required object buckets were copied locally. Eight files were counted, and the file count, aggregate size and SHA-256 hashes matched the local Storage manifest.
+- Auth: a separate Auth data-only export was inspected locally. Its user, identity and session row counts matched an independent read-only count from the live project at that time, and its SHA-256 matched the local manifest.
+- Backups remain only on the local encrypted volume as far as currently verified. This is **not** an off-device or independently retained backup.
+- Docker Desktop WSL disk migration from the nearly full system drive to the separate data volume was initiated through Settings. A post-restart Docker status check is still required.
+- A local-only preflight helper is available at `scripts/verify-private-backups.ps1`. It checks backup manifests, hashes, Docker availability and free disk space without restoring anything or connecting to Production.
+
+**Limits:** These checks establish local file integrity relative to locally generated manifests, not transactional consistency across the separate exports, not remote source checksums and not restore success. Auth exports may contain authentication secrets; never place them in this repository or attach them to issues. Supabase project settings, Edge Function secrets, provider configuration, and a separate encrypted off-device copy are not yet captured or verified.
+
+**Next recovery gate:** Verify Docker Engine after its data-directory move, inspect the local preflight report, then devise a disposable isolated restore environment. The repository has only two later migration files while Production records six migrations; never run a blanket local `supabase db reset` as a surrogate for a full production restoration. No restore to or reset of Production is authorized.
+
+**Google Sheets access decision:** Existing source workbooks retain their current sharing arrangement at the owner's request. Permission changes are deferred and are not a blocker for this backup validation. Do not alter operational spreadsheet permissions during the recovery drill.
+
 ## 2. Git versus live Supabase migration history
 
 | Feature | Git repository migration | Live migration record |
