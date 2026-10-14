@@ -1,6 +1,6 @@
-# Dioxyzine Frog — Baseline and Regression Test Plan
+# Dioxyzine Frog - Baseline and Regression Test Plan
 
-**Created:** 2026-10-14 | **Status:** PLAN ONLY — NO TEST RUNS CLAIMED  
+**Created:** 2026-10-14 | **Status:** PLAN ONLY - NO TEST RUNS CLAIMED  
 **Scope:** Phase 1, Step 1: describe verification before introducing new implementation.
 
 ## 0. Testing safeguards
@@ -67,11 +67,11 @@ Confirm package manager and lockfile before adding or updating dependencies. Do 
 
 ## 5. Milestones
 
-**Phase 1 Step 1 — complete when:** working branch exists, inventory + issues + test plan are in GitHub, all claims are marked correctly, and `main` remains unchanged.
+**Phase 1 Step 1 - complete when:** working branch exists, inventory + issues + test plan are in GitHub, all claims are marked correctly, and `main` remains unchanged.
 
-**Phase 1 Step 2 — complete when:** verified backups (including formula-preserving workbook copies), restore practice, staging isolation, and migration reconciliation have written evidence. No claim is made until demonstrated.
+**Phase 1 Step 2 - complete when:** verified backups (including formula-preserving workbook copies), restore practice, staging isolation, and migration reconciliation have written evidence. No claim is made until demonstrated.
 
-**Phase 1 Step 3 — complete when:** implemented tests exercise critical browser, Supabase and sandbox payment workflows; CI reports actual pass/fail status.
+**Phase 1 Step 3 - complete when:** implemented tests exercise critical browser, Supabase and sandbox payment workflows; CI reports actual pass/fail status.
 
 ## 6. Baseline limitations
 
