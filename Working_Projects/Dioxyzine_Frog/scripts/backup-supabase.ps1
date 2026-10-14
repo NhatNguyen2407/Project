@@ -4,15 +4,17 @@ Local Windows PowerShell. This file contains no credentials.
 
 Prerequisites:
   1. Supabase CLI and Docker are installed and Docker is running.
-  2. Set SUPABASE_DB_URL in the current PowerShell process to the direct/pooler
-     connection string obtained from the project's Supabase dashboard.
+  2. Log into Supabase CLI, and link the local application directory to
+     the expected project using `supabase link --project-ref ...`.
+     The CLI can obtain the database password securely via a local prompt or
+     SUPABASE_DB_PASSWORD set in the current PowerShell process.
   3. Run from a trusted Windows account with an encrypted drive.
 
 Output: Documents\DioxyzineFrog\DatabaseBackups\db-<UTC>\roles.sql,
         schema.sql, data.sql, manifest.json
 
-IMPORTANT: This script does NOT back up Storage file bytes, Edge Function
-secrets, or every platform-managed setting. See docs/BACKUP_RUNBOOK.md.
+IMPORTANT: This script does NOT back up Auth user records, Storage file bytes,
+Edge Function secrets, or all platform-managed settings. See docs/BACKUP_RUNBOOK.md.
 #>
 
 [CmdletBinding()]
@@ -22,16 +24,14 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $expectedRef = 'xeljnocizvlmefqovvfw'
-$databaseUrl = [Environment]::GetEnvironmentVariable('SUPABASE_DB_URL', 'Process')
-
-if ([string]::IsNullOrWhiteSpace($databaseUrl)) {
-    throw 'SUPABASE_DB_URL is missing. Set it locally, not in GitHub or ChatGPT.'
+$appRoot = Split-Path -Parent $PSScriptRoot
+$projectRefFile = Join-Path $appRoot 'supabase\.temp\project-ref'
+if (-not (Test-Path -LiteralPath $projectRefFile -PathType Leaf)) {
+    throw 'Local project is not linked. Run supabase link --project-ref for the expected production project from the app root.'
 }
-if ($databaseUrl -notmatch '^postgres(ql)?://') {
-    throw 'SUPABASE_DB_URL must be a PostgreSQL connection URL.'
-}
-if ($databaseUrl -notmatch [regex]::Escape($expectedRef)) {
-    throw 'Connection URL does not appear to target the expected Supabase project. Aborting.'
+$linkedRef = (Get-Content -LiteralPath $projectRefFile -Raw).Trim()
+if ($linkedRef -ne $expectedRef) {
+    throw 'Local Supabase CLI is linked to a different project. Aborting.'
 }
 if (-not (Get-Command 'supabase' -ErrorAction SilentlyContinue)) {
     throw 'Supabase CLI not found. Install it and verify supabase --version.'
@@ -56,7 +56,7 @@ function Invoke-SafeDump {
         [Parameter(Mandatory = $true)][string[]]$ExtraFlags
     )
     Write-Host ('Exporting ' + [IO.Path]::GetFileName($OutputFile) + '...')
-    & supabase db dump --db-url $databaseUrl -f $OutputFile @ExtraFlags
+    & supabase db dump --linked -f $OutputFile @ExtraFlags
     if ($LASTEXITCODE -ne 0) {
         throw ('Supabase CLI backup failed for ' + [IO.Path]::GetFileName($OutputFile))
     }
@@ -68,14 +68,13 @@ function Invoke-SafeDump {
     }
 }
 
+Push-Location -LiteralPath $appRoot
 try {
     Invoke-SafeDump -OutputFile (Join-Path $out 'roles.sql') -ExtraFlags @('--role-only')
     Invoke-SafeDump -OutputFile (Join-Path $out 'schema.sql') -ExtraFlags @()
     Invoke-SafeDump -OutputFile (Join-Path $out 'data.sql') -ExtraFlags @(
         '--data-only',
-        '--use-copy',
-        '-x', 'storage.buckets_vectors',
-        '-x', 'storage.vector_indexes'
+        '--use-copy'
     )
 
     $manifestFiles = @()
@@ -92,7 +91,7 @@ try {
         description = 'Dioxyzine Frog - Supabase CLI logical export'
         project_ref = $expectedRef
         created_utc = [DateTime]::UtcNow.ToString('o')
-        export_type = 'roles, schema, application data'
+        export_type = 'roles, application schema, application data (not Auth or Storage object bytes)'
         storage_object_bytes_included = $false
         restore_verified = $false
         files = $manifestFiles
@@ -104,7 +103,8 @@ try {
     Write-Host 'Local export completed. This is NOT a verified restore.'
     Write-Host ('Backup directory: ' + $out)
     Write-Host 'Keep the backup private, encrypted and outside the public Git repository.'
-    Write-Host 'Back up Storage objects separately and complete an isolated restore drill.'
+    Write-Host 'Auth data, Storage objects and platform configuration require separate recovery planning.'
+    Write-Host 'Complete an isolated restore drill before marking backups verified.'
 }
 catch {
     Write-Warning 'Export is INCOMPLETE. Do not rely on these files as a verified backup.'
@@ -112,5 +112,5 @@ catch {
     throw
 }
 finally {
-    $databaseUrl = $null
+    Pop-Location
 }
