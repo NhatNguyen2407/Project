@@ -14,6 +14,7 @@ import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
 import { trackPurchase, trackInitiateCheckout } from '../utils/analytics';
 import { normalizeOrderId } from '../utils/orderIntegrity';
+import { needsPaymentReview } from '../utils/paymentOutcome';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
 
@@ -526,7 +527,7 @@ export function CheckoutPage() {
                             });
 
                             if (error || !result?.success) {
-                              if (result?.paymentCaptured || error) {
+                              if (needsPaymentReview(result, error)) {
                                 // Capture may have succeeded even if the function response failed.
                                 // Keep the checkout UI locked to avoid an accidental second payment.
                                 setPaymentReview({
