@@ -15,9 +15,9 @@ This document is kept in a **public GitHub repository**. It excludes private bac
 | Workbook structure | All ten tabs in the main workbook match the source tab names and grid dimensions | VERIFIED |
 | Formula spot check | All 25 formula cells in two sampled dashboard/cashflow regions matched between source and copy | VERIFIED - SAMPLED |
 | Main workbook restore drill | No actual restore into a disposable workspace performed | NOT TESTED |
-| Database backup | Neither scheduled backup nor an independent logical snapshot has been verified as recoverable | NOT VERIFIED |
+| Database backup | Local logical exports and manifest hashes verified; successful restoration not demonstrated | EXPORT VERIFIED; RESTORE NOT VERIFIED |
 | Database restore drill | No staging/test restore performed | NOT TESTED |
-| Storage assets backup | Storage API files require separate inventory/backup; database backups alone do not include object bytes | NOT VERIFIED |
+| Storage assets backup | Eight Storage objects copied and checked against local manifest hashes; re-upload/recovery not demonstrated | COPY VERIFIED; RESTORE NOT VERIFIED |
 | Deployment rollback | Source revision and previous deployments identified; rollback not rehearsed | NOT TESTED |
 | Staging database isolation | No existing Supabase development branch was returned | NOT VERIFIED |
 
@@ -126,7 +126,7 @@ Read-only runtime checks confirmed:
 - Local PostgreSQL is mapped to host port `55432`. **It currently binds `0.0.0.0` and `[::]`**, which may permit access from outside the host if network/firewall settings allow it.
 - **No application database, Storage object, or Auth SQL dump has been restored.**
 
-**Security gate before any import:** Confirm Supabase CLI support for using a dedicated Docker bridge network with the host binding option `com.docker.network.bridge.host_binding_ipv4=127.0.0.1`. Reconfigure/recreate only the disposable local instance as needed and independently verify the new published bind address, without changing other Docker workloads or the Production project. Avoid using exposed local services for real user records. Documentation: https://supabase.com/docs/guides/local-development and https://docs.docker.com/engine/network/port-publishing/.
+**Historical security gate:** A dedicated Docker bridge network was prepared with `com.docker.network.bridge.host_binding_ipv4=127.0.0.1`, but Windows Docker Desktop continued publishing the database to wildcard host interfaces; network isolation was therefore **not demonstrated**. See subsequent runtime and Windows Firewall results below. Do not import real user records before independently verifying network ingress protection. References: https://supabase.com/docs/guides/local-development and https://docs.docker.com/engine/network/port-publishing/.
 
 **2026-10-14 follow-up:** The operator created `dioxyzine_frog_restore_loopback` with Docker bridge option `com.docker.network.bridge.host_binding_ipv4=127.0.0.1` and restarted local PostgreSQL using `supabase db start --network-id dioxyzine_frog_restore_loopback`. Runtime inspection confirmed `HostConfig.NetworkMode=dioxyzine_frog_restore_loopback`, but Docker still published the container as `0.0.0.0:55432` and `[::]:55432`. `HostConfig.PortBindings` for `5432/tcp` showed `HostIp=""`, `HostPort="55432"`. Therefore network option alone **did not provide host-loopback-only exposure on this Windows Docker Desktop setup**.
 
