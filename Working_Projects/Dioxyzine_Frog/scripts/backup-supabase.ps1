@@ -10,7 +10,7 @@ Prerequisites:
      SUPABASE_DB_PASSWORD set in the current PowerShell process.
   3. Run from a trusted Windows account with an encrypted drive.
 
-Output: Documents\DioxyzineFrog\DatabaseBackups\db-<UTC>\roles.sql,
+Output: <parent of Source>\Private-Backups\Database\db-<UTC>\roles.sql,
         schema.sql, data.sql, manifest.json
 
 IMPORTANT: This script does NOT back up Auth user records, Storage file bytes,
@@ -40,12 +40,28 @@ if (-not (Get-Command 'docker' -ErrorAction SilentlyContinue)) {
     throw 'Docker CLI not found. Install Docker Desktop and start it.'
 }
 
-$docs = [Environment]::GetFolderPath('MyDocuments')
-if ([string]::IsNullOrWhiteSpace($docs)) {
-    throw 'Windows Documents directory could not be determined.'
+# With the prescribed folder layout, Source and Private-Backups are siblings.
+$sourceRoot = (Resolve-Path -LiteralPath (Join-Path $appRoot '..\..')).Path
+$backupParent = Split-Path -Parent $sourceRoot
+$privateRoot = Join-Path $backupParent 'Private-Backups'
+if (-not (Test-Path -LiteralPath $privateRoot -PathType Container)) {
+    throw 'Private-Backups folder was not found beside Source. Aborting.'
 }
 
-$root = Join-Path $docs 'DioxyzineFrog\DatabaseBackups'
+# Even if Private-Backups is outside the nested Source repo, it must not be
+# inside ANY enclosing Git repository. The outer Project working tree may
+# otherwise accidentally include SQL exports in a later git add.
+$checkDir = (Resolve-Path -LiteralPath $privateRoot).Path
+while ($true) {
+    if (Test-Path -LiteralPath (Join-Path $checkDir '.git')) {
+        throw ('Private-Backups is inside a Git repository at ' + $checkDir + '. Move DioxyzineFrog-Backup outside the parent Git working tree, then retry.')
+    }
+    $parentDir = Split-Path -Parent $checkDir
+    if ([string]::IsNullOrWhiteSpace($parentDir) -or $parentDir -eq $checkDir) { break }
+    $checkDir = $parentDir
+}
+
+$root = Join-Path $privateRoot 'Database'
 $stamp = [DateTime]::UtcNow.ToString('yyyyMMdd-HHmmss')
 $out = Join-Path $root ("db-" + $stamp)
 New-Item -Path $out -ItemType Directory -Force | Out-Null
