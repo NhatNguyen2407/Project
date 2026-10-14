@@ -139,7 +139,7 @@ export function AdminPage() {
               {
                 to_email: customerEmail, 
                 customer_name: order.customer_name || 'Quý khách',
-                order_id: order.id.substring(0, 8), 
+                order_id: order.id, 
                 product_name: Array.isArray(order.cart_items)
                   ? order.cart_items.map(item => `${item.id} × ${item.qty}`).join(', ')
                   : 'Your order',
@@ -269,8 +269,10 @@ export function AdminPage() {
   const handleDeleteProduct = async (id) => {
     if(!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
     try {
-      await supabase.from('products').delete().eq('id', id);
-      setProducts(products.filter(p => p.id !== id));
+      const { data, error } = await supabase.from('products').delete().eq('id', id).select('id');
+       if (error) throw error;
+       if (!data?.length) throw new Error('No product was deleted. Refresh the page and check your permissions.');
+       setProducts(current => current.filter(p => p.id !== id));
       toast.success("Đã xóa sản phẩm");
     } catch (err) { toast.error(err.message); }
   };
@@ -300,8 +302,10 @@ export function AdminPage() {
 
   const handleToggleVoucher = async (id, currentStatus) => {
     try {
-      await supabase.from('vouchers').update({ is_active: !currentStatus }).eq('id', id);
-      setVouchers(vouchers.map(v => v.id === id ? { ...v, is_active: !currentStatus } : v));
+      const { data, error } = await supabase.from('vouchers').update({ is_active: !currentStatus }).eq('id', id).select('id');
+       if (error) throw error;
+       if (!data?.length) throw new Error('No voucher was updated. Refresh the page and check your permissions.');
+       setVouchers(current => current.map(v => v.id === id ? { ...v, is_active: !currentStatus } : v));
       toast.success("Đã cập nhật trạng thái mã!");
     } catch (err) { toast.error(err.message); }
   };
@@ -309,8 +313,10 @@ export function AdminPage() {
   const handleDeleteVoucher = async (id) => {
     if(!window.confirm("Bạn có chắc chắn muốn xóa mã giảm giá này vĩnh viễn?")) return;
     try {
-      await supabase.from('vouchers').delete().eq('id', id);
-      setVouchers(vouchers.filter(v => v.id !== id));
+      const { data, error } = await supabase.from('vouchers').delete().eq('id', id).select('id');
+       if (error) throw error;
+       if (!data?.length) throw new Error('No voucher was deleted. Refresh the page and check your permissions.');
+       setVouchers(current => current.filter(v => v.id !== id));
       toast.success("Đã xóa mã giảm giá!");
     } catch (err) { toast.error(err.message); }
   };
