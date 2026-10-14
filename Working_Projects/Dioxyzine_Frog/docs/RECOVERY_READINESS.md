@@ -103,7 +103,7 @@ Do not:
 
 Until all required recovery checks pass, **Step 2 remains open**.
 
-## Isolated local restore preparation (not yet executed)
+## Isolated local restore preparation and database readiness
 
 Docker Desktop reported its WSL disk location on the encrypted data drive after restart; subsequent local preflight reported the Docker Engine reachable and all application, Storage, and Auth backup hashes matching their local manifests. This confirms neither a database restore nor an end-to-end recovery.
 
@@ -115,6 +115,20 @@ Recovery drill design constraints:
 - Keep real Auth dumps and any restored credentials on encrypted local storage only. Never expose a local instance containing copied real accounts or let a test app connect to live services.
 - A full platform recovery plan still needs non-SQL settings, Edge Function secrets, and tested Storage object re-upload, plus an off-device protected copy.
 - Do not apply `supabase db reset`, migrations, or restore commands against the linked Production project.
+
+### Local database readiness verification (2026-10-14)
+
+The operator successfully ran `scripts/prepare-restore-workspace.ps1` and started the local database using `supabase db start` in the isolated (unlinked) workspace.
+
+Read-only runtime checks confirmed:
+- Container `supabase_db_dioxyzine_frog_restore_drill` reported `Up (healthy)`.
+- `docker exec ... pg_isready -U postgres -d postgres` returned `accepting connections`.
+- Local PostgreSQL is mapped to host port `55432`. **It currently binds `0.0.0.0` and `[::]`**, which may permit access from outside the host if network/firewall settings allow it.
+- **No application database, Storage object, or Auth SQL dump has been restored.**
+
+**Security gate before any import:** Confirm Supabase CLI support for using a dedicated Docker bridge network with the host binding option `com.docker.network.bridge.host_binding_ipv4=127.0.0.1`. Reconfigure/recreate only the disposable local instance as needed and independently verify the new published bind address, without changing other Docker workloads or the Production project. Avoid using exposed local services for real user records. Documentation: https://supabase.com/docs/guides/local-development and https://docs.docker.com/engine/network/port-publishing/.
+
+**Next recovery gate:** Once database localhost-only exposure and connectivity are verified, review SQL import compatibility and order before an isolated dry-run. Keep real Auth data separate unless and until a secure, justified test is approved. Record actual restore results separately; no recovery claim is made from health checks alone.
 
 ## 5. Reference
 
