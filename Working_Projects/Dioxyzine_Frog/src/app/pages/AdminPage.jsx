@@ -111,6 +111,7 @@ export function AdminPage() {
   const handleUpdateStatus = async (order, newStatus) => {
     setUpdatingId(order.id);
     try {
+      const validatedOrderId = requireOrderId(order.id);
       let updateData = { order_status: newStatus };
       let trackingCode = order.tracking_code;
 
@@ -140,7 +141,7 @@ export function AdminPage() {
               {
                 to_email: customerEmail, 
                 customer_name: order.customer_name || 'Quý khách',
-                order_id: requireOrderId(order.id), 
+                order_id: validatedOrderId, 
                 product_name: Array.isArray(order.cart_items)
                   ? order.cart_items.map(item => `${item.id} × ${item.qty}`).join(', ')
                   : 'Your order',
