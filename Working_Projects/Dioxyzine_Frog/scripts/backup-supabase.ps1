@@ -14,7 +14,7 @@ Output: <parent of Source>\Private-Backups\Database\db-<UTC>\roles.sql,
         schema.sql, data.sql, manifest.json
 
 IMPORTANT: This script does NOT back up Auth user records, Storage file bytes,
-Edge Function secrets, or all platform-managed settings. See docs/BACKUP_RUNBOOK.md.
+Edge Function secrets, or all platform-managed settings. See docs/RECOVERY_READINESS.md.
 #>
 
 [CmdletBinding()]
@@ -69,7 +69,7 @@ New-Item -Path $out -ItemType Directory -Force | Out-Null
 function Invoke-SafeDump {
     param(
         [Parameter(Mandatory = $true)][string]$OutputFile,
-        [Parameter(Mandatory = $true)][string[]]$ExtraFlags
+        [string[]]$ExtraFlags = @()
     )
     Write-Host ('Exporting ' + [IO.Path]::GetFileName($OutputFile) + '...')
     & supabase db dump --linked -f $OutputFile @ExtraFlags
