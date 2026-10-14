@@ -136,6 +136,8 @@ Read-only runtime checks confirmed:
 
 Next perform a *read-only* localhost TCP test using `Test-NetConnection -ComputerName 127.0.0.1 -Port 55432`. If local TCP connectivity fails, do not modify firewall rules without diagnosis. If local TCP succeeds, test reachability from a separate LAN device or establish another appropriately scoped isolation control before restoring live customer/Auth data. A test to the PC's own LAN address from the same PC **does not substitute** for an independent LAN device test. Do not mistake a wild-card Docker port mapping for a verified access-control result.
 
+**Local TCP check completed:** Operator ran `Test-NetConnection -ComputerName 127.0.0.1 -Port 55432` after creating the firewall rule. Result: `TcpTestSucceeded=True` with interface `Loopback Pseudo-Interface 1`. This proves localhost reachability only. The separate-LAN-device negative test remains pending before any restore of personal/Auth data.
+
 **Next recovery gate:** Once database localhost-only exposure and connectivity are verified, review SQL import compatibility and order before an isolated dry-run. Keep real Auth data separate unless and until a secure, justified test is approved. Record actual restore results separately; no recovery claim is made from health checks alone.
 
 ## 5. Reference
