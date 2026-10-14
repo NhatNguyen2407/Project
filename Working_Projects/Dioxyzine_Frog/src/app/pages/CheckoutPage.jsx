@@ -146,7 +146,7 @@ export function CheckoutPage() {
   // đơn hàng vào database giờ nằm hoàn toàn ở server (capture-paypal-order),
   // không còn ở đây nữa — tránh đúng lỗ hổng cũ: client tự quyết định
   // "coi như đã lưu thành công" trong khi có thể chưa.
-  const sendConfirmationEmail = async (transactionId, capturedAmount) => {
+  const sendConfirmationEmail = async (orderId, transactionId, capturedAmount) => {
     const { email, firstName, lastName } = shippingForm;
     const orderSummary = cart
       .map(item => `${item.qty}x ${item.title || item.name}`)
@@ -165,7 +165,7 @@ export function CheckoutPage() {
         {
           to_email: email,
           customer_name: `${firstName} ${lastName}`,
-          order_id: transactionId,
+          order_id: orderId,
           product_name: orderSummary,
           total_amount: `$${Number(capturedAmount).toFixed(2)}`
         },
@@ -512,7 +512,14 @@ export function CheckoutPage() {
                               return;
                             }
 
-                            await sendConfirmationEmail(result.transactionId, result.capturedAmount);
+                            if (!result.orderId) {
+                               console.error('Payment was captured and recorded, but the order ID is missing from the response.');
+                               showToast('Payment succeeded, but the order reference could not be retrieved. Please contact support with your PayPal transaction ID.', 'error');
+                               setIsFinalizing(false);
+                               return;
+                             }
+
+                             await sendConfirmationEmail(result.orderId, result.transactionId, result.capturedAmount);
                             setIsFinalizing(false);
                           } catch (error) {
                             showToast("Transaction failed or was canceled.", "error");
