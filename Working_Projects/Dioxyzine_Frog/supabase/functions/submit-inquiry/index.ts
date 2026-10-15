@@ -9,13 +9,13 @@ const corsBase = {
   'Vary': 'Origin',
 };
 
-function response(status, body, origin) {
-  const headers = { ...corsBase, ...jsonHeaders };
-  if (origin) headers['Access-Control-Allow-Origin'] = origin;
+function response(status: number, body: Record<string, unknown>, origin: string | null) {
+  const headers = new Headers({ ...corsBase, ...jsonHeaders });
+  if (origin) headers.set('Access-Control-Allow-Origin', origin);
   return new Response(JSON.stringify(body), { status, headers });
 }
 
-async function readSmallJson(request) {
+async function readSmallJson(request: Request): Promise<any> {
   const reader = request.body?.getReader();
   if (!reader) throw new Error('Empty body');
   const chunks = [];
@@ -40,7 +40,7 @@ async function readSmallJson(request) {
   return JSON.parse(new TextDecoder('utf-8', { fatal: true }).decode(bytes));
 }
 
-async function sha256(value) {
+async function sha256(value: string): Promise<string> {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(value));
   return [...new Uint8Array(digest)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
@@ -63,7 +63,7 @@ Deno.serve(async (request) => {
       !trustedIpHeader || !dbUrl || !serviceKey || !anonKey) {
     return response(503, { success: false, message: 'Inquiry service is not configured.' }, null);
   }
-  if (!allowedOrigin(origin, origins)) {
+  if (!origin || !allowedOrigin(origin, origins)) {
     return response(403, { success: false, message: 'Origin not allowed.' }, null);
   }
   if (request.method === 'OPTIONS') return new Response('ok', {
