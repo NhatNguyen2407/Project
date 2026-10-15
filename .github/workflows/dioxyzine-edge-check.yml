@@ -1,0 +1,30 @@
+name: Dioxyzine Frog Edge Function Check
+
+on:
+  pull_request:
+    paths:
+      - 'Working_Projects/Dioxyzine_Frog/supabase/functions/**'
+      - '.github/workflows/dioxyzine-edge-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'Working_Projects/Dioxyzine_Frog/supabase/functions/**'
+      - '.github/workflows/dioxyzine-edge-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  deno-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: Working_Projects/Dioxyzine_Frog
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Check trusted inquiry Edge Function
+        run: deno check supabase/functions/submit-inquiry/index.ts
