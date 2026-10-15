@@ -3,13 +3,13 @@
 -- Must be paired with the Edge Function and stricter inquiry INSERT grants.
 BEGIN;
 CREATE SCHEMA IF NOT EXISTS private;
-REVOKE ALL ON SCHEMA private FROM PUBLIC, anon, authenticated;
-CREATE TABLE IF NOT EXISTS private.inquiry_limits (
+REVOKE ALL ON SCHEMA inquiry_security FROM PUBLIC, anon, authenticated;
+CREATE TABLE IF NOT EXISTS inquiry_security.inquiry_limits (
   key_hash text PRIMARY KEY,
   window_start timestamptz NOT NULL,
   attempts integer NOT NULL CHECK (attempts > 0)
 );
-REVOKE ALL ON private.inquiry_limits FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON inquiry_security.inquiry_limits FROM PUBLIC, anon, authenticated;
 
 CREATE OR REPLACE FUNCTION public.consume_inquiry_quota(p_key_hash text)
 RETURNS boolean
@@ -24,7 +24,7 @@ BEGIN
     RETURN false;
   END IF;
 
-  INSERT INTO private.inquiry_limits AS q (key_hash, window_start, attempts)
+  INSERT INTO inquiry_security.inquiry_limits AS q (key_hash, window_start, attempts)
   VALUES (p_key_hash, now(), 1)
   ON CONFLICT (key_hash) DO UPDATE SET
     window_start = CASE
