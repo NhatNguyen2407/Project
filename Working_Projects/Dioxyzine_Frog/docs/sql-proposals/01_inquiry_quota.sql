@@ -2,7 +2,7 @@
 -- First create rate-limit primitives in an isolated staging database.
 -- Must be paired with the Edge Function and stricter inquiry INSERT grants.
 BEGIN;
-CREATE SCHEMA IF NOT EXISTS private;
+CREATE SCHEMA IF NOT EXISTS inquiry_security;
 REVOKE ALL ON SCHEMA inquiry_security FROM PUBLIC, anon, authenticated;
 CREATE TABLE IF NOT EXISTS inquiry_security.inquiry_limits (
   key_hash text PRIMARY KEY,
