@@ -15,45 +15,30 @@ export const api = {
     }
   },
 
-  // Form Inquiry
-  submitInquiry: async (data) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const { error } = await supabase
-        .from('inquiries')
-        .insert([
-          {
-            user_id: user ? user.id : null, //import id for display on profile
-            subject: data.subject,
-            customer_name: data.customerName,
-            customer_email: data.customerEmail,
-            contact_info: data.contactInfo,
-            product_name: data.productName,
-            size: data.size || null,
-            quantity: parseInt(data.quantity) || 1,
-            accessory_qty: parseInt(data.accessoryQty) || 0,
-            image_link: data.imageLink,
-            note: data.note || null
-          }
-        ]);
-
-      if (error) throw error;
-
-      // backup in google sheets
-      const payload = { type: 'inquiry', ...data };
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      }).catch(e => console.error("Lỗi backup ra Google Sheet:", e));
-      
-
-      return true;
-    } catch (error) {
-      console.error('Lỗi khi lưu Inqury vào Supabase:', error);
-      throw error;
+  // The trusted Edge Function verifies reCAPTCHA and persists the inquiry
+  // in one server-side flow. Never write to public.inquiries from the browser.
+  submitInquiry: async (data, token) => {
+    if (typeof token !== 'string' || !token) {
+      throw new Error('Security verification is missing.');
     }
+
+    const { data: result, error } = await supabase.functions.invoke('submit-inquiry', {
+      body: { token, inquiry: data }
+    });
+    if (error || result?.success !== true) {
+      throw new Error('Could not submit your inquiry. Please try again later.');
+    }
+
+    // Legacy Sheets mirroring is best-effort and not a verified backup.
+    // Future work: replace with a durable server-side outbox.
+    const payload = { type: 'inquiry', ...data };
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).catch(() => console.error('Inquiry mirror request failed.'));
+
+    return true;
   },
 
   // Feedback
