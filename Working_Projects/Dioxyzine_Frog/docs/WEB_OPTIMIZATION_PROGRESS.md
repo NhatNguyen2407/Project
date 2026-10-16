@@ -41,3 +41,7 @@ For **each future optimization batch**: (1) inspect current PR head and dependen
 ## Deferred acceptance
 
 See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Issue #17](https://github.com/NhatNguyen2407/Project/issues/17). Never place personal records, tokens, transaction IDs or private backups in commit history.
+
+## CI regression and resolution
+- Initial PR #19 commit `1d248d4` failed 1 of 42 Node tests (`externalServicePolicy.test.mjs` still expected the old inline Admin guard). Vercel Preview built READY; the failed test prevented Node CI from reaching the build step.
+- New guard is centralized in `allowAdminWrite()` and called at the start of each mutation. Updated the source-contract test to verify **both** the central environment check and the per-handler early return; no runtime production semantics changed. Validate new exact-HEAD CI before marking this resolved.
