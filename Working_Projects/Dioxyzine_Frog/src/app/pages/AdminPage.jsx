@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { assertConfirmedMutation, requireOrderId } from '../utils/orderIntegrity';
+import { filterInquiries, safeInquiryReferenceUrl, formatInquiryTimestamp } from '../utils/inquiryInbox';
 
 export function AdminPage() {
   const { user, role } = useAuth();
@@ -24,6 +25,7 @@ export function AdminPage() {
   // Tab 'reviews'
   const [activeTab, setActiveTab] = useState('orders'); 
   const [orders, setOrders] = useState([]);
+  const [inquirySearch, setInquirySearch] = useState('');
   const [paypalOrders, setPaypalOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [vouchers, setVouchers] = useState([]); 
@@ -324,6 +326,7 @@ export function AdminPage() {
 
   // Lọc ra các đơn hàng có đánh giá
   const reviewsList = orders.filter(o => o.rating != null);
+  const visibleInquiries = filterInquiries(orders, inquirySearch);
 
   return (
     <>
@@ -337,6 +340,9 @@ export function AdminPage() {
             <div className="flex flex-wrap gap-2 bg-[var(--card)] dark:bg-[#1A1528] p-1.5 rounded-xl border border-[var(--border)] shadow-sm">
               <button onClick={() => setActiveTab('orders')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'orders' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
                 Orders ({paypalOrders.length})
+              </button>
+              <button onClick={() => setActiveTab('inquiries')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'inquiries' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
+                Inquiries ({orders.length})
               </button>
               <button onClick={() => setActiveTab('products')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'products' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
                 CMS Products ({products.length})
@@ -406,6 +412,71 @@ export function AdminPage() {
                 </table>
               </div>
             </div>
+          ) : activeTab === 'inquiries' ? (
+            /* Read-only Inquiry Inbox: no status changes or customer messaging yet. */
+            <section className="space-y-5" aria-label="Customer inquiries">
+              <div className="bg-[var(--card)] dark:bg-[#1A1528] border border-[var(--border)] rounded-3xl p-5 sm:p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div>
+                    <h2 className="font-bold text-lg text-[var(--foreground)]">Customer Inquiry Inbox</h2>
+                    <p className="text-sm text-[var(--muted-foreground)]">Read-only requests • {visibleInquiries.length} of {orders.length} shown</p>
+                  </div>
+                  <input
+                    type="search"
+                    aria-label="Search inquiries"
+                    placeholder="Search name, email, subject, product or request ID"
+                    value={inquirySearch}
+                    onChange={(event) => setInquirySearch(event.target.value)}
+                    className="w-full md:w-96 rounded-xl border border-[var(--border)] bg-[var(--input-background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)]"
+                  />
+                </div>
+              </div>
+              {visibleInquiries.length === 0 ? (
+                <p role="status" className="rounded-3xl border border-[var(--border)] bg-[var(--card)] p-8 text-center text-[var(--muted-foreground)]">
+                  {inquirySearch.trim() ? 'No inquiries match your search.' : 'No customer inquiries have been received yet.'}
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  {visibleInquiries.map((inquiry) => {
+                    const referenceUrl = safeInquiryReferenceUrl(inquiry.image_link);
+                    return (
+                      <article key={inquiry.id} className="bg-[var(--card)] dark:bg-[#1A1528] border border-[var(--border)] rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm min-w-0">
+                        <header className="flex flex-wrap justify-between items-start gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-lg text-[var(--foreground)] break-words">{inquiry.subject || 'New inquiry'}</h3>
+                            <p className="text-sm text-[var(--muted-foreground)] break-words">{inquiry.product_name || 'Product not specified'}</p>
+                          </div>
+                          <time dateTime={inquiry.created_at || undefined} className="text-xs text-[var(--muted-foreground)]">{formatInquiryTimestamp(inquiry.created_at)}</time>
+                        </header>
+                        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Customer</dt><dd className="font-semibold text-[var(--foreground)] break-words">{inquiry.customer_name || 'Not provided'}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Email</dt><dd className="text-[var(--foreground)] break-all">{inquiry.customer_email || 'Not provided'}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Contact</dt><dd className="text-[var(--foreground)] break-words">{inquiry.contact_info || 'Not provided'}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Quantity / Accessories</dt><dd className="text-[var(--foreground)]">{inquiry.quantity ?? '—'} / {inquiry.accessory_qty ?? 0}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Size</dt><dd className="text-[var(--foreground)] break-words">{inquiry.size || 'Not specified'}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Current status</dt><dd className="text-[var(--foreground)] break-words">{inquiry.status || 'Not set'}</dd></div>
+                        </dl>
+                        {inquiry.note && (
+                          <div className="rounded-xl bg-[var(--muted)] p-3">
+                            <h4 className="text-xs font-semibold text-[var(--muted-foreground)] mb-1">Additional notes</h4>
+                            <p className="text-sm text-[var(--foreground)] whitespace-pre-wrap break-words">{inquiry.note}</p>
+                          </div>
+                        )}
+                        <footer className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-[var(--border)] pt-3 text-xs text-[var(--muted-foreground)]">
+                          <span className="font-mono break-all">ID: {inquiry.id}</span>
+                          {referenceUrl && (
+                            <a href={referenceUrl} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer"
+                              className="text-[var(--primary)] font-semibold underline underline-offset-4">
+                              Open design reference
+                            </a>
+                          )}
+                        </footer>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
           ) : activeTab === 'reviews' ? (
             /* REVIEWS ADMIN */
             <div className="space-y-6 max-w-4xl mx-auto">
