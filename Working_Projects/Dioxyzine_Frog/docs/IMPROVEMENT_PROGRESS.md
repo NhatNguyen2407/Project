@@ -63,3 +63,12 @@ Last verified: **2026-10-16** (Asia/Bangkok). This is a **public**, redacted eng
 - The latest verified run for PR #18 was GitHub Actions **38840870496**, with install, tests and Vite build all successful.
 - PR #18 remains **unmerged**; no Vercel Preview settings, Production database, Production deployment or financial workbook were changed.
 - Issue #15 and Issue #17 were updated with the current blocking conditions. A valid staging backend and a witnessed restore are **still outstanding**, so Phase 1 Steps 2 and 3 remain **PARTIAL**.
+
+## 2026-10-16 — P0 inquiry security remediation draft
+
+- Inspected live `public.inquiries` RLS/grants and confirmed public/anonymous INSERT remains possible via the `Cho phép gửi form` `WITH CHECK(true)` policy. This allows direct database writes bypassing browser-only verification.
+- Inspected deployed `verify-recaptcha` function: Google success is checked, but required hostname/action/score/freshness are not enforced.
+- [Draft PR #21](https://github.com/NhatNguyen2407/Project/pull/21) prepares a single trusted submission endpoint and frontend integration, server-side input and reCAPTCHA validation, and unit tests. **CI run 38842664148 PASSED** (tests + Vite build). Production was **not** changed.
+- [P0 Issue #22](https://github.com/NhatNguyen2407/Project/issues/22) tracks required rate limiting, direct INSERT RLS/grant lockdown, staged integration tests, coordinated deploy and rollback.
+- **Release blocker:** PR #21 cannot safely merge/deploy alone. The active database still accepts direct client INSERT; until staged, isolated tests and database permission changes are coordinated, the vulnerability remains **OPEN**.
+- **Cost boundary:** no paid infrastructure, no new hosted Supabase projects, no Production SQL/function deploy, no payment capture and no spreadsheet changes.
