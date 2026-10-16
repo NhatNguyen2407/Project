@@ -90,6 +90,8 @@ test('client and server use one trusted submission endpoint', () => {
   assert.match(page, /api\.submitInquiry\(payload, token\)/);
   assert.doesNotMatch(page, /functions\.invoke\('verify-recaptcha'/);
   assert.match(functionSrc, /createInquiryHandler/);
-  assert.match(handlerSrc, /validateInquiryPayload\(body\?\.inquiry\)/);
+  assert.match(handlerSrc, /validateInquiryPayload\(body\?\.inquiry, \{/);
+  assert.match(handlerSrc, /stagingPrivateImages: ticketMode/);
+  assert.match(handlerSrc, /INQUIRY_UPLOAD_STAGING_ENABLED/);
   assert.match(handlerSrc, /assessRecaptcha\(captcha/);
 });
