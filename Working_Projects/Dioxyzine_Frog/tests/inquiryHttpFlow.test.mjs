@@ -17,6 +17,7 @@ const env = {
   INQUIRY_RECAPTCHA_MIN_SCORE:'0.5', RECAPTCHA_SECRET_KEY:'synthetic-secret',
   SUPABASE_SERVICE_ROLE_KEY:'synthetic-server-key',
   SUPABASE_ANON_KEY:'synthetic-public-key',
+  INQUIRY_PUBLIC_API_KEY:'synthetic-public-key',
   SUPABASE_URL:'https://test.invalid',
 };
 const body = { token, inquiry, idempotencyKey:'e682fa00-61aa-4c7b-a8cf-01465f0fd8f7' };
@@ -25,6 +26,7 @@ const request = (input=body, options={}) => new Request('https://test.invalid/fu
   headers: {
     origin:options.origin ?? 'https://shop.test.example',
     'content-type':options.contentType ?? 'application/json',
+    apikey:'synthetic-public-key',
     ...(options.headers||{}),
   },
   body:options.raw ?? JSON.stringify(input),
@@ -112,6 +114,45 @@ test('public anon token remains a guest and cannot impersonate user',async()=>{
   assert.equal(f.records[0].user_id,null);
   assert.equal(f.events.includes('auth'),false);
 });
+test('missing or incorrect apikey cannot reach the database write',async()=>{
+  for(const apiKey of ['', 'wrong-public-key', 'sb_secret_fake']) {
+    const f=fixture();
+    const req=request(body,{headers:{apikey:apiKey}});
+    await check(f.handler,req,401);
+    assert.equal(f.records.length,0);
+  }
+});
+test('public publishable key works as guest via apikey or matching bearer',async()=>{
+  const f=fixture({env:{INQUIRY_PUBLIC_API_KEY:'sb_publishable_synthetic'}});
+  const req=request(body,{headers:{apikey:'sb_publishable_synthetic',authorization:'Bearer sb_publishable_synthetic'}});
+  await check(f.handler,req,201);
+  assert.equal(f.records[0].user_id,null);
+});
+test('mismatched bearer public keys and server secrets are denied',async()=>{
+  for(const token of ['sb_publishable_other','sb_secret_forbidden','synthetic-server-key']) {
+    const f=fixture();
+    const req=request(body,{headers:{authorization:'Bearer '+token}});
+    await check(f.handler,req,401);
+    assert.equal(f.records.length,0);
+  }
+});
+test('preflight denies unexpected header while permitting supabase-js headers',async()=>{
+  const f=fixture();
+  const allowed=new Request('https://test.invalid/functions/v1/submit-inquiry',{
+    method:'OPTIONS',
+    headers:{origin:'https://shop.test.example','access-control-request-method':'POST',
+      'access-control-request-headers':'authorization,apikey,x-client-info,content-type'}
+  });
+  const {response}=await check(f.handler,allowed,204);
+  assert.match(response.headers.get('access-control-allow-headers'),/x-client-info/);
+  const blocked=new Request(allowed.url,{method:'OPTIONS',headers:{
+    origin:'https://shop.test.example','access-control-request-method':'POST',
+    'access-control-request-headers':'x-admin-override'}
+  });
+  await check(f.handler,blocked,403);
+  assert.deepEqual(f.events,[]);
+});
+
 test('invalid bearer and malformed auth deny insert instead of silently falling back to guest',async()=>{
   for(const auth of ['Bearer expired-test-user','Basic unsafe']){
     const f=fixture();
