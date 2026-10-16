@@ -98,3 +98,7 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 - Preview remains opt-in gated by `VITE_ENABLE_STAGING_STORAGE_UPLOAD=true`, the exact known Staging backend and the separate server `INQUIRY_UPLOAD_STAGING_ENABLED=true`. The Edge Function, budget/ticket RPC drafts and Staging secrets are NOT deployed/enabled. No hosted upload E2E is claimed.
 - Added mocked guest upload tests for success, CAPTCHA, invalid bytes, bad ticket, forged bucket/path and signed-upload error. CI verification is pending at final commit.
 - Roadmap: Phase 1 Recovery/hosted E2E partial; Phase 2 source integration progressing but unmerged; Phases 3–5 not started.
+
+## 2026-10-16 — Combined ticket SQL and guest uploader regression gate
+- PR #21 `6cbacff` completed the new disposable PostgreSQL 17 ticket SQL drill (real SQL on synthetic schema), Application CI, Deno Runtime and existing Postgres Drill; all 4 workflows SUCCESS. **Not** a hosted upload test.
+- Combined PR #19 workflow pin updated to PR #21 exact reviewed SHA. Recheck source tests/build after this PR #19 commit before accepting this batch. Staging server enable flags remain OFF. No live service writes or merges.
