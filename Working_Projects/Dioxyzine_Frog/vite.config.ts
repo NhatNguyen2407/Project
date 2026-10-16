@@ -2,6 +2,7 @@ import { defineConfig } from 'vite'
 import path from 'path'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
+import { assertPreviewBackendIsolation } from './scripts/check-preview-backend.mjs'
 
 
 function figmaAssetResolver() {
@@ -15,6 +16,16 @@ function figmaAssetResolver() {
     },
   }
 }
+
+// Forbid building Vercel Previews against the production Supabase project.
+// Vercel Preview must explicitly set STAGING_SUPABASE_REF and a matching
+// VITE_SUPABASE_URL; this does not affect local or production builds.
+assertPreviewBackendIsolation({
+  deploymentEnvironment: process.env.VERCEL_ENV,
+  supabaseUrl: process.env.VITE_SUPABASE_URL,
+  stagingProjectRef: process.env.STAGING_SUPABASE_REF,
+  productionProjectRef: 'xeljnocizvlmefqovvfw',
+})
 
 export default defineConfig({
   define: {
