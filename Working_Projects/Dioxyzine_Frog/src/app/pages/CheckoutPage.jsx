@@ -15,8 +15,13 @@ import { useAuth } from '../../app/context/AuthContext';
 import { trackPurchase, trackInitiateCheckout } from '../utils/analytics';
 import { normalizeOrderId } from '../utils/orderIntegrity';
 import { needsPaymentReview } from '../utils/paymentOutcome';
+import { canUseLiveExternalServices } from '../utils/externalServicePolicy';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+const liveExternalServices = canUseLiveExternalServices({
+  deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+  supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+});
 
 export function CheckoutPage() {
   const { user } = useAuth();
@@ -163,7 +168,7 @@ export function CheckoutPage() {
     trackPurchase(transactionId, Number(capturedAmount), cart);
 
     try {
-      await emailjs.send(
+      if (liveExternalServices) await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_CONFIRMED_ID,
         {
@@ -466,7 +471,7 @@ export function CheckoutPage() {
                   </div>
 
                   <div className="w-full relative z-0 mt-4">
-                    <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD", locale: "en_US" }}>
+                    {liveExternalServices ? <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD", locale: "en_US" }}>
                       <PayPalButtons 
                         style={{ 
                           layout: "vertical", 
@@ -576,7 +581,7 @@ export function CheckoutPage() {
                           setIsFinalizing(false);
                         }}
                       />
-                    </PayPalScriptProvider>
+                    </PayPalScriptProvider> : <p role="status" className="text-sm text-[var(--muted-foreground)]">Checkout is disabled outside the verified Production environment.</p>}
                   </div>
 
                 </div>
