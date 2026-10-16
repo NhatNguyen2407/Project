@@ -1,0 +1,143 @@
+# Validate the committed public tracking RPC in a disposable PostgreSQL database.
+# No hosted Supabase connection, payment credentials, real customers, or mutations to Production.
+name: Dioxyzine Tracking PostgreSQL Drill
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/dioxyzine-tracking-postgres.yml'
+      - 'Working_Projects/Dioxyzine_Frog/supabase/migrations/202610130002_order_tracking_rpc_shape.sql'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  tracking-rpc:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: dioxyzine_tracking_ci
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: disposable_ci_only
+        ports:
+          - 127.0.0.1:54323:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dioxyzine_tracking_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: Working_Projects/Dioxyzine_Frog
+    env:
+      PGHOST: 127.0.0.1
+      PGPORT: '54323'
+      PGDATABASE: dioxyzine_tracking_ci
+      PGUSER: postgres
+      PGPASSWORD: disposable_ci_only
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Initialize disposable roles and synthetic orders
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+              CREATE ROLE anon NOLOGIN;
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+              CREATE ROLE authenticated NOLOGIN;
+            END IF;
+          END
+          $$;
+          CREATE TABLE public.orders (
+            id uuid PRIMARY KEY,
+            cart_items jsonb,
+            order_status text,
+            tracking_code text,
+            created_at timestamptz NOT NULL DEFAULT now(),
+            payment_status text,
+            customer_email text
+          );
+          ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
+          REVOKE ALL ON TABLE public.orders FROM PUBLIC, anon, authenticated;
+
+          INSERT INTO public.orders
+            (id,cart_items,order_status,tracking_code,created_at,payment_status,customer_email)
+          VALUES
+            ('123e4567-e89b-42d3-a456-426614174000',
+             '[{"title":"Synthetic Plush"}]'::jsonb,'shipping','TEST-ONLY-TRACK',
+             '2026-10-16T03:00:00Z','paid','fake-private@example.invalid'),
+            ('123e4567-e89b-42d3-a456-426614174001',
+             '[{"title":"Hidden Product"}]'::jsonb,'pending',null,
+             '2026-10-16T03:00:00Z','pending','fake-unpaid@example.invalid'),
+            ('123e4567-e89b-42d3-a456-426614174002',
+             '[]'::jsonb,'confirmed',null,
+             '2026-10-16T03:00:00Z','PAID','fake-fallback@example.invalid');
+          SQL
+
+      - name: Apply the exact committed tracking SQL to disposable database
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 -f supabase/migrations/202610130002_order_tracking_rpc_shape.sql
+
+      - name: Test guest RPC, data minimization and direct-table denial
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 <<'SQL'
+          BEGIN READ ONLY;
+          SET LOCAL ROLE anon;
+          DO $$
+          DECLARE
+            paid jsonb;
+            unpaid jsonb;
+            unknown_order jsonb;
+            fallback_order jsonb;
+          BEGIN
+            IF NOT has_function_privilege('anon','public.track_order_status(uuid)','EXECUTE') THEN
+              RAISE EXCEPTION 'Anon RPC execution grant is missing';
+            END IF;
+            IF has_table_privilege('anon','public.orders','SELECT') THEN
+              RAISE EXCEPTION 'Anon unexpectedly has direct orders SELECT';
+            END IF;
+
+            SELECT public.track_order_status('123e4567-e89b-42d3-a456-426614174000') INTO paid;
+            IF paid IS NULL OR paid->>'product_name' <> 'Synthetic Plush'
+               OR paid->>'order_status' <> 'shipping'
+               OR paid->>'tracking_code' <> 'TEST-ONLY-TRACK' THEN
+              RAISE EXCEPTION 'Paid order lookup incorrect';
+            END IF;
+            IF (paid - 'id' - 'product_name' - 'order_status' - 'tracking_code' - 'created_at') <> '{}'::jsonb
+               OR (SELECT count(*) FROM jsonb_object_keys(paid)) <> 5 THEN
+              RAISE EXCEPTION 'Tracking RPC leaked unexpected fields';
+            END IF;
+            IF paid::text LIKE '%fake-private%' OR paid ? 'payment_status' THEN
+              RAISE EXCEPTION 'Tracking RPC returned restricted data';
+            END IF;
+
+            SELECT public.track_order_status('123e4567-e89b-42d3-a456-426614174001') INTO unpaid;
+            SELECT public.track_order_status('123e4567-e89b-42d3-a456-426614174999') INTO unknown_order;
+            IF unpaid IS NOT NULL OR unknown_order IS NOT NULL THEN
+              RAISE EXCEPTION 'Unpaid or unknown order disclosed';
+            END IF;
+
+            SELECT public.track_order_status('123e4567-e89b-42d3-a456-426614174002') INTO fallback_order;
+            IF fallback_order->>'product_name' <> 'Custom Merchandise' THEN
+              RAISE EXCEPTION 'Case-insensitive paid filter or fallback incorrect';
+            END IF;
+          END $$;
+          ROLLBACK;
+          SQL
+          if psql -X -v ON_ERROR_STOP=1 -c 'SET ROLE anon; SELECT id FROM public.orders LIMIT 1' >/dev/null 2>&1; then
+            echo 'ERROR: anonymous direct orders query was unexpectedly allowed.'
+            exit 1
+          fi
+          echo 'Disposable PostgreSQL tracking assertions passed (no remote database touched).'
