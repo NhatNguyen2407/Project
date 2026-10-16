@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.110.0';
+import { corsHeaders } from 'npm:@supabase/supabase-js@2.110.0/cors';
 import { createInquiryHandler } from './handler.mjs';
 
 // Deno entrypoint; all request handling is testable in Node via injected mocks.
@@ -7,4 +8,5 @@ Deno.serve(createInquiryHandler({
   envGet: (name) => Deno.env.get(name),
   createClient,
   fetchCaptcha: fetch,
+  allowedCorsHeaders: corsHeaders['Access-Control-Allow-Headers'],
 }));
