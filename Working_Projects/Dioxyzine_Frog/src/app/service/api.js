@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { mayMirrorInquiryToSheets } from '../utils/inquiryMirrorPolicy';
 
 let pendingInquiry = null;
 
@@ -34,7 +35,11 @@ export const api = {
         throw error || new Error('Inquiry submission failed verification.');
       }
       // A replay must not create a duplicate best-effort mirror request.
-      if (!result.replayed) {
+      if (!result.replayed && mayMirrorInquiryToSheets({
+        optIn: import.meta.env.VITE_ENABLE_INQUIRY_SHEETS_MIRROR,
+        deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+        supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+      })) {
         const payload = { type: 'inquiry', ...data };
         fetch(SCRIPT_URL, {
           method: 'POST',
