@@ -1,0 +1,29 @@
+# Disposable Deno HTTP smoke tests for Inquiry; no Supabase project or live secrets.
+name: Dioxyzine Inquiry Deno Runtime
+on:
+  pull_request:
+    paths:
+      - 'Working_Projects/Dioxyzine_Frog/supabase/functions/submit-inquiry/**'
+      - 'Working_Projects/Dioxyzine_Frog/tests/inquiry-runtime-smoke.test.ts'
+      - '.github/workflows/dioxyzine-inquiry-deno.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  deno-http:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: Working_Projects/Dioxyzine_Frog
+    steps:
+      - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.x
+      - name: Type-check real Edge Function entrypoint and pinned CORS import
+        run: deno check supabase/functions/submit-inquiry/index.ts
+      - name: Run isolated Deno HTTP smoke tests (synthetic services only)
+        run: deno test --allow-net=127.0.0.1 --allow-env tests/inquiry-runtime-smoke.test.ts
