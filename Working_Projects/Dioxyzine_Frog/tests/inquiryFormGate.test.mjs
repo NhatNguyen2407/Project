@@ -43,7 +43,7 @@ test('Inquiry UI clears prior URL and checks latest upload before rendering succ
   const src=readFileSync(new URL('../src/app/pages/InquiryPage.jsx',import.meta.url),'utf8');
   const upload=src.slice(src.indexOf('const handleImageUpload = async'),src.indexOf('const handleSubmit = async'));
   const clear=upload.indexOf("imageLink: ''");
-  const awaitUpload=upload.indexOf('await uploadImageToCloudinary(file)');
+  const awaitUpload=upload.indexOf('await uploadImageToCloudinary(');
   const current=upload.indexOf('isCurrentUpload(attempt)');
   const attach=upload.indexOf('imageLink: uploadedUrl');
   assert.ok(clear>=0 && awaitUpload>clear && current>awaitUpload && attach>current);

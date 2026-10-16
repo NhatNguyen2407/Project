@@ -178,3 +178,8 @@ Covered scenarios:
 - InquiryPage now passes a **lazy**, upload-only reCAPTCHA action to the image provider. The Production Cloudinary provider does not need the extra token. The private `storage://` identifier is not opened as a browser URL; Staging displays an attachment confirmation only.
 - Added `.github/workflows/dioxyzine-inquiry-upload-ticket.yml` and synthetic disposable SQL test with a new loopback-only PostgreSQL 17 container. Exercises actual base idempotency + new ticket SQL, grants, bad path/MIME, missing object, mismatched metadata, replay, single-use claim and expired ticket. This is a simulated Storage *metadata table*, not real HTTP uploads or hosted Supabase.
 - GitHub SQL workflow and CI outcome: **PENDING** until verified on the final SHA. No Production/Staging SQL or Edge Function deployment.
+
+## 2026-10-16 — Disposable SQL drill first-run corrections
+- Initial isolated PostgreSQL 17 workflow uncovered invalid schema qualification of SQL special expression `COALESCE`; fixed to built-in `coalesce(...)` in draft function. No hosted schema change.
+- Application source-contract test updated to match lazy `uploadImageToCloudinary(file, captchaProvider)` call, without weakening the relative ordering check.
+- Re-run exact-HEAD CI and disposable SQL drill before marking successful.

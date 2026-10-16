@@ -108,7 +108,7 @@ begin
     p_row->>'subject',p_row->>'customer_name',p_row->>'customer_email',
     p_row->>'contact_info',p_row->>'product_name',p_row->>'size',
     (p_row->>'quantity')::integer,
-    pg_catalog.coalesce((p_row->>'accessory_qty')::integer,0),
+    coalesce((p_row->>'accessory_qty')::integer,0),
     p_row->>'image_link',p_row->>'note',p_user_id
   ) returning id into created;
 
