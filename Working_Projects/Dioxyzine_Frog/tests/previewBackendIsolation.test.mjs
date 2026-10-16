@@ -57,3 +57,15 @@ test('preview rejects invalid production project marker', () => {
     productionProjectRef: 'invalid',
   }), /Preview safety check/);
 });
+
+
+test('Vite build config wires actual Vercel environment into the isolation guard', async () => {
+  const { readFileSync } = await import('node:fs');
+  const source = readFileSync(new URL('../vite.config.ts', import.meta.url), 'utf8');
+  assert.match(source, /import\s*\{\s*assertPreviewBackendIsolation\s*\}\s*from\s*['"]\.\/scripts\/check-preview-backend\.mjs['"]/);
+  assert.match(source, /assertPreviewBackendIsolation\s*\(\s*\{/);
+  assert.match(source, /deploymentEnvironment:\s*process\.env\.VERCEL_ENV/);
+  assert.match(source, /supabaseUrl:\s*process\.env\.VITE_SUPABASE_URL/);
+  assert.match(source, /stagingProjectRef:\s*process\.env\.STAGING_SUPABASE_REF/);
+  assert.match(source, /productionProjectRef:\s*['"]xeljnocizvlmefqovvfw['"]/);
+});
