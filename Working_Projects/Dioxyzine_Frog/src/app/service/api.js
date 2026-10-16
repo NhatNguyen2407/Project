@@ -15,45 +15,26 @@ export const api = {
     }
   },
 
-  // Form Inquiry
-  submitInquiry: async (data) => {
-    try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const { error } = await supabase
-        .from('inquiries')
-        .insert([
-          {
-            user_id: user ? user.id : null, //import id for display on profile
-            subject: data.subject,
-            customer_name: data.customerName,
-            customer_email: data.customerEmail,
-            contact_info: data.contactInfo,
-            product_name: data.productName,
-            size: data.size || null,
-            quantity: parseInt(data.quantity) || 1,
-            accessory_qty: parseInt(data.accessoryQty) || 0,
-            image_link: data.imageLink,
-            note: data.note || null
-          }
-        ]);
-
-      if (error) throw error;
-
-      // backup in google sheets
-      const payload = { type: 'inquiry', ...data };
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      }).catch(e => console.error("Lỗi backup ra Google Sheet:", e));
-      
-
-      return true;
-    } catch (error) {
-      console.error('Lỗi khi lưu Inqury vào Supabase:', error);
-      throw error;
+  // Form Inquiry: the server validates reCAPTCHA and persists the request
+  // in one trusted flow. This path must NOT use direct client table INSERT.
+  submitInquiry: async (data, recaptchaToken) => {
+    const { data: result, error } = await supabase.functions.invoke('submit-inquiry', {
+      body: { inquiry: data, token: recaptchaToken }
+    });
+    if (error || !result?.success) {
+      throw error || new Error('Inquiry submission failed verification.');
     }
+
+    // Legacy Google Sheets mirror remains best-effort and non-authoritative.
+    // Durable delivery/reconciliation is a separate tracked issue.
+    const payload = { type: 'inquiry', ...data };
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+      body: JSON.stringify(payload)
+    }).catch(() => console.error('Inquiry mirror delivery failed.'));
+
+    return result.inquiryId;
   },
 
   // Feedback
