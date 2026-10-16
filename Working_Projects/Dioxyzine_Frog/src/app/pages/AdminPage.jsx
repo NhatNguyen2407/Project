@@ -9,7 +9,7 @@ import { canUseLiveExternalServices } from '../utils/externalServicePolicy';
 import { toast } from 'sonner';
 
 import { ToastNotification } from '../components/common_components/ToastNotification';
-import { assertConfirmedMutation, requireOrderId } from '../utils/orderIntegrity';
+import { assertConfirmedMutation, assertSingleInsertedRow, requireOrderId } from '../utils/orderIntegrity';
 import { filterInquiries, safeInquiryReferenceUrl, formatInquiryTimestamp } from '../utils/inquiryInbox';
 
 export function AdminPage() {
@@ -17,6 +17,17 @@ export function AdminPage() {
   const navigate = useNavigate();
   
   const [toastNotif, setToastNotif] = useState({ show: false, msg: '', type: '' });
+
+  // Source/UI safety only: server-side RLS remains the authorization boundary.
+  // All Admin write handlers must fail closed on Preview and staging builds.
+  const allowAdminWrite = () => {
+    if (canUseLiveExternalServices({
+      deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    })) return true;
+    toast.error('Admin changes are disabled outside verified Production.');
+    return false;
+  };
   const showToast = (msg, type) => {
     if(type === 'success') toast.success(msg);
     else if(type === 'error') toast.error(msg);
@@ -112,10 +123,7 @@ export function AdminPage() {
   }, [role]);
 
   const handleUpdateStatus = async (order, newStatus) => {
-    if (!canUseLiveExternalServices({ deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV, supabaseUrl: import.meta.env.VITE_SUPABASE_URL })) {
-      toast.error('Order updates are disabled outside verified Production.');
-      return;
-    }
+    if (!allowAdminWrite()) return;
     setUpdatingId(order.id);
     try {
       const validatedOrderId = requireOrderId(order.id);
@@ -184,22 +192,26 @@ export function AdminPage() {
 
   // Admin Reply Review
   const handleSaveReply = async (id) => {
+    if (!allowAdminWrite()) return;
     const replyText = replyInputs[id];
     if (!replyText) return toast.error("Vui lòng nhập câu trả lời!");
     try {
-      const { error } = await supabase.from('inquiries').update({ admin_reply: replyText }).eq('id', id);
-      if (error) throw error;
-      setOrders(orders.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      const { data, error } = await supabase.from('inquiries')
+        .update({ admin_reply: replyText }).eq('id', id).select('id');
+      assertConfirmedMutation({ data, error }, id);
+      setOrders(current => current.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
       toast.success("Đã phản hồi đánh giá!");
     } catch (err) { toast.error(err.message); }
   };
 
   // hide/Unhide Review
   const handleToggleReviewVisibility = async (id, isHidden) => {
+    if (!allowAdminWrite()) return;
     try {
-      const { error } = await supabase.from('inquiries').update({ is_hidden: !isHidden }).eq('id', id);
-      if (error) throw error;
-      setOrders(orders.map(o => o.id === id ? { ...o, is_hidden: !isHidden } : o));
+      const { data, error } = await supabase.from('inquiries')
+        .update({ is_hidden: !isHidden }).eq('id', id).select('id');
+      assertConfirmedMutation({ data, error }, id);
+      setOrders(current => current.map(o => o.id === id ? { ...o, is_hidden: !isHidden } : o));
       toast.success(!isHidden ? "Đã ẨN đánh giá này!" : "Đã HIỆN đánh giá này!");
     } catch (err) { toast.error(err.message); }
   };
@@ -239,6 +251,7 @@ export function AdminPage() {
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
+    if (!allowAdminWrite()) return;
     setIsSavingProduct(true);
     try {
       let finalCoverUrl = productForm.image_cover;
@@ -267,8 +280,9 @@ export function AdminPage() {
       }
 
       const dataToSave = { ...productForm, image_cover: finalCoverUrl, images_gallery: finalGalleryUrls.join('|') };
-      const { error } = await supabase.from('products').upsert(dataToSave);
-      if (error) throw error;
+      const { data, error } = await supabase.from('products')
+        .upsert(dataToSave).select('id');
+      assertConfirmedMutation({ data, error }, productForm.id);
       
       await fetchData();
       setIsModalOpen(false);
@@ -281,6 +295,7 @@ export function AdminPage() {
   };
 
   const handleDeleteProduct = async (id) => {
+    if (!allowAdminWrite()) return;
     if(!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
     try {
       const { data, error } = await supabase.from('products').delete().eq('id', id).select('id');
@@ -292,6 +307,7 @@ export function AdminPage() {
 
   const handleSaveVoucher = async (e) => {
     e.preventDefault();
+    if (!allowAdminWrite()) return;
     if (!voucherForm.code.trim()) return toast.error("Please enter a Promo Code! 🎟️");
     if (hasExpiration && !voucherForm.expires_at) return toast.error("Please completely fill out the Expiration Date and Time! ⏰");
 
@@ -302,8 +318,9 @@ export function AdminPage() {
       else finalData.expires_at = new Date(finalData.expires_at).toISOString();
       finalData.code = finalData.code.toUpperCase();
 
-      const { error } = await supabase.from('vouchers').insert([finalData]);
-      if (error) throw error;
+      const { data, error } = await supabase.from('vouchers')
+        .insert([finalData]).select('id');
+      assertSingleInsertedRow({ data, error });
       
       await fetchData();
       setIsVoucherModalOpen(false);
@@ -314,6 +331,7 @@ export function AdminPage() {
   };
 
   const handleToggleVoucher = async (id, currentStatus) => {
+    if (!allowAdminWrite()) return;
     try {
       const { data, error } = await supabase.from('vouchers').update({ is_active: !currentStatus }).eq('id', id).select('id');
        assertConfirmedMutation({ data, error }, id);
@@ -323,6 +341,7 @@ export function AdminPage() {
   };
 
   const handleDeleteVoucher = async (id) => {
+    if (!allowAdminWrite()) return;
     if(!window.confirm("Bạn có chắc chắn muốn xóa mã giảm giá này vĩnh viễn?")) return;
     try {
       const { data, error } = await supabase.from('vouchers').delete().eq('id', id).select('id');

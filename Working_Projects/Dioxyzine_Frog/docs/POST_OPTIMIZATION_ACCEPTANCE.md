@@ -9,6 +9,11 @@
 - The Staging-only tracking RPC SQL file in PR #19 has NOT been applied: the attempted migration was blocked. Do not assume hosted tracking works; obtain authorized review/application before test.
 - No real customer/order/Auth data may be imported to hosted Staging. Do not touch Production migrations or PayPal live mode before release gates.
 
+## Current optimization progress / delivery gates
+- Source fixes in **Draft PR #19**: Checkout concurrent capture guard, external-effects fail-closed policy, Admin confirmed mutation checks, and synthetic Staging fixtures. GitHub CI may still be running on the new commit; validate exact SHA after push.
+- Draft PR #21: trusted Inquiry submission, server-side CAPTCHA/rate budget/idempotency and Sheets mirror isolation; NOT merged or released.
+- Not yet shipped: both Draft PRs require browser, sandbox, auth and recovery acceptance. This document is the deferred operator acceptance queue, not proof of completion.
+
 ## Deferred operator acceptance in order
 - [ ] **Recovery:** local PostgreSQL port 55432 inaccessible from other LAN hosts; encrypted backup availability, separate disposable restore, schema/count/RLS verification and safe rollback. Record results without exposing dumps or secrets.
 - [ ] **Preview identity:** inspect browser network requests to verify only Staging Supabase. Test Product/Price/Voucher read paths with synthetic fixtures. Verify guest/auth role restrictions and admin access cannot read restricted tables.

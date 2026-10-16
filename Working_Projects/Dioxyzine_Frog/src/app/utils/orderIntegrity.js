@@ -32,3 +32,12 @@ export function assertConfirmedMutation(result, expectedId) {
 
   return rows[0];
 }
+
+export function assertSingleInsertedRow(result) {
+  if (result?.error) throw result.error;
+  const rows = result?.data;
+  if (!Array.isArray(rows) || rows.length !== 1 || !rows[0]?.id) {
+    throw new Error('Database did not confirm the change. Refresh and check your permissions.');
+  }
+  return rows[0];
+}
