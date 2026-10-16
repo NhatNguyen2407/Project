@@ -1,6 +1,6 @@
 # Vercel Preview / Supabase Backend Isolation
 
-**Status (2026-10-16): Guard implemented on a Draft PR; staging environment NOT YET provisioned or validated.**
+**Status (2026-10-16): A separate Supabase Staging project exists and reports ACTIVE_HEALTHY. Vercel Preview isolation and application-level staging compatibility remain unverified. PR #18 stays Draft.**
 
 ## Purpose
 
@@ -18,6 +18,15 @@ An isolated database is a **separate Supabase project** or an authorized develop
 The Vite build performs an exact project reference and HTTPS host comparison when `VERCEL_ENV=preview`. It rejects missing refs, the known Production project, wrong/malformed URLs and suspicious extra URL components. No key values are printed.
 
 **Consequence until staging is configured:** Vercel Preview builds are deliberately blocked. This is a fail-closed safety behavior, not a Vite regression.
+
+## Read-only environment audit (2026-10-16)
+
+- Production and Staging are distinct, existing Supabase projects. No new project/branch was created in this audit.
+- Staging has one `public` table (`inquiries`, 14 columns), with RLS enabled and three recorded inquiry-focused migrations. Production has eight `public` tables; its `inquiries` table has 27 columns. Staging is **not** a full copy of the live application schema.
+- Staging currently lists zero Edge Functions. The Staging security advisor reported no notices, which is not a substitute for authorization or integration testing.
+- The Vercel integration returned HTTP 403 for reading project/environment metadata and build logs in the expected team scope. Preview environment values could not be independently verified or modified. The PR #18 Vercel Preview deployment is ERROR, while its GitHub CI completed successfully; the precise Preview build failure cannot be confirmed from logs.
+- Consequently, no Preview E2E tests, restore rehearsal, payment test, RLS change, or Production modification were performed. The Preview gate must stay fail-closed until the correct staging URL **and matching public key** are configured for Preview only.
+- Do not attempt full-site E2E on this partial staging schema. Before testing, reconcile missing schema and integrations using synthetic data, check authorization boundaries and sandbox external services, and perform a separately documented isolated restore rehearsal.
 
 ## Behavior and scope
 
@@ -38,7 +47,7 @@ The `tests/previewBackendIsolation.test.mjs` suite covers successful staging con
 
 Before marking staging safe:
 
-1. Obtain cost authorization and provision a separate Supabase environment; current Production project has no listed development branches.
+1. Use the existing isolated Supabase Staging project for narrow tests; do **not** provision a new billable branch or project. First confirm its budget, schema, RLS and test-only credentials.
 2. Configure Preview-only variables in Vercel, leaving Production unchanged.
 3. Confirm preview build runs successfully **using only synthetic test data** and query a staging-specific safe marker to verify runtime target.
 4. Check other integrations are disabled/mocked or sandboxed and that all staff/customer data is synthetic.
