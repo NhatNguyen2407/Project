@@ -58,7 +58,7 @@ test('endpoint invokes preverification budget before Google and accepted budget 
   const pre = src.indexOf('consumeInquiryBudget(admin, INQUIRY_BUDGETS.preverify)');
   const verify = src.indexOf("fetchCaptcha('https://www.google.com/recaptcha/api/siteverify'");
   const accepted = src.indexOf('consumeInquiryBudget(admin, INQUIRY_BUDGETS.accepted)');
-  const insert = src.indexOf(".from('inquiries')");
+  const insert = src.indexOf('persistInquiryOnce(admin');
   assert.ok(pre > -1 && verify > pre && accepted > verify && insert > accepted);
   assert.match(src, /if \(!preverifyAllowed\)[\s\S]*?429/);
   assert.match(src, /if \(!acceptedAllowed\)[\s\S]*?429/);
