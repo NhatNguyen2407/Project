@@ -183,3 +183,8 @@ Covered scenarios:
 - Initial isolated PostgreSQL 17 workflow uncovered invalid schema qualification of SQL special expression `COALESCE`; fixed to built-in `coalesce(...)` in draft function. No hosted schema change.
 - Application source-contract test updated to match lazy `uploadImageToCloudinary(file, captchaProvider)` call, without weakening the relative ordering check.
 - Re-run exact-HEAD CI and disposable SQL drill before marking successful.
+
+## 2026-10-16 — Hosted synthetic Staging Inquiry backend candidate
+- Read-only preflight confirmed 0 Staging inquiries, 0 Auth users, 0 uploaded objects, one Private 5MiB bucket, expected synthetic product/order, and no new quota/idempotency/ticket RPCs or private backend tables. The unrelated existing `consume_inquiry_quota` stays untouched.
+- Consolidated the three reviewed SQL drafts in `docs/staging/STAGING_INQUIRY_BACKEND_FOUNDATION.sql` as one transaction with synthetic Staging preflight and postflight grants/RLS checks. Only apply to project `bvnnmvlfcduwmneipmsi` once the exact bundled migration has passed disposable CI.
+- Disposable PostgreSQL test now executes that same bundle rather than separate drafts. Supabase Edge Functions remain undeployed and Preview upload opt-in remains OFF until independent CAPTCHA/secrets/E2E readiness. No Production change.

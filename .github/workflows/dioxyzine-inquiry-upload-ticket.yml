@@ -5,6 +5,8 @@ on:
       - '.github/workflows/dioxyzine-inquiry-upload-ticket.yml'
       - 'Working_Projects/Dioxyzine_Frog/docs/drafts/INQUIRY_IDEMPOTENCY_DRAFT.sql'
       - 'Working_Projects/Dioxyzine_Frog/docs/drafts/INQUIRY_UPLOAD_TICKET_BINDING_DRAFT.sql'
+      - 'Working_Projects/Dioxyzine_Frog/docs/drafts/INQUIRY_RATE_LIMIT_DRAFT.sql'
+      - 'Working_Projects/Dioxyzine_Frog/docs/staging/STAGING_INQUIRY_BACKEND_FOUNDATION.sql'
       - 'Working_Projects/Dioxyzine_Frog/scripts/verify-inquiry-upload-ticket-disposable.sql'
       - 'Working_Projects/Dioxyzine_Frog/supabase/functions/issue-inquiry-upload/**'
       - 'Working_Projects/Dioxyzine_Frog/supabase/functions/submit-inquiry/**'

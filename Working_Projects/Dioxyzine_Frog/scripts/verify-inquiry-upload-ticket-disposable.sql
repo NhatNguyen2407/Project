@@ -12,6 +12,12 @@ CREATE TABLE storage.objects (
   metadata jsonb NOT NULL,
   PRIMARY KEY(bucket_id,name)
 );
+CREATE SCHEMA auth;
+CREATE TABLE auth.users(id uuid primary key);
+CREATE TABLE public.products(id text primary key);
+CREATE TABLE public.orders(customer_email text);
+INSERT INTO public.products(id) VALUES('STG-SAMPLE-PLUSH');
+INSERT INTO public.orders(customer_email) VALUES('synthetic@example.invalid');
 CREATE TABLE public.inquiries (
   id uuid PRIMARY KEY DEFAULT pg_catalog.gen_random_uuid(),
   subject text, customer_name text, customer_email text,
@@ -21,9 +27,9 @@ CREATE TABLE public.inquiries (
 GRANT USAGE ON SCHEMA storage TO service_role;
 GRANT SELECT ON storage.buckets, storage.objects TO service_role;
 GRANT SELECT,INSERT ON public.inquiries TO service_role;
+ALTER TABLE storage.buckets ADD COLUMN file_size_limit bigint NOT NULL DEFAULT 5242880;
 INSERT INTO storage.buckets(id,public) VALUES('inquiry-test-references',false);
-\ir ../docs/drafts/INQUIRY_IDEMPOTENCY_DRAFT.sql
-\ir ../docs/drafts/INQUIRY_UPLOAD_TICKET_BINDING_DRAFT.sql
+\ir ../docs/staging/STAGING_INQUIRY_BACKEND_FOUNDATION.sql
 
 DO $assert$
 BEGIN
