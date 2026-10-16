@@ -54,7 +54,7 @@ test('RPC denial, service failures and unexpected responses fail closed', async 
 });
 
 test('endpoint invokes preverification budget before Google and accepted budget before DB insert', () => {
-  const src = readFileSync(new URL('../supabase/functions/submit-inquiry/index.ts', import.meta.url), 'utf8');
+  const src = readFileSync(new URL('../supabase/functions/submit-inquiry/handler.mjs', import.meta.url), 'utf8');
   const pre = src.indexOf('consumeInquiryBudget(admin, INQUIRY_BUDGETS.preverify)');
   const verify = src.indexOf("fetch('https://www.google.com/recaptcha/api/siteverify'");
   const accepted = src.indexOf('consumeInquiryBudget(admin, INQUIRY_BUDGETS.accepted)');
