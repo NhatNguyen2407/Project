@@ -78,13 +78,19 @@ function psql(env, args, { allowFailure = false } = {}) {
 const query = async (env, statement) => (await psql(env, ['-c', statement])).value;
 
 export async function runLocalRateBudgetDrill(env, { sqlPath = SQL_PATH } = {}) {
-  // Verify server identity *before* loading the draft SQL.
+  // Verify a test-only marker *inside the database* before any DDL.
+  // GitHub Actions forwards loopback:54322 into a Docker bridge, so
+  // inet_server_addr() is a container IP, NOT 127.0.0.1.
+  // A per-run marker plus exact loopback TCP URL and fixed DB name prevent
+  // accidental execution against a non-disposable database.
+  const runMarker = process.env.INQUIRY_RATE_TEST_RUN_MARKER;
+  if (!/^[a-zA-Z0-9_-]{16,120}$/.test(runMarker || '')) {
+    throw new Error('Disposable database run marker is missing or invalid.');
+  }
   const identity = await query(env,
-    "select current_database() || '|' || coalesce(inet_server_addr()::text,'socket');");
-  assert.ok([
-    `${TEST_DB}|127.0.0.1`,
-    `${TEST_DB}|::1`,
-  ].includes(identity), 'Server-side identity did not confirm the disposable loopback database.');
+    "select current_database() || '|' || coalesce((select marker from public.inquiry_ci_disposable_marker limit 1), 'MISSING')");
+  assert.equal(identity, `${TEST_DB}|${runMarker}`,
+    'Server identity and disposable run marker did not match; no SQL was applied.');
 
   const draft = await readFile(sqlPath, 'utf8');
   assert.match(draft, /create table if not exists inquiry_internal\.request_budgets/i);
