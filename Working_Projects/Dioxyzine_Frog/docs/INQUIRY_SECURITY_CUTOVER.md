@@ -91,3 +91,19 @@ node scripts/verify-inquiry-rate-limit-local.mjs
 - No test results are claimed until the script finishes against a real local PostgreSQL server. Normal GitHub CI runs only the safe Node connection-parser tests, not live SQL.
 
 **CI solution verified on 2026-10-16:** the separate `.github/workflows/dioxyzine-inquiry-postgres.yml` uses PostgreSQL 17 in a disposable GitHub Actions service container. Run [38845419812](https://github.com/NhatNguyen2407/Project/actions/runs/38845419812) succeeded and its raw log reported 32 parallel attempts, 10 allowed, 22 denied, 6 grant checks, successful counter reset, denied unauthorized role execution and cleanup. The standard unit/build workflow [38845419740](https://github.com/NhatNguyen2407/Project/actions/runs/38845419740) passed on the same commit. This is **real PostgreSQL test evidence**, not evidence of deployment to Supabase Production. The draft rate limit SQL and direct INSERT/RLS cutover remain unapplied.
+
+## Mocked HTTP inquiry flow tests — 2026-10-16
+
+The server-side HTTP submission logic has been extracted into `supabase/functions/submit-inquiry/handler.mjs`. `index.ts` is a minimal Deno dependency-injection entrypoint. `tests/inquiryHttpFlow.test.mjs` exercises the **actual handler** in Node with synthetic credentials, request bodies, CAPTCHA responses, database writes and Auth responses.
+
+Covered scenarios:
+- Valid guest and authenticated form submissions; only verified user identity is stored and caller-supplied privileged fields are discarded.
+- The normal Supabase publishable/anon bearer treated as a guest; invalid or expired user bearer rejected with HTTP 401 rather than silently treated as a guest.
+- Wrong origin, preflight, wrong HTTP method, invalid payload/token/JSON/content type and request body over 16 KiB.
+- Preverification and accepted budget denials (HTTP 429), unavailable RPC/Google/DB (HTTP 503), unacceptable action/hostname/score/freshness (HTTP 403).
+- Google-rejected duplicate token, server-side insert failure, minimized response and sanitized logs.
+- Request body is read with a bounded streaming reader instead of allocating an unbounded body then checking its size.
+
+**Verification:** The test suite passed locally before commit and again in GitHub Actions run [38846722445](https://github.com/NhatNguyen2407/Project/actions/runs/38846722445). Separate real PostgreSQL grant/concurrency workflow [38846722462](https://github.com/NhatNguyen2407/Project/actions/runs/38846722462) passed its test step. All dependencies are simulated in the handler suite; **this is not a deployed Supabase E2E test**.
+
+**Unresolved release gates:** real Edge Function runtime/HTTP CORS and Auth integration, API-key compatibility, independent idempotency, coordinated grant/RLS direct INSERT lockdown, end-to-end browser verification and rollback. The public production INSERT bypass remains open until deployed permissions are corrected. No paid services or production writes were used.
