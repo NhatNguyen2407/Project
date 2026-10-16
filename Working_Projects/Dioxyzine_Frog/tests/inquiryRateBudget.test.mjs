@@ -18,6 +18,9 @@ test('budget sizes are finite, bounded, and separate for verification vs accepte
     windowSeconds: 3600,
   });
   assert.notEqual(INQUIRY_BUDGETS.preverify.scope, INQUIRY_BUDGETS.accepted.scope);
+  assert.deepEqual(INQUIRY_BUDGETS.uploadPreverify, {scope:'upload-preverify',maxHits:60,windowSeconds:60});
+  assert.deepEqual(INQUIRY_BUDGETS.uploadIssued, {scope:'upload-issued',maxHits:12,windowSeconds:3600});
+  assert.equal(new Set(Object.values(INQUIRY_BUDGETS).map(x=>x.scope)).size,4);
 });
 
 test('an allowed request executes exactly one RPC with server-selected quota', async () => {
@@ -68,7 +71,7 @@ test('SQL draft uses atomic upsert, fixed scope rows, revokes public RPC executi
   const sql = readFileSync(new URL('../docs/drafts/INQUIRY_RATE_LIMIT_DRAFT.sql', import.meta.url), 'utf8');
   assert.match(sql, /on conflict \(scope\) do update/i);
   assert.match(sql, /returning request_count into v_count/i);
-  assert.match(sql, /scope in \('inquiry-preverify', 'inquiry-accepted'\)/i);
+  assert.match(sql, /scope in \('inquiry-preverify', 'inquiry-accepted', 'upload-preverify', 'upload-issued'\)/i);
   assert.match(sql, /security invoker/i);
   assert.match(sql, /revoke execute on function public\.consume_inquiry_rate_budget/i);
   assert.match(sql, /grant execute on function public\.consume_inquiry_rate_budget\(text, integer, integer\)\s+to service_role/i);

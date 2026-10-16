@@ -159,3 +159,10 @@ Covered scenarios:
 - Added `createInquiryFormGate` as a synchronous in-memory guard, clears the attached URL on replacement, ignores stale upload completions, and prevents submit while an image is still uploading or a submit is in progress. Image picker is disabled during submission.
 - Added five pure/UI-contract tests for concurrent upload, last-selection-wins and duplicate submissions. This is a frontend safety improvement, not a replacement for backend idempotency in `submit-inquiry`.
 - PR #21 remains Draft. Update the pinned version in PR #19's combined-source workflow after the new SHA and CI are verified. No hosted Storage uploads or Production modifications.
+
+## 2026-10-16 — Guest upload signing backend prepared (Staging only)
+- Added `issue-inquiry-upload` as an independent draft Supabase Edge Function, **disabled unless** `INQUIRY_UPLOAD_STAGING_ENABLED=true` and `SUPABASE_URL` is the exact known Staging project.
+- It requires an allowed exact Origin, public caller-key check, strict 1 KiB metadata allowlist, PNG/JPEG/WebP and <=5 MiB declaration, independent atomic database quotas (60 attempts/min and 12 issued/hour), and server-verified reCAPTCHA **action `inquiry_upload`**. It returns a random `guest/<UUID>.<ext>` path and scoped Supabase signed upload token; never exposes a service-role key.
+- The Supabase token can be valid for **two hours**. A token is NOT proof of a completed upload, a one-time database claim, file-content validation, or a durable Inquiry attachment. No frontend guest integration or trusted ticket reconciliation exists yet. **Do not deploy or enable** until those elements, cleanup policy and hosted RLS tests are implemented.
+- Expanded the *draft-only* `consume_inquiry_rate_budget` allowed scopes to include `upload-preverify` and `upload-issued`. No SQL was applied to Production or Staging. The function intentionally fails closed if the budget RPC does not exist.
+- Added source/handler tests; release and migration remain blocked pending isolated tests and coordinated Inbox/Inquiry/storage review. Neither Draft PR is eligible for merge from this change alone.

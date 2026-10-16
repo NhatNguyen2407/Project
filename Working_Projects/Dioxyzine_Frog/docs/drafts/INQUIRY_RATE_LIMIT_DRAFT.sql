@@ -17,7 +17,7 @@ grant usage on schema inquiry_internal to service_role;
 
 create table if not exists inquiry_internal.request_budgets (
   scope text primary key
-    check (scope in ('inquiry-preverify', 'inquiry-accepted')),
+    check (scope in ('inquiry-preverify', 'inquiry-accepted', 'upload-preverify', 'upload-issued')),
   window_started_at timestamptz not null,
   request_count integer not null check (request_count > 0)
 );
@@ -28,7 +28,7 @@ grant select, insert, update on inquiry_internal.request_budgets to service_role
 
 -- SECURITY INVOKER runs as service_role; RLS remains enabled.
 -- The unique primary key makes concurrent upserts serialize per scope.
--- Two durable rows suffice: no cron job, unbounded key growth, or IP storage.
+-- Four durable rows suffice: no cron job, unbounded key growth, or IP storage.
 create or replace function public.consume_inquiry_rate_budget(
   p_scope text,
   p_max_hits integer,
@@ -43,7 +43,7 @@ declare
   v_count integer;
 begin
   if p_scope is null
-     or p_scope not in ('inquiry-preverify', 'inquiry-accepted')
+     or p_scope not in ('inquiry-preverify', 'inquiry-accepted', 'upload-preverify', 'upload-issued')
      or p_max_hits is null
      or p_max_hits not between 1 and 1000
      or p_window_seconds is null

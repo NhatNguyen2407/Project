@@ -75,11 +75,11 @@ export function validateInquiryPayload(input) {
   };
 }
 
-export function assessRecaptcha(result, { allowedHostnames, minScore = 0.5, now = Date.now() } = {}) {
+export function assessRecaptcha(result, { allowedHostnames, minScore = 0.5, now = Date.now(), action = 'inquiry_submit' } = {}) {
   if (!Array.isArray(allowedHostnames) || allowedHostnames.length === 0) {
     return false; // Fail closed if the deployment has no site allowlist.
   }
-  if (!result || result.success !== true || result.action !== 'inquiry_submit') return false;
+  if (!result || result.success !== true || result.action !== action) return false;
   if (typeof result.hostname !== 'string' ||
       !allowedHostnames.includes(result.hostname.toLowerCase())) return false;
   if (typeof result.score !== 'number' || !Number.isFinite(result.score) ||

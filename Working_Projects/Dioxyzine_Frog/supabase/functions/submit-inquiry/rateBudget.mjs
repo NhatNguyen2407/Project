@@ -3,6 +3,8 @@
 export const INQUIRY_BUDGETS = Object.freeze({
   preverify: Object.freeze({ scope: 'inquiry-preverify', maxHits: 180, windowSeconds: 60 }),
   accepted: Object.freeze({ scope: 'inquiry-accepted', maxHits: 60, windowSeconds: 3600 }),
+  uploadPreverify: Object.freeze({ scope: 'upload-preverify', maxHits: 60, windowSeconds: 60 }),
+  uploadIssued: Object.freeze({ scope: 'upload-issued', maxHits: 12, windowSeconds: 3600 }),
 });
 
 export async function consumeInquiryBudget(client, budget) {
