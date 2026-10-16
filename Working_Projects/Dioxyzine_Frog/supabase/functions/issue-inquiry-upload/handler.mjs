@@ -124,6 +124,12 @@ export function createGuestUploadHandler({
       if (typeof id!=='string' || !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(id))
         return reply(503,'Upload unavailable.',origin);
       const path=`guest/${id}.${body.extension}`;
+      // Persist issuance first. Failed signing leaves only a cleanup-eligible
+      // unclaimed ticket; a token without a registered ticket is never returned.
+      const {data:ticketSaved,error:ticketError}=await admin.rpc('register_inquiry_upload_ticket',{
+        p_path:path,p_mime_type:body.mimeType,p_declared_bytes:body.sizeBytes,
+      });
+      if (ticketError || ticketSaved!==true) return reply(503,'Upload unavailable.',origin);
       const {data,error}=await admin.storage.from(STAGING_IMAGE_BUCKET).createSignedUploadUrl(path);
       if (error || !data || data.path!==path ||
           typeof data.token!=='string' || !data.token.trim()) {

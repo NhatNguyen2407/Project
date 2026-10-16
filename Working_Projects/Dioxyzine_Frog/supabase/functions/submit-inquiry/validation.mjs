@@ -40,7 +40,7 @@ function boundedInteger(value, field, minimum, maximum) {
   return number;
 }
 
-export function validateInquiryPayload(input) {
+export function validateInquiryPayload(input, { stagingPrivateImages = false } = {}) {
   if (!input || typeof input !== 'object' || Array.isArray(input)) {
     throw new SubmissionValidationError('Invalid inquiry payload.');
   }
@@ -49,16 +49,25 @@ export function validateInquiryPayload(input) {
     throw new SubmissionValidationError('Email is invalid.');
   }
   const imageLink = requiredText(input.imageLink, 'Image link', 2048);
-  let imageUrl;
-  try {
-    imageUrl = new URL(imageLink);
-  } catch {
-    throw new SubmissionValidationError('Image link must be a valid HTTPS URL.');
-  }
-  if (imageUrl.protocol !== 'https:' || imageUrl.username || imageUrl.password ||
-      imageUrl.hostname === 'localhost' || imageUrl.hostname.endsWith('.local') ||
-      imageUrl.port || !imageUrl.hostname.includes('.')) {
-    throw new SubmissionValidationError('Image link must be a valid HTTPS URL.');
+  let verifiedImageReference;
+  if (stagingPrivateImages) {
+    // A durable private reference requires a previously registered ticket and
+    // completed Storage object, both checked atomically in the database RPC.
+    const expected = /^storage:\/\/inquiry-test-references\/guest\/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(png|jpg|webp)$/i;
+    if (!expected.test(imageLink)) {
+      throw new SubmissionValidationError('Staging reference must be a private Storage object.');
+    }
+    verifiedImageReference = imageLink;
+  } else {
+    let imageUrl;
+    try { imageUrl = new URL(imageLink); }
+    catch { throw new SubmissionValidationError('Image link must be a valid HTTPS URL.'); }
+    if (imageUrl.protocol !== 'https:' || imageUrl.username || imageUrl.password ||
+        imageUrl.hostname === 'localhost' || imageUrl.hostname.endsWith('.local') ||
+        imageUrl.port || !imageUrl.hostname.includes('.')) {
+      throw new SubmissionValidationError('Image link must be a valid HTTPS URL.');
+    }
+    verifiedImageReference = imageUrl.href;
   }
 
   return {
@@ -70,7 +79,7 @@ export function validateInquiryPayload(input) {
     size: optionalText(input.size, 'Size', 120),
     quantity: boundedInteger(input.quantity, 'Quantity', 1, 100_000),
     accessory_qty: boundedInteger(input.accessoryQty ?? 0, 'Accessory quantity', 0, 100_000),
-    image_link: imageUrl.href,
+    image_link: verifiedImageReference,
     note: optionalText(input.note, 'Notes', 2000),
   };
 }

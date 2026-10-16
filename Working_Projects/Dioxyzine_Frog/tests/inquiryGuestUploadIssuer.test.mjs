@@ -12,10 +12,17 @@ const env={
  INQUIRY_PUBLIC_API_KEY:'public-test-key',RECAPTCHA_SECRET_KEY:'captcha-server-secret',
  INQUIRY_RECAPTCHA_MIN_SCORE:'0.5',INQUIRY_UPLOAD_STAGING_ENABLED:'true',
 };
-function fixture({changes={},budgetResults=[true,true],captchaAction='inquiry_upload',token='single-upload-token'}={}) {
+function fixture({changes={},budgetResults=[true,true],captchaAction='inquiry_upload',token='single-upload-token',ticketResult=true,ticketError=null}={}) {
  let calls=[];let grants=[...budgetResults];
  const client={
-   rpc:async(name,args)=>{calls.push({kind:'budget',name,scope:args.p_scope});return {data:grants.shift(),error:null};},
+   rpc:async(name,args)=>{
+     if(name==='register_inquiry_upload_ticket'){
+       calls.push({kind:'ticket',path:args.p_path,mime:args.p_mime_type,bytes:args.p_declared_bytes});
+       return {data:ticketResult,error:ticketError};
+     }
+     calls.push({kind:'budget',name,scope:args.p_scope});
+     return {data:grants.shift(),error:null};
+   },
    storage:{from:bucket=>{calls.push({kind:'bucket',bucket});return {createSignedUploadUrl:async p=>{
      calls.push({kind:'signed',path:p});return {data:{path:p,token},error:null};
    }}}},
@@ -55,7 +62,7 @@ test('approved guest gets a single scoped token after two database budgets and u
  const r=await f.handler(f.req());assert.equal(r.status,201);
  const result=await r.json();
  assert.deepEqual(result,{success:true,bucket:STAGING_IMAGE_BUCKET,path,token:'single-upload-token'});
- assert.deepEqual(f.calls.map(c=>c.kind),['admin','budget','captcha','budget','bucket','signed']);
+ assert.deepEqual(f.calls.map(c=>c.kind),['admin','budget','captcha','budget','ticket','bucket','signed']);
  assert.deepEqual(f.calls.filter(c=>c.kind==='budget').map(c=>c.scope),['upload-preverify','upload-issued']);
  assert.ok(f.calls.find(c=>c.kind==='captcha').body.includes('response='));
 });
@@ -94,4 +101,13 @@ test('safe preflight permits only declared request headers',async()=>{
  origin,'access-control-request-method':'DELETE','access-control-request-headers':'apikey',
  }}));
  assert.equal(denied.status,403);
+});
+
+test('failed ticket registration stops before signing any guest upload capability',async()=>{
+ for(const config of [{ticketResult:false},{ticketResult:null},{ticketError:{code:'42501'}}]){
+   const f=fixture(config), response=await f.handler(f.req());
+   assert.equal(response.status,503);
+   assert.equal(f.calls.some(c=>c.kind==='signed'),false);
+   assert.equal(f.calls.filter(c=>c.kind==='ticket').length,1);
+ }
 });

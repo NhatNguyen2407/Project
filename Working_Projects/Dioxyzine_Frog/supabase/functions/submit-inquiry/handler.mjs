@@ -135,7 +135,15 @@ export function createInquiryHandler({
       if (!validateCaptchaToken(body?.token)) {
         return json({ success: false, message: 'Verification required.' }, 400, origin);
       }
-      const row = validateInquiryPayload(body?.inquiry);
+      // Production keeps the established HTTPS image link contract. The
+      // staging-only ticket mode fails closed unless the guarded DB RPC exists.
+      const ticketMode = envGet('INQUIRY_UPLOAD_STAGING_ENABLED') === 'true';
+      if (ticketMode && url !== 'https://bvnnmvlfcduwmneipmsi.supabase.co') {
+        return json({success:false,message:'Upload service disabled.'},503,origin);
+      }
+      const row = validateInquiryPayload(body?.inquiry, {
+        stagingPrivateImages: ticketMode,
+      });
       if (!isInquiryIdempotencyKey(body?.idempotencyKey)) {
         return json({success:false,message:'Invalid submission identifier.'},400,origin);
       }
