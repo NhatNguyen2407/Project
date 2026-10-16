@@ -1,5 +1,5 @@
 import { supabase } from './supabase';
-import { mayMirrorInquiryToSheets } from '../utils/inquiryMirrorPolicy';
+import { mayMirrorInquiryToSheets, maySubmitFeedbackToSheets } from '../utils/inquiryMirrorPolicy';
 
 let pendingInquiry = null;
 
@@ -60,6 +60,12 @@ export const api = {
 
   // Feedback
   submitFeedback: async (data) => {
+    if (!maySubmitFeedbackToSheets({
+      deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    })) {
+      throw new Error('Feedback submission is disabled outside verified Production.');
+    }
     const payload = { type: 'feedback', ...data };
     return fetch(SCRIPT_URL, {
       method: 'POST',
