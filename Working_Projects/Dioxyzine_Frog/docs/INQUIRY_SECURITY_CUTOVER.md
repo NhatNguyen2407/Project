@@ -67,3 +67,27 @@ Anonymous visitors use the function without a user JWT, so deployment **must** d
 - **Required before deployment:** prove SQL executes cleanly, permissions cannot be abused through the public RPC or Data API, and parallel requests never exceed the fixed budgets. The DB RPC must be present before deploying the Edge Function (else submissions fail closed), and database INSERT bypass must be revoked as part of the coordinated cutover.
 
 **No paid resources, PostgreSQL DDL, Supabase function deployment, Production changes, or payment actions were performed for this review.**
+
+## Local-only PostgreSQL concurrency drill — prepared, NOT executed
+
+The script `scripts/verify-inquiry-rate-limit-local.mjs` exercises the actual draft SQL with 32 independent PostgreSQL connections, scope exhaustion, reset behavior, privilege metadata, unauthorized role execution and cleanup. Its companion Node tests check that remote databases, wrong ports and wrong database names cannot be targeted.
+
+**Before running the script:** provision a disposable local PostgreSQL instance on **127.0.0.1:54322** (not a hosted database), create a separate database named `dioxyzine_rate_limit_test`, and ensure local Postgres roles `service_role`, `anon`, and `authenticated` exist with a dedicated test-only administrative owner. This script does NOT provision the database. The SQL draft changes schema in that test database and the script truncates its private test table; it should never be connected to any existing data.
+
+Example with fake placeholder local credentials (do not paste real passwords into shell history or public files):
+
+```bash
+# These values must be provided privately by the local test operator.
+export INQUIRY_LOCAL_DATABASE_URL="postgresql://tester:<LOCAL_TEST_PASSWORD>@127.0.0.1:54322/dioxyzine_rate_limit_test"
+export INQUIRY_RATE_TEST_ACK="DISPOSABLE_LOCAL_TEST_DB"
+node scripts/verify-inquiry-rate-limit-local.mjs
+```
+
+**Environment safety gates:**
+- Both a specific acknowledgement and an exact disposable database name are mandatory.
+- Only explicit loopback hostnames/IPs and port `54322` pass the connection parser.
+- The script verifies the server-side database name and loopback interface before loading the SQL.
+- It never reads the Production Supabase URL or tries to provision hosted resources.
+- No test results are claimed until the script finishes against a real local PostgreSQL server. Normal GitHub CI runs only the safe Node connection-parser tests, not live SQL.
+
+**Availability in the current ChatGPT runtime on 2026-10-16:** Node.js is present, but `postgres`, `psql`, `initdb` and Docker are absent, and downloading missing packages is unavailable. Consequently, an actual PostgreSQL concurrency result remains **NOT TESTED**. Do not mistake code checks for the 32-connection database race test.
