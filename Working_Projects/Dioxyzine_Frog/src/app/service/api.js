@@ -17,9 +17,9 @@ export const api = {
 
   // Form Inquiry: the server validates reCAPTCHA and persists the request
   // in one trusted flow. This path must NOT use direct client table INSERT.
-  submitInquiry: async (data, recaptchaToken) => {
+  submitInquiry: async (data, recaptchaToken, submissionKey) => {
     const { data: result, error } = await supabase.functions.invoke('submit-inquiry', {
-      body: { inquiry: data, token: recaptchaToken }
+      body: { inquiry: data, token: recaptchaToken, idempotencyKey: submissionKey }
     });
     if (error || !result?.success) {
       throw error || new Error('Inquiry submission failed verification.');
