@@ -36,3 +36,9 @@ Record acceptance evidence under Issue #17, including commit SHAs, environment, 
 - [ ] Re-run after **either** PR changes; CI pin deliberately becomes stale if PR #21 moves.
 - [ ] Resolve the fact that Preview blocks Cloudinary uploads while Inquiry requires a reference image, using **synthetic, isolated storage only**. Do not connect real Cloudinary destinations or bypass fail-closed guards.
 - [ ] Before a real release, assess cross-PR source integration, payment behavior, authenticated Admin permissions, hosted Supabase schema/RPC availability, edge deployment ordering, rollback and external integrations.
+
+## Cloudinary Preview setup — operator gate
+- [ ] Provision a **separate Cloudinary cloud/account**, not a folder in the same production cloud. Configure a dedicated unsigned upload preset limited to image formats, small upload size, and folder `DioxyzineFrog_Staging/Inquiry_References` with no overwrite; confirm Cloudinary account security controls. Never reuse Production's cloud/preset.
+- [ ] Add Preview-only `VITE_STAGING_CLOUDINARY_CLOUD_NAME`, `VITE_STAGING_CLOUDINARY_UPLOAD_PRESET` and `VITE_ENABLE_STAGING_CLOUDINARY_UPLOAD=true` after independent review. Keep Production-only vars unchanged. The upload preset is a public client setting, not an authentication mechanism.
+- [ ] Verify test upload returns the expected public ID prefix and Cloudinary HTTPS URL, and the Production asset library contains no new test uploads. Validate abuse/upload limits. No real customer design images in test Cloudinary.
+- [ ] Only then mark hosted Inquiry reference upload E2E runnable. PR #19 remains Draft until other safety gates pass.
