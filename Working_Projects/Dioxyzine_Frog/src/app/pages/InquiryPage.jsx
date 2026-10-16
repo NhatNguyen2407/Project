@@ -1,10 +1,11 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle, Loader2, Lock, Calculator, Layers, UploadCloud } from 'lucide-react';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
+import { createInquiryFormGate } from '../utils/inquiryFormGate';
 import { uploadImageToCloudinary } from '../service/cloudinary';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
@@ -31,7 +32,10 @@ export function InquiryPage() {
 
   const [isSubjectEdited, setIsSubjectEdited] = useState(false);
   const [status, setStatus] = useState('idle');
-  const [isUploading, setIsUploading] = useState(false); // Trạng thái đang upload ảnh
+  const [isUploading, setIsUploading] = useState(false);
+  // Synchronous form gate: React state may lag on rapid clicks or file changes.
+  const formGateRef = useRef(null);
+  if (!formGateRef.current) formGateRef.current = createInquiryFormGate();
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsOfServiceModal, setShowTermsOfServiceModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
@@ -92,14 +96,18 @@ export function InquiryPage() {
     setTimeout(() => setToast({ show: false, msg: '', type: '' }), 3500);
   };
 
-  // Hàm xử lý đẩy ảnh lên Cloudinary
+  // Clear the old image as soon as a replacement is selected. Only the
+  // latest asynchronous upload may attach its URL to the form.
   const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0];
     if (!file) return;
-
+    const attempt = formGateRef.current.beginUpload();
+    if (attempt === null) return;
+    setFormData(prev => ({ ...prev, imageLink: '' }));
     setIsUploading(true);
     try {
       const uploadedUrl = await uploadImageToCloudinary(file);
+      if (!formGateRef.current.isCurrentUpload(attempt)) return;
       if (uploadedUrl) {
         setFormData(prev => ({ ...prev, imageLink: uploadedUrl }));
         showToast('Image uploaded securely!', 'success');
@@ -107,15 +115,17 @@ export function InquiryPage() {
         showToast('Upload failed. Please try again.', 'error');
       }
     } catch (error) {
-      console.error("Upload error:", error);
+      if (!formGateRef.current.isCurrentUpload(attempt)) return;
+      console.error('Image upload failed:', error);
       showToast('Error connecting to image server.', 'error');
     } finally {
-      setIsUploading(false);
+      if (formGateRef.current.finishUpload(attempt)) setIsUploading(false);
     }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formGateRef.current.isBusy()) return;
     if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.quantity) {
       return showToast('Please fill in all required fields!', 'error');
     }
@@ -131,8 +141,9 @@ export function InquiryPage() {
       return showToast('reCAPTCHA is not ready. Please refresh the page!', 'error');
     }
 
+    if (!formGateRef.current.beginSubmit()) return;
     setStatus('loading');
-    
+
     try {
       const token = await executeRecaptcha('inquiry_submit');
 
@@ -157,6 +168,8 @@ export function InquiryPage() {
       console.error('Error:', error);
       showToast('Connection error. Please try again later!', 'error');
       setStatus('idle');
+    } finally {
+      formGateRef.current.finishSubmit();
     }
   };
 
@@ -262,7 +275,7 @@ export function InquiryPage() {
                       type="file"
                       accept="image/jpeg, image/png, image/webp"
                       onChange={handleImageUpload}
-                      disabled={isUploading}
+                      disabled={isUploading || status === 'loading'}
                       className="block w-full text-sm text-muted-foreground
                         file:mr-4 file:py-3 file:px-6
                         file:rounded-full file:border-0

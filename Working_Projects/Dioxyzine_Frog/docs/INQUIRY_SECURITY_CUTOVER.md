@@ -153,3 +153,9 @@ Covered scenarios:
 - PR #21 now incorporates the Preview Supabase build-time isolation guard already merged into `main`, plus the Vercel environment value exposed to client policy. This prevents losing the already-released guard if the stale Draft branch were merged.
 - Added pure policy/environment matrix tests and a source-contract check for Feedback; browser/network verification and the eventual merging of #19/#21 still require separate release gates. `api.fetchProducts` can still READ the configured Google Sheet; replacing the read-side feed needs a separate source-of-truth decision in Phase 3.
 - No Production write, service configuration change, Edge Function deployment or PR merge occurred. Exact-HEAD CI and Preview results should be recorded after this change is pushed.
+
+## 2026-10-16 — Inquiry form duplicate-submit and image race hardening
+- Source audit identified two potential React UI race conditions: old uploaded image URLs persisted during replacement and multiple synchronous submit calls could begin before `status=loading` rerendered.
+- Added `createInquiryFormGate` as a synchronous in-memory guard, clears the attached URL on replacement, ignores stale upload completions, and prevents submit while an image is still uploading or a submit is in progress. Image picker is disabled during submission.
+- Added five pure/UI-contract tests for concurrent upload, last-selection-wins and duplicate submissions. This is a frontend safety improvement, not a replacement for backend idempotency in `submit-inquiry`.
+- PR #21 remains Draft. Update the pinned version in PR #19's combined-source workflow after the new SHA and CI are verified. No hosted Storage uploads or Production modifications.
