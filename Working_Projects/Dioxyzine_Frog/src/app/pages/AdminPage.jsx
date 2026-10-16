@@ -5,6 +5,7 @@ import { supabase } from '../service/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
 import emailjs from '@emailjs/browser';
+import { canUseLiveExternalServices } from '../utils/externalServicePolicy';
 import { toast } from 'sonner';
 
 import { ToastNotification } from '../components/common_components/ToastNotification';
@@ -111,6 +112,10 @@ export function AdminPage() {
   }, [role]);
 
   const handleUpdateStatus = async (order, newStatus) => {
+    if (!canUseLiveExternalServices({ deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV, supabaseUrl: import.meta.env.VITE_SUPABASE_URL })) {
+      toast.error('Order updates are disabled outside verified Production.');
+      return;
+    }
     setUpdatingId(order.id);
     try {
       const validatedOrderId = requireOrderId(order.id);
