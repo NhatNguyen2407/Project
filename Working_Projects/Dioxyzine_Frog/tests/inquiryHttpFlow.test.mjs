@@ -34,7 +34,7 @@ function fixture(options={}) {
   const events=[], records=[], errors=[], usedTokens=new Set();
   const client = {
     rpc:async (_name, args)=>{
-      events.push(args.p_scope);
+      if(_name !== 'create_inquiry_idempotent') events.push(args.p_scope);
       if(_name === 'create_inquiry_idempotent') {
         events.push('insert');
         records.push({ ...args.p_row, user_id:args.p_user_id });
