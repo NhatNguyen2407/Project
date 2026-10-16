@@ -23,6 +23,8 @@ jobs:
       - uses: denoland/setup-deno@v2
         with:
           deno-version: v2.x
+      - name: Prepare isolated Deno npm dependencies
+        run: deno install --entrypoint supabase/functions/submit-inquiry/index.ts
       - name: Type-check real Edge Function entrypoint and pinned CORS import
         run: deno check supabase/functions/submit-inquiry/index.ts
       - name: Run isolated Deno HTTP smoke tests (synthetic services only)
