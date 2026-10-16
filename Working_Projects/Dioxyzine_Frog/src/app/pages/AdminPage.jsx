@@ -124,11 +124,16 @@ export function AdminPage() {
         updateData.tracking_code = trackingCode;
       }
 
-      const { error } = await supabase.from('orders').update(updateData).eq('id', order.id);
-      if (error) throw error;
+      // Returning the row is essential: Supabase can return no error even
+      // when RLS prevents the update or no matching row was changed.
+      const { data, error } = await supabase.from('orders')
+        .update(updateData)
+        .eq('id', validatedOrderId)
+        .select('id');
+      assertConfirmedMutation({ data, error }, validatedOrderId);
 
-      setPaypalOrders(paypalOrders.map(o =>
-        o.id === order.id ? { ...o, ...updateData } : o
+      setPaypalOrders(current => current.map(o =>
+        o.id === validatedOrderId ? { ...o, ...updateData } : o
       ));
 
       if (newStatus === 'shipping') {
