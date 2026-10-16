@@ -8,7 +8,7 @@ test('browser service sends idempotency key and retains it on uncertain failure'
   assert.match(src,/idempotencyKey: pending\.key/);
   assert.match(src,/if \(pending\.promise\) return pending\.promise/);
   assert.match(src,/if \(pendingInquiry === pending\) pendingInquiry = null/);
-  assert.match(src,/if \(!result\.replayed\)/);
+  assert.match(src,/if \(!result\.replayed && mayMirrorInquiryToSheets\(\{/);
 });
 
 test('trusted handler requires valid key and maps RPC replays and key conflicts',()=>{
