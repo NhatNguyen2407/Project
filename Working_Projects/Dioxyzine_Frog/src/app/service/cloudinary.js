@@ -1,4 +1,9 @@
+import { canUseLiveExternalServices } from '../utils/externalServicePolicy';
+
 export const uploadImageToCloudinary = async (file) => {
+  if (!canUseLiveExternalServices({ deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV, supabaseUrl: import.meta.env.VITE_SUPABASE_URL })) {
+    throw new Error('Cloudinary uploads are disabled outside verified Production.');
+  }
   const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
   const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
 
