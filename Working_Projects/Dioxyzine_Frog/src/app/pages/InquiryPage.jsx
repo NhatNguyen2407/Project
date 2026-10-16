@@ -106,7 +106,11 @@ export function InquiryPage() {
     setFormData(prev => ({ ...prev, imageLink: '' }));
     setIsUploading(true);
     try {
-      const uploadedUrl = await uploadImageToCloudinary(file);
+      // The uploader requests a separate CAPTCHA only when the isolated
+      // Preview guest-upload provider is selected. Production stays unchanged.
+      const uploadedUrl = await uploadImageToCloudinary(
+        file, () => executeRecaptcha?.('inquiry_upload'),
+      );
       if (!formGateRef.current.isCurrentUpload(attempt)) return;
       if (uploadedUrl) {
         setFormData(prev => ({ ...prev, imageLink: uploadedUrl }));
@@ -292,7 +296,11 @@ export function InquiryPage() {
                     {formData.imageLink && !isUploading && (
                       <div className="flex items-center gap-2 text-sm text-green-500 font-bold px-2">
                         <CheckCircle className="w-4 h-4" /> Image attached!
-                        <a href={formData.imageLink} target="_blank" rel="noreferrer" className="underline ml-2 text-xs text-muted-foreground hover:text-foreground transition-colors">View file</a>
+                        {formData.imageLink.startsWith('https://') ? (
+                          <a href={formData.imageLink} target="_blank" rel="noreferrer" className="underline ml-2 text-xs text-muted-foreground hover:text-foreground transition-colors">View file</a>
+                        ) : (
+                          <span className="ml-2 text-xs text-muted-foreground">Private Staging reference attached</span>
+                        )}
                       </div>
                     )}
                   </div>

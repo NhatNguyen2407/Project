@@ -1,0 +1,50 @@
+name: Dioxyzine Inquiry Upload Ticket SQL Drill
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/dioxyzine-inquiry-upload-ticket.yml'
+      - 'Working_Projects/Dioxyzine_Frog/docs/drafts/INQUIRY_IDEMPOTENCY_DRAFT.sql'
+      - 'Working_Projects/Dioxyzine_Frog/docs/drafts/INQUIRY_UPLOAD_TICKET_BINDING_DRAFT.sql'
+      - 'Working_Projects/Dioxyzine_Frog/scripts/verify-inquiry-upload-ticket-disposable.sql'
+      - 'Working_Projects/Dioxyzine_Frog/supabase/functions/issue-inquiry-upload/**'
+      - 'Working_Projects/Dioxyzine_Frog/supabase/functions/submit-inquiry/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+jobs:
+  isolated-postgres:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: inquiry_upload_disposable
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci_disposable_only
+        ports:
+          - 127.0.0.1:54324:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d inquiry_upload_disposable"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: Working_Projects/Dioxyzine_Frog
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify ticket and idempotency SQL on disposable PostgreSQL
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '54324'
+          PGUSER: postgres
+          PGPASSWORD: ci_disposable_only
+          PGDATABASE: inquiry_upload_disposable
+        run: |
+          set -euo pipefail
+          if [ "$PGHOST" != '127.0.0.1' ] || [ "$PGPORT" != '54324' ] || [ "$PGDATABASE" != 'inquiry_upload_disposable' ]; then
+            echo 'Refusing non-disposable database'; exit 1
+          fi
+          psql -X -v ON_ERROR_STOP=1 -f scripts/verify-inquiry-upload-ticket-disposable.sql
