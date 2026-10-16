@@ -2,6 +2,7 @@
 // Dependencies are provided by the Deno entrypoint in production and by mocks
 // in Node tests. No database or Google network call occurs on module import.
 import { INQUIRY_BUDGETS, consumeInquiryBudget } from './rateBudget.mjs';
+import { persistInquiryOnce, isInquiryIdempotencyKey } from './idempotency.mjs';
 import {
   validateInquiryPayload,
   assessRecaptcha,
@@ -129,6 +130,9 @@ export function createInquiryHandler({
         return json({ success: false, message: 'Verification required.' }, 400, origin);
       }
       const row = validateInquiryPayload(body?.inquiry);
+      if (!isInquiryIdempotencyKey(body?.idempotencyKey)) {
+        return json({success:false,message:'Invalid submission identifier.'},400,origin);
+      }
       const admin = createClient(url, adminKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
@@ -185,15 +189,14 @@ export function createInquiryHandler({
         }
       }
 
-      const { data, error } = await admin.from('inquiries')
-        .insert({ ...row, user_id: userId })
-        .select('id')
-        .single();
-      if (error || !data?.id) {
-        logger.error('Inquiry storage failed:', error?.code || 'no record returned');
-        return json({ success: false, message: 'Unable to submit right now.' }, 503, origin);
+      const result = await persistInquiryOnce(admin, {
+        key: body.idempotencyKey, row, userId,
+      });
+      if (result.conflict) {
+        return json({ success:false, message:'Submission identifier reused with different details.' },409,origin);
       }
-      return json({ success: true, inquiryId: data.id }, 201, origin);
+      return json({ success:true, inquiryId:result.inquiryId, replayed:result.replayed },
+        result.replayed ? 200 : 201,origin);
     } catch (error) {
       if (error instanceof RequestTooLarge) {
         return json({ success: false, message: 'Request too large.' }, 413, origin);
