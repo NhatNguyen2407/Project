@@ -39,7 +39,8 @@ function fixture(options={}) {
         events.push('insert');
         records.push({ ...args.p_row, user_id:args.p_user_id });
         if(options.insertError) return {data:null,error:{code:'TEST_STORAGE_ERROR'}};
-        return {data:{inquiryId:'created-test-inquiry',replayed:false},error:null};
+        if(options.keyConflict) return {data:null,error:{code:'23505'}};
+        return {data:{inquiryId:'created-test-inquiry',replayed:!!options.replayed},error:null};
       }
       if(options.rpcError===args.p_scope) return {data:null,error:{code:'TEST_DB_ERROR'}};
       return {data:options.denyBudget===args.p_scope?false:true,error:null};
@@ -204,4 +205,18 @@ test('unapproved HTTP methods fail without side effects',async()=>{
     method:'GET',headers:{origin:'https://shop.test.example'},
   }),405);
   assert.deepEqual(f.events,[]);
+});
+
+test('already committed retry returns original ID and HTTP 200, not another logical success',async()=>{
+  const f=fixture({replayed:true});
+  const result=await check(f.handler,request(),200);
+  assert.equal(result.body.inquiryId,'created-test-inquiry');
+  assert.equal(result.body.replayed,true);
+  assert.equal(f.records.length,1); // RPC mock invocation, not an additional database insert
+});
+
+test('reused request key with changed payload rejects with 409',async()=>{
+  const f=fixture({keyConflict:true});
+  const result=await check(f.handler,request(),409);
+  assert.equal(result.body.success,false);
 });
