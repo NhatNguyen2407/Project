@@ -70,9 +70,9 @@ async function readJsonBounded(request) {
  * @param {(key:string) => string|undefined} dependencies.envGet
  * @param {Function} dependencies.createClient Supabase service role client factory
  * @param {typeof fetch} dependencies.fetchCaptcha HTTP siteverify caller
- * @param {() => number} dependencies.clock current Unix milliseconds
- * @param {object} dependencies.logger sanitized error logger
- * @param {string} dependencies.allowedCorsHeaders SDK-supported preflight headers
+ * @param {() => number} [dependencies.clock] current Unix milliseconds
+ * @param {object} [dependencies.logger] sanitized error logger
+ * @param {string} [dependencies.allowedCorsHeaders] SDK-supported preflight headers
  */
 export function createInquiryHandler({
   envGet,
