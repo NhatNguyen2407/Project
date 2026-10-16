@@ -434,3 +434,11 @@ entrypoint = "./functions/verify-recaptcha/index.ts"
 # Specifies static files to be bundled with the function. Supports glob patterns.
 # For example, if you want to serve static HTML pages in your function:
 # static_files = [ "./functions/verify-recaptcha/*.html" ]
+
+# Guest inquiries require OPTIONS and unauthenticated requests to reach
+# the handler. The function validates the public API key, CAPTCHA and quotas.
+# Do not disable JWT verification for unrelated functions.
+[functions.submit-inquiry]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/submit-inquiry/index.ts"
