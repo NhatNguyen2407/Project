@@ -79,3 +79,8 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 - Added `docs/staging/INQUIRY_GUEST_UPLOAD_DESIGN.md` with the trusted signed-upload issuance, rate limiting, Auth/CAPTCHA policy, durable private object-path reference and short-lived URL constraints. **No public guest endpoint, service key, schema permission change or upload was introduced.**
 - Unit test/combined CI result for this source patch is PENDING. After verified tests, operator-gated Staging synthetic Auth user, owner/cross-user permissions, actual browser upload and guest issuance implementation remain deferred.
 - Roadmap: Phase 1 baseline DONE, Recovery PARTIAL, CI available / E2E pending; Phase 2 Draft security and upload foundation improving but not released; Phases 3–5 NOT STARTED.
+
+## 2026-10-16 — Combined PR re-pin after Inquiry race fix
+- PR #21 commit `745593e` fixes stale upload URL attachment and duplicate simultaneous Inquiry submit on the frontend. Its three workflows (App CI `38916425012`, Deno `38916425063`, PostgreSQL `38916425077`) SUCCESS; Vercel Preview `dpl_6yERDVTJvw1RZoN3ByB8QqbCbaZR` READY.
+- Combined-source CI pin updated from old PR #21 HEAD to `745593e`; verify next combined run before marking integrated. Both PRs stay Draft and the backend cutover remains deferred.
+- Roadmap remains Phase 1 baseline DONE, Recovery PARTIAL and E2E PENDING; Phase 2 source optimization ongoing (not released); Phases 3–5 NOT STARTED.
