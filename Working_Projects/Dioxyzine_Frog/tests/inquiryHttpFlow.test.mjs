@@ -114,6 +114,13 @@ test('public anon token remains a guest and cannot impersonate user',async()=>{
   assert.equal(f.records[0].user_id,null);
   assert.equal(f.events.includes('auth'),false);
 });
+test('invalid public keys are blocked before rate budget and Google verification',async()=>{
+  for(const apiKey of ['wrong-key','sb_secret_unauthorized']){
+    const f=fixture();
+    await check(f.handler,request(body,{headers:{apikey:apiKey}}),401);
+    assert.deepEqual(f.events,[]);
+  }
+});
 test('missing or incorrect apikey cannot reach the database write',async()=>{
   for(const apiKey of ['', 'wrong-public-key', 'sb_secret_fake']) {
     const f=fixture();
