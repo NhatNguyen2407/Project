@@ -66,6 +66,25 @@ Deno.serve(async (request) => {
       return json({ success: false, message: 'Verification required.' }, 400, origin);
     }
     const row = validateInquiryPayload(body?.inquiry);
+
+    // The RPC is an atomic database-backed global budget, shared across
+    // Edge Function instances. Never proceed on missing grants or RPC errors.
+    const admin = createClient(url, adminKey, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
+    const preverify = await admin.rpc('consume_inquiry_rate_budget', {
+      p_scope: 'inquiry-preverify',
+      p_max_hits: 180,
+      p_window_seconds: 60,
+    });
+    if (preverify.error) {
+      console.error('Inquiry preverification budget unavailable', preverify.error.code || 'rpc');
+      return json({ success: false, message: 'Service temporarily unavailable.' }, 503, origin);
+    }
+    if (preverify.data !== true) {
+      return json({ success: false, message: 'Too many requests. Please try later.' }, 429, origin);
+    }
+
     const verifyResponse = await fetch('https://www.google.com/recaptcha/api/siteverify', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
@@ -80,9 +99,21 @@ Deno.serve(async (request) => {
       return json({ success: false, message: 'Security verification failed.' }, 403, origin);
     }
 
-    const admin = createClient(url, adminKey, {
-      auth: { persistSession: false, autoRefreshToken: false },
+    // Limit actual accepted inquiries separately from verification traffic.
+    // Fixed global quotas are a conservative safeguard, not user-specific
+    // rate limiting. Check before processing customer identity and writing.
+    const accepted = await admin.rpc('consume_inquiry_rate_budget', {
+      p_scope: 'inquiry-accepted',
+      p_max_hits: 60,
+      p_window_seconds: 3600,
     });
+    if (accepted.error) {
+      console.error('Inquiry submission budget unavailable', accepted.error.code || 'rpc');
+      return json({ success: false, message: 'Service temporarily unavailable.' }, 503, origin);
+    }
+    if (accepted.data !== true) {
+      return json({ success: false, message: 'Too many requests. Please try later.' }, 429, origin);
+    }
 
     // Caller-provided user_id is never accepted. Signed-in users are verified
     // against Auth; anonymous submissions intentionally remain guest inquiries.
