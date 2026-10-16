@@ -42,3 +42,11 @@ Record acceptance evidence under Issue #17, including commit SHAs, environment, 
 - [ ] Add Preview-only `VITE_STAGING_CLOUDINARY_CLOUD_NAME`, `VITE_STAGING_CLOUDINARY_UPLOAD_PRESET` and `VITE_ENABLE_STAGING_CLOUDINARY_UPLOAD=true` after independent review. Keep Production-only vars unchanged. The upload preset is a public client setting, not an authentication mechanism.
 - [ ] Verify test upload returns the expected public ID prefix and Cloudinary HTTPS URL, and the Production asset library contains no new test uploads. Validate abuse/upload limits. No real customer design images in test Cloudinary.
 - [ ] Only then mark hosted Inquiry reference upload E2E runnable. PR #19 remains Draft until other safety gates pass.
+
+## Supabase Storage Staging — supersedes Cloudinary Staging proposal
+- [ ] Review and apply Staging-only SQL `docs/staging/STAGING_INQUIRY_STORAGE.sql` ONLY to `bvnnmvlfcduwmneipmsi`; confirm private bucket, MIME/5MiB limits, zero anon access and authenticated own-prefix grants. Never apply to Production.
+- [ ] Only after bucket/RLS verification, consider Preview-only `VITE_ENABLE_STAGING_STORAGE_UPLOAD=true` and re-run Preview build/CI. Production Cloudinary vars remain unchanged.
+- [ ] Synthetic Staging Auth user: upload own image and obtain a signed one-hour test URL; anonymous user and cross-user access rejected; forbidden types, too-large files, overwrite and wrong paths rejected. Never use real customer images.
+- [ ] Guest Inquiry E2E requires a separate short-lived, rate-limited server-issued upload mechanism. Do NOT add broad `anon` Storage INSERT policy to make a green test.
+- [ ] The one-hour signed image URL is test-only and will expire; do not use for durable user design references or claim full Inquiry production parity.
+- [ ] Legacy empty Cloudinary test folder may remain unused; do not delete or move unrelated assets.

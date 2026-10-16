@@ -1,6 +1,6 @@
 # Dioxyzine Frog — Debug & Optimization Progress
 
-**Last change batch:** 2026-10-16 · Canonical/legacy Admin Review consistency (Draft PR #19)
+**Last change batch:** 2026-10-16 · Supabase Storage Staging upload source integration (Draft PR #19)
 **Status rule:** Change labels distinguish SOURCE FIXED, CI VERIFIED, HOSTED TESTED, RELEASED and DEFERRED. A green build does not imply runtime E2E or Production release.
 
 ## Total roadmap
@@ -65,3 +65,10 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 - Draft PR #19 introduces a Preview-only upload configuration requiring an explicit opt-in, a **separate Cloudinary cloud** and a **different preset**, matching Supabase Staging. It also checks returned URL and public ID prefix. Until all conditions hold, Preview continues to deny uploads. This is an operational client guard, not a server security boundary.
 - A dedicated staging cloud/account, a restricted unsigned preset targeting the folder, and explicit Vercel Preview-only variables remain **operator setup pending**. No images, customers, Production data or Cloudinary account settings were changed. Exact-commit CI awaits verification.
 - Roadmap: Phase 1 Recovery/E2E still pending; Phase 2 Preview upload path CODE PREPARED but not hosted-tested or released; Phases 3–5 not started.
+
+## 2026-10-16 — Replace Preview Cloudinary with Supabase Storage Staging
+- The owner opted not to maintain a second Cloudinary account. The existing Supabase Staging project has zero Storage buckets and no object policies. This batch replaces the previous unused Preview Cloudinary-cloud/preset option with a private Storage bucket proposal named `inquiry-test-references`.
+- A Staging-only migration `docs/staging/STAGING_INQUIRY_STORAGE.sql` contains synthetic-project and empty-bucket preflight checks, private 5 MiB image bucket and owner-folder RLS for `authenticated` INSERT/SELECT only. No guest/anonymous upload policy, UPDATE or DELETE.
+- Preview selects Staging Storage only when the backend URL exactly matches the Staging project and `VITE_ENABLE_STAGING_STORAGE_UPLOAD=true`; otherwise it fails closed. Production retains Cloudinary. Only synthetic images for Staging test accounts; the client returns a one-hour signed private image URL (ephemeral, not durable). Guest Inquiry upload remains blocked pending a trusted token issuer and quota.
+- Code/test status **PENDING CI** until final SHA verified. Applying Staging migration is a separate authorized operation and must be independently confirmed. No Production changes; PRs #19/#21 remain Draft.
+- Phase 1 still baseline DONE, Recovery PARTIAL, E2E PENDING; Phase 2 source optimization ongoing; Phase 3 Data Integration not started; Phases 4–5 not started.

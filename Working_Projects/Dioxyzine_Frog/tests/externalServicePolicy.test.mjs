@@ -23,6 +23,6 @@ test('Checkout, Admin and Cloudinary use the environment guard before live write
   assert.match(checkout,/if \(liveExternalServices\) await emailjs\.send/);
   assert.match(admin,/const allowAdminWrite = \(\) => \{[\s\S]*?canUseLiveExternalServices\(/);
   assert.match(admin,/const handleUpdateStatus = async[\s\S]*?if \(!allowAdminWrite\(\)\) return;/);
-  assert.match(cloud,/export const uploadImageToCloudinary = async \(file\) => \{[\s\S]*?selectCloudinaryUploadConfig\(/);
+  assert.match(cloud,/export const uploadImageToCloudinary = async \(file\) => \{[\s\S]*?selectInquiryImageProvider\(/);
   assert.match(vite,/['"]import\.meta\.env\.VITE_VERCEL_ENV['"]:\s*JSON\.stringify\(process\.env\.VERCEL_ENV \|\| ''\)/);
 });
