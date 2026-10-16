@@ -138,6 +138,16 @@ export function createInquiryHandler({
       if (!isInquiryIdempotencyKey(body?.idempotencyKey)) {
         return json({success:false,message:'Invalid submission identifier.'},400,origin);
       }
+      const caller = classifyInquiryCaller(
+        request.headers,
+        envGet('INQUIRY_PUBLIC_API_KEY'),
+        adminKey,
+      );
+      if (caller.status !== 200) {
+        return json({ success: false, message: caller.status === 503
+          ? 'Service temporarily unavailable.' : 'Invalid authorization.' },
+          caller.status, origin);
+      }
       const admin = createClient(url, adminKey, {
         auth: { persistSession: false, autoRefreshToken: false },
       });
@@ -177,16 +187,6 @@ export function createInquiryHandler({
 
       // Public apikey identifies the application, not a user. A separate
       // non-key Bearer token must be verified via Supabase Auth.
-      const caller = classifyInquiryCaller(
-        request.headers,
-        envGet('INQUIRY_PUBLIC_API_KEY'),
-        adminKey,
-      );
-      if (caller.status !== 200) {
-        return json({ success: false, message: caller.status === 503
-          ? 'Service temporarily unavailable.' : 'Invalid authorization.' },
-          caller.status, origin);
-      }
       let userId = null;
       if (caller.userToken) {
         const { data, error } = await admin.auth.getUser(caller.userToken);
