@@ -50,7 +50,14 @@ function psql(env, args, { allowFailure = false } = {}) {
     let stdout = '';
     let stderr = '';
     const child = spawn('psql', ['-X', '-A', '-t', '-q', '-v', 'ON_ERROR_STOP=1', ...args], {
-      env: { ...process.env, ...env },
+      // Do not inherit PGHOSTADDR, PGSERVICE, PGOPTIONS or any other PG*
+      // override that could redirect a supposedly loopback-only test.
+      env: {
+        PATH: process.env.PATH || '',
+        HOME: process.env.HOME || '',
+        LANG: 'C',
+        ...env,
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     child.stdout.on('data', chunk => { stdout += chunk; });
