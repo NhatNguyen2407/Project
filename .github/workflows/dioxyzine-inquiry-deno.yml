@@ -4,7 +4,7 @@ on:
   pull_request:
     paths:
       - 'Working_Projects/Dioxyzine_Frog/supabase/functions/submit-inquiry/**'
-      - 'Working_Projects/Dioxyzine_Frog/tests/inquiry-runtime-smoke.test.mjs'
+      - 'Working_Projects/Dioxyzine_Frog/scripts/inquiry-runtime-smoke.mjs'
       - '.github/workflows/dioxyzine-inquiry-deno.yml'
   workflow_dispatch:
 
@@ -28,4 +28,4 @@ jobs:
       - name: Type-check real Edge Function entrypoint and pinned CORS import
         run: deno check supabase/functions/submit-inquiry/index.ts
       - name: Run isolated Deno HTTP smoke tests (synthetic services only)
-        run: deno test --allow-net=127.0.0.1 --allow-env tests/inquiry-runtime-smoke.test.mjs
+        run: deno test --allow-net=127.0.0.1 --allow-env scripts/inquiry-runtime-smoke.mjs
