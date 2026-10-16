@@ -1,4 +1,4 @@
-import { spawnSync } from 'node:child_process';
+import { spawnSync, spawn } from 'node:child_process';
 import { randomUUID, createHash } from 'node:crypto';
 import assert from 'node:assert/strict';
 import { parseLocalRateTestDatabase } from './verify-inquiry-rate-limit-local.mjs';
@@ -25,13 +25,30 @@ for(const role of ['anon','authenticated'])
 const key=randomUUID(), hash=createHash('sha256').update('synthetic').digest('hex');
 const row=JSON.stringify({subject:'Test',customer_name:'Synthetic',customer_email:'sample@example.invalid',contact_info:'Test',product_name:'Plush',size:'10',quantity:2,accessory_qty:0,image_link:'https://example.invalid/sample'});
 const statement="select public.create_inquiry_idempotent('"+key+"','"+hash+"','"+row+"'::jsonb,null)::text";
-const results=[];
-for(let i=0;i<3;i++)results.push(JSON.parse(sql(statement).value));
+// Slow the first INSERT slightly so independent connections overlap while
+// the first transaction holds its advisory lock. Only in disposable CI DB.
+sql("create function public.inquiry_test_delay() returns trigger language plpgsql as $$ begin perform pg_sleep(0.5); return new; end $$");
+sql("create trigger inquiry_test_race before insert on public.inquiries for each row execute function public.inquiry_test_delay()");
+
+const concurrentSql = () => new Promise((resolve,reject) => {
+  const child=spawn('psql',['-X','-A','-t','-q','-v','ON_ERROR_STOP=1','-c',statement],{
+    env:runtime,stdio:['ignore','pipe','ignore'],
+  });
+  let stdout='';
+  child.stdout.on('data',chunk=>{stdout+=chunk;});
+  child.on('error',()=>reject(Error('Unable to start test psql process')));
+  child.on('close',code=>{
+    if(code!==0)return reject(Error('Concurrent idempotency query failed'));
+    try {resolve(JSON.parse(stdout.trim()));}
+    catch {reject(Error('Invalid concurrent idempotency response'));}
+  });
+});
+const results=await Promise.all(Array.from({length:24},()=>concurrentSql()));
 assert.equal(results.filter(r=>r.replayed===false).length,1);
-assert.equal(results.filter(r=>r.replayed===true).length,2);
+assert.equal(results.filter(r=>r.replayed===true).length,23);
 assert.equal(new Set(results.map(r=>r.inquiryId)).size,1);
 assert.equal(sql('select count(*) from public.inquiries').value,'1');
 assert.notEqual(sql("select public.create_inquiry_idempotent('"+key+"','"+ 'b'.repeat(64) +"','"+row+"'::jsonb,null)",true).status,0);
 assert.equal(sql('select count(*) from public.inquiries').value,'1');
 assert.notEqual(sql("begin; set local role anon; "+statement+"; rollback;",true).status,0);
-console.log('Idempotency SQL test succeeded: same-key replays=2, inserts=1, conflict denied, anon denied');
+console.log('Idempotency SQL test succeeded: 24 independent parallel clients, same-key replays=23, inserts=1, conflict denied, anon denied');
