@@ -1,4 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.110.0';
+import { INQUIRY_BUDGETS, consumeInquiryBudget } from './rateBudget.mjs';
 import {
   validateInquiryPayload,
   assessRecaptcha,
@@ -72,16 +73,13 @@ Deno.serve(async (request) => {
     const admin = createClient(url, adminKey, {
       auth: { persistSession: false, autoRefreshToken: false },
     });
-    const preverify = await admin.rpc('consume_inquiry_rate_budget', {
-      p_scope: 'inquiry-preverify',
-      p_max_hits: 180,
-      p_window_seconds: 60,
-    });
-    if (preverify.error) {
-      console.error('Inquiry preverification budget unavailable', preverify.error.code || 'rpc');
+    let preverifyAllowed;
+    try {
+      preverifyAllowed = await consumeInquiryBudget(admin, INQUIRY_BUDGETS.preverify);
+    } catch {
       return json({ success: false, message: 'Service temporarily unavailable.' }, 503, origin);
     }
-    if (preverify.data !== true) {
+    if (!preverifyAllowed) {
       return json({ success: false, message: 'Too many requests. Please try later.' }, 429, origin);
     }
 
@@ -102,16 +100,13 @@ Deno.serve(async (request) => {
     // Limit actual accepted inquiries separately from verification traffic.
     // Fixed global quotas are a conservative safeguard, not user-specific
     // rate limiting. Check before processing customer identity and writing.
-    const accepted = await admin.rpc('consume_inquiry_rate_budget', {
-      p_scope: 'inquiry-accepted',
-      p_max_hits: 60,
-      p_window_seconds: 3600,
-    });
-    if (accepted.error) {
-      console.error('Inquiry submission budget unavailable', accepted.error.code || 'rpc');
+    let acceptedAllowed;
+    try {
+      acceptedAllowed = await consumeInquiryBudget(admin, INQUIRY_BUDGETS.accepted);
+    } catch {
       return json({ success: false, message: 'Service temporarily unavailable.' }, 503, origin);
     }
-    if (accepted.data !== true) {
+    if (!acceptedAllowed) {
       return json({ success: false, message: 'Too many requests. Please try later.' }, 429, origin);
     }
 
