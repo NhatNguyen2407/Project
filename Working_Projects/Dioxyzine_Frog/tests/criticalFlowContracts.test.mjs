@@ -21,16 +21,16 @@ test('shipping email uses full validated application UUID', () => {
 
 test('delete product and voucher writes require successful database confirmation', () => {
   const source = readSource('../src/app/pages/AdminPage.jsx');
-  const segment = (start, end) => {
+  const segment = (start) => {
     const from = source.indexOf(start);
-    const to = source.indexOf(end, from + start.length);
+    const to = source.indexOf('\n  };', from + start.length);
     assert.ok(from >= 0 && to > from, `Expected Admin handler boundary: ${start}`);
     return source.slice(from, to);
   };
   for (const body of [
-    segment('const handleDeleteProduct', 'const handleToggleVoucher'),
-    segment('const handleToggleVoucher', 'const handleDeleteVoucher'),
-    segment('const handleDeleteVoucher', 'const '),
+    segment('const handleDeleteProduct'),
+    segment('const handleToggleVoucher'),
+    segment('const handleDeleteVoucher'),
   ]) {
     assert.match(body, /assertConfirmedMutation\(\{\s*data,\s*error\s*\},\s*id\)/);
     assert.match(body, /\.select\(['"]id['"]\)/);
