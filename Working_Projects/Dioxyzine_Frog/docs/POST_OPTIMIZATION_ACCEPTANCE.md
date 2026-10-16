@@ -50,3 +50,9 @@ Record acceptance evidence under Issue #17, including commit SHAs, environment, 
 - [ ] Guest Inquiry E2E requires a separate short-lived, rate-limited server-issued upload mechanism. Do NOT add broad `anon` Storage INSERT policy to make a green test.
 - [ ] The one-hour signed image URL is test-only and will expire; do not use for durable user design references or claim full Inquiry production parity.
 - [ ] Legacy empty Cloudinary test folder may remain unused; do not delete or move unrelated assets.
+
+## Test-image signature and guest upload requirements
+- [ ] Verify browser upload with a **synthetic** Staging Auth account created through an authorized Auth administration flow; current Staging Auth user count is zero. Never use real customer identity or credentials in logs.
+- [ ] Check accepted PNG/JPEG/WebP image bytes and mismatched MIME/extension at bucket, browser and eventual server layers. Magic-byte checks alone do not validate full image integrity, malicious payloads or resource exhaustion.
+- [ ] Implement and test separate trusted guest upload issuer with reCAPTCHA/origin validation, durable DB rate budget, path scoping, quotas, server-side format/size checks, short-lived issuance and cleanup before enabling guests.
+- [ ] Do not persist a 3600-second signed image URL as the sole permanent Inquiry reference. Store a private object identifier and mint view URLs server-side after appropriate authorization when the final schema and Edge Function are ready.

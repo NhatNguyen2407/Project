@@ -11,6 +11,24 @@ const MIME_TO_EXT = Object.freeze({
 });
 const MAX_BYTES = 5 * 1024 * 1024;
 
+// MIME and filename are untrusted user inputs. Verify minimal file signatures
+// before any network request. This is only a client-side defense in depth:
+// production-grade guest uploads must validate bytes again server-side.
+export function hasExpectedImageSignature(bytes, mime) {
+  if (!(bytes instanceof Uint8Array)) return false;
+  const starts = (...prefix) => bytes.length >= prefix.length &&
+    prefix.every((value, index) => bytes[index] === value);
+  if (mime === 'image/png') return starts(0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a);
+  if (mime === 'image/jpeg') return starts(0xff,0xd8,0xff);
+  if (mime === 'image/webp') {
+    return bytes.length >= 12
+      && starts(0x52,0x49,0x46,0x46)
+      && bytes[8] === 0x57 && bytes[9] === 0x45
+      && bytes[10] === 0x42 && bytes[11] === 0x50;
+  }
+  return false;
+}
+
 export async function uploadSyntheticInquiryImage(file, {
   client, createId = () => crypto.randomUUID(),
 } = {}) {
@@ -21,6 +39,14 @@ export async function uploadSyntheticInquiryImage(file, {
       !Number.isInteger(file.size) || file.size <= 0 || file.size > MAX_BYTES) {
     throw new Error('Only JPG, PNG or WebP test images up to 5 MB are allowed.');
   }
+  if (typeof file.slice !== 'function') {
+    throw new Error('Image content could not be verified.');
+  }
+  const header = new Uint8Array(await file.slice(0, 12).arrayBuffer());
+  if (!hasExpectedImageSignature(header, file.type)) {
+    throw new Error('Image bytes do not match the selected image format.');
+  }
+
   const { data: identity, error: authError } = await client.auth.getUser();
   const uid = identity?.user?.id;
   if (authError || typeof uid !== 'string' ||

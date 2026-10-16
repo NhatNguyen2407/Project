@@ -2,14 +2,17 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { selectInquiryImageProvider, STAGING_BUCKET, STAGING_URL, PRODUCTION_URL, validSignedStagingImageUrl } from '../src/app/utils/inquiryImageProvider.js';
-import { uploadSyntheticInquiryImage } from '../src/app/utils/inquiryStorageUpload.js';
+import { uploadSyntheticInquiryImage, hasExpectedImageSignature } from '../src/app/utils/inquiryStorageUpload.js';
 
 const prod={deploymentEnvironment:'production',supabaseUrl:PRODUCTION_URL,productionCloudName:'prod-cloud',productionPreset:'prod-preset'};
 const stage={...prod,deploymentEnvironment:'preview',supabaseUrl:STAGING_URL,stagingStorageOptIn:'true'};
 const uid='11111111-1111-4111-8111-111111111111',id='22222222-2222-4222-8222-222222222222';
 const path=`${uid}/${id}.png`;
 const signed=`${STAGING_URL}/storage/v1/object/sign/${STAGING_BUCKET}/${path}?token=synthetic-test-token`;
-const file={type:'image/png',size:1000};
+const pngMagic = Uint8Array.of(0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a);
+const jpegMagic = Uint8Array.of(0xff,0xd8,0xff,0xe0);
+const webpMagic = Uint8Array.of(0x52,0x49,0x46,0x46,0x01,0x02,0x03,0x04,0x57,0x45,0x42,0x50);
+const file=new Blob([pngMagic],{type:'image/png'});
 function fakeClient({userId=uid,uploadError=null,signError=null,uploadedPath=path,signedUrl=signed}={}) {
   const events=[];
   const client={
@@ -74,4 +77,23 @@ test('Staging SQL defaults to private bucket, owner-only RLS, no anon policies',
   assert.doesNotMatch(sql,/for insert to anon/);
   assert.doesNotMatch(sql,/for insert to public/);
   assert.match(sql,/auth\.uid\(\)/);
+});
+
+test('client rejects mislabeled image bytes before contacting Auth or Storage', async () => {
+  const {client,events}=fakeClient();
+  const fakePng=new Blob([Uint8Array.of(0x3c,0x73,0x76,0x67)],{type:'image/png'});
+  await assert.rejects(uploadSyntheticInquiryImage(fakePng,{client,createId:()=>id}),/Image bytes do not match/);
+  assert.deepEqual(events,[]);
+});
+
+test('recognized PNG, JPEG and WebP magic bytes match only their MIME types',()=>{
+  assert.equal(hasExpectedImageSignature(pngMagic,'image/png'),true);
+  assert.equal(hasExpectedImageSignature(jpegMagic,'image/jpeg'),true);
+  assert.equal(hasExpectedImageSignature(webpMagic,'image/webp'),true);
+  assert.equal(hasExpectedImageSignature(pngMagic,'image/jpeg'),false);
+  assert.equal(hasExpectedImageSignature(jpegMagic,'image/png'),false);
+  assert.equal(hasExpectedImageSignature(webpMagic.slice(0,11),'image/webp'),false);
+  assert.equal(hasExpectedImageSignature(new Uint8Array(),'image/png'),false);
+  assert.equal(hasExpectedImageSignature(webpMagic,'image/svg+xml'),false);
+  assert.equal(hasExpectedImageSignature(null,'image/png'),false);
 });

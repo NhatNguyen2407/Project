@@ -1,6 +1,6 @@
 # Dioxyzine Frog — Debug & Optimization Progress
 
-**Last change batch:** 2026-10-16 · Supabase Storage Staging upload source integration (Draft PR #19)
+**Last change batch:** 2026-10-16 · Storage image content check and guest-upload release gate (Draft PR #19)
 **Status rule:** Change labels distinguish SOURCE FIXED, CI VERIFIED, HOSTED TESTED, RELEASED and DEFERRED. A green build does not imply runtime E2E or Production release.
 
 ## Total roadmap
@@ -72,3 +72,10 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 - Preview selects Staging Storage only when the backend URL exactly matches the Staging project and `VITE_ENABLE_STAGING_STORAGE_UPLOAD=true`; otherwise it fails closed. Production retains Cloudinary. Only synthetic images for Staging test accounts; the client returns a one-hour signed private image URL (ephemeral, not durable). Guest Inquiry upload remains blocked pending a trusted token issuer and quota.
 - Code/test status **PENDING CI** until final SHA verified. Applying Staging migration is a separate authorized operation and must be independently confirmed. No Production changes; PRs #19/#21 remain Draft.
 - Phase 1 still baseline DONE, Recovery PARTIAL, E2E PENDING; Phase 2 source optimization ongoing; Phase 3 Data Integration not started; Phases 4–5 not started.
+
+## 2026-10-16 — Storage content verification + guest upload plan
+- Read-only verified private Staging Storage bucket, two authenticated owner-folder policies, **zero** Staging Auth users and **zero** Staging Edge Functions. No hosted upload can be marked E2E PASS in this state. Security Advisor reports five pre-existing INFO-only deny-by-default application tables without policies.
+- The Staging client now checks PNG/JPEG/WebP magic bytes before an Auth or Storage call, in addition to MIME and 5 MiB bucket limits. This is a client-side test hardening step, NOT server-side malware/content validation.
+- Added `docs/staging/INQUIRY_GUEST_UPLOAD_DESIGN.md` with the trusted signed-upload issuance, rate limiting, Auth/CAPTCHA policy, durable private object-path reference and short-lived URL constraints. **No public guest endpoint, service key, schema permission change or upload was introduced.**
+- Unit test/combined CI result for this source patch is PENDING. After verified tests, operator-gated Staging synthetic Auth user, owner/cross-user permissions, actual browser upload and guest issuance implementation remain deferred.
+- Roadmap: Phase 1 baseline DONE, Recovery PARTIAL, CI available / E2E pending; Phase 2 Draft security and upload foundation improving but not released; Phases 3–5 NOT STARTED.
