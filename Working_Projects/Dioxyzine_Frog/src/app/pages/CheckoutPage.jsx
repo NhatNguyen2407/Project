@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle, Loader2 } from 'lucide-react';
 import { Link } from 'react-router';
@@ -15,6 +15,7 @@ import { useAuth } from '../../app/context/AuthContext';
 import { trackPurchase, trackInitiateCheckout } from '../utils/analytics';
 import { normalizeOrderId } from '../utils/orderIntegrity';
 import { needsPaymentReview } from '../utils/paymentOutcome';
+import { createCaptureAttemptGate } from '../utils/captureAttemptGate';
 import { canUseLiveExternalServices } from '../utils/externalServicePolicy';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
@@ -41,6 +42,9 @@ export function CheckoutPage() {
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
   
   const [isFinalizing, setIsFinalizing] = useState(false);
+  // A synchronous ref prevents duplicate onApprove callbacks racing before React rerenders.
+  const captureAttemptRef = useRef(null);
+  if (!captureAttemptRef.current) captureAttemptRef.current = createCaptureAttemptGate();
 
   const [promoCodeInput, setPromoCodeInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState(null);
@@ -481,12 +485,14 @@ export function CheckoutPage() {
                           height: 48 
                         }}
                         onClick={(data, actions) => {
+                          if (captureAttemptRef.current.isLocked()) return actions.reject();
                           const isValid = validateCheckoutForm();
                           if (!isValid) return actions.reject();
                           return actions.resolve();
                         }}
                         // Xóa cái createOrder cũ và thay bằng cái này:
                         createOrder={async () => {
+                          if (captureAttemptRef.current.isLocked()) return null;
                           try {
                             // 🚀 GỌI BACKEND: gửi GIỎ HÀNG + mã voucher, không gửi
                             // số tiền trực tiếp nữa — server tự tính lại từ giá
@@ -512,6 +518,9 @@ export function CheckoutPage() {
                           }
                         }}
                         onApprove={async (data) => {
+                          // Ignore duplicate SDK callbacks for the same or another PayPal order.
+                          const approvedOrderId = data?.orderID;
+                          if (!captureAttemptRef.current.begin(approvedOrderId)) return;
                           try {
                             setIsFinalizing(true);
                             // 🚀 Capture diễn ra Ở SERVER (không còn actions.order.capture()
@@ -533,6 +542,7 @@ export function CheckoutPage() {
 
                             if (error || !result?.success) {
                               if (needsPaymentReview(result, error)) {
+                                captureAttemptRef.current.requireReview();
                                 // Capture may have succeeded even if the function response failed.
                                 // Keep the checkout UI locked to avoid an accidental second payment.
                                 setPaymentReview({
@@ -544,6 +554,8 @@ export function CheckoutPage() {
                                     : null,
                                 });
                               } else {
+                                // Only a response explicitly confirming "not captured" unlocks retry.
+                                captureAttemptRef.current.confirmUncaptured(approvedOrderId);
                                 showToast(result?.error || "Transaction failed or was canceled.", "error");
                               }
                               setIsFinalizing(false);
@@ -552,6 +564,7 @@ export function CheckoutPage() {
 
                             const canonicalOrderId = normalizeOrderId(result.orderId);
                             if (!canonicalOrderId) {
+                              captureAttemptRef.current.requireReview();
                               // A captured payment must never return the customer to PayPal checkout.
                               console.error('Payment succeeded, but the order ID is missing from the response.');
                               trackPurchase(result.transactionId, Number(result.capturedAmount), cart);
@@ -565,8 +578,10 @@ export function CheckoutPage() {
                             }
 
                             await sendConfirmationEmail(canonicalOrderId, result.transactionId, result.capturedAmount);
+                            captureAttemptRef.current.complete(approvedOrderId);
                             setIsFinalizing(false);
                           } catch (error) {
+                            captureAttemptRef.current.requireReview();
                             console.error('Payment approval outcome could not be confirmed:', error);
                             setPaymentReview({
                               message: 'We could not confirm the final payment status. Contact support and check PayPal before trying again.',
@@ -577,7 +592,17 @@ export function CheckoutPage() {
                         }}
                         onError={(err) => {
                           console.error("PayPal Error:", err);
-                          showToast("Payment Gateway encountered an error.", "error");
+                          const status = captureAttemptRef.current.status();
+                          if (status === 'processing') {
+                            // The SDK may fail after server capture began; do not unlock checkout.
+                            captureAttemptRef.current.requireReview();
+                            setPaymentReview({
+                              message: 'We could not confirm the final payment status. Contact support before trying again.',
+                              transactionId: null,
+                            });
+                          } else if (status === 'idle') {
+                            showToast("Payment Gateway encountered an error.", "error");
+                          }
                           setIsFinalizing(false);
                         }}
                       />
