@@ -30,3 +30,9 @@
 - Vercel Preview build READY proves compilation only. It does not prove backend identity, payment behavior, email delivery or database recovery.
 
 Record acceptance evidence under Issue #17, including commit SHAs, environment, sanitized logs, pass/fail, owner, and remaining blockers. Do not publish credentials, customer payloads or payment transaction secrets.
+
+## Draft PR #19 + #21 virtual integration checkpoint
+- [ ] Exact PR #19 + pinned PR #21 SHA combined Node test and Preview build PASS in GitHub Actions (virtual worktree only).
+- [ ] Re-run after **either** PR changes; CI pin deliberately becomes stale if PR #21 moves.
+- [ ] Resolve the fact that Preview blocks Cloudinary uploads while Inquiry requires a reference image, using **synthetic, isolated storage only**. Do not connect real Cloudinary destinations or bypass fail-closed guards.
+- [ ] Before a real release, assess cross-PR source integration, payment behavior, authenticated Admin permissions, hosted Supabase schema/RPC availability, edge deployment ordering, rollback and external integrations.

@@ -1,0 +1,111 @@
+name: Dioxyzine Phase 2 Combined Source CI
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/dioxyzine-phase2-integration.yml'
+      - 'Working_Projects/Dioxyzine_Frog/**'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dioxyzine-phase2-combined-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-integration:
+    name: Combine Draft PRs and test without deployment
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # Reviewed SHA of Draft PR #21. Deliberately fail when it moves.
+      INQUIRY_HEAD_SHA: d6bc1ec3ae471798c76e779989d14d0b2ed30e3a
+      APP_ROOT: Working_Projects/Dioxyzine_Frog
+      # Synthetic build-only variables; never connect to a hosted backend.
+      VERCEL_ENV: preview
+      STAGING_SUPABASE_REF: bvnnmvlfcduwmneipmsi
+      VITE_SUPABASE_URL: https://bvnnmvlfcduwmneipmsi.supabase.co
+      VITE_SUPABASE_ANON_KEY: synthetic-build-key-no-access
+
+    defaults:
+      run:
+        working-directory: Working_Projects/Dioxyzine_Frog
+
+    steps:
+      - name: Checkout exact PR 19 HEAD
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Overlay reviewed PR 21 files onto disposable worktree
+        working-directory: .
+        shell: bash
+        run: |
+          set -euo pipefail
+          git fetch --no-tags origin refs/heads/security/inquiry-trusted-submission-draft
+          actual="$(git rev-parse FETCH_HEAD)"
+          if [ "$actual" != "$INQUIRY_HEAD_SHA" ]; then
+            echo "PR #21 moved from pinned SHA. Re-review both PRs and update pin."
+            exit 1
+          fi
+
+          base="$(git merge-base HEAD "$INQUIRY_HEAD_SHA")"
+          left_changed="$(mktemp)"
+          right_changed="$(mktemp)"
+          git diff --name-only "$base" HEAD -- "$APP_ROOT" | sort -u > "$left_changed"
+          git diff --name-only "$base" "$INQUIRY_HEAD_SHA" -- "$APP_ROOT" | sort -u > "$right_changed"
+
+          # Stop on ANY new overlapping source file; only these two were
+          # independently reconciled by a byte-for-byte comparison below.
+          while IFS= read -r file; do
+            if ! grep -Fqx "$file" "$left_changed"; then continue; fi
+            case "$file" in
+              "$APP_ROOT/vite.config.ts"|"$APP_ROOT/scripts/check-preview-backend.mjs") ;;
+              *) echo "Unexpected overlapping edit: $file"; exit 1 ;;
+            esac
+          done < "$right_changed"
+
+          guard="$APP_ROOT/scripts/check-preview-backend.mjs"
+          vite="$APP_ROOT/vite.config.ts"
+          diff -u "$guard" <(git show "$INQUIRY_HEAD_SHA:$guard")
+          # The only permitted Vite difference is a non-functional comment.
+          diff -u "$vite" <(git show "$INQUIRY_HEAD_SHA:$vite" |
+            sed '/Client-only deployment gate; never expose server secrets here\./d')
+
+          deleted="$(git diff --name-only --diff-filter=D "$base" "$INQUIRY_HEAD_SHA" -- "$APP_ROOT")"
+          if [ -n "$deleted" ]; then
+            echo "PR #21 deleted files; require an explicit integration review."
+            exit 1
+          fi
+
+          copied=0
+          while IFS= read -r file; do
+            case "$file" in
+              "$APP_ROOT/vite.config.ts"|"$APP_ROOT/scripts/check-preview-backend.mjs") continue ;;
+            esac
+            mkdir -p "$(dirname "$file")"
+            git show "$INQUIRY_HEAD_SHA:$file" > "$file"
+            copied=$((copied + 1))
+          done < "$right_changed"
+          echo "Overlay completed: $copied distinct PR #21 files."
+          echo "No merge commit, deployment, secrets or remote DB operations."
+
+      - name: Install pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+          cache-dependency-path: Working_Projects/Dioxyzine_Frog/pnpm-lock.yaml
+      - name: Frozen dependency install
+        run: pnpm install --frozen-lockfile
+      - name: Test combined Node source
+        run: pnpm test
+      - name: Build combined Vite Preview bundle
+        run: pnpm build
