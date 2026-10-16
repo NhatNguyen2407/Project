@@ -88,3 +88,7 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 ## 2026-10-16 — Staging guest upload issuer integration
 - Draft PR #21 at `b3a042f` adds staging-only signed-upload authorization, separate quota scopes, CAPTCHA action validation and source tests. App CI `38918095080`, Deno runtime `38918095208`, Postgres drill `38918095197` SUCCESS. Staging enablement, upload completion verification, object-to-Inquiry binding, cleanup and browser E2E remain **not implemented**.
 - Combined PR #19+21 pin updated to this reviewed SHA; verify combined CI at the new PR #19 commit. No merge/Production mutation. Phase 2 security source work progressed but is not released; Phase 1 Recovery/E2E pending; Phases 3-5 not started.
+
+## 2026-10-16 — Guest upload ticket / Inquiry association source gate
+- Draft PR #21 at `8cce7aa` includes registered upload tickets, staging-only canonical private object reference validation, and a review-only atomic Storage-to-Inquiry SQL extension. **The SQL has not been applied or exercised against PostgreSQL and is NOT release-ready.** No frontend guest flow, private-image Admin display or cleanup is claimed.
+- PR #19 combined source CI pin updated to this reviewed PR #21 head. Run CI on final PR #19 SHA and record results under Issue #17. Phase 2 advances in Draft source design, Phase 1 acceptance pending, Phase 3-5 not started. No Production deployment or DB updates.
