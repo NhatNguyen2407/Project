@@ -19,7 +19,7 @@ const env = {
   SUPABASE_ANON_KEY:'synthetic-public-key',
   SUPABASE_URL:'https://test.invalid',
 };
-const body = { token, inquiry };
+const body = { token, inquiry, idempotencyKey:'e682fa00-61aa-4c7b-a8cf-01465f0fd8f7' };
 const request = (input=body, options={}) => new Request('https://test.invalid/functions/v1/submit-inquiry',{
   method:'POST',
   headers: {
@@ -35,6 +35,12 @@ function fixture(options={}) {
   const client = {
     rpc:async (_name, args)=>{
       events.push(args.p_scope);
+      if(_name === 'create_inquiry_idempotent') {
+        events.push('insert');
+        records.push({ ...args.p_row, user_id:args.p_user_id });
+        if(options.insertError) return {data:null,error:{code:'TEST_STORAGE_ERROR'}};
+        return {data:{inquiryId:'created-test-inquiry',replayed:false},error:null};
+      }
       if(options.rpcError===args.p_scope) return {data:null,error:{code:'TEST_DB_ERROR'}};
       return {data:options.denyBudget===args.p_scope?false:true,error:null};
     },
