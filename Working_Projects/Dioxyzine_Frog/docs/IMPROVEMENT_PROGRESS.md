@@ -55,3 +55,11 @@ Last verified: **2026-10-16** (Asia/Bangkok). This is a **public**, redacted eng
 - **No real staging backend was created**, and Vercel Preview runtime isolation was not demonstrated. Until staging variables are configured, this guard deliberately blocks Preview builds when merged.
 - Neither Draft PR #16 nor Draft PR #18 was merged here. No Production database, Vercel environment variables, spreadsheet permissions, or payment configuration changed.
 
+
+## 2026-10-16 follow-up — staging provisioning and guard wiring
+
+- Requested a Supabase development branch. Supabase required a **cost confirmation ID**, so creation stopped before provisioning. **No staging branch exists as a result of this request.** Issue #15 remains open.
+- Draft PR #18 gained another regression test that checks the Preview isolation guard is actually wired into `vite.config.ts` with Vercel and Supabase environment inputs.
+- The latest verified run for PR #18 was GitHub Actions **38840870496**, with install, tests and Vite build all successful.
+- PR #18 remains **unmerged**; no Vercel Preview settings, Production database, Production deployment or financial workbook were changed.
+- Issue #15 and Issue #17 were updated with the current blocking conditions. A valid staging backend and a witnessed restore are **still outstanding**, so Phase 1 Steps 2 and 3 remain **PARTIAL**.
