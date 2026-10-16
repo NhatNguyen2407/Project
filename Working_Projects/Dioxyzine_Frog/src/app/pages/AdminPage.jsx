@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { assertConfirmedMutation, assertSingleInsertedRow, requireOrderId } from '../utils/orderIntegrity';
 import { filterInquiries, safeInquiryReferenceUrl, formatInquiryTimestamp } from '../utils/inquiryInbox';
+import { buildAdminReviewRows, requireAdminReviewTable } from '../utils/adminReviewRecords';
 
 export function AdminPage() {
   const { user, role } = useAuth();
@@ -37,6 +38,7 @@ export function AdminPage() {
   // Tab 'reviews'
   const [activeTab, setActiveTab] = useState('orders'); 
   const [orders, setOrders] = useState([]);
+  const [orderReviews, setOrderReviews] = useState([]);
   const [inquirySearch, setInquirySearch] = useState('');
   const [paypalOrders, setPaypalOrders] = useState([]);
   const [products, setProducts] = useState([]);
@@ -84,14 +86,15 @@ export function AdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resOrders, resPaypalOrders, resProducts, resVouchers] = await Promise.all([
+      const [resOrders, resPaypalOrders, resProducts, resVouchers, resReviews] = await Promise.all([
         supabase.from('inquiries').select('*').order('created_at', { ascending: false }),
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('products').select('*').order('created_at', { ascending: false }),
-        supabase.from('vouchers').select('*').order('created_at', { ascending: false }) 
+        supabase.from('vouchers').select('*').order('created_at', { ascending: false }),
+        supabase.from('order_reviews').select('id,order_id,customer_name,product_names,rating,review_comment,admin_reply,is_hidden,created_at').order('created_at', { ascending: false })
       ]);
 
-      const firstError = resOrders.error || resPaypalOrders.error || resProducts.error || resVouchers.error;
+      const firstError = resOrders.error || resPaypalOrders.error || resProducts.error || resVouchers.error || resReviews.error;
       if (firstError) {
         const isAuthError = firstError.code === 'PGRST301'
           || firstError.message?.toLowerCase().includes('jwt')
@@ -110,6 +113,7 @@ export function AdminPage() {
       if (resPaypalOrders.data) setPaypalOrders(resPaypalOrders.data);
       if (resProducts.data) setProducts(resProducts.data);
       if (resVouchers.data) setVouchers(resVouchers.data);
+      if (resReviews.data) setOrderReviews(resReviews.data);
     } catch (err) {
       console.error(err);
       toast.error('Could not load admin data. Please try refreshing the page.');
@@ -191,27 +195,39 @@ export function AdminPage() {
   // };
 
   // Admin Reply Review
-  const handleSaveReply = async (id) => {
+  const handleSaveReply = async (review) => {
     if (!allowAdminWrite()) return;
-    const replyText = replyInputs[id];
+    const { id } = review;
+    const table = requireAdminReviewTable(review);
+    const replyText = replyInputs[`${table}:${id}`];
     if (!replyText) return toast.error("Vui lòng nhập câu trả lời!");
     try {
-      const { data, error } = await supabase.from('inquiries')
+      const { data, error } = await supabase.from(table)
         .update({ admin_reply: replyText }).eq('id', id).select('id');
       assertConfirmedMutation({ data, error }, id);
-      setOrders(current => current.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      if (table === 'order_reviews') {
+        setOrderReviews(current => current.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      } else {
+        setOrders(current => current.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      }
       toast.success("Đã phản hồi đánh giá!");
     } catch (err) { toast.error(err.message); }
   };
 
   // hide/Unhide Review
-  const handleToggleReviewVisibility = async (id, isHidden) => {
+  const handleToggleReviewVisibility = async (review) => {
     if (!allowAdminWrite()) return;
+    const { id } = review;
+    const table = requireAdminReviewTable(review);
     try {
-      const { data, error } = await supabase.from('inquiries')
-        .update({ is_hidden: !isHidden }).eq('id', id).select('id');
+      const { data, error } = await supabase.from(table)
+        .update({ is_hidden: !review.is_hidden }).eq('id', id).select('id');
       assertConfirmedMutation({ data, error }, id);
-      setOrders(current => current.map(o => o.id === id ? { ...o, is_hidden: !isHidden } : o));
+      if (table === 'order_reviews') {
+        setOrderReviews(current => current.map(o => o.id === id ? { ...o, is_hidden: !review.is_hidden } : o));
+      } else {
+        setOrders(current => current.map(o => o.id === id ? { ...o, is_hidden: !review.is_hidden } : o));
+      }
       toast.success(!isHidden ? "Đã ẨN đánh giá này!" : "Đã HIỆN đánh giá này!");
     } catch (err) { toast.error(err.message); }
   };
@@ -354,7 +370,7 @@ export function AdminPage() {
   if (!user || role !== 'admin') return <div className="min-h-screen pt-28 text-center text-white">Checking Auth...</div>;
 
   // Lọc ra các đơn hàng có đánh giá
-  const reviewsList = orders.filter(o => o.rating != null);
+  const reviewsList = buildAdminReviewRows(orders, orderReviews);
   const visibleInquiries = filterInquiries(orders, inquirySearch);
 
   return (
@@ -514,7 +530,7 @@ export function AdminPage() {
               ) : (
                 reviewsList.map(review => (
                   <div
-                    key={review.id}
+                    key={`${review.sourceTable}:${review.id}`}
                     className={`bg-[var(--card)] dark:bg-[#1A1528] border ${
                       review.is_hidden
                         ? 'border-red-500/30 opacity-60'
@@ -524,7 +540,7 @@ export function AdminPage() {
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                       <div>
                         <h4 className="font-bold text-[var(--heading-color)] dark:text-white text-lg">
-                          {review.product_name}
+                          {review.display_product_name}
                         </h4>
                         <p className="text-sm text-[var(--muted-foreground)]">
                           Bởi <strong className="text-[var(--foreground)] dark:text-white">
@@ -536,7 +552,7 @@ export function AdminPage() {
                         </div>
                       </div>
                       <button 
-                        onClick={() => handleToggleReviewVisibility(review.id, review.is_hidden)} 
+                        onClick={() => handleToggleReviewVisibility(review)} 
                         className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${review.is_hidden ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'}`}
                       >
                         {review.is_hidden ? <><Eye className="w-4 h-4"/> Đang Ẩn (Bấm để Hiện)</> : <><EyeOff className="w-4 h-4"/> Đang Hiện (Bấm để Ẩn)</>}
@@ -551,12 +567,12 @@ export function AdminPage() {
                       <input 
                         type="text" 
                         placeholder="Trả lời bình luận với tư cách Dioxyzine Frog..." 
-                        value={replyInputs[review.id] ?? (review.admin_reply || '')}
-                        onChange={(e) => setReplyInputs({...replyInputs, [review.id]: e.target.value})}
+                        value={replyInputs[`${review.sourceTable}:${review.id}`] ?? (review.admin_reply || '')}
+                        onChange={(e) => setReplyInputs({...replyInputs, [`${review.sourceTable}:${review.id}`]: e.target.value})}
                         className="flex-1 bg-[var(--input-background)] dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-xl px-4 py-3 text-sm text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none"
                       />
                       <button 
-                        onClick={() => handleSaveReply(review.id)} 
+                        onClick={() => handleSaveReply(review)} 
                         className="px-6 py-3 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
                       >
                         <MessageSquare className="w-4 h-4" /> Lưu Câu Trả Lời

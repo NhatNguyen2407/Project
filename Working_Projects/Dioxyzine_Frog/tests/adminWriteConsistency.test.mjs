@@ -31,9 +31,12 @@ test('reply and review visibility require confirmed single-row writes before UI 
     const query = body.indexOf(".update(");
     const select = body.indexOf(".select('id')", query);
     const confirmation = body.indexOf('assertConfirmedMutation({ data, error }, id)', select);
-    const ui = body.indexOf('setOrders(', confirmation);
+    const ui = body.indexOf('setOrderReviews(', confirmation);
+    const legacyUi = body.indexOf('setOrders(', ui);
     const toast = body.indexOf('toast.success(', ui);
-    assert.ok(query >= 0 && select > query && confirmation > select && ui > confirmation && toast > ui, name);
+    assert.ok(query >= 0 && select > query && confirmation > select && ui > confirmation && legacyUi > ui && toast > legacyUi, name);
+    assert.match(body, /requireAdminReviewTable\(review\)/);
+    assert.match(body, /supabase\.from\(table\)/);
   }
 });
 

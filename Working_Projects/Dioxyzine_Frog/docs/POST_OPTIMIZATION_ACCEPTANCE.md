@@ -20,7 +20,7 @@
 - [ ] **Tracking:** after authorized Staging RPC installation, test paid, unpaid, unknown and malformed UUID cases, 5-field response only, and direct `orders` SELECT denial; consider brute-force/rate limits.
 - [ ] **Inquiry:** isolated Edge Function deployment + CAPTCHA hostname/action + rate-limit + idempotent retries and replay; stage-safe Google Sheets mirror (must remain OFF), test reference upload destination and RLS.
 - [ ] **Checkout PayPal Sandbox:** separate Sandbox credentials/server functions, synthetic SKUs, successful capture, multiple `onApprove` callbacks, delayed capture, uncaptured error, unknown capture, double-click, reload/retry, stock reservation/reconciliation and loss of final HTTP response. Explicitly verify server-side idempotency.
-- [ ] **Admin/email/storage:** synthetic admin account with least privilege, zero-row update, shipping-email test recipient only, Cloudinary sandbox upload destination, Apps Script test sheet, vouchers and review permissions. Verify Preview live external guards are effective in browser.
+- [ ] **Admin/email/storage:** synthetic admin account with least privilege, zero-row update, shipping-email test recipient only, Cloudinary sandbox upload destination, Apps Script test sheet, vouchers and review permissions. Verify `order_reviews` → `inquiries` sync triggers, list de-duplication, single-table reply/hide updates and Preview guards in browser.
 - [ ] **Release:** reproduce all checks on the merged candidate, approve coordinated Inquiry function/frontend/RLS cutover, test rollback, verify live environment selection and monitor Production. Keep Draft PRs unmerged until approvals.
 
 ## Known boundaries

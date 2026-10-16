@@ -1,6 +1,6 @@
 # Dioxyzine Frog — Debug & Optimization Progress
 
-**Last change batch:** 2026-10-16 · Admin write consistency and Preview safety (Draft PR #19)
+**Last change batch:** 2026-10-16 · Canonical/legacy Admin Review consistency (Draft PR #19)
 **Status rule:** Change labels distinguish SOURCE FIXED, CI VERIFIED, HOSTED TESTED, RELEASED and DEFERRED. A green build does not imply runtime E2E or Production release.
 
 ## Total roadmap
@@ -27,7 +27,7 @@
 | --- | --- | --- | --- |
 | Checkout payment ambiguity | SOURCE FIXED, previous CI PASS; new gate added to Draft #19 | NOT RELEASED | Client in-memory lock resets on reload; server idempotency, PayPal Sandbox reconciliation pending |
 | Admin shipping status | SOURCE FIXED, previous CI PASS in Draft #19 | NOT RELEASED | Confirm real RLS/row updates and sandbox email |
-| Admin review reply & visibility | SOURCE FIXED in this batch: `.select('id')` and confirmed exactly-one matching row | NOT RELEASED; CI PENDING THIS COMMIT | Hosted admin role/permissions E2E pending |
+| Admin review reply & visibility | SOURCE FIXED: row confirmation plus canonical `order_reviews`/legacy `inquiries` selection and de-duplication | NOT RELEASED; CI PENDING THIS COMMIT | Hosted admin role, trigger mirroring and RLS E2E pending |
 | Admin product/voucher create/save | SOURCE FIXED in this batch: explicit returned-row confirmation | NOT RELEASED; CI PENDING THIS COMMIT | Synthetic authorized admin E2E pending |
 | Admin Preview mutation guard | SOURCE FIXED in this batch: all eight handlers blocked outside verified Production | NOT RELEASED; CI PENDING THIS COMMIT | Frontend guard is not backend authorization; check browser behavior |
 | Inquiry API / idempotency / Sheets mirror | SOURCE FIXED; previous CI PASS in Draft PR #21 | NOT RELEASED | Coordinated Edge Function/RLS cutover and hosted tests pending |
@@ -45,3 +45,9 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 ## CI regression and resolution
 - Initial PR #19 commit `1d248d4` failed 1 of 42 Node tests (`externalServicePolicy.test.mjs` still expected the old inline Admin guard). Vercel Preview built READY; the failed test prevented Node CI from reaching the build step.
 - New guard is centralized in `allowAdminWrite()` and called at the start of each mutation. Updated the source-contract test to verify **both** the central environment check and the per-handler early return; no runtime production semantics changed. Validate new exact-HEAD CI before marking this resolved.
+
+## 2026-10-16 — Admin Reviews canonical and legacy model
+- Read-only audit verified that Production `order_reviews` has Admin SELECT/UPDATE RLS and triggers syncing `order_reviews` to legacy `inquiries` using `order_review_id`. Do not double-write.
+- Draft #19 now reads canonical and legacy rows, removes linked duplicates, shows product names and routes replies/hide to the row's original table only. Database row confirmation remains required; tests cover dedup and authorization-target allowlist.
+- No Production schema/data change. Exact-commit CI and Preview verification PENDING; final browser test with Admin account and trigger propagation DEFERRED until post-optimization acceptance.
+- Roadmap remains: Phase 1 Step 1 DONE; Step 2 PARTIAL, Step 3 source CI present but E2E DEFERRED. Phase 2 improving unreleased source; Phases 3–5 NOT STARTED.
