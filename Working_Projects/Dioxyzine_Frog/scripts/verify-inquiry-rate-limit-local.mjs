@@ -177,6 +177,12 @@ if (invokedAsCli) {
       process.env.INQUIRY_RATE_TEST_ACK
     );
     const result = await runLocalRateBudgetDrill(env);
+    const { spawnSync } = await import('node:child_process');
+    const nested = spawnSync(process.execPath, ['scripts/verify-inquiry-idempotency-local.mjs'], {
+      env: process.env,
+      stdio: 'inherit',
+    });
+    if (nested.status !== 0) throw new Error('Isolated idempotency SQL check failed.');
     process.stdout.write(`Local test succeeded: ${JSON.stringify(result)}\n`);
   } catch (error) {
     process.stderr.write(`Local test not passed: ${error.message}\n`);
