@@ -64,7 +64,7 @@ test('image service gates provider selection before contacting Cloudinary or Sta
   assert.match(source,/const config = selectInquiryImageProvider\(/);
   assert.match(source,/if \(!config\) throw new Error/);
   assert.match(source,/VITE_ENABLE_STAGING_STORAGE_UPLOAD/);
-  assert.match(source,/return uploadSyntheticInquiryImage\(file, \{ client: supabase \}\)/);
+  assert.match(source,/return uploadGuestInquiryImage\(file, \{client:supabase, getUploadCaptcha\}\)/);
   assert.match(source,/if \(config.kind === 'supabase-storage'\)/);
   assert.match(source,/config\.cloudName/);
 });

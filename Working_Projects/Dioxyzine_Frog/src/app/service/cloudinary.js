@@ -1,8 +1,8 @@
 import { supabase } from './supabase';
 import { selectInquiryImageProvider } from '../utils/inquiryImageProvider.js';
-import { uploadSyntheticInquiryImage } from '../utils/inquiryStorageUpload.js';
+import { uploadGuestInquiryImage } from '../utils/inquiryGuestUpload.js';
 
-export const uploadImageToCloudinary = async (file) => {
+export const uploadImageToCloudinary = async (file, getUploadCaptcha) => {
   const config = selectInquiryImageProvider({
     deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
     supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
@@ -17,7 +17,7 @@ export const uploadImageToCloudinary = async (file) => {
   // Staging never calls the Production Cloudinary endpoint/preset.
   // Guest Inquiry upload remains blocked pending a trusted issuance service.
   if (config.kind === 'supabase-storage') {
-    return uploadSyntheticInquiryImage(file, { client: supabase });
+    return uploadGuestInquiryImage(file, {client:supabase, getUploadCaptcha});
   }
 
   const formData = new FormData();

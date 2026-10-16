@@ -92,3 +92,9 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 ## 2026-10-16 — Guest upload ticket / Inquiry association source gate
 - Draft PR #21 at `8cce7aa` includes registered upload tickets, staging-only canonical private object reference validation, and a review-only atomic Storage-to-Inquiry SQL extension. **The SQL has not been applied or exercised against PostgreSQL and is NOT release-ready.** No frontend guest flow, private-image Admin display or cleanup is claimed.
 - PR #19 combined source CI pin updated to this reviewed PR #21 head. Run CI on final PR #19 SHA and record results under Issue #17. Phase 2 advances in Draft source design, Phase 1 acceptance pending, Phase 3-5 not started. No Production deployment or DB updates.
+
+## 2026-10-16 — Guest image upload frontend integration
+- PR #19 now routes Preview Inquiry upload through the Staging-only `issue-inquiry-upload` Edge Function and `uploadToSignedUrl` and passes back canonical `storage://inquiry-test-references/guest/<UUID>.<ext>` references. This preserves the Production Cloudinary uploader.
+- Preview remains opt-in gated by `VITE_ENABLE_STAGING_STORAGE_UPLOAD=true`, the exact known Staging backend and the separate server `INQUIRY_UPLOAD_STAGING_ENABLED=true`. The Edge Function, budget/ticket RPC drafts and Staging secrets are NOT deployed/enabled. No hosted upload E2E is claimed.
+- Added mocked guest upload tests for success, CAPTCHA, invalid bytes, bad ticket, forged bucket/path and signed-upload error. CI verification is pending at final commit.
+- Roadmap: Phase 1 Recovery/hosted E2E partial; Phase 2 source integration progressing but unmerged; Phases 3–5 not started.
