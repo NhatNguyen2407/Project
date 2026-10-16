@@ -3,6 +3,7 @@
 // in Node tests. No database or Google network call occurs on module import.
 import { INQUIRY_BUDGETS, consumeInquiryBudget } from './rateBudget.mjs';
 import { persistInquiryOnce, isInquiryIdempotencyKey } from './idempotency.mjs';
+import { classifyInquiryCaller, isAllowedInquiryPreflight } from './requestAuth.mjs';
 import {
   validateInquiryPayload,
   assessRecaptcha,
@@ -78,6 +79,7 @@ export function createInquiryHandler({
   fetchCaptcha,
   clock = () => Date.now(),
   logger = console,
+  allowedCorsHeaders = 'authorization, apikey, x-client-info, content-type',
 }) {
   if (typeof envGet !== 'function' || typeof createClient !== 'function' || typeof fetchCaptcha !== 'function') {
     throw new TypeError('Inquiry handler dependencies must be provided.');
@@ -91,12 +93,15 @@ export function createInquiryHandler({
     }
 
     if (request.method === 'OPTIONS') {
+      if (!isAllowedInquiryPreflight(request, allowedCorsHeaders)) {
+        return json({ success: false, message: 'Preflight not permitted.' }, 403, null);
+      }
       return new Response(null, {
         status: 204,
         headers: {
           'Access-Control-Allow-Origin': origin,
           'Access-Control-Allow-Methods': 'POST, OPTIONS',
-          'Access-Control-Allow-Headers': 'authorization, apikey, x-client-info, content-type',
+          'Access-Control-Allow-Headers': allowedCorsHeaders,
           'Access-Control-Max-Age': '600',
           'Vary': 'Origin',
         },
@@ -170,23 +175,25 @@ export function createInquiryHandler({
         return json({ success: false, message: 'Too many requests. Please try later.' }, 429, origin);
       }
 
-      // A Supabase client may supply its public anon key in Authorization.
-      // It is not a user identity. Any OTHER bearer must authenticate;
-      // invalid/expired user JWTs must not silently become guest requests.
+      // Public apikey identifies the application, not a user. A separate
+      // non-key Bearer token must be verified via Supabase Auth.
+      const caller = classifyInquiryCaller(
+        request.headers,
+        envGet('INQUIRY_PUBLIC_API_KEY'),
+        adminKey,
+      );
+      if (caller.status !== 200) {
+        return json({ success: false, message: caller.status === 503
+          ? 'Service temporarily unavailable.' : 'Invalid authorization.' },
+          caller.status, origin);
+      }
       let userId = null;
-      const authHeader = request.headers.get('authorization');
-      if (authHeader) {
-        const match = /^Bearer (\S+)$/i.exec(authHeader.trim());
-        if (!match) return json({ success: false, message: 'Invalid authorization.' }, 401, origin);
-        const bearer = match[1];
-        const publicKey = envGet('SUPABASE_ANON_KEY') || envGet('SUPABASE_PUBLISHABLE_KEY');
-        if (!publicKey || bearer !== publicKey) {
-          const { data, error } = await admin.auth.getUser(bearer);
-          if (error || !data?.user?.id) {
-            return json({ success: false, message: 'Invalid authorization.' }, 401, origin);
-          }
-          userId = data.user.id;
+      if (caller.userToken) {
+        const { data, error } = await admin.auth.getUser(caller.userToken);
+        if (error || !data?.user?.id) {
+          return json({ success: false, message: 'Invalid authorization.' }, 401, origin);
         }
+        userId = data.user.id;
       }
 
       const result = await persistInquiryOnce(admin, {
