@@ -1,6 +1,6 @@
 # Vercel Preview / Supabase Backend Isolation
 
-**Status (2026-10-16): A separate Supabase Staging project exists and reports ACTIVE_HEALTHY. Vercel Preview isolation and application-level staging compatibility remain unverified. PR #18 stays Draft.**
+**Status (2026-10-16): Preview-only URL and staging project marker verified against the separate, healthy Supabase Staging project. GitHub CI and guarded Vercel Preview BUILD have passed. Browser/runtime identity, complete staging compatibility and external integration isolation remain unverified.**
 
 ## Purpose
 
@@ -19,7 +19,7 @@ The Vite build performs an exact project reference and HTTPS host comparison whe
 
 **Consequence until staging is configured:** Vercel Preview builds are deliberately blocked. This is a fail-closed safety behavior, not a Vite regression.
 
-## Read-only environment audit (2026-10-16)
+## Initial read-only environment audit (2026-10-16 — historical, before reconnect)
 
 - Production and Staging are distinct, existing Supabase projects. No new project/branch was created in this audit.
 - Staging has one `public` table (`inquiries`, 14 columns), with RLS enabled and three recorded inquiry-focused migrations. Production has eight `public` tables; its `inquiries` table has 27 columns. Staging is **not** a full copy of the live application schema.
@@ -27,6 +27,16 @@ The Vite build performs an exact project reference and HTTPS host comparison whe
 - The Vercel integration returned HTTP 403 for reading project/environment metadata and build logs in the expected team scope. Preview environment values could not be independently verified or modified. The PR #18 Vercel Preview deployment is ERROR, while its GitHub CI completed successfully; the precise Preview build failure cannot be confirmed from logs.
 - Consequently, no Preview E2E tests, restore rehearsal, payment test, RLS change, or Production modification were performed. The Preview gate must stay fail-closed until the correct staging URL **and matching public key** are configured for Preview only.
 - Do not attempt full-site E2E on this partial staging schema. Before testing, reconcile missing schema and integrations using synthetic data, check authorization boundaries and sandbox external services, and perform a separately documented isolated restore rehearsal.
+
+## Follow-up checkpoint: configured Preview build (2026-10-16)
+
+The earlier 403/ERROR observations above describe **the initial check only** and were resolved by using authorized project-level access without an unnecessary team-scope argument, followed by the owner's Preview-only staging marker configuration.
+
+- Preview-only `VITE_SUPABASE_URL` and `STAGING_SUPABASE_REF` were read directly and matched the distinct existing Supabase Staging project; the Production Supabase URL and deployment configuration were not edited as part of this checkpoint.
+- The Preview-only public client key was replaced with the Staging project's key in an earlier controlled configuration step. Vercel currently returns its type and metadata but **does not return the sensitive key value**, so an independent byte-level re-comparison could not be performed in this later audit. Verify application API connectivity in the runtime acceptance batch.
+- PR HEAD `11b185d`: GitHub Actions run `38877723947` completed successfully, including frozen dependency installation, Node tests and Vite build; Vercel Preview deployment `dpl_GD5DgmUBjkXQQLr4PL2jiFwNRByM` was `READY` on that exact commit.
+- The build guard checks the Supabase URL and staging reference at build time only; it does **not** verify the bundled API key, browser network target or isolation of EmailJS, Cloudinary, Apps Script or PayPal integrations.
+- Hosted Staging remains inquiry-only with no full order/payment backend. **Do not perform stateful Checkout/Admin/Inquiry E2E until all required fixtures and external test providers are isolated.** No restore or data migration was performed in this checkpoint.
 
 ## Behavior and scope
 
