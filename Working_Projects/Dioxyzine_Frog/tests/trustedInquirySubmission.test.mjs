@@ -84,10 +84,12 @@ test('client and server use one trusted submission endpoint', () => {
   const api = readFileSync(new URL('../src/app/service/api.js', import.meta.url), 'utf8');
   const page = readFileSync(new URL('../src/app/pages/InquiryPage.jsx', import.meta.url), 'utf8');
   const functionSrc = readFileSync(new URL('../supabase/functions/submit-inquiry/index.ts', import.meta.url), 'utf8');
+  const handlerSrc = readFileSync(new URL('../supabase/functions/submit-inquiry/handler.mjs', import.meta.url), 'utf8');
   assert.match(api, /functions\.invoke\('submit-inquiry'/);
   assert.doesNotMatch(api, /from\('inquiries'\)\.insert/);
   assert.match(page, /api\.submitInquiry\(payload, token\)/);
   assert.doesNotMatch(page, /functions\.invoke\('verify-recaptcha'/);
-  assert.match(functionSrc, /validateInquiryPayload\(body\?\.inquiry\)/);
-  assert.match(functionSrc, /assessRecaptcha\(captcha/);
+  assert.match(functionSrc, /createInquiryHandler/);
+  assert.match(handlerSrc, /validateInquiryPayload\(body\?\.inquiry\)/);
+  assert.match(handlerSrc, /assessRecaptcha\(captcha/);
 });
