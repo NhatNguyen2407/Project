@@ -46,3 +46,12 @@ Last verified: **2026-10-16** (Asia/Bangkok). This is a **public**, redacted eng
 2. Never mistake Vercel Preview for isolated staging without proving the Supabase URL/project binding is different from Production.
 3. No bulk RLS policy changes, financial workbook edits or permission resets without a safe rollback and impact review.
 4. Keep change PRs in draft until green checks + intended change reviewed. No merge or production deploy is implied by a passing PR check.
+
+## Preview isolation safety — 2026-10-16 (additional review)
+
+- Verified **PR #16** latest GitHub Actions run `38839615432`: completed successfully after the progress documentation commit.
+- Created **[Draft PR #18](https://github.com/NhatNguyen2407/Project/pull/18)** on separate branch `safety/preview-backend-isolation`. It adds a fail-closed Vite build check for `VERCEL_ENV=preview`, requiring a distinct staging Supabase reference and its exact HTTPS project URL. The change does not alter Production/local build behavior.
+- Six Preview guard test cases passed in local Node tests. GitHub Actions run **38840219391** completed successfully on PR #18 (frozen dependency installation, Node tests, Vite build).
+- **No real staging backend was created**, and Vercel Preview runtime isolation was not demonstrated. Until staging variables are configured, this guard deliberately blocks Preview builds when merged.
+- Neither Draft PR #16 nor Draft PR #18 was merged here. No Production database, Vercel environment variables, spreadsheet permissions, or payment configuration changed.
+
