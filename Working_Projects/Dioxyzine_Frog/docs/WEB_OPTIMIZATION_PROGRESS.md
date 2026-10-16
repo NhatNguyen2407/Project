@@ -84,3 +84,7 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 - PR #21 commit `745593e` fixes stale upload URL attachment and duplicate simultaneous Inquiry submit on the frontend. Its three workflows (App CI `38916425012`, Deno `38916425063`, PostgreSQL `38916425077`) SUCCESS; Vercel Preview `dpl_6yERDVTJvw1RZoN3ByB8QqbCbaZR` READY.
 - Combined-source CI pin updated from old PR #21 HEAD to `745593e`; verify next combined run before marking integrated. Both PRs stay Draft and the backend cutover remains deferred.
 - Roadmap remains Phase 1 baseline DONE, Recovery PARTIAL and E2E PENDING; Phase 2 source optimization ongoing (not released); Phases 3–5 NOT STARTED.
+
+## 2026-10-16 — Staging guest upload issuer integration
+- Draft PR #21 at `b3a042f` adds staging-only signed-upload authorization, separate quota scopes, CAPTCHA action validation and source tests. App CI `38918095080`, Deno runtime `38918095208`, Postgres drill `38918095197` SUCCESS. Staging enablement, upload completion verification, object-to-Inquiry binding, cleanup and browser E2E remain **not implemented**.
+- Combined PR #19+21 pin updated to this reviewed SHA; verify combined CI at the new PR #19 commit. No merge/Production mutation. Phase 2 security source work progressed but is not released; Phase 1 Recovery/E2E pending; Phases 3-5 not started.
