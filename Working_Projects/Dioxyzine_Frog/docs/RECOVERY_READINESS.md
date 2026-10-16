@@ -145,3 +145,37 @@ Next perform a *read-only* localhost TCP test using `Test-NetConnection -Compute
 Supabase documentation: https://supabase.com/docs/guides/platform/backups
 
 Backups and restores may depend on the subscription plan. Never restore a production database in place as a test.
+
+## 2026-10-16 read-only cross-environment audit
+
+This checkpoint used only metadata queries through the connected Supabase tools and reviewed repository migration files. No production or staging SQL writes, data exports, restore, payment calls, or new resources were performed. Do not treat this inventory as a full semantic schema diff.
+
+| Area | Production (live metadata) | Staging (live metadata) | Gate |
+| --- | --- | --- | --- |
+| Public tables | 8, all with RLS | 1 (`inquiries`), with RLS | Full-app tests BLOCKED |
+| Public function signatures | 12 | 1 (`consume_inquiry_quota(text)`) | Order/Admin RPC tests BLOCKED |
+| Public RLS policies | 14 | 1 | Role matrix differs by design |
+| Migration history | 6 live entries | 3 inquiry-focused entries | Histories must NOT be merged or replayed blindly |
+| `inquiries` fields | 27 | 14 | Missing 13 live application fields in Staging |
+| Inquiry data | Not exported or replicated | No inquiry rows at inspection | Synthetic fixtures only |
+| Edge Functions | Not verified in this checkpoint | None deployed at earlier inspection | Inquiry endpoint integration BLOCKED |
+
+Staging's `inquiries` table has its own quantity constraints and a simplified column set; it is a limited, independent test contract, **not a restore of Production**. The 13 additional Production inquiry columns relate to delivery/payment/review/administration fields. Production also has `orders`, `order_reviews`, `products`, `vouchers`, `wishlists`, `user_roles`, and `stock_reservations`; these are absent from Staging.
+
+**Role/RLS boundary:** Staging grants neither SELECT nor INSERT to `anon` for `inquiries`; `authenticated` has SELECT-only with owner-scoped RLS; Staging's `consume_inquiry_quota(text)` can be executed by `service_role` only. Production intentionally includes a public Inquiry INSERT policy and an `anon` INSERT grant; this remains a live bypass of the planned trusted server-side CAPTCHA submission. Do **not** revoke it independently: coordinate Edge Function deployment, compatible frontend release, verification, and rollback per Draft PR #21. No Production permissions changed.
+
+**Function access inventory:** Production has twelve public SQL/RPC functions. The inspected mutating payment/stock functions (`process_paid_order`, `reserve_product_stock`, `decrement_product_stock`, and `increment_voucher_usage`) are callable by `service_role`, not by `anon` or `authenticated`. Public `track_order_status(uuid)` and `get_public_reviews(text)` are intentionally callable by guests using `SECURITY DEFINER`. Review their returned fields, object grants, and abuse controls before certifying the overall security posture; presence of an advisor warning alone does not prove exploitation. Supabase Security Advisor reports warnings for externally callable `SECURITY DEFINER` functions and an informational notice for `stock_reservations` with RLS but no policy. No automatic privilege changes were applied. [Security lint guidance](https://supabase.com/docs/guides/database/database-linter).
+
+**Migration history:** Production records `20261012140001` and `20261012140254` for the security and tracking revisions, while repository files are `202610130001_security_hardening.sql` and `202610130002_order_tracking_rpc_shape.sql`. Names and overlapping intended behavior are not full SQL equivalence; the two repository files cannot replace the earlier four Production migrations. Staging's three `20261015...` inquiry migrations represent a separate partial test schema. Do not repair history, replay files, or deploy those changes to Production without a reviewed canonical baseline and isolated restore.
+
+**Backup coverage:** Supabase organization is on the Free plan. [Supabase Database Backups documentation](https://supabase.com/docs/guides/platform/backups) states platform-managed daily backups cover Pro/Team/Enterprise, and recommends self-managed off-site exports for Free. Therefore no platform daily recovery point/PITR is established. Previously validated local encrypted SQL/Auth/Storage export hashes are **not** evidence of a successful restore or independent off-device retention. No new backup was made by this audit.
+
+### Remaining Phase 1 / Step 2 release gates
+
+1. Independently verify that the Windows host's local PostgreSQL port 55432 is **not reachable from another LAN device** before importing any live Auth/customer dump. Existing localhost success and Windows firewall rule presence do not prove network isolation.
+2. Verify local restore prerequisites, sensitive-dump handling and source consistency, then perform a witnessed isolated restore in a disposable environment (never overwrite Production). Record timings, non-sensitive schema/row-count parity, RPC signatures, RLS and rollback result; keep raw dumps private.
+3. Establish independent encrypted off-device backup retention and separately verify recoverable Storage object bytes; document recovery point/RPO and expected RTO without publishing sensitive paths.
+4. Reconcile full Production schema, policies, functions, triggers, and migration history with a canonical reviewed baseline before attempting to make Staging full-app compatible. Do not copy Production customer, order or Auth data into hosted Staging.
+5. Verify Vercel browser/runtime backend identity and sandbox all external integrations before Staging E2E; a Preview build reporting READY is not sufficient.
+
+**Gate decision:** Phase 1 / Step 2 remains PARTIAL. Do not merge the security/inquiry cutover or treat Staging as production-equivalent based on these metadata checks.
