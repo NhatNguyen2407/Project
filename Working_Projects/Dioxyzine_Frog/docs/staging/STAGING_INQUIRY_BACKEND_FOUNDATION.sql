@@ -237,8 +237,8 @@ as $fn$
 begin
   if p_path is null or
      p_path !~* '^guest/[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}\.(png|jpg|webp)$'
-     or p_mime_type not in ('image/png','image/jpeg','image/webp')
-     or p_declared_bytes not between 1 and 5242880
+     or p_mime_type is null or p_mime_type not in ('image/png','image/jpeg','image/webp')
+     or p_declared_bytes is null or p_declared_bytes not between 1 and 5242880
      or not (
        (p_mime_type='image/png' and p_path ~* '\.png$') or
        (p_mime_type='image/jpeg' and p_path ~* '\.jpg$') or
@@ -305,9 +305,10 @@ begin
     select metadata into v_meta from storage.objects
     where bucket_id='inquiry-test-references' and name=v_path;
     v_size=v_meta->>'size';
-    if v_meta is null or v_size is null or v_size !~ '^[0-9]+$'
-       or v_size::bigint <> ticket.declared_bytes
-       or v_meta->>'mimetype' <> ticket.mime_type then
+    -- Compare canonical sizes as text: malformed/huge metadata must not
+    -- overflow a cast. IS DISTINCT FROM rejects missing and JSON-null MIME.
+    if v_size is distinct from ticket.declared_bytes::text
+       or (v_meta->>'mimetype') is distinct from ticket.mime_type then
       raise exception 'Storage object not confirmed' using errcode='22023';
     end if;
   end if;

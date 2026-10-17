@@ -50,6 +50,16 @@ BEGIN
   ) THEN RAISE EXCEPTION 'Ticket registration failed'; END IF;
   BEGIN
     PERFORM public.register_inquiry_upload_ticket(
+      'guest/22222222-2222-4222-8222-222222222222.png',null,100);
+    RAISE EXCEPTION 'Null MIME accepted';
+  EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
+  BEGIN
+    PERFORM public.register_inquiry_upload_ticket(
+      'guest/22222222-2222-4222-8222-222222222222.png','image/png',null);
+    RAISE EXCEPTION 'Null size accepted';
+  EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
+  BEGIN
+    PERFORM public.register_inquiry_upload_ticket(
       'other/11111111-1111-4111-8111-111111111111.png','image/png',100);
     RAISE EXCEPTION 'Unsafe path accepted';
   EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
@@ -85,7 +95,38 @@ DECLARE
   result jsonb;
   primary_id uuid;
   fake_id uuid;
+  invalid_metadata jsonb;
 BEGIN
+  -- JSON null/missing MIME must not make a PL/pgSQL IF evaluate to NULL.
+  -- Reject malformed sizes without overflowing a bigint cast.
+  FOR invalid_metadata IN SELECT value FROM pg_catalog.jsonb_array_elements(
+    '[{"size":100},{"size":100,"mimetype":null},
+      {"size":null,"mimetype":"image/png"},
+      {"size":"invalid","mimetype":"image/png"},
+      {"size":999999999999999999999999999999,"mimetype":"image/png"},
+      {"size":99,"mimetype":"image/png"},
+      {"size":100,"mimetype":false},
+      {"size":100,"mimetype":{}},
+      {"size":100.5,"mimetype":"image/png"},
+      {"size":-100,"mimetype":"image/png"},
+      {"size":[],"mimetype":"image/png"},null,[]]'::jsonb)
+  LOOP
+    -- Each rejected call runs in a subtransaction; the exception rolls back
+    -- any insert/claim before the next case is attempted.
+    RESET ROLE;
+    UPDATE storage.objects SET metadata=invalid_metadata
+      WHERE name='guest/11111111-1111-4111-8111-111111111111.png';
+    SET LOCAL ROLE service_role;
+    BEGIN
+      PERFORM public.create_inquiry_idempotent(
+        'ffffffff-ffff-4fff-8fff-ffffffffffff',pg_catalog.repeat('f',64),row,null);
+      RAISE EXCEPTION 'Invalid Storage metadata accepted: %', invalid_metadata;
+    EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
+  END LOOP;
+  RESET ROLE;
+  UPDATE storage.objects SET metadata='{"size":100,"mimetype":"image/png"}'::jsonb
+    WHERE name='guest/11111111-1111-4111-8111-111111111111.png';
+  SET LOCAL ROLE service_role;
   -- Failed validation MUST leave zero inquiries and no claimed ticket.
   BEGIN
     PERFORM public.create_inquiry_idempotent(
@@ -101,8 +142,10 @@ BEGIN
         '"storage://inquiry-test-references/guest/44444444-4444-4444-8444-444444444444.png"'::jsonb),null);
     RAISE EXCEPTION 'Wrong MIME accepted';
   EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
-  IF (SELECT count(*) FROM public.inquiries)<>0 THEN
-    RAISE EXCEPTION 'Rejected requests mutated inquiries';
+  IF (SELECT count(*) FROM public.inquiries)<>0
+     OR (SELECT count(*) FROM inquiry_internal.submission_keys)<>0
+     OR EXISTS (SELECT 1 FROM inquiry_internal.upload_tickets WHERE claimed_inquiry_id IS NOT NULL) THEN
+    RAISE EXCEPTION 'Rejected requests mutated inquiries, keys or ticket claims';
   END IF;
 
   result := public.create_inquiry_idempotent(
@@ -111,11 +154,21 @@ BEGIN
   IF primary_id IS NULL OR result->>'replayed'<>'false' THEN
     RAISE EXCEPTION 'First issuance missing';
   END IF;
+  -- A lost-response retry must still succeed if the object is later removed.
+  -- The saved request hash/result is checked before fresh upload validation.
+  RESET ROLE;
+  DELETE FROM storage.objects WHERE name='guest/11111111-1111-4111-8111-111111111111.png';
+  SET LOCAL ROLE service_role;
   result := public.create_inquiry_idempotent(
     'cccccccc-cccc-4ccc-8ccc-cccccccccccc',pg_catalog.repeat('c',64),row,null);
   IF result->>'replayed'<>'true' OR (result->>'inquiryId')::uuid<>primary_id THEN
     RAISE EXCEPTION 'Idempotency replay did not reuse result';
   END IF;
+  RESET ROLE;
+  INSERT INTO storage.objects(bucket_id,name,metadata) VALUES
+    ('inquiry-test-references','guest/11111111-1111-4111-8111-111111111111.png',
+     '{"size":100,"mimetype":"image/png"}'::jsonb);
+  SET LOCAL ROLE service_role;
   BEGIN
     PERFORM public.create_inquiry_idempotent(
       'dddddddd-dddd-4ddd-8ddd-dddddddddddd',pg_catalog.repeat('d',64),row,null);

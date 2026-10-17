@@ -53,7 +53,7 @@ test('legacy feedback can write only from verified Production with Production ba
 });
 
 test('feedback rejects non-production environments before creating a Sheets fetch request', () => {
-  const src = readFileSync(new URL('../src/app/service/api.js', import.meta.url), 'utf8');
+  const src = readFileSync(new URL('../src/app/service/api.js', import.meta.url), 'utf8').replace(/\r\n/g, '\n');
   const start = src.indexOf('submitFeedback: async (data) => {');
   const end = src.indexOf('\n  }\n};', start);
   assert.ok(start >= 0 && end > start);

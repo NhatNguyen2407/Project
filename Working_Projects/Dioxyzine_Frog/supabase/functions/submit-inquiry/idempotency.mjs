@@ -1,5 +1,6 @@
 // Stable, unprivileged client request keys. Retry same unchanged form with
 // the same key; changing payload starts a fresh logical submission.
+import { SubmissionValidationError } from './validation.mjs';
 export function getInquirySubmissionKey(previous, payload, userId) {
   const fingerprint = JSON.stringify([payload, userId || null]);
   if (previous?.fingerprint === fingerprint && previous?.key) return previous;
@@ -21,6 +22,9 @@ export async function persistInquiryOnce(admin, { key, row, userId }) {
     p_key:key, p_hash:hash, p_row:row, p_user_id:userId,
   });
   if (error?.code === '23505') return { conflict:true };
+  // Ticket expiry, an unconfirmed object or invalid metadata requires a new
+  // valid reference, not repeated retries against an unavailable service.
+  if (error?.code === '22023') throw new SubmissionValidationError('Invalid inquiry reference');
   if (error || !data?.inquiryId || typeof data.replayed !== 'boolean') {
     throw new Error('Inquiry persistence unavailable');
   }

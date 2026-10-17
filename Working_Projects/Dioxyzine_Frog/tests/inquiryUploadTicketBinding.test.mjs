@@ -53,11 +53,21 @@ test('SQL draft binds ticket plus existing Storage object and Inquiry atomically
  }
  const object=sql.indexOf('from storage.objects'),inquiry=sql.indexOf('insert into public.inquiries'),claim=sql.indexOf('update inquiry_internal.upload_tickets');
  assert.ok(object>0&&inquiry>object&&claim>inquiry);
- assert.match(sql,/v_size::bigint <> ticket.declared_bytes/);
+ assert.match(sql,/v_size is distinct from ticket.declared_bytes::text/);
  assert.match(sql,/ticket.mime_type/);
  assert.match(sql,/pg_catalog.pg_advisory_xact_lock/);
  assert.match(sql,/create_inquiry_idempotent/);
  assert.match(sql,/revoke execute on function public.register_inquiry_upload_ticket/);
  assert.match(sql,/to service_role/);
  assert.doesNotMatch(sql,/to anon;/i);
+});
+
+test('Staging foundation includes the exact reviewed ticket schema and RPC definitions',()=>{
+ const read=path=>readFileSync(new URL(path,import.meta.url),'utf8').replace(/\r\n/g,'\n');
+ const draft=read('../docs/drafts/INQUIRY_UPLOAD_TICKET_BINDING_DRAFT.sql');
+ const foundation=read('../docs/staging/STAGING_INQUIRY_BACKEND_FOUNDATION.sql');
+ const start=draft.indexOf('create table inquiry_internal.upload_tickets');
+ const end=draft.lastIndexOf('\ncommit;');
+ assert.ok(start>=0&&end>start);
+ assert.ok(foundation.includes(draft.slice(start,end)), 'Staging SQL diverged from reviewed ticket contract');
 });

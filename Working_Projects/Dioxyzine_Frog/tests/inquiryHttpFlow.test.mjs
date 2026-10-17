@@ -39,6 +39,7 @@ function fixture(options={}) {
       if(_name !== 'create_inquiry_idempotent') events.push(args.p_scope);
       if(_name === 'create_inquiry_idempotent') {
         events.push('insert');
+        if(options.invalidReference) return {data:null,error:{code:'22023',message:'private backend details'}};
         records.push({ ...args.p_row, user_id:args.p_user_id });
         if(options.insertError) return {data:null,error:{code:'TEST_STORAGE_ERROR'}};
         if(options.keyConflict) return {data:null,error:{code:'23505'}};
@@ -88,6 +89,19 @@ async function check(handler, req, status) {
   assert.equal(response.status,status);
   return {response, body: status===204?null:await response.json()};
 }
+
+test('rejected Staging upload reference returns a safe 400 instead of a retryable 503',async()=>{
+  const f=fixture({invalidReference:true,env:{
+    INQUIRY_UPLOAD_STAGING_ENABLED:'true',
+    SUPABASE_URL:'https://bvnnmvlfcduwmneipmsi.supabase.co',
+  }});
+  const input={...body,inquiry:{...inquiry,
+    imageLink:'storage://inquiry-test-references/guest/11111111-1111-4111-8111-111111111111.png'}};
+  const {body:result}=await check(f.handler,request(input),400);
+  assert.deepEqual(result,{success:false,message:'Invalid inquiry details.'});
+  assert.equal(f.records.length,0);
+  assert.deepEqual(f.errors,[]);
+});
 
 test('guest submission validates CAPTCHA, both budgets, and writes allowlisted fields once',async()=>{
   const f=fixture();
