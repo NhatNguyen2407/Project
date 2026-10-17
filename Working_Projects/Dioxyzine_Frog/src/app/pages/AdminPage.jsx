@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { STAGING_ADMIN_SUPABASE_URL, isStagingAdminInquiryEnabled, isPrivateInquiryReference, loadStagingAdminInquiries, openStagingAdminReference } from '../utils/stagingAdminInquiryClient';
 import { motion, AnimatePresence } from 'motion/react';
 import { PackageSearch, PackagePlus, Edit, Trash2, X, PlusCircle, Save, Ticket, ToggleLeft, ToggleRight, UploadCloud, MessageSquare, Eye, EyeOff, Star } from 'lucide-react';
 import { supabase } from '../service/supabase';
@@ -40,6 +41,43 @@ export function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [orderReviews, setOrderReviews] = useState([]);
   const [inquirySearch, setInquirySearch] = useState('');
+  const [openingReferenceId, setOpeningReferenceId] = useState(null);
+  const [privateReference, setPrivateReference] = useState(null);
+
+  const adminInquiryGate = {
+    environment: import.meta.env.VITE_VERCEL_ENV,
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    optIn: import.meta.env.VITE_ENABLE_STAGING_ADMIN_INQUIRIES,
+  };
+  const useStagingAdminReader = isStagingAdminInquiryEnabled(adminInquiryGate);
+  const stagingPreview = adminInquiryGate.environment === 'preview' &&
+    adminInquiryGate.supabaseUrl === STAGING_ADMIN_SUPABASE_URL;
+  const productionAdminReader = canUseLiveExternalServices({
+    deploymentEnvironment: adminInquiryGate.environment,
+    supabaseUrl: adminInquiryGate.supabaseUrl,
+  });
+
+  useEffect(() => {
+    if (!privateReference) return;
+    const expiry = Math.max(0, privateReference.expiresAt - Date.now());
+    const timer = setTimeout(() => setPrivateReference(null), expiry);
+    return () => clearTimeout(timer);
+  }, [privateReference]);
+  useEffect(() => { setPrivateReference(null); }, [user?.id, role, activeTab]);
+
+  const handlePrivateReference = async (inquiry) => {
+    if (!useStagingAdminReader || role !== 'admin' || openingReferenceId) return;
+    setPrivateReference(null);
+    setOpeningReferenceId(inquiry.id);
+    try {
+      const url = await openStagingAdminReference(supabase, adminInquiryGate, inquiry);
+      setPrivateReference({ id: inquiry.id, url, expiresAt: Date.now() + 55_000 });
+    } catch {
+      toast.error('The private image is unavailable. Check Staging Admin access.');
+    } finally {
+      setOpeningReferenceId(null);
+    }
+  };
   const [paypalOrders, setPaypalOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [vouchers, setVouchers] = useState([]); 
@@ -86,8 +124,18 @@ export function AdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
+      // Never read customer Inquiry rows directly from Preview. A verified
+      // Production environment retains legacy RLS access; the Staging reader
+      // uses a separate server-verified, read-only Admin function.
+      const inquiryFetch = useStagingAdminReader
+        ? loadStagingAdminInquiries(supabase, adminInquiryGate)
+            .then((data) => ({ data, error: null }))
+            .catch((error) => ({ data: null, error }))
+        : productionAdminReader
+          ? supabase.from('inquiries').select('*').order('created_at', { ascending: false })
+          : Promise.resolve({ data: [], error: null });
       const [resOrders, resPaypalOrders, resProducts, resVouchers, resReviews] = await Promise.all([
-        supabase.from('inquiries').select('*').order('created_at', { ascending: false }),
+        inquiryFetch,
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('products').select('*').order('created_at', { ascending: false }),
         supabase.from('vouchers').select('*').order('created_at', { ascending: false }),
@@ -465,6 +513,11 @@ export function AdminPage() {
                   <div>
                     <h2 className="font-bold text-lg text-[var(--foreground)]">Customer Inquiry Inbox</h2>
                     <p className="text-sm text-[var(--muted-foreground)]">Read-only requests • {visibleInquiries.length} of {orders.length} shown</p>
+                    {stagingPreview && !useStagingAdminReader && (
+                      <p role="status" className="text-xs text-[var(--muted-foreground)]">
+                        Staging Admin Inbox is disabled until backend access is approved.
+                      </p>
+                    )}
                   </div>
                   <input
                     type="search"
@@ -483,7 +536,10 @@ export function AdminPage() {
               ) : (
                 <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
                   {visibleInquiries.map((inquiry) => {
-                    const referenceUrl = safeInquiryReferenceUrl(inquiry.image_link);
+                    const referenceUrl = productionAdminReader
+                      ? safeInquiryReferenceUrl(inquiry.image_link) : null;
+                    const privateImage = useStagingAdminReader &&
+                      isPrivateInquiryReference(inquiry.image_link);
                     return (
                       <article key={inquiry.id} className="bg-[var(--card)] dark:bg-[#1A1528] border border-[var(--border)] rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm min-w-0">
                         <header className="flex flex-wrap justify-between items-start gap-3">
@@ -514,6 +570,21 @@ export function AdminPage() {
                               className="text-[var(--primary)] font-semibold underline underline-offset-4">
                               Open design reference
                             </a>
+                          )}
+                          {privateImage && (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button type="button" disabled={!!openingReferenceId}
+                                onClick={() => handlePrivateReference(inquiry)}
+                                className="text-[var(--primary)] font-semibold underline underline-offset-4 disabled:opacity-50">
+                                {openingReferenceId === inquiry.id ? 'Getting secure link...' : 'Get private reference link'}
+                              </button>
+                              {privateReference?.id === inquiry.id && privateReference.expiresAt > Date.now() && (
+                                <a href={privateReference.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer"
+                                  className="text-[var(--primary)] font-semibold underline underline-offset-4">
+                                  Private reference (expires shortly)
+                                </a>
+                              )}
+                            </div>
                           )}
                         </footer>
                       </article>

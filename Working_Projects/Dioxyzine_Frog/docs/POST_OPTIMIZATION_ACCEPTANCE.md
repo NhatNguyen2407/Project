@@ -61,3 +61,10 @@ Record acceptance evidence under Issue #17, including commit SHAs, environment, 
 - [ ] After disposable SQL PASS, review whether to deploy the rate-budget, idempotency and ticket SQL to Staging with isolated secrets and server settings. Never apply to Production by default.
 - [ ] Validate guest `inquiry_upload` CAPTCHA, two-step issuance/upload, ticket claim in final Inquiry transaction, no expired signed URL persisted, and Admin viewing via authorized short-lived download URLs.
 - [ ] Test one successful synthetic guest submission, retries, duplicate claims, mismatched MIME/metadata, quota exhaustion, bad paths and cleanup. Source-only CI and a simulated SQL metadata table are not hosted Supabase Storage E2E.
+
+## Preview Admin Inbox and private reference acceptance
+- [ ] With `VITE_ENABLE_STAGING_ADMIN_INQUIRIES` unset, Preview must make zero direct `inquiries` SELECT requests, show staging-reader disabled, and never invoke privileged `admin-inquiries` Edge Function.
+- [ ] After approved backend migration and test-only Staging Admin account, enable `INQUIRY_ADMIN_READ_STAGING_ENABLED` only on Staging server and client opt-in only on Vercel Preview; verify admin list and reference actions with real synthetic fixtures.
+- [ ] Anon, forged JWT, authenticated non-admin and removed Admin role cannot list/read; arbitrary client image paths cannot be signed. Verify denied cases on hosted Staging, no Production key exposure.
+- [ ] A legitimate Staging Admin can request a per-Inquiry short-lived signed URL; link expires quickly and does not leak or persist customer references to localStorage, query logs or unrelated services.
+- [ ] Admin UI source approval does not constitute hosted E2E or permission to merge either Draft PR. Backend migration remains blocked; do not enable flags until authorized review.
