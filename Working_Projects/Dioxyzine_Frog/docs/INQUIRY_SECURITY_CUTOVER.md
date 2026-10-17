@@ -188,3 +188,8 @@ Covered scenarios:
 - Read-only preflight confirmed 0 Staging inquiries, 0 Auth users, 0 uploaded objects, one Private 5MiB bucket, expected synthetic product/order, and no new quota/idempotency/ticket RPCs or private backend tables. The unrelated existing `consume_inquiry_quota` stays untouched.
 - Consolidated the three reviewed SQL drafts in `docs/staging/STAGING_INQUIRY_BACKEND_FOUNDATION.sql` as one transaction with synthetic Staging preflight and postflight grants/RLS checks. Only apply to project `bvnnmvlfcduwmneipmsi` once the exact bundled migration has passed disposable CI.
 - Disposable PostgreSQL test now executes that same bundle rather than separate drafts. Supabase Edge Functions remain undeployed and Preview upload opt-in remains OFF until independent CAPTCHA/secrets/E2E readiness. No Production change.
+
+## 2026-10-17 — Staging Admin Inbox and private image reader (Draft)
+- A new read-only `admin-inquiries` Edge Function offers bounded list and on-demand 60-second private reference link actions. Disabled unless Staging URL and `INQUIRY_ADMIN_READ_STAGING_ENABLED=true` are set. Not deployed.
+- Caller must have a verified Supabase Auth session and server-checked `user_roles.role=admin`; an apikey, Origin or client role value alone does not grant access. The client never supplies an arbitrary Storage object path. No anon Storage SELECT policy added.
+- Mock tests verify denial for guests/non-admins/wrong environment, input allowlist and short-lived signed URLs. Hosted Staging has zero Auth users and the foundational migration remains blocked; hosted Admin E2E and UI wiring remain separate release gates.
