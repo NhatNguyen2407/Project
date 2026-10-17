@@ -9,7 +9,9 @@ async function loadRuntime() {
   await magick.initializeImageMagick(bytes);
   const limits = magick.ResourceLimits;
   limits.width=BigInt(IMAGE_MAX_SIDE); limits.height=BigInt(IMAGE_MAX_SIDE);
-  limits.area=BigInt(IMAGE_MAX_SIDE * IMAGE_MAX_SIDE);
+  // ImageMagick's area resource uses size < limit. Keep the documented
+  // inclusive 2048x2048 boundary in memory; disk fallback remains disabled.
+  limits.area=BigInt(IMAGE_MAX_SIDE * IMAGE_MAX_SIDE + 1);
   limits.memory=64n*1024n*1024n; limits.disk=0n;
   limits.maxMemoryRequest=64n*1024n*1024n; limits.maxProfileSize=256n*1024n;
   // ImageMagick's cache counts the destination image as well as the input.

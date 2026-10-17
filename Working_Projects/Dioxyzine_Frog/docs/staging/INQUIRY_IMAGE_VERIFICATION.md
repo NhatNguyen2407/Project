@@ -88,13 +88,39 @@ CI runs the same SQL and combined test on a guarded disposable localhost DB.
 
 ## Hosted acceptance remaining
 
-Separate Staging reCAPTCHA credentials are still missing. Before enabling:
+Staging reCAPTCHA credentials were created on 2026-10-17 (site 770957295).
+The secret is stored only in Supabase Staging; the public Site Key is scoped
+to the Vercel Preview branch `codex/inquiry-staging-candidate`. Before enabling:
 review migration history/foundation preflight, reconcile direct INSERT/RLS
 cutover, package and smoke-test WASM in the actual Edge runtime, measure memory/
 CPU with representative boundary images, verify real signed-upload overwrite
 denial and ETag behavior, test actual Auth/Admin permissions and signed expiry,
 define orphan cleanup/quota handling, then validate the combined Preview UI.
 Keep both PRs Draft and upload switches disabled until these gates pass.
+
+## Local Edge Runtime boundary checkpoint (2026-10-17)
+
+The decoder and its pinned npm/WASM assets were bundled into an ESZIP and
+run with Supabase Edge Runtime v1.77.4, image digest
+`sha256:ad45164b7548bf5820ed7be714789c17ac2865edce79a09cfb4c3756c3d365a8`.
+The user worker had 256 MiB memory and 2000 ms hard CPU limits. The runtime
+had no external network, source tree or npm cache mounted; only the main
+test service and the generated bundle were mounted read-only.
+
+Real 2048x2048 PNG/JPEG/WebP fixtures initially all failed. ImageMagick's
+AreaResource uses `size < limit`, so a limit equal to the maximum pixel area
+forced the boundary image onto the disabled disk cache. Raising the area
+threshold by one pixel fixes the inclusive boundary without increasing the
+64 MiB cache/request limits or allowing a larger decoded width/height.
+See [the upstream comparison](https://github.com/ImageMagick/ImageMagick/blob/main/MagickCore/resource.c).
+
+After the fix, all three 2048x2048 formats passed (about 260/99/84 ms elapsed
+in this synthetic local run); all three real 2049x2049 fixtures were rejected.
+The Deno regression now generates valid fixtures at both sizes and checks
+acceptance/rejection with the real decoder. These small solid-color files
+establish the pixel boundary, not worst-case CPU/memory behavior for every
+file up to 5 MiB. Hosted runtime equivalence, peak memory and representative
+high-complexity images remain acceptance gates.
 
 References: [Supabase WASM image processing](https://supabase.com/docs/guides/functions/examples/image-manipulation),
 [WebP container specification](https://developers.google.com/speed/webp/docs/riff_container),
