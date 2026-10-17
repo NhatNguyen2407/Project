@@ -37,7 +37,7 @@ function fixture(options={}) {
   const client = {
     rpc:async (_name, args)=>{
       if(_name !== 'create_inquiry_idempotent') events.push(args.p_scope);
-      if(_name === 'create_inquiry_idempotent') {
+      if(['create_inquiry_idempotent','create_verified_inquiry_idempotent'].includes(_name)) {
         events.push('insert');
         if(options.invalidReference) return {data:null,error:{code:'22023',message:'private backend details'}};
         records.push({ ...args.p_row, user_id:args.p_user_id });

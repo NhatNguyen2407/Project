@@ -70,6 +70,7 @@ async function readJsonBounded(request) {
  * @param {(key:string) => string|undefined} dependencies.envGet
  * @param {Function} dependencies.createClient Supabase service role client factory
  * @param {typeof fetch} dependencies.fetchCaptcha HTTP siteverify caller
+ * @param {Function} [dependencies.verifyImage] Staging-only server image verifier
  * @param {() => number} [dependencies.clock] current Unix milliseconds
  * @param {object} [dependencies.logger] sanitized error logger
  * @param {string} [dependencies.allowedCorsHeaders] SDK-supported preflight headers
@@ -78,6 +79,7 @@ export function createInquiryHandler({
   envGet,
   createClient,
   fetchCaptcha,
+  verifyImage,
   clock = () => Date.now(),
   logger = console,
   allowedCorsHeaders = 'authorization, apikey, x-client-info, content-type',
@@ -206,7 +208,8 @@ export function createInquiryHandler({
       }
 
       const result = await persistInquiryOnce(admin, {
-        key: body.idempotencyKey, row, userId,
+        key: body.idempotencyKey, row, userId, verifyImage: ticketMode ? verifyImage : undefined,
+        requireImageVerification:ticketMode,
       });
       if (result.conflict) {
         return json({ success:false, message:'Submission identifier reused with different details.' },409,origin);

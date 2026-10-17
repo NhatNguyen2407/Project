@@ -36,7 +36,7 @@ BEGIN
   IF pg_catalog.has_function_privilege('anon','public.register_inquiry_upload_ticket(text,text,integer)','EXECUTE')
     OR pg_catalog.has_function_privilege('authenticated','public.register_inquiry_upload_ticket(text,text,integer)','EXECUTE')
     OR NOT pg_catalog.has_function_privilege('service_role','public.register_inquiry_upload_ticket(text,text,integer)','EXECUTE')
-    OR pg_catalog.has_function_privilege('anon','public.create_inquiry_idempotent(uuid,text,jsonb,uuid)','EXECUTE')
+    OR pg_catalog.has_function_privilege('anon','public.create_verified_inquiry_idempotent(uuid,text,jsonb,uuid)','EXECUTE')
   THEN RAISE EXCEPTION 'Unsafe RPC grants'; END IF;
 END
 $assert$;
@@ -78,7 +78,7 @@ RESET ROLE;
 INSERT INTO storage.objects(bucket_id,name,metadata) VALUES
  ('inquiry-test-references',
   'guest/11111111-1111-4111-8111-111111111111.png',
-  '{"size":100,"mimetype":"image/png"}'::jsonb),
+  '{"size":100,"mimetype":"image/png","eTag":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}'::jsonb),
  ('inquiry-test-references',
   'guest/44444444-4444-4444-8444-444444444444.png',
   '{"size":100,"mimetype":"image/jpeg"}'::jsonb);
@@ -91,12 +91,38 @@ DECLARE
     'subject','Synthetic','customer_name','Sample','customer_email','sample@example.invalid',
     'contact_info','Synthetic','product_name','Test','size','10',
     'quantity',1,'accessory_qty',0,'note','none',
+    '_verified_image',pg_catalog.jsonb_build_object('etag',pg_catalog.repeat('a',32),'sha256',pg_catalog.repeat('b',64),
+      'mimeType','image/png','sizeBytes',100,'width',2,'height',2),
     'image_link','storage://inquiry-test-references/guest/11111111-1111-4111-8111-111111111111.png');
   result jsonb;
   primary_id uuid;
   fake_id uuid;
   invalid_metadata jsonb;
+  invalid_proof jsonb;
 BEGIN
+  result := public.create_verified_inquiry_idempotent(
+    'ffffffff-ffff-4fff-8fff-ffffffffffff',pg_catalog.repeat('f',64),row-'_verified_image',null);
+  IF result->'verificationRequired'->>'etag' IS DISTINCT FROM pg_catalog.repeat('a',32)
+     OR (SELECT count(*) FROM public.inquiries)<>0
+     OR (SELECT count(*) FROM inquiry_internal.submission_keys)<>0
+     OR EXISTS (SELECT 1 FROM inquiry_internal.upload_tickets WHERE claimed_inquiry_id IS NOT NULL) THEN
+    RAISE EXCEPTION 'Verification challenge wrote data or returned wrong checksum';
+  END IF;
+  FOR invalid_proof IN SELECT value FROM pg_catalog.jsonb_array_elements(
+    '[null,{}, {"etag":"bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb"},
+      {"mimeType":"image/jpeg"}, {"sizeBytes":101}, {"width":2049},
+      {"height":0}, {"sha256":"invalid"}]'::jsonb)
+  LOOP
+    BEGIN
+      PERFORM public.create_verified_inquiry_idempotent(
+        'ffffffff-ffff-4fff-8fff-ffffffffffff',pg_catalog.repeat('f',64),
+        pg_catalog.jsonb_set(row,'{_verified_image}',
+          CASE WHEN invalid_proof='{}'::jsonb THEN '{}'::jsonb
+               WHEN invalid_proof='null'::jsonb THEN 'null'::jsonb
+               ELSE (row->'_verified_image')||invalid_proof END),null);
+      RAISE EXCEPTION 'Invalid or stale verification evidence accepted';
+    EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
+  END LOOP;
   -- JSON null/missing MIME must not make a PL/pgSQL IF evaluate to NULL.
   -- Reject malformed sizes without overflowing a bigint cast.
   FOR invalid_metadata IN SELECT value FROM pg_catalog.jsonb_array_elements(
@@ -118,25 +144,25 @@ BEGIN
       WHERE name='guest/11111111-1111-4111-8111-111111111111.png';
     SET LOCAL ROLE service_role;
     BEGIN
-      PERFORM public.create_inquiry_idempotent(
+      PERFORM public.create_verified_inquiry_idempotent(
         'ffffffff-ffff-4fff-8fff-ffffffffffff',pg_catalog.repeat('f',64),row,null);
       RAISE EXCEPTION 'Invalid Storage metadata accepted: %', invalid_metadata;
     EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
   END LOOP;
   RESET ROLE;
-  UPDATE storage.objects SET metadata='{"size":100,"mimetype":"image/png"}'::jsonb
+  UPDATE storage.objects SET metadata='{"size":100,"mimetype":"image/png","eTag":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}'::jsonb
     WHERE name='guest/11111111-1111-4111-8111-111111111111.png';
   SET LOCAL ROLE service_role;
   -- Failed validation MUST leave zero inquiries and no claimed ticket.
   BEGIN
-    PERFORM public.create_inquiry_idempotent(
+    PERFORM public.create_verified_inquiry_idempotent(
       'aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa',pg_catalog.repeat('a',64),
       pg_catalog.jsonb_set(row,'{image_link}',
         '"storage://inquiry-test-references/guest/33333333-3333-4333-8333-333333333333.png"'::jsonb),null);
     RAISE EXCEPTION 'Missing Storage object accepted';
   EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
   BEGIN
-    PERFORM public.create_inquiry_idempotent(
+    PERFORM public.create_verified_inquiry_idempotent(
       'bbbbbbbb-bbbb-4bbb-8bbb-bbbbbbbbbbbb',pg_catalog.repeat('b',64),
       pg_catalog.jsonb_set(row,'{image_link}',
         '"storage://inquiry-test-references/guest/44444444-4444-4444-8444-444444444444.png"'::jsonb),null);
@@ -148,7 +174,7 @@ BEGIN
     RAISE EXCEPTION 'Rejected requests mutated inquiries, keys or ticket claims';
   END IF;
 
-  result := public.create_inquiry_idempotent(
+  result := public.create_verified_inquiry_idempotent(
     'cccccccc-cccc-4ccc-8ccc-cccccccccccc',pg_catalog.repeat('c',64),row,null);
   primary_id := (result->>'inquiryId')::uuid;
   IF primary_id IS NULL OR result->>'replayed'<>'false' THEN
@@ -159,7 +185,7 @@ BEGIN
   RESET ROLE;
   DELETE FROM storage.objects WHERE name='guest/11111111-1111-4111-8111-111111111111.png';
   SET LOCAL ROLE service_role;
-  result := public.create_inquiry_idempotent(
+  result := public.create_verified_inquiry_idempotent(
     'cccccccc-cccc-4ccc-8ccc-cccccccccccc',pg_catalog.repeat('c',64),row,null);
   IF result->>'replayed'<>'true' OR (result->>'inquiryId')::uuid<>primary_id THEN
     RAISE EXCEPTION 'Idempotency replay did not reuse result';
@@ -167,10 +193,10 @@ BEGIN
   RESET ROLE;
   INSERT INTO storage.objects(bucket_id,name,metadata) VALUES
     ('inquiry-test-references','guest/11111111-1111-4111-8111-111111111111.png',
-     '{"size":100,"mimetype":"image/png"}'::jsonb);
+     '{"size":100,"mimetype":"image/png","eTag":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"}'::jsonb);
   SET LOCAL ROLE service_role;
   BEGIN
-    PERFORM public.create_inquiry_idempotent(
+    PERFORM public.create_verified_inquiry_idempotent(
       'dddddddd-dddd-4ddd-8ddd-dddddddddddd',pg_catalog.repeat('d',64),row,null);
     RAISE EXCEPTION 'Previously claimed object was accepted';
   EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;
@@ -178,6 +204,10 @@ BEGIN
      OR (SELECT count(*) FROM inquiry_internal.submission_keys)<>1
      OR (SELECT claimed_inquiry_id FROM inquiry_internal.upload_tickets
          WHERE object_path='guest/11111111-1111-4111-8111-111111111111.png')<>primary_id
+     OR (SELECT verified_sha256 FROM inquiry_internal.upload_tickets
+         WHERE object_path='guest/11111111-1111-4111-8111-111111111111.png') IS DISTINCT FROM pg_catalog.repeat('b',64)
+     OR (SELECT verified_at FROM inquiry_internal.upload_tickets
+         WHERE object_path='guest/11111111-1111-4111-8111-111111111111.png') IS NULL
   THEN RAISE EXCEPTION 'Not atomic: record or claim count differs'; END IF;
 END
 $assert$;
@@ -193,7 +223,7 @@ DECLARE row jsonb := pg_catalog.jsonb_build_object(
   'image_link','storage://inquiry-test-references/guest/44444444-4444-4444-8444-444444444444.png');
 BEGIN
   BEGIN
-    PERFORM public.create_inquiry_idempotent(
+    PERFORM public.create_verified_inquiry_idempotent(
       'eeeeeeee-eeee-4eee-8eee-eeeeeeeeeeee',pg_catalog.repeat('e',64),row,null);
     RAISE EXCEPTION 'Expired ticket accepted';
   EXCEPTION WHEN SQLSTATE '22023' THEN NULL; END;

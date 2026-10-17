@@ -23,7 +23,8 @@ function fixture({changes={},budgetResults=[true,true],captchaAction='inquiry_up
      calls.push({kind:'budget',name,scope:args.p_scope});
      return {data:grants.shift(),error:null};
    },
-   storage:{from:bucket=>{calls.push({kind:'bucket',bucket});return {createSignedUploadUrl:async p=>{
+   storage:{from:bucket=>{calls.push({kind:'bucket',bucket});return {createSignedUploadUrl:async (p,options)=>{
+     assert.deepEqual(options,{upsert:false});
      calls.push({kind:'signed',path:p});return {data:{path:p,token},error:null};
    }}}},
  };

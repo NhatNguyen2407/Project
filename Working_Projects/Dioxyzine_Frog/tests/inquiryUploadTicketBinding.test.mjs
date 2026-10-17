@@ -33,7 +33,7 @@ test('Staging mode is gated by URL and explicit Edge toggle before validation',(
 test('issuer records durable upload ticket before returning signed capability',()=>{
  const source=readFileSync(new URL('../supabase/functions/issue-inquiry-upload/handler.mjs',import.meta.url),'utf8');
  const ticket=source.indexOf("admin.rpc('register_inquiry_upload_ticket'");
- const signing=source.indexOf('.createSignedUploadUrl(path)');
+ const signing=source.indexOf('.createSignedUploadUrl(path,{upsert:false})');
  const response=source.indexOf('return reply(201');
  assert.ok(ticket>0&&signing>ticket&&response>signing);
  assert.match(source,/ticketSaved!==true/);
@@ -56,7 +56,7 @@ test('SQL draft binds ticket plus existing Storage object and Inquiry atomically
  assert.match(sql,/v_size is distinct from ticket.declared_bytes::text/);
  assert.match(sql,/ticket.mime_type/);
  assert.match(sql,/pg_catalog.pg_advisory_xact_lock/);
- assert.match(sql,/create_inquiry_idempotent/);
+ assert.match(sql,/create_verified_inquiry_idempotent/);
  assert.match(sql,/revoke execute on function public.register_inquiry_upload_ticket/);
  assert.match(sql,/to service_role/);
  assert.doesNotMatch(sql,/to anon;/i);

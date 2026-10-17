@@ -4,7 +4,12 @@ on:
   pull_request:
     paths:
       - 'Working_Projects/Dioxyzine_Frog/supabase/functions/submit-inquiry/**'
+      - 'Working_Projects/Dioxyzine_Frog/supabase/functions/issue-inquiry-upload/**'
+      - 'Working_Projects/Dioxyzine_Frog/supabase/functions/admin-inquiries/**'
+      - 'Working_Projects/Dioxyzine_Frog/supabase/config.toml'
       - 'Working_Projects/Dioxyzine_Frog/scripts/inquiry-runtime-smoke.mjs'
+      - 'Working_Projects/Dioxyzine_Frog/scripts/inquiry-image-runtime-test.mjs'
+      - 'Working_Projects/Dioxyzine_Frog/scripts/fixtures/inquiryImages.mjs'
       - '.github/workflows/dioxyzine-inquiry-deno.yml'
   workflow_dispatch:
 
@@ -22,10 +27,12 @@ jobs:
       - uses: actions/checkout@v4
       - uses: denoland/setup-deno@v2
         with:
-          deno-version: v2.x
+          deno-version: v2.9.6
       - name: Prepare isolated Deno npm dependencies
-        run: deno install --entrypoint supabase/functions/submit-inquiry/index.ts
+        run: deno install --frozen --config supabase/functions/submit-inquiry/deno.json --entrypoint supabase/functions/submit-inquiry/index.ts
       - name: Type-check real Edge Function entrypoint and pinned CORS import
-        run: deno check supabase/functions/submit-inquiry/index.ts
+        run: deno check --frozen --config supabase/functions/submit-inquiry/deno.json supabase/functions/submit-inquiry/index.ts supabase/functions/issue-inquiry-upload/index.ts supabase/functions/admin-inquiries/index.ts
       - name: Run isolated Deno HTTP smoke tests (synthetic services only)
-        run: deno test --allow-net=127.0.0.1 --allow-env scripts/inquiry-runtime-smoke.mjs
+        run: deno test --frozen --cached-only --config supabase/functions/submit-inquiry/deno.json --allow-net=127.0.0.1 --allow-env scripts/inquiry-runtime-smoke.mjs
+      - name: Decode real synthetic PNG JPEG and WebP with bounded WASM
+        run: deno test --frozen --cached-only --config supabase/functions/submit-inquiry/deno.json --allow-read --allow-env scripts/inquiry-image-runtime-test.mjs

@@ -442,3 +442,16 @@ entrypoint = "./functions/verify-recaptcha/index.ts"
 enabled = true
 verify_jwt = false
 entrypoint = "./functions/submit-inquiry/index.ts"
+
+# Staging guest issuance verifies the public key, CAPTCHA and budgets itself.
+[functions.issue-inquiry-upload]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/issue-inquiry-upload/index.ts"
+
+# The read handler verifies Auth.getUser and database admin role itself.
+# This setting permits CORS preflight; it grants no Admin authorization.
+[functions.admin-inquiries]
+enabled = true
+verify_jwt = false
+entrypoint = "./functions/admin-inquiries/index.ts"

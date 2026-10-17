@@ -130,7 +130,7 @@ export function createGuestUploadHandler({
         p_path:path,p_mime_type:body.mimeType,p_declared_bytes:body.sizeBytes,
       });
       if (ticketError || ticketSaved!==true) return reply(503,'Upload unavailable.',origin);
-      const {data,error}=await admin.storage.from(STAGING_IMAGE_BUCKET).createSignedUploadUrl(path);
+      const {data,error}=await admin.storage.from(STAGING_IMAGE_BUCKET).createSignedUploadUrl(path,{upsert:false});
       if (error || !data || data.path!==path ||
           typeof data.token!=='string' || !data.token.trim()) {
         return reply(503,'Upload unavailable.',origin);

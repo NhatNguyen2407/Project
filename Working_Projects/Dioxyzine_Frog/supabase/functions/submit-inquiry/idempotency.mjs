@@ -15,12 +15,26 @@ export async function hashInquiryRecord(row, userId) {
   const digest = await crypto.subtle.digest('SHA-256', bytes);
   return Array.from(new Uint8Array(digest), n => n.toString(16).padStart(2,'0')).join('');
 }
-export async function persistInquiryOnce(admin, { key, row, userId }) {
+export async function persistInquiryOnce(admin, { key, row, userId, verifyImage, requireImageVerification=false }) {
   if (!isInquiryIdempotencyKey(key)) throw new Error('Invalid idempotency key');
   const hash = await hashInquiryRecord(row, userId);
-  const { data, error } = await admin.rpc('create_inquiry_idempotent', {
+  // A distinct RPC fails closed against an older deployment; it cannot fall
+  // back to the old transaction that accepted metadata without decoding.
+  const rpc = requireImageVerification ? 'create_verified_inquiry_idempotent' : 'create_inquiry_idempotent';
+  let { data, error } = await admin.rpc(rpc, {
     p_key:key, p_hash:hash, p_row:row, p_user_id:userId,
   });
+  if (!error && data?.verificationRequired) {
+    if (!requireImageVerification || typeof verifyImage!=='function' || data.inquiryId || data.replayed!==undefined) {
+      throw new Error('Image verifier unavailable');
+    }
+    const proof = await verifyImage(row,data.verificationRequired);
+    // Only the server supplies this evidence. The request validator's field
+    // allowlist never copies it from browser JSON; it is excluded from hash.
+    ({data,error} = await admin.rpc(rpc, {
+      p_key:key,p_hash:hash,p_row:{...row,_verified_image:proof},p_user_id:userId,
+    }));
+  }
   if (error?.code === '23505') return { conflict:true };
   // Ticket expiry, an unconfirmed object or invalid metadata requires a new
   // valid reference, not repeated retries against an unavailable service.

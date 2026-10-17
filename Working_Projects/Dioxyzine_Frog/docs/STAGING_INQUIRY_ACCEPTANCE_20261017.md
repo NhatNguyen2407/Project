@@ -39,10 +39,11 @@ service_role calls. Storage tables are synthetic stubs, not the Storage API.
 
 ## Remaining release gates
 
-1. Server-side image-content verification is **not implemented**. Neither
-   browser signature checks nor Storage metadata prove the uploaded bytes are
-   a valid, safe image. Prepare bounded server validation, preserving retries
-   and atomic ticket claims, before opening guest upload.
+1. Server-side image-content verification is now implemented in the subsequent
+   checkpoint, with bounded download, actual WASM decoding and transactional
+   verification/claim. See [the current contract and evidence](staging/INQUIRY_IMAGE_VERIFICATION.md).
+   Actual hosted WASM packaging, resource limits and Storage semantics remain
+   to be verified before opening guest upload.
 2. Configure separate Staging reCAPTCHA v3 credentials, exact origin/hostname
    allowlists and server-only secrets. Never put secrets in chat or Vite vars.
 3. Review/apply the Staging foundation and deploy the three functions, then

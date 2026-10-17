@@ -39,7 +39,12 @@ test('preflight header allowlist is case-insensitive and rejects unexpected head
 test('function configuration remains scoped and CORS headers follow pinned Supabase SDK',()=>{
   const config=readFileSync(new URL('../supabase/config.toml',import.meta.url),'utf8');
   const index=readFileSync(new URL('../supabase/functions/submit-inquiry/index.ts',import.meta.url),'utf8');
-  assert.match(config,/\[functions\.submit-inquiry\][\s\S]*?verify_jwt\s*=\s*false/);
+  for (const name of ['submit-inquiry','issue-inquiry-upload','admin-inquiries']) {
+    const section=config.split(`[functions.${name}]`)[1]?.split(/\r?\n\[/)[0];
+    assert.ok(section,`Missing function configuration: ${name}`);
+    assert.match(section,/verify_jwt\s*=\s*false/);
+    assert.ok(section.includes(`entrypoint = "./functions/${name}/index.ts"`));
+  }
   assert.match(index,/supabase-js@2\.110\.0\/cors/);
   assert.match(index,/allowedCorsHeaders:\s*corsHeaders\['Access-Control-Allow-Headers'\]/);
 });

@@ -13,7 +13,9 @@ create table inquiry_internal.upload_tickets (
   mime_type text not null check (mime_type in ('image/png','image/jpeg','image/webp')),
   declared_bytes integer not null check (declared_bytes between 1 and 5242880),
   issued_at timestamptz not null default pg_catalog.now(),
-  claimed_inquiry_id uuid unique references public.inquiries(id)
+  claimed_inquiry_id uuid unique references public.inquiries(id),
+  verified_sha256 text check (verified_sha256 ~ '^[a-f0-9]{64}$'),
+  verified_at timestamptz
 );
 alter table inquiry_internal.upload_tickets enable row level security;
 revoke all on inquiry_internal.upload_tickets from public, anon, authenticated;
@@ -51,7 +53,7 @@ grant execute on function public.register_inquiry_upload_ticket(text,text,intege
   to service_role;
 
 -- Extension of the base idempotent transaction with an atomic upload claim.
-create or replace function public.create_inquiry_idempotent(
+create or replace function public.create_verified_inquiry_idempotent(
   p_key uuid, p_hash text, p_row jsonb, p_user_id uuid default null
 ) returns jsonb language plpgsql security invoker set search_path=''
 as $fn$
@@ -62,6 +64,8 @@ declare
   v_path text;
   v_meta jsonb;
   v_size text;
+  v_etag text;
+  v_proof jsonb;
 begin
   if p_key is null or p_hash is null or p_hash !~ '^[a-f0-9]{64}$'
      or pg_catalog.jsonb_typeof(p_row) is distinct from 'object' then
@@ -100,6 +104,35 @@ begin
        or (v_meta->>'mimetype') is distinct from ticket.mime_type then
       raise exception 'Storage object not confirmed' using errcode='22023';
     end if;
+    -- Only single-part objects with a content checksum are accepted. The
+    -- server compares downloaded bytes against this value, then we recheck
+    -- current metadata in the final transaction. Guest tokens cannot upsert.
+    v_etag=pg_catalog.lower(pg_catalog.btrim(v_meta->>'eTag','"'));
+    if v_etag is null or v_etag !~ '^[a-f0-9]{32}$' then
+      raise exception 'Storage checksum unavailable' using errcode='22023';
+    end if;
+    v_proof=p_row->'_verified_image';
+    if v_proof is null then
+      -- No inquiry, key or claim is written by this verification challenge.
+      return pg_catalog.jsonb_build_object('verificationRequired',pg_catalog.jsonb_build_object(
+        'path',v_path,'mimeType',ticket.mime_type,'sizeBytes',ticket.declared_bytes,'etag',v_etag));
+    end if;
+    -- This is server attestation, not client-supplied evidence. Only
+    -- service_role can call the RPC; the HTTP validator drops this field.
+    if pg_catalog.jsonb_typeof(v_proof) is distinct from 'object'
+       or (v_proof->>'etag') is distinct from v_etag
+       or (v_proof->>'mimeType') is distinct from ticket.mime_type
+       or (v_proof->>'sizeBytes') is distinct from v_size
+       or coalesce(v_proof->>'sha256','') !~ '^[a-f0-9]{64}$'
+       or coalesce(v_proof->>'width','') !~ '^[1-9][0-9]{0,3}$'
+       or coalesce(v_proof->>'height','') !~ '^[1-9][0-9]{0,3}$' then
+      raise exception 'Invalid image verification' using errcode='22023';
+    end if;
+    if (v_proof->>'width')::integer>2048 or (v_proof->>'height')::integer>2048 then
+      raise exception 'Image dimensions exceed Staging limit' using errcode='22023';
+    end if;
+  else
+    raise exception 'Verified submission requires private Storage reference' using errcode='22023';
   end if;
 
   insert into public.inquiries(
@@ -114,7 +147,8 @@ begin
   ) returning id into created;
 
   if v_path is not null then
-    update inquiry_internal.upload_tickets set claimed_inquiry_id=created
+    update inquiry_internal.upload_tickets set claimed_inquiry_id=created,
+      verified_sha256=v_proof->>'sha256',verified_at=pg_catalog.now()
     where object_path=v_path and claimed_inquiry_id is null;
     if not found then
       raise exception 'Already claimed' using errcode='22023';
@@ -125,9 +159,9 @@ begin
   return pg_catalog.jsonb_build_object('inquiryId',created,'replayed',false);
 end;
 $fn$;
-revoke execute on function public.create_inquiry_idempotent(uuid,text,jsonb,uuid)
+revoke execute on function public.create_verified_inquiry_idempotent(uuid,text,jsonb,uuid)
   from public,anon,authenticated;
-grant execute on function public.create_inquiry_idempotent(uuid,text,jsonb,uuid)
+grant execute on function public.create_verified_inquiry_idempotent(uuid,text,jsonb,uuid)
   to service_role;
 commit;
 

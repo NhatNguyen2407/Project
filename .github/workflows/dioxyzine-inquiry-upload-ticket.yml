@@ -8,8 +8,11 @@ on:
       - 'Working_Projects/Dioxyzine_Frog/docs/drafts/INQUIRY_RATE_LIMIT_DRAFT.sql'
       - 'Working_Projects/Dioxyzine_Frog/docs/staging/STAGING_INQUIRY_BACKEND_FOUNDATION.sql'
       - 'Working_Projects/Dioxyzine_Frog/scripts/verify-inquiry-upload-ticket-disposable.sql'
+      - 'Working_Projects/Dioxyzine_Frog/scripts/inquiry-content-database-test.mjs'
+      - 'Working_Projects/Dioxyzine_Frog/scripts/fixtures/inquiryImages.mjs'
       - 'Working_Projects/Dioxyzine_Frog/supabase/functions/issue-inquiry-upload/**'
       - 'Working_Projects/Dioxyzine_Frog/supabase/functions/submit-inquiry/**'
+      - 'Working_Projects/Dioxyzine_Frog/supabase/functions/admin-inquiries/**'
   workflow_dispatch:
 
 permissions:
@@ -37,6 +40,11 @@ jobs:
         working-directory: Working_Projects/Dioxyzine_Frog
     steps:
       - uses: actions/checkout@v4
+      - uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - name: Prepare pinned image decoder and Edge dependencies
+        run: deno install --frozen --config supabase/functions/submit-inquiry/deno.json --entrypoint supabase/functions/submit-inquiry/index.ts
       - name: Verify ticket and idempotency SQL on disposable PostgreSQL
         env:
           PGHOST: 127.0.0.1
@@ -50,3 +58,12 @@ jobs:
             echo 'Refusing non-disposable database'; exit 1
           fi
           psql -X -v ON_ERROR_STOP=1 -f scripts/verify-inquiry-upload-ticket-disposable.sql
+      - name: Verify HTTP image submission and Admin read against real disposable PostgreSQL
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '54324'
+          PGUSER: postgres
+          PGPASSWORD: ci_disposable_only
+          PGDATABASE: inquiry_upload_disposable
+          INQUIRY_CONTENT_TEST_ACK: synthetic-only
+        run: deno run --frozen --cached-only --config supabase/functions/submit-inquiry/deno.json --allow-read --allow-env --allow-run=psql --allow-net=127.0.0.1 scripts/inquiry-content-database-test.mjs
