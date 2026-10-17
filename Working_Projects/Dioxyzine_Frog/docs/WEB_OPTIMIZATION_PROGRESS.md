@@ -102,3 +102,8 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 ## 2026-10-16 — Combined ticket SQL and guest uploader regression gate
 - PR #21 `6cbacff` completed the new disposable PostgreSQL 17 ticket SQL drill (real SQL on synthetic schema), Application CI, Deno Runtime and existing Postgres Drill; all 4 workflows SUCCESS. **Not** a hosted upload test.
 - Combined PR #19 workflow pin updated to PR #21 exact reviewed SHA. Recheck source tests/build after this PR #19 commit before accepting this batch. Staging server enable flags remain OFF. No live service writes or merges.
+
+## 2026-10-17 — Admin private Inquiry image reader release gate
+- PR #21 `3aea043` introduced disabled-by-default, Staging-only read-only `admin-inquiries` Edge Function. Verifies caller Auth and `user_roles.role=admin` server-side, lists at most 100 allowed Inquiry fields, and creates on-demand 60-second signed download links only from canonical stored private references. No browser-supplied object path or public Storage read policy.
+- Exact PR #21 App CI `38994143225`, Deno runtime `38994143203`, rate PostgreSQL drill `38994143183` and upload-ticket SQL drill `38994143206` all SUCCESS. Source tests do not verify hosted Auth roles or actual signed URL access.
+- Combined PR #19 pin updated to exact PR #21 HEAD. Hosted migration blocked, Staging Auth user count zero, function not deployed, admin UI integration deferred. Phase 2 still Draft/not released; Phase 1 Recovery/browser E2E pending; Phases 3–5 not started.
