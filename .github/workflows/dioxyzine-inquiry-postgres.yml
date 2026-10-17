@@ -1,0 +1,84 @@
+# Isolated PostgreSQL integration drill for the Inquiry rate budget.
+# Public GitHub repo + standard ubuntu-latest runner + transient service container.
+# This workflow never uses Supabase secrets, hosted databases or paid add-ons.
+name: Dioxyzine Inquiry PostgreSQL Drill
+on:
+  pull_request:
+    paths:
+      - 'Working_Projects/Dioxyzine_Frog/docs/drafts/INQUIRY_RATE_LIMIT_DRAFT.sql'
+      - 'Working_Projects/Dioxyzine_Frog/scripts/verify-inquiry-rate-limit-local.mjs'
+      - 'Working_Projects/Dioxyzine_Frog/tests/inquiryRateLocalSafety.test.mjs'
+      - '.github/workflows/dioxyzine-inquiry-postgres.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  local-postgres-rate-budget:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: dioxyzine_rate_limit_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: ci_disposable_only
+        ports:
+          - 127.0.0.1:54322:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d dioxyzine_rate_limit_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+
+    defaults:
+      run:
+        working-directory: Working_Projects/Dioxyzine_Frog
+
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Prepare disposable DB roles and per-run marker
+        env:
+          PGHOST: 127.0.0.1
+          PGPORT: '54322'
+          PGDATABASE: dioxyzine_rate_limit_test
+          PGUSER: postgres
+          PGPASSWORD: ci_disposable_only
+          INQUIRY_RATE_TEST_RUN_MARKER: ci_${{ github.run_id }}_${{ github.run_attempt }}
+        run: |
+          set -euo pipefail
+          psql -X -v ON_ERROR_STOP=1 <<'SQL'
+          DO $$
+          BEGIN
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'anon') THEN
+              CREATE ROLE anon NOLOGIN;
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'authenticated') THEN
+              CREATE ROLE authenticated NOLOGIN;
+            END IF;
+            IF NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'service_role') THEN
+              CREATE ROLE service_role NOLOGIN BYPASSRLS;
+            END IF;
+          END
+          $$;
+          CREATE TABLE public.inquiry_ci_disposable_marker (marker text NOT NULL);
+          SQL
+          psql -X -v ON_ERROR_STOP=1 -v test_marker="$INQUIRY_RATE_TEST_RUN_MARKER" <<'SQL'
+          INSERT INTO public.inquiry_ci_disposable_marker(marker) VALUES (:'test_marker');
+          SQL
+
+      - name: Run real PostgreSQL rate limit, concurrency, RLS and grant drill
+        env:
+          INQUIRY_LOCAL_DATABASE_URL: postgresql://postgres:ci_disposable_only@127.0.0.1:54322/dioxyzine_rate_limit_test
+          INQUIRY_RATE_TEST_ACK: DISPOSABLE_LOCAL_TEST_DB
+          INQUIRY_RATE_TEST_RUN_MARKER: ci_${{ github.run_id }}_${{ github.run_attempt }}
+        run: node scripts/verify-inquiry-rate-limit-local.mjs
