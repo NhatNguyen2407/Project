@@ -20,7 +20,7 @@ jobs:
     timeout-minutes: 20
     env:
       # Reviewed SHA of Draft PR #21. Deliberately fail when it moves.
-      INQUIRY_HEAD_SHA: 116e9e7ac145d185a8dbfe398d7021da08d40d5d
+      INQUIRY_HEAD_SHA: 811c31d1571bba0a05d94b5ea6480789f681f71b
       APP_ROOT: Working_Projects/Dioxyzine_Frog
       # Synthetic build-only variables; never connect to a hosted backend.
       VERCEL_ENV: preview

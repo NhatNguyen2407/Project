@@ -24,3 +24,6 @@
 
 ## Exit condition
 Successful isolated Staging guest upload, rejected abuse cases, a durable stored object reference, authorized preview retrieval and verified cleanup, all reproduced on a release candidate. Until then: **DEFERRED / NOT RELEASED**.
+
+## 2026-10-17 implementation checkpoint
+Server content verification and the two-call atomic verification/claim contract are now implemented in Draft PR #21 `811c31d`. See its `docs/staging/INQUIRY_IMAGE_VERIFICATION.md` for bounds, checksum assumptions, tests and remaining hosted gates. Local HTTP/WASM/PostgreSQL integration passes, using synthetic CAPTCHA/Auth/Storage transport. This advances source acceptance; the exit condition above still requires actual hosted services, guest ownership/abuse review and orphan cleanup. No Preview upload toggle is enabled.
