@@ -17,8 +17,16 @@ import { normalizeOrderId } from '../utils/orderIntegrity';
 import { needsPaymentReview } from '../utils/paymentOutcome';
 import { createCaptureAttemptGate } from '../utils/captureAttemptGate';
 import { canUseLiveExternalServices } from '../utils/externalServicePolicy';
+import { canUsePayPalCheckout } from '../utils/paypalEnvironment';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+const allowPayPalCheckout = canUsePayPalCheckout({
+  deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+  supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+  mode: import.meta.env.VITE_PAYPAL_MODE,
+  stagingOptIn: import.meta.env.VITE_ENABLE_STAGING_PAYPAL_SANDBOX,
+  clientId: PAYPAL_CLIENT_ID,
+});
 const liveExternalServices = canUseLiveExternalServices({
   deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
   supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
@@ -475,7 +483,7 @@ export function CheckoutPage() {
                   </div>
 
                   <div className="w-full relative z-0 mt-4">
-                    {liveExternalServices ? <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD", locale: "en_US" }}>
+                    {allowPayPalCheckout ? <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD", locale: "en_US" }}>
                       <PayPalButtons 
                         style={{ 
                           layout: "vertical", 

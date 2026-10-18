@@ -65,3 +65,19 @@ test('role lookup failures fail closed and login never logs session objects', as
   const source = await readFile(new URL('../src/app/pages/LoginPage.jsx', import.meta.url), 'utf8');
   assert.doesNotMatch(source, /console\.(?:log|debug|info)\([^;]*(?:data|session|user)/i);
 });
+
+test('refresh of a resolved session keeps forms mounted while rechecking role', async () => {
+  const f = setup();
+  f.emit(session('admin'));
+  let pending = f.jobs.shift()();
+  f.lookups[0].resolve({ data: { role: 'admin' } });
+  await pending;
+  f.emit(session('admin'));
+  assert.equal(f.states.at(-1).loading, false);
+  assert.equal(f.states.at(-1).role, 'admin');
+  pending = f.jobs.shift()();
+  f.lookups[1].resolve({ data: null });
+  await pending;
+  assert.equal(f.states.at(-1).loading, false);
+  assert.equal(f.states.at(-1).role, 'customer');
+});
