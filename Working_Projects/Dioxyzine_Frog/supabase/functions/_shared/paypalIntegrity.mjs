@@ -21,6 +21,28 @@ export async function captureRequestId(orderId) {
   return 'cap-' + Array.from(hash.subarray(0, 16), n => n.toString(16).padStart(2, '0')).join('');
 }
 
+// Called only after the merchant-authenticated provider order and cart match.
+// A completed payment needs reconciliation, never a second capture. Expiry
+// prevents a new charge but must not prevent recording an existing payment.
+export function shouldCapturePayPalOrder(reservations, providerStatus, now = Date.now()) {
+  if (!Array.isArray(reservations) || reservations.length === 0)
+    throw new Error('Stock reservation is missing; payment requires review.');
+  const allActive = reservations.every(row => row?.status === 'active');
+  const allConsumed = reservations.every(row => row?.status === 'consumed');
+  if (!allActive && !allConsumed)
+    throw new Error('Stock reservation is in an invalid state; payment requires review.');
+  if (providerStatus === 'COMPLETED') return false;
+  if (providerStatus !== 'APPROVED')
+    throw new Error('PayPal order is not approved for capture');
+  if (allConsumed)
+    throw new Error('Consumed reservation cannot authorize another capture.');
+  if (!Number.isFinite(now) || reservations.some(row => {
+    const expiresAt = new Date(row.expires_at).getTime();
+    return !Number.isFinite(expiresAt) || expiresAt <= now;
+  })) throw new Error('Reservation expired; review payment status before another checkout.');
+  return true;
+}
+
 export function payPalServerEnvironment(url, mode, stagingEnabled) {
   if (url === 'https://xeljnocizvlmefqovvfw.supabase.co' && mode === 'live')
     return { staging: false, base: 'https://api-m.paypal.com', reserveRpc: 'reserve_product_stock', paidRpc: 'process_paid_order' };

@@ -17,7 +17,7 @@ Historical progress entries are dated snapshots; this ledger supersedes their ol
 | Tracking | Approved Staging RPC installed. Paid result has exactly 5 fields; unpaid/unknown return null; malformed UUID rejected; direct orders SELECT denied. Paid browser lookup passed. | Public UUID lookup still needs operational abuse controls before release sign-off. |
 | PayPal Sandbox | Merchant OAuth, server-calculated USD 27 order, fake buyer approval, capture and stored paid order passed. Repeated capture and 4 concurrent retries return the same order. Stock changed once (5→4); one consumed reservation. Changed cart, wrong Origin, missing caller key and unknown reservation rejected without data changes. | Sandbox only. Origin/public-key matching is isolation, not authentication or rate limiting. |
 | Checkout UI | Product→cart→delivery form displays USD 27 and Sandbox SDK buttons. | IAB opened the PayPal overlay but did not expose its popup; browser onApprove→confirmation completion is NOT accepted. |
-| Source integration | Backend 113 tests; frontend 64 tests; combined candidate including current main: 181 tests. Both payment entrypoints use pinned SDK/lockfile and type-check in CI. | Exact final commit workflow/deployment results must accompany release evidence. |
+| Source integration | Backend 113 tests; frontend 68 tests; combined candidate including current main: 185 tests. Both payment entrypoints use pinned SDK/lockfile and type-check in CI. | Exact final commit workflow/deployment results must accompany release evidence. |
 
 ## Corrections made during hosted acceptance
 
@@ -41,7 +41,7 @@ Credentials stay server-only; no real funds, customer records, email or Sheets w
 ## Remaining release gates
 
 - Complete SDK popup/onApprove→confirmation in a popup-capable test browser; verify cancellation, delayed/uncertain outcome, reload and loss of final response with the same payment.
-- Exercise captured-but-not-recorded reconciliation and operator handling. Same-payment replay is verified; failure injection and durable reconciliation operations are not.
+- Controlled captured-but-not-recorded failure/recovery and the expired-retained-reservation variant now PASS, with exact fixture restoration and the same single provider capture. See PAYPAL_RECONCILIATION_RUNBOOK.md. Durable operations and deleted-reservation recovery remain unimplemented.
 - Test synthetic voucher usage/rollback, shipping email to an approved test destination, review permissions/sync and remaining Admin mutations against a deliberately scoped Staging contract. Do not grant broad table access to make a test pass.
 - Implement/review orphan retention and upload-abuse operations. A read-only 24-hour orphan inventory found zero eligible objects; no cleanup deletion was claimed.
 - Verify full hosted Auth/Storage/provider/settings recovery, deployment rollback and an independent encrypted backup destination. Offline SQL recovery is already accepted.
