@@ -67,6 +67,13 @@ test('approved guest gets a single scoped token after two database budgets and u
  assert.deepEqual(f.calls.filter(c=>c.kind==='budget').map(c=>c.scope),['upload-preverify','upload-issued']);
  assert.ok(f.calls.find(c=>c.kind==='captcha').body.includes('response='));
 });
+test('issuer accepts the full supported CAPTCHA token with JSON metadata',async()=>{
+ const f=fixture(),captchaToken='A'.repeat(8192);
+ const body={captchaToken,mimeType:'image/png',sizeBytes:1200};
+ const r=await f.handler(f.req(body,{'content-length':String(Buffer.byteLength(JSON.stringify(body)))}));
+ assert.equal(r.status,201);
+ assert.equal(new URLSearchParams(f.calls.find(c=>c.kind==='captcha').body).get('response'),captchaToken);
+});
 test('invalid origin, wrong caller key, wrong method and wrong content type fail closed',async()=>{
  const f=fixture();
  const invalid=[new Request(origin+'/upload',{method:'POST',headers:{origin:'https://bad.test',apikey:'public-test-key','content-type':'application/json'},body:'{}'}),
@@ -89,8 +96,16 @@ test('issuer never accepts arbitrary client object paths or credentials',async()
  assert.equal(response.status,400);assert.equal(f.calls.length,0);
 });
 test('oversized body is rejected before calling Supabase',async()=>{
- const f=fixture();const response=await f.handler(f.req({captchaToken:'A'.repeat(22),mimeType:'image/png',sizeBytes:1200,padding:'z'.repeat(3000)}));
- assert.notEqual(response.status,201);assert.equal(f.calls.length,0);
+ for(const padding of ['z'.repeat(17000),'💜'.repeat(5000)]) {
+  const f=fixture();const response=await f.handler(f.req({captchaToken:'A'.repeat(22),mimeType:'image/png',sizeBytes:1200,padding}));
+  assert.equal(response.status,413);assert.equal(f.calls.length,0);
+ }
+ const f=fixture();const response=await f.handler(f.req(undefined,{'content-length':'16385'}));
+ assert.equal(response.status,413);assert.equal(f.calls.length,0);
+});
+test('an overlength CAPTCHA is rejected even within the HTTP body limit',async()=>{
+ const f=fixture();const response=await f.handler(f.req({captchaToken:'A'.repeat(8193),mimeType:'image/png',sizeBytes:1200}));
+ assert.equal(response.status,400);assert.equal(f.calls.length,0);
 });
 test('safe preflight permits only declared request headers',async()=>{
  const f=fixture();

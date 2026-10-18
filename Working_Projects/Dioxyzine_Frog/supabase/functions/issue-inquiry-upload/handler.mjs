@@ -10,7 +10,9 @@ import { classifyInquiryCaller, isAllowedInquiryPreflight } from '../submit-inqu
 
 export const STAGING_PROJECT_URL = 'https://bvnnmvlfcduwmneipmsi.supabase.co';
 export const STAGING_IMAGE_BUCKET = 'inquiry-test-references';
-const MAX_BODY_BYTES = 1024;
+// CAPTCHA tokens support up to 8192 characters, plus JSON image metadata.
+// Match the submission endpoint's bounded byte budget, not a 1 KiB body.
+const MAX_BODY_BYTES = 16_384;
 const FILE_LIMIT = 5 * 1024 * 1024;
 const TYPES = Object.freeze({'image/png':'png','image/jpeg':'jpg','image/webp':'webp'});
 
@@ -22,6 +24,7 @@ function reply(status, message, origin, extra={}) {
   });
 }
 
+class RequestTooLarge extends Error {}
 async function readBoundedJson(req) {
   if (!req.body) throw new Error('missing body');
   const reader=req.body.getReader();
@@ -34,7 +37,7 @@ async function readBoundedJson(req) {
       size+=value.byteLength;
       if (size>MAX_BODY_BYTES) {
         await reader.cancel().catch(()=>{});
-        throw new Error('oversized');
+        throw new RequestTooLarge();
       }
       parts.push(value);
     }
@@ -139,6 +142,7 @@ export function createGuestUploadHandler({
       // capability to this single path, not proof of a completed upload.
       return reply(201,null,origin,{bucket:STAGING_IMAGE_BUCKET,path,token:data.token});
     } catch (error) {
+      if (error instanceof RequestTooLarge) return reply(413,'Request too large.',origin);
       logger.error('Guest upload issuance failed:',error instanceof Error?error.name:'unknown');
       return reply(503,'Upload unavailable.',origin);
     }
