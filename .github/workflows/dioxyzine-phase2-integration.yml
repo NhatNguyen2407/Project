@@ -33,10 +33,12 @@ jobs:
         working-directory: Working_Projects/Dioxyzine_Frog
 
     steps:
-      - name: Checkout exact PR 19 HEAD
+      - name: Checkout PR 19 merged with its event base
         uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.pull_request.head.sha }}
+          # pull_request github.sha is GitHub's tested merge of head and base.
+          # Keep main's Phase 1 guards in the combined source test as well.
+          ref: ${{ github.sha }}
           fetch-depth: 0
           persist-credentials: false
 

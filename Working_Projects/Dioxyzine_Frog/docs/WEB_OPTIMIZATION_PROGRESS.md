@@ -167,3 +167,8 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 - Removed the duplicate ProductDetailPage cart drawer already supplied by App, plus unused state. Removed an inaccurate email-success log on Preview; live email stays guarded. Frontend Node suite: 64 PASS.
 - Closed all three Staging server switches and verified disabled HTTP responses for upload/Admin/create/capture. Removed temporary Admin role (count zero), set all three branch Preview opt-ins false, restored buyer Payment Review ON and removed the temporary buyer password file. Candidate must rebuild before claiming its new client flags are active.
 - Replaced the stale acceptance queue with a current ledger; updated recovery evidence. Offline restore and eight Storage backup files are verified, while platform recovery, independent backup retention, email/review/Admin mutation tests and release operations remain gates. Production unchanged, both PRs Draft, Phases 3–5 not started.
+
+## 2026-10-18 — Current-main baseline included
+- Combined candidate now also includes main 8b80d8a (Phase 1 / PR #18), preserving its Preview isolation documentation and regression files. Combined Node suite: 181 PASS. The prior 169-test result omitted those 12 baseline tests.
+- Combined Source CI now checks out the pull-request event merge commit before the pinned backend overlay, so main's baseline is tested on every run. No remote database/deployment/secrets are used by this workflow.
+- Rebuilt Preview verified exactly one cart drawer and disabled Checkout after session closure. Final workflow and candidate source identities must still be verified after publication.

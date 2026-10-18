@@ -17,7 +17,7 @@ Historical progress entries are dated snapshots; this ledger supersedes their ol
 | Tracking | Approved Staging RPC installed. Paid result has exactly 5 fields; unpaid/unknown return null; malformed UUID rejected; direct orders SELECT denied. Paid browser lookup passed. | Public UUID lookup still needs operational abuse controls before release sign-off. |
 | PayPal Sandbox | Merchant OAuth, server-calculated USD 27 order, fake buyer approval, capture and stored paid order passed. Repeated capture and 4 concurrent retries return the same order. Stock changed once (5→4); one consumed reservation. Changed cart, wrong Origin, missing caller key and unknown reservation rejected without data changes. | Sandbox only. Origin/public-key matching is isolation, not authentication or rate limiting. |
 | Checkout UI | Product→cart→delivery form displays USD 27 and Sandbox SDK buttons. | IAB opened the PayPal overlay but did not expose its popup; browser onApprove→confirmation completion is NOT accepted. |
-| Source integration | Backend 113 tests; frontend 64 tests; combined candidate 169 tests. Both payment entrypoints use pinned SDK/lockfile and type-check in CI. | Exact final commit workflow/deployment results must accompany release evidence. |
+| Source integration | Backend 113 tests; frontend 64 tests; combined candidate including current main: 181 tests. Both payment entrypoints use pinned SDK/lockfile and type-check in CI. | Exact final commit workflow/deployment results must accompany release evidence. |
 
 ## Corrections made during hosted acceptance
 
@@ -34,7 +34,7 @@ Historical progress entries are dated snapshots; this ledger supersedes their ol
 ## Session closure
 
 Temporary server switches for upload, Admin reader and Sandbox payment are OFF.
-The three corresponding candidate-branch Preview opt-ins are false; rebuild the candidate before UI closure verification.
+The three corresponding candidate-branch Preview opt-ins are false. Rebuilt Preview displayed Checkout disabled; the product page now has exactly one cart drawer.
 The temporary synthetic Admin assignment was revoked. Buyer Payment Review restored ON; temporary buyer password file removed.
 Credentials stay server-only; no real funds, customer records, email or Sheets writes were used in these checks.
 
