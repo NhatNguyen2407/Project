@@ -48,3 +48,23 @@ Pending: popup-capable full browser checkout, failure-injected reconciliation,
 delayed/uncertain capture, approved test-recipient emails and remaining release gates.
 Origin plus a public caller key is not authentication or an abuse-control system.
 No private payment/order identifiers or credentials are published in this report.
+
+## Follow-up: persistence failure and expired hold — PASS
+
+The existing completed USD 27 Sandbox payment was used for two controlled
+failure/recovery drills; no new capture was created. With the stored transaction
+mapping temporarily held and stock zero, the endpoint reported an already
+captured payment that could not be recorded. After restoring test stock, retry
+reconstructed one paid order. Concurrent repeats returned that same record;
+provider GET still showed the original single capture. The original fixture
+(order, stock and reservation) was restored exactly and server flags closed.
+
+The retained-but-expired active reservation variant failed with HTTP 400 before
+the fix, then passed after the handler checked authoritative provider status
+before applying expiry to new captures. Four added policy tests also cover fresh
+APPROVED, consumed/mixed/missing holds, invalid dates and unapproved states.
+Frontend: 68 Node tests PASS; changed capture entrypoint type-check PASS.
+
+See PAYPAL_RECONCILIATION_RUNBOOK.md for operator boundaries. Deleted reservation
+recovery, durable operations, SDK popup callbacks and real network-loss injection
+remain unverified. These server drills do not certify full browser Checkout.

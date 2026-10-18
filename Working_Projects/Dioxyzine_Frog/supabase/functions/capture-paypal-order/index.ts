@@ -1,5 +1,5 @@
 import { createClient } from 'npm:@supabase/supabase-js@2.110.0';
-import { normalizePayPalItems, captureRequestId, payPalServerEnvironment, storedPayPalId, assertStagingPaymentCaller } from '../_shared/paypalIntegrity.mjs';
+import { normalizePayPalItems, captureRequestId, payPalServerEnvironment, storedPayPalId, assertStagingPaymentCaller, shouldCapturePayPalOrder } from '../_shared/paypalIntegrity.mjs';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -107,15 +107,6 @@ Deno.serve(async req => {
       );
     }
 
-    if (
-      allActive &&
-      reservations.some(r => new Date(r.expires_at) <= new Date())
-    ) {
-      throw new Error(
-        'Checkout reservation expired. Please restart checkout.',
-      );
-    }
-
     const token = await paypalToken(PAYPAL_API_BASE);
 
     // Verify the PayPal order before capturing it.
@@ -142,11 +133,9 @@ Deno.serve(async req => {
 
     let capture = paypalOrder;
 
-    if (paypalOrder?.status !== 'COMPLETED') {
-      if (paypalOrder?.status !== 'APPROVED') {
-        throw new Error('PayPal order is not approved for capture');
-      }
-
+    // Expired local holds block new captures, while already completed payments
+    // can still be recorded after an earlier persistence failure.
+    if (shouldCapturePayPalOrder(reservations, paypalOrder?.status)) {
       const captureRes = await fetch(
         `${PAYPAL_API_BASE}/v2/checkout/orders/${encodeURIComponent(orderID)}/capture`,
         {
