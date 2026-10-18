@@ -52,6 +52,9 @@ export function AdminPage() {
   const useStagingAdminReader = isStagingAdminInquiryEnabled(adminInquiryGate);
   const stagingPreview = adminInquiryGate.environment === 'preview' &&
     adminInquiryGate.supabaseUrl === STAGING_ADMIN_SUPABASE_URL;
+  useEffect(() => {
+    if (stagingPreview) setActiveTab('inquiries');
+  }, [stagingPreview]);
   const productionAdminReader = canUseLiveExternalServices({
     deploymentEnvironment: adminInquiryGate.environment,
     supabaseUrl: adminInquiryGate.supabaseUrl,
@@ -134,6 +137,18 @@ export function AdminPage() {
         : productionAdminReader
           ? supabase.from('inquiries').select('*').order('created_at', { ascending: false })
           : Promise.resolve({ data: [], error: null });
+      // The isolated Staging reader has no access to the other Admin tables.
+      // Their denied queries must not discard a successfully verified Inbox.
+      if (stagingPreview) {
+        const result = await inquiryFetch;
+        if (result.error) throw result.error;
+        setOrders(result.data || []);
+        setPaypalOrders([]);
+        setProducts([]);
+        setVouchers([]);
+        setOrderReviews([]);
+        return;
+      }
       const [resOrders, resPaypalOrders, resProducts, resVouchers, resReviews] = await Promise.all([
         inquiryFetch,
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
