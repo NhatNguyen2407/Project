@@ -66,12 +66,18 @@ test('CAPTCHA must match verified action, hostname, score and freshness', () => 
   const negatives = [
     { success: false }, { action: 'login' }, { hostname: 'evil.example' },
     { score: 0.1 }, { score: null }, { score: 1.01 },
-    { challenge_ts: '2026-10-16T02:55:00Z' }, { challenge_ts: 'not-a-date' },
+    { challenge_ts: '2026-10-16T03:01:00Z' }, { challenge_ts: 'not-a-date' },
   ];
   for (const fields of negatives) {
     assert.equal(assessRecaptcha({ ...captcha, ...fields }, { allowedHostnames, now }), false);
   }
   assert.equal(assessRecaptcha(captcha, { allowedHostnames: [], now }), false);
+});
+
+test('fresh provider-verified token is valid after a long form fill; provider expiry still rejects', () => {
+  const longOpen = { ...captcha, challenge_ts: '2026-10-16T02:00:00Z' };
+  assert.equal(assessRecaptcha(longOpen, { allowedHostnames, now }), true);
+  assert.equal(assessRecaptcha({ ...longOpen, success: false, 'error-codes': ['timeout-or-duplicate'] }, { allowedHostnames, now }), false);
 });
 test('allowed hosts and request origin are explicit, without wildcards', () => {
   assert.deepEqual(parseAllowedHostnames(' site.example,site.example, preview.example '), ['site.example', 'preview.example']);

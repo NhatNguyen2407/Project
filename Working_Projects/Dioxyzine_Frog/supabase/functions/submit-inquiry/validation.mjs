@@ -1,7 +1,6 @@
 // Pure submission input and reCAPTCHA v3 checks shared by Deno and Node tests.
 // Never trust request JSON for user_id, payment fields, workflow status or table names.
 const EMAIL = /^[^\s@]{1,64}@[^\s@]{1,254}\.[^\s@]{2,63}$/;
-const ONE_MINUTE = 60_000;
 
 export class SubmissionValidationError extends Error {
   constructor(message) {
@@ -84,20 +83,26 @@ export function validateInquiryPayload(input, { stagingPrivateImages = false } =
   };
 }
 
-export function assessRecaptcha(result, { allowedHostnames, minScore = 0.5, now = Date.now(), action = 'inquiry_submit' } = {}) {
+export function recaptchaFailureReason(result, { allowedHostnames, minScore = 0.5, now = Date.now(), action = 'inquiry_submit' } = {}) {
   if (!Array.isArray(allowedHostnames) || allowedHostnames.length === 0) {
-    return false; // Fail closed if the deployment has no site allowlist.
+    return 'configuration';
   }
-  if (!result || result.success !== true || result.action !== action) return false;
+  if (!result || result.success !== true) return 'provider';
+  if (result.action !== action) return 'action';
   if (typeof result.hostname !== 'string' ||
-      !allowedHostnames.includes(result.hostname.toLowerCase())) return false;
+      !allowedHostnames.includes(result.hostname.toLowerCase())) return 'hostname';
   if (typeof result.score !== 'number' || !Number.isFinite(result.score) ||
-      result.score < minScore || result.score > 1) return false;
-  if (typeof result.challenge_ts !== 'string') return false;
+      result.score < minScore || result.score > 1) return 'score';
+  if (typeof result.challenge_ts !== 'string') return 'freshness';
   const issuedAt = Date.parse(result.challenge_ts);
-  if (!Number.isFinite(issuedAt) || issuedAt - now > 10_000 ||
-      now - issuedAt > 2 * ONE_MINUTE) return false;
-  return true;
+  // Google defines challenge_ts as challenge LOAD time, not token issuance.
+  // siteverify success already enforces the token's two-minute, single-use TTL.
+  // A form may stay open much longer before execute() issues a fresh token.
+  if (!Number.isFinite(issuedAt) || issuedAt - now > 10_000) return 'freshness';
+  return null;
+}
+export function assessRecaptcha(result, options) {
+  return recaptchaFailureReason(result, options) === null;
 }
 
 export function parseAllowedHostnames(value) {

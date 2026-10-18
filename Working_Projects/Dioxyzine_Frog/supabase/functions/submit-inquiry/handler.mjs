@@ -7,6 +7,7 @@ import { classifyInquiryCaller, isAllowedInquiryPreflight } from './requestAuth.
 import {
   validateInquiryPayload,
   assessRecaptcha,
+  recaptchaFailureReason,
   parseAllowedHostnames,
   isAllowedRequestOrigin,
   validateCaptchaToken,
@@ -183,6 +184,9 @@ export function createInquiryHandler({
       }
       const captcha = await verifyResponse.json();
       if (!assessRecaptcha(captcha, { allowedHostnames: allowedHosts, minScore, now: clock() })) {
+        logger.warn?.('Inquiry verification rejected', recaptchaFailureReason(captcha, {
+          allowedHostnames: allowedHosts, minScore, now: clock(),
+        }));
         return json({ success: false, message: 'Security verification failed.' }, 403, origin);
       }
 

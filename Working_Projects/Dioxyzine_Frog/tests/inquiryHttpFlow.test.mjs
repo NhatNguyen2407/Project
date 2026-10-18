@@ -227,7 +227,8 @@ test('RPC unavailable fails closed at both points',async()=>{
 test('wrong CAPTCHA action, hostname, score, freshness and success cannot insert',async()=>{
   for(const invalid of [
     {action:'login'},{hostname:'evil.example'},{score:0.1},
-    {challenge_ts:'2026-10-16T02:54:00Z'},{success:false},
+    {challenge_ts:'2026-10-16T03:01:00Z'},{challenge_ts:'invalid'},
+    {success:false,'error-codes':['timeout-or-duplicate']},
   ]){
     const f=fixture({captcha:invalid});
     await check(f.handler,request(),403);
