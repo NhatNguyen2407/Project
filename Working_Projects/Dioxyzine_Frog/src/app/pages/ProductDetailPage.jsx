@@ -6,7 +6,6 @@ import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, Me
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 // import { MOCK_PRODUCTS } from '../data/storeData';
-import { CartDrawer } from '../components/store/CartDrawer';
 import { SEO } from '../components/common_components/SEO';
 import { supabase } from '../service/supabase';
 
@@ -35,7 +34,6 @@ export function ProductDetailPage() {
   const [hasAccessory, setHasAccessory] = useState(false);
   const [accessoryQuantity, setAccessoryQuantity] = useState(11);
 
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [liveRating, setLiveRating] = useState(0);
 
@@ -523,7 +521,6 @@ const backUrl = isReadyUse
         </div>
       </div>
 
-      <CartDrawer onProceedToCheckout={() => setIsCheckoutOpen(true)} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-24">
         <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2 font-heading">

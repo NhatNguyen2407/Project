@@ -1,6 +1,6 @@
 # Dioxyzine Frog — Debug & Optimization Progress
 
-**Last change batch:** 2026-10-16 · Storage image content check and guest-upload release gate (Draft PR #19)
+**Last change batch:** 2026-10-18 · Hosted Inquiry/Admin/Tracking and Sandbox capture acceptance (Draft PRs #19/#21)
 **Status rule:** Change labels distinguish SOURCE FIXED, CI VERIFIED, HOSTED TESTED, RELEASED and DEFERRED. A green build does not imply runtime E2E or Production release.
 
 ## Total roadmap
@@ -160,3 +160,10 @@ See [POST_OPTIMIZATION_ACCEPTANCE.md](./POST_OPTIMIZATION_ACCEPTANCE.md) and [Is
 - Added a guarded service-only SECURITY INVOKER checkout foundation for synthetic Staging. Hosted transactional probe verifies replay creates one order and decrements stock once, then rolls back; original stock restored. Anonymous/member RPC execution stays denied.
 - Fixed capture normalization crashing for multi-product carts, shared canonical normalization between create/capture, and added a stable provider PayPal-Request-Id for capture retries. Pinned SDK/lockfile, explicit Production-live vs Staging-Sandbox routing and separate Preview opt-in; email/other live services stay blocked on Preview. First hosted Sandbox order creation returned 200 with the server-calculated amount. Capture/browser checkout acceptance is still in progress.
 - Frontend: 64 Node tests PASS; both payment entrypoints type-check. CI now checks those entrypoints without credentials. Temporary access must be closed after controlled acceptance; no Production release or PR merge.
+
+## 2026-10-18 — Sandbox capture/replay accepted; temporary access closed
+- Hosted PayPal Sandbox capture succeeded for the server-calculated USD 27 synthetic order. A repeat and four concurrent capture retries returned the same order; stock changed once, 5 to 4, and one reservation was consumed. Changed-cart, wrong-Origin, missing-public-key and absent-reservation cases were rejected without data changes. Eight hosted acceptance assertions PASS.
+- Checkout browser verified product/cart/form and Sandbox buttons. IAB opened the PayPal overlay but did not expose the popup. Full browser onApprove-to-confirmation, cancellation and failure-injected reconciliation remain unverified; API capture is separate evidence.
+- Removed the duplicate ProductDetailPage cart drawer already supplied by App, plus unused state. Removed an inaccurate email-success log on Preview; live email stays guarded. Frontend Node suite: 64 PASS.
+- Closed all three Staging server switches and verified disabled HTTP responses for upload/Admin/create/capture. Removed temporary Admin role (count zero), set all three branch Preview opt-ins false, restored buyer Payment Review ON and removed the temporary buyer password file. Candidate must rebuild before claiming its new client flags are active.
+- Replaced the stale acceptance queue with a current ledger; updated recovery evidence. Offline restore and eight Storage backup files are verified, while platform recovery, independent backup retention, email/review/Admin mutation tests and release operations remain gates. Production unchanged, both PRs Draft, Phases 3–5 not started.

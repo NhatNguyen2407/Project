@@ -1,8 +1,31 @@
 # Dioxyzine Frog - Recovery Readiness and Migration Reconciliation
 
-**Assessment date:** 2026-10-14  
+**Assessment date:** 2026-10-18
 **Scope:** Phase 1 / Step 2 - backup verification and migration reconciliation.  
-**Status:** PARTIALLY COMPLETE. Restore drill and database recovery point are NOT verified.
+**Status:** Offline database restore VERIFIED; full hosted platform recovery and independent backup retention remain incomplete.
+
+## Latest verified recovery checkpoint — 2026-10-18
+
+A disposable local PostgreSQL restore completed with networking disabled, no
+published port and data on tmpfs. All 41 data-table counts matched the snapshot.
+Compared 43 table definitions, 439 columns, 35 function hashes, 22 RLS policies,
+961 table/sequence ACL entries, 82 function grants and 10 triggers. Application,
+Auth and Storage migration-history counts matched. Guest denial, owner access,
+Admin role, paid-only Tracking and rollback probes passed.
+
+All eight Storage files were recovered; byte sizes and single-part MD5 values
+matched snapshot metadata, with a private SHA-256 manifest retained locally.
+The three original SQL files still match their original manifest. No customer
+data was imported into hosted Staging.
+
+This is evidence of offline SQL recovery, not a complete Supabase platform
+restoration. Hosted Auth/OAuth behavior, Storage API re-upload, provider settings,
+Edge secrets, deployment rollback and an independent encrypted off-device copy
+remain release gates. Docker was later closed; its stopped state does not undo
+the recorded restore results. Do not start an exposed database to repeat this drill.
+
+The dated assessment below is historical and is superseded by this checkpoint
+where it says the offline restore or isolated Staging was unverified.
 
 This document is kept in a **public GitHub repository**. It excludes private backup links, customer records, spreadsheet IDs, payment credentials, internal financial figures, and personal access information.
 
