@@ -16,6 +16,8 @@ This public document contains sanitized verification results only. Private backu
 | Storage binaries | Every backed-up binary uploaded through the recovered API, downloaded and checked by SHA-256 | Database exports alone do not contain Storage bytes |
 | Off-device archive | Owner-only encrypted archive uploaded, downloaded, hash-checked, decrypted and restored successfully | Independent custody of the private key is still awaiting confirmation |
 | Deployed backend source | Four currently deployed Edge Function sources downloaded | Secret inventory has names/digests, not recoverable values |
+| Readable provider Config | Seventeen Vercel Config definitions preserved with actual values and environment/branch scopes; eight offline reconstruction/guard checks passed | Five write-only definitions and backend secret values remain unavailable; no remote settings were changed |
+| Cloudinary originals | Twenty-six available originals independently backed up; API byte counts, CDN MD5 ETags, SHA-256 and image signatures verified, including after encrypted cloud round-trip | Only the captured media references are in scope; unavailable originals cannot be reconstructed from metadata |
 | Management workbook restore | Private backup restored into a separate owner-only native workbook; all ten tabs, locale/timezone and twelve conditional-format rules matched | The source is the dated private backup, not a fresh operational snapshot |
 | Workbook cells/formulas | All 2,623 exported formula texts/coordinates and 113,882 resolved cell value/style comparisons passed; 1,438 native sampled cells also matched, including 73 formulas and 11 validation cells | Export comparison excludes cached formula results; external imports/scripts were not executed |
 | Preview rollback | Alias moved to previous verified READY candidate and restored to current candidate; each mapping read back | Preview routing only; not Production rollback or browser regression |
@@ -26,6 +28,14 @@ The isolated recovery used an internal Docker network, no published host ports, 
 The backed-up Storage schema requires a compatible service version. A cached older image failed its upsert conflict target; using the compatible official image fixed the drill without modifying the backed-up schema.
 
 Workbook verification used native cell/format/rule readback and resolved export comparison. Browser visual verification was unavailable because its tool could not initialize. No source workbook cells or sharing permissions were changed.
+
+### Source-media coverage and gaps
+
+The SQL snapshot contains 159 unique Cloudinary media URLs. A read-only CDN audit found 27 reachable references and 132 HTTP 404 references: 131 gallery references and one Inquiry reference. One account-listed resource has zero bytes and also returns 404. All currently reachable references map to the 26 verified available originals.
+
+These source gaps are explicitly excluded from successful asset-recovery claims. The private row-level repair list is retained outside the repository. Recover original files or an earlier provider backup before repairing missing content; do not fabricate originals or overwrite Production assets as a drill. External customer-supplied Drive links were not assumed owned or archived.
+
+The supplementary provider archive was encrypted, uploaded owner-only, downloaded and decrypted; all 41 archived file checksums matched and available image originals were revalidated. The original database/Auth/Storage archive and operating-notes archive remain separate. Readable Config preservation does not prove OAuth/SMTP, EmailJS templates, Apps Script authorizations, Cloudinary preset recreation or Live payment readiness.
 
 ## Migration reconciliation
 
@@ -58,6 +68,8 @@ This closes the evidence gap for the historical pair's effective baseline behavi
 - [x] Verify encrypted off-device upload, download, decryption and restore.
 - [x] Reconcile the historical migration pair and document the authoritative baseline.
 - [x] Verify isolated Staging and rehearse Preview alias routing rollback.
+- [x] Preserve readable provider Config and verify fail-closed Preview reconstruction.
+- [x] Preserve available Cloudinary originals and record unavailable source references without claiming they were restored.
 - [ ] Confirm the owner has retained the decryption key independently of this device.
 - [ ] Verify recovery or recreation of provider settings and secret values: OAuth, SMTP/email, PayPal, CAPTCHA, Sheets/Apps Script and Vercel configuration.
 - [ ] Complete the separately tracked critical Checkout browser acceptance and final release review.
