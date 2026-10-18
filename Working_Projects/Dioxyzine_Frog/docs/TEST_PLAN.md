@@ -1,6 +1,6 @@
 # Dioxyzine Frog - Baseline and Regression Test Plan
 
-**Created:** 2026-10-14 | **Status:** PLAN ONLY - NO TEST RUNS CLAIMED  
+**Created:** 2026-10-14 | **Status:** PLAN ONLY - NO TEST RUNS CLAIMED\
 **Scope:** Phase 1, Step 1: describe verification before introducing new implementation.
 
 ## 0. Testing safeguards
@@ -79,15 +79,15 @@ A `READY` Vercel build is only a build/deploy result. A healthy Supabase project
 
 ## Phase 1 closeout batch (2026-10-16)
 
-**Scope:** Phase 1 Steps 1–3 in sequence. This is an engineering preparation and acceptance plan, not a claim that full-site E2E or restore succeeded. Keep unmerged until the final gate review.
+**Scope:** Phase 1 Steps 1-3 in sequence. This is an engineering preparation and acceptance plan, not a claim that full-site E2E or restore succeeded. Keep unmerged until the final gate review.
 
-### Step 1 — Baseline (already complete)
+### Step 1 - Baseline (already complete)
 
 - [x] Record repository and Production deployment baseline; preserve the currently deployed main SHA.
 - [x] Inspect existing DB schema, migration histories, role grants and staged change branches.
 - [ ] Immediately before release, recheck Production SHA, account/project identity and runtime health.
 
-### Step 2 — Safety, recovery and isolated Preview (preparation complete; verification deferred)
+### Step 2 - Safety, recovery and isolated Preview (preparation complete; verification deferred)
 
 - [x] Configure existing Vercel Preview with a distinct Supabase Staging URL, public client key and exact allowlisted project reference.
 - [x] Implement fail-closed Preview build guard and source/negative tests; confirm Vercel Preview build READY for the guarded branch.
@@ -96,7 +96,7 @@ A `READY` Vercel build is only a build/deploy result. A healthy Supabase project
 - [ ] Perform isolated restore to disposable local infrastructure and check RLS, RPC signatures, representative counts, time-to-restore and rollback. Do not put data/credentials in the repository.
 - [ ] Verify independent encrypted off-device backup and separately recoverable Storage objects.
 
-### Step 3 — Automated and staged validation
+### Step 3 - Automated and staged validation
 
 - [x] Enable existing GitHub Actions frozen dependency install, unit/source regression suite and Vite build.
 - [x] Add checkout confirmation ID, shipping notification ID, admin mutation confirmation, tracking input validation and public tracking SQL response-contract tests.
@@ -108,7 +108,7 @@ A `READY` Vercel build is only a build/deploy result. A healthy Supabase project
 - [ ] PayPal **Sandbox only**: successful capture and record, duplicate/retry, captured-payment persistence uncertainty, stock reservation expiry, and reconciliation by transaction ID. No live capture/refund.
 - [ ] Record restore/E2E results and reviewed release/rollback decision. Do not merge sensitive security or checkout changes without this evidence.
 
-### Deferred operator test batch — run once at the end of Step 3
+### Deferred operator test batch - run once at the end of Step 3
 
 **A. Local/Recovery:** Confirm encrypted disk and Docker health, negative inbound LAN test to local Postgres port 55432, isolated dump compatibility and local restore, selective schema/count/RPC/RLS verification; protect raw reports and remove disposable test data securely.
 

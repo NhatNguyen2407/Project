@@ -19,7 +19,7 @@ The Vite build performs an exact project reference and HTTPS host comparison whe
 
 **Consequence until staging is configured:** Vercel Preview builds are deliberately blocked. This is a fail-closed safety behavior, not a Vite regression.
 
-## Initial read-only environment audit (2026-10-16 — historical, before reconnect)
+## Initial read-only environment audit (2026-10-16 - historical, before reconnect)
 
 - Production and Staging are distinct, existing Supabase projects. No new project/branch was created in this audit.
 - Staging has one `public` table (`inquiries`, 14 columns), with RLS enabled and three recorded inquiry-focused migrations. Production has eight `public` tables; its `inquiries` table has 27 columns. Staging is **not** a full copy of the live application schema.

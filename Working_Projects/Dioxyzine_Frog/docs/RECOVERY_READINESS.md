@@ -1,7 +1,7 @@
 # Dioxyzine Frog - Recovery Readiness and Migration Reconciliation
 
-**Assessment date:** 2026-10-14  
-**Scope:** Phase 1 / Step 2 - backup verification and migration reconciliation.  
+**Assessment date:** 2026-10-14\
+**Scope:** Phase 1 / Step 2 - backup verification and migration reconciliation.\
 **Status:** PARTIALLY COMPLETE. Restore drill and database recovery point are NOT verified.
 
 This document is kept in a **public GitHub repository**. It excludes private backup links, customer records, spreadsheet IDs, payment credentials, internal financial figures, and personal access information.
