@@ -1,8 +1,8 @@
 # Staging Inquiry image verification
 
-Prepared 2026-10-17. Source and synthetic acceptance only; no hosted deployment
-or upload flag was changed. This supersedes the earlier missing server-content
-verification gate in the first 2026-10-17 acceptance checkpoint.
+Prepared 2026-10-17; hosted Staging work began on 2026-10-18 (Vietnam time).
+See [the hosted checkpoint](HOSTED_ACCEPTANCE_20261018.md) for deployed scope
+and incomplete gates. This is not Production release approval.
 
 ## Request path
 
