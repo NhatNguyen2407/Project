@@ -76,3 +76,50 @@ Confirm package manager and lockfile before adding or updating dependencies. Do 
 ## 6. Baseline limitations
 
 A `READY` Vercel build is only a build/deploy result. A healthy Supabase project status is not proof that every RPC, email or frontend flow works. Historical order counts, customer details and private operational metrics intentionally do not belong in this public test plan.
+
+## Phase 1 closeout batch (2026-10-16)
+
+**Scope:** Phase 1 Steps 1–3 in sequence. This is an engineering preparation and acceptance plan, not a claim that full-site E2E or restore succeeded. Keep unmerged until the final gate review.
+
+### Step 1 — Baseline (already complete)
+
+- [x] Record repository and Production deployment baseline; preserve the currently deployed main SHA.
+- [x] Inspect existing DB schema, migration histories, role grants and staged change branches.
+- [ ] Immediately before release, recheck Production SHA, account/project identity and runtime health.
+
+### Step 2 — Safety, recovery and isolated Preview (preparation complete; verification deferred)
+
+- [x] Configure existing Vercel Preview with a distinct Supabase Staging URL, public client key and exact allowlisted project reference.
+- [x] Implement fail-closed Preview build guard and source/negative tests; confirm Vercel Preview build READY for the guarded branch.
+- [x] Record schema gaps and migration differences in RECOVERY_READINESS.md. Staging is only inquiry-focused and must not be treated as a restored live DB.
+- [ ] Run independent negative LAN-ingress check for the local restore Postgres listener before using any customer/Auth dump.
+- [ ] Perform isolated restore to disposable local infrastructure and check RLS, RPC signatures, representative counts, time-to-restore and rollback. Do not put data/credentials in the repository.
+- [ ] Verify independent encrypted off-device backup and separately recoverable Storage objects.
+
+### Step 3 — Automated and staged validation
+
+- [x] Enable existing GitHub Actions frozen dependency install, unit/source regression suite and Vite build.
+- [x] Add checkout confirmation ID, shipping notification ID, admin mutation confirmation, tracking input validation and public tracking SQL response-contract tests.
+- [ ] Confirm GitHub CI and Preview build for the **final combined commit**; previous independent PR green checks do not establish integration correctness.
+- [ ] Obtain runtime browser evidence that Preview requests connect only to Staging. Never conduct mutation testing based solely on a build-time guard.
+- [ ] Build/provision synthetic Staging contract, separate from a sensitive Production restore, before testing Auth, Admin, products, order tracking and backend functions.
+- [ ] Browser E2E: storefront/product/cart/navigation, inaccessible admin without role, invalid/unknown tracking ID, inquiry error/success, status persistence, validation and accessibility basics.
+- [ ] Controlled integration: RLS denial/authorized paths, RPC response shape, rate limits, idempotent inquiry submission and email failure behavior; check no real recipients receive messages.
+- [ ] PayPal **Sandbox only**: successful capture and record, duplicate/retry, captured-payment persistence uncertainty, stock reservation expiry, and reconciliation by transaction ID. No live capture/refund.
+- [ ] Record restore/E2E results and reviewed release/rollback decision. Do not merge sensitive security or checkout changes without this evidence.
+
+### Deferred operator test batch — run once at the end of Step 3
+
+**A. Local/Recovery:** Confirm encrypted disk and Docker health, negative inbound LAN test to local Postgres port 55432, isolated dump compatibility and local restore, selective schema/count/RPC/RLS verification; protect raw reports and remove disposable test data securely.
+
+**B. Browser:** Review intended isolated Vercel Preview, verify backend project identity in safe diagnostics, use only dummy test accounts/content, confirm guest/authenticated/admin roles, inquiries, storefront/cart and tracking; no production writes.
+
+**C. External integrations:** Sandbox PayPal and stock order paths, test-only EmailJS recipients, separate Cloudinary bucket/preset, Google Apps Script/Sheets isolation, reCAPTCHA permitted hosts, and rollback. Stop if any integration still points to Production or sends messages to real users.
+
+**D. Final gate:** Recheck exact commit CI/build and Supabase security advisor, compare database changes and grant/RLS cutover plans, document go/no-go, approve a release only after recovery and staged tests pass.
+
+### Explicit exclusions until the final gate
+
+- No Production migration, RLS/grant edits, mass data copying or live PayPal capture.
+- No automatic merge of Phase 2 PRs (#12, #14, #19, #20, #21): each needs a separate impact assessment; Inquiry cutover specifically must coordinate frontend, function, rate limit and RLS.
+- CI success means only the automated checks executed successfully; it never certifies runtime security or payment correctness.
