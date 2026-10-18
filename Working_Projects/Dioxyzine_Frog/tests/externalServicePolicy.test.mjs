@@ -19,7 +19,7 @@ test('Checkout, Admin and Cloudinary use the environment guard before live write
   const admin=read('../src/app/pages/AdminPage.jsx');
   const cloud=read('../src/app/service/cloudinary.js');
   const vite=read('../vite.config.ts');
-  assert.match(checkout,/liveExternalServices \? <PayPalScriptProvider/);
+  assert.match(checkout,/allowPayPalCheckout \? <PayPalScriptProvider/);
   assert.match(checkout,/if \(liveExternalServices\) await emailjs\.send/);
   assert.match(admin,/const allowAdminWrite = \(\) => \{[\s\S]*?canUseLiveExternalServices\(/);
   assert.match(admin,/const handleUpdateStatus = async[\s\S]*?if \(!allowAdminWrite\(\)\) return;/);

@@ -43,6 +43,26 @@ markers. Only authenticated SELECT on `user_id,role` is granted, with
 Eight real Auth/API checks PASS, including cross-user denial and unchanged
 Admin assignment after denied insert/update/delete attempts.
 
+## Further verified acceptance
+
+- Admin browser signs in, lists both the management-seeded and real submitted
+  Inquiry, requests a private reference by Inquiry ID and displays its 2x2 image.
+  The reader stays isolated from other denied Admin tables.
+- A signed-in browser also uploads and submits a 2048x2048 pseudo-random noise
+  PNG (658,886 bytes). Its hosted ticket has a verified SHA-256 and is claimed.
+  Supabase shutdown telemetry reports 382 ms CPU and 52,000,408 bytes memory.
+  Shutdown memory is an observation, not a measured peak or proof for all images.
+- The issuer now verifies a signed-in browser's JWT through Auth instead of
+  rejecting every non-guest bearer. It issues the same scoped non-overwritable
+  capability, with the same CAPTCHA and budgets; invalid JWT fails before issue.
+  Backend suite: 113 Node tests PASS; issuer type-check PASS.
+- Staging Tracking RPC was separately approved and installed. Five hosted
+  checks PASS: paid result has exactly five fields, unpaid/unknown return null,
+  malformed UUID rejected and direct orders SELECT denied. Browser paid lookup
+  displays the synthetic product and tracking state.
+- Orphan inventory at a 24-hour retention cutoff found zero expired unclaimed
+  uploads. No customer files or recently issued capabilities were deleted.
+
 The temporary synthetic Admin role and all temporary browser/server switches
 must be removed/closed when this acceptance session finishes. Do not infer a
 Production release from this report; PRs remain Draft until all release gates

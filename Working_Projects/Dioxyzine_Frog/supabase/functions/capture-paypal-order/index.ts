@@ -1,31 +1,11 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'npm:@supabase/supabase-js@2.110.0';
+import { normalizePayPalItems, captureRequestId, payPalServerEnvironment, storedPayPalId, assertStagingPaymentCaller } from '../_shared/paypalIntegrity.mjs';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers':
     'authorization, x-client-info, apikey, content-type',
 };
-
-const PAYPAL_API_BASE =
-  Deno.env.get('PAYPAL_MODE') === 'live'
-    ? 'https://api-m.paypal.com'
-    : 'https://api-m.sandbox.paypal.com';
-
-const normalizeItems = (items: any[]) =>
-  [...items.reduce((map, item) => {
-    if (
-      !item ||
-      typeof item.id !== 'string' ||
-      !Number.isInteger(item.qty) ||
-      item.qty <= 0
-    ) throw new Error('Invalid cart item');
-
-    const id = item.id.trim();
-    map.set(id, (map.get(id) || 0) + item.qty);
-    return map;
-  }, new Map())]
-    .map(([id, qty]) => ({ id, qty }))
-    .sort(([a], [b]) => a.localeCompare(b));
 
 async function fingerprint(items: any[], voucherCode: string | null) {
   const data = new TextEncoder().encode(
@@ -38,13 +18,13 @@ async function fingerprint(items: any[], voucherCode: string | null) {
     .join('');
 }
 
-async function paypalToken() {
+async function paypalToken(base: string) {
   const id = Deno.env.get('PAYPAL_CLIENT_ID');
   const secret = Deno.env.get('PAYPAL_SECRET_KEY');
 
   if (!id || !secret) throw new Error('PayPal credentials missing');
 
-  const res = await fetch(`${PAYPAL_API_BASE}/v1/oauth2/token`, {
+  const res = await fetch(`${base}/v1/oauth2/token`, {
     method: 'POST',
     headers: {
       Authorization: `Basic ${btoa(`${id}:${secret}`)}`,
@@ -74,6 +54,9 @@ Deno.serve(async req => {
     if (!supabaseUrl || !serviceKey || !anonKey) {
       throw new Error('Supabase configuration missing');
     }
+    const config = payPalServerEnvironment(supabaseUrl,Deno.env.get('PAYPAL_MODE'),Deno.env.get('PAYPAL_STAGING_ENABLED'));
+    assertStagingPaymentCaller(req,config,Deno.env.get('PAYPAL_PUBLIC_API_KEY'),Deno.env.get('PAYPAL_ALLOWED_ORIGIN'));
+    const PAYPAL_API_BASE = config.base;
 
     let userId: string | null = null;
     const auth = req.headers.get('Authorization');
@@ -90,8 +73,9 @@ Deno.serve(async req => {
     const { orderID, shipping, cart, voucherCode } = await req.json();
 
     if (!orderID) throw new Error('PayPal order ID is required');
+    const storedOrderId = storedPayPalId(orderID,config.staging);
 
-    const items = normalizeItems(cart);
+    const items = normalizePayPalItems(cart);
     const code =
       typeof voucherCode === 'string' && voucherCode.trim()
         ? voucherCode.trim()
@@ -103,7 +87,7 @@ Deno.serve(async req => {
     const { data: reservations, error: reservationError } = await supabase
       .from('stock_reservations')
       .select('status, expires_at')
-      .eq('paypal_order_id', orderID)
+      .eq('paypal_order_id', storedOrderId)
       .in('status', ['active', 'consumed']);
 
     if (reservationError) throw reservationError;
@@ -132,7 +116,7 @@ Deno.serve(async req => {
       );
     }
 
-    const token = await paypalToken();
+    const token = await paypalToken(PAYPAL_API_BASE);
 
     // Verify the PayPal order before capturing it.
     const orderRes = await fetch(
@@ -170,6 +154,7 @@ Deno.serve(async req => {
           headers: {
             Authorization: `Bearer ${token}`,
             'Content-Type': 'application/json',
+            'PayPal-Request-Id': await captureRequestId(orderID),
           },
         },
       );
@@ -211,7 +196,7 @@ Deno.serve(async req => {
     const customerEmail = shipping?.email?.trim() || null;
 
     const { data: orderId, error } = await supabase.rpc(
-      'process_paid_order',
+      config.paidRpc,
       {
         p_user_id: userId,
         p_customer_name: customerName,
@@ -219,7 +204,7 @@ Deno.serve(async req => {
         p_phone_number: phone || null,
         p_shipping_address: shippingAddress || null,
         p_total_amount: Number(captureUnit.amount?.value),
-        p_transaction_id: captureUnit.id,
+        p_transaction_id: storedPayPalId(captureUnit.id,config.staging),
         p_cart_items: items,
         p_voucher_code: code,
       },
@@ -249,7 +234,7 @@ Deno.serve(async req => {
     const { error: consumeError } = await supabase
       .from('stock_reservations')
       .update({ status: 'consumed' })
-      .eq('paypal_order_id', orderID)
+      .eq('paypal_order_id', storedOrderId)
       .eq('status', 'active');
 
     if (consumeError) {

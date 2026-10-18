@@ -2,11 +2,16 @@
 export function observeAuthState(client, publish, schedule = (run) => setTimeout(run, 0)) {
   let revision = 0;
   let active = true;
+  let state = { user: null, role: 'customer', loading: true };
   const update = (session) => {
     if (!active) return;
     const current = ++revision;
     const user = session?.user ?? null;
-    publish({ user, role: 'customer', loading: !!user });
+    const sameResolvedUser = !!user && user.id === state.user?.id && !state.loading;
+    // TOKEN_REFRESHED / focus SIGNED_IN must not unmount an in-progress form.
+    // A changed account always clears the previous role before lookup.
+    state = { user, role: sameResolvedUser ? state.role : 'customer', loading: !!user && !sameResolvedUser };
+    publish(state);
     if (!user) return;
     // Supabase auth callbacks must return before another SDK operation starts.
     schedule(async () => {
@@ -17,7 +22,10 @@ export function observeAuthState(client, publish, schedule = (run) => setTimeout
           .eq('user_id', user.id).maybeSingle();
         if (!error && data?.role === 'admin') role = 'admin';
       } catch { /* Permission/network failures stay unprivileged. */ }
-      if (active && revision === current) publish({ user, role, loading: false });
+      if (active && revision === current) {
+        state = { user, role, loading: false };
+        publish(state);
+      }
     });
   };
   const { data: { subscription } } = client.auth.onAuthStateChange((_event, session) => {

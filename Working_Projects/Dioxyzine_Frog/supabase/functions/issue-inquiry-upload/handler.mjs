@@ -101,12 +101,18 @@ export function createGuestUploadHandler({
       return reply(503,'Upload service disabled.',origin);
     }
     const caller=classifyInquiryCaller(req.headers,publicKey,serverKey);
-    if (caller.status!==200 || caller.userToken) return reply(401,'Invalid authorization.',origin);
+    if (caller.status!==200) return reply(401,'Invalid authorization.',origin);
 
     try {
       const body=validateGuestUploadRequest(await readBoundedJson(req));
       if (!body) return reply(400,'Invalid image metadata.',origin);
       const admin=createClient(url,serverKey,{auth:{persistSession:false,autoRefreshToken:false}});
+      // The browser SDK sends its user JWT when signed in. Verify it through
+      // Auth; signed-in visitors receive the same constrained upload capability.
+      if (caller.userToken) {
+        const {data:identity,error}=await admin.auth.getUser(caller.userToken);
+        if (error || !identity?.user?.id) return reply(401,'Invalid authorization.',origin);
+      }
       if (!await consumeInquiryBudget(admin,INQUIRY_BUDGETS.uploadPreverify))
         return reply(429,'Too many requests.',origin);
 

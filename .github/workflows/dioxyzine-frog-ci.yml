@@ -42,5 +42,11 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Test order and admin safety checks
         run: pnpm test
+      - name: Set up Deno for payment entrypoints
+        uses: denoland/setup-deno@v2
+        with:
+          deno-version: v2.9.6
+      - name: Type-check pinned PayPal server entrypoints without live credentials
+        run: deno check --frozen --config supabase/functions/capture-paypal-order/deno.json supabase/functions/capture-paypal-order/index.ts supabase/functions/create-paypal-order/index.ts
       - name: Build Vite app
         run: pnpm build

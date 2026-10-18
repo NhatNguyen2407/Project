@@ -1,5 +1,5 @@
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2"
+import { createClient } from "npm:@supabase/supabase-js@2.110.0"
+import { normalizePayPalItems, payPalServerEnvironment, storedPayPalId, assertStagingPaymentCaller } from '../_shared/paypalIntegrity.mjs'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -8,31 +8,6 @@ const corsHeaders = {
 
 const SHIPPING_FEE = 15
 const RESERVATION_MINUTES = 30
-
-const PAYPAL_API_BASE = Deno.env.get('PAYPAL_MODE') === 'live'
-  ? 'https://api-m.paypal.com'
-  : 'https://api-m.sandbox.paypal.com'
-
-function normalizeItems(items: unknown) {
-  if (!Array.isArray(items)) throw new Error('Giỏ hàng trống hoặc không hợp lệ.')
-
-  const quantities = new Map<string, number>()
-
-  for (const item of items) {
-    if (!item || typeof item !== 'object') throw new Error('Giỏ hàng không hợp lệ.')
-    const id = String(item.id || '').trim()
-    const qty = Number(item.qty)
-    if (!id) throw new Error('Sản phẩm không có ID hợp lệ.')
-    if (!Number.isInteger(qty) || qty <= 0) {
-      throw new Error(`Số lượng không hợp lệ cho sản phẩm "${id}".`)
-    }
-    quantities.set(id, (quantities.get(id) || 0) + qty)
-  }
-
-  return [...quantities.entries()]
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([id, qty]) => ({ id, qty }))
-}
 
 async function createFingerprint(
   items: Array<{ id: string; qty: number }>,
@@ -45,19 +20,22 @@ async function createFingerprint(
     .join('')
 }
 
-serve(async (req) => {
+Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
 
   try {
+    const config = payPalServerEnvironment(Deno.env.get('SUPABASE_URL'),Deno.env.get('PAYPAL_MODE'),Deno.env.get('PAYPAL_STAGING_ENABLED'))
+    assertStagingPaymentCaller(req,config,Deno.env.get('PAYPAL_PUBLIC_API_KEY'),Deno.env.get('PAYPAL_ALLOWED_ORIGIN'))
+    const PAYPAL_API_BASE = config.base
     const { items: rawItems, voucherCode } = await req.json()
-    const normalizedItems = normalizeItems(rawItems)
+    const normalizedItems = normalizePayPalItems(rawItems, { coerceQuantities: true })
     const normalizedVoucherCode =
       typeof voucherCode === 'string' && voucherCode.trim() ? voucherCode.trim() : null
 
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL'),
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
-    )
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+    if (!supabaseUrl || !serviceKey) throw new Error('Supabase configuration missing')
+    const supabase = createClient(supabaseUrl, serviceKey)
 
     const productIds = normalizedItems.map((item) => item.id)
     const { data: products, error: productsError } = await supabase
@@ -147,8 +125,8 @@ serve(async (req) => {
     }
 
     const expiresAt = new Date(Date.now() + RESERVATION_MINUTES * 60 * 1000).toISOString()
-    const { error: reservationError } = await supabase.rpc('reserve_product_stock', {
-      p_paypal_order_id: orderData.id,
+    const { error: reservationError } = await supabase.rpc(config.reserveRpc, {
+      p_paypal_order_id: storedPayPalId(orderData.id,config.staging),
       p_items: normalizedItems,
       p_expires_at: expiresAt,
     })
