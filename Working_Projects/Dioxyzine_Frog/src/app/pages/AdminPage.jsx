@@ -1,20 +1,35 @@
 import React, { useEffect, useState } from 'react';
+import { STAGING_ADMIN_SUPABASE_URL, isStagingAdminInquiryEnabled, isPrivateInquiryReference, loadStagingAdminInquiries, openStagingAdminReference } from '../utils/stagingAdminInquiryClient';
 import { motion, AnimatePresence } from 'motion/react';
 import { PackageSearch, PackagePlus, Edit, Trash2, X, PlusCircle, Save, Ticket, ToggleLeft, ToggleRight, UploadCloud, MessageSquare, Eye, EyeOff, Star } from 'lucide-react';
 import { supabase } from '../service/supabase';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router';
 import emailjs from '@emailjs/browser';
+import { canUseLiveExternalServices } from '../utils/externalServicePolicy';
 import { toast } from 'sonner';
 
 import { ToastNotification } from '../components/common_components/ToastNotification';
-import { assertConfirmedMutation, requireOrderId } from '../utils/orderIntegrity';
+import { assertConfirmedMutation, assertSingleInsertedRow, requireOrderId } from '../utils/orderIntegrity';
+import { filterInquiries, safeInquiryReferenceUrl, formatInquiryTimestamp } from '../utils/inquiryInbox';
+import { buildAdminReviewRows, requireAdminReviewTable } from '../utils/adminReviewRecords';
 
 export function AdminPage() {
   const { user, role } = useAuth();
   const navigate = useNavigate();
   
   const [toastNotif, setToastNotif] = useState({ show: false, msg: '', type: '' });
+
+  // Source/UI safety only: server-side RLS remains the authorization boundary.
+  // All Admin write handlers must fail closed on Preview and staging builds.
+  const allowAdminWrite = () => {
+    if (canUseLiveExternalServices({
+      deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    })) return true;
+    toast.error('Admin changes are disabled outside verified Production.');
+    return false;
+  };
   const showToast = (msg, type) => {
     if(type === 'success') toast.success(msg);
     else if(type === 'error') toast.error(msg);
@@ -24,6 +39,48 @@ export function AdminPage() {
   // Tab 'reviews'
   const [activeTab, setActiveTab] = useState('orders'); 
   const [orders, setOrders] = useState([]);
+  const [orderReviews, setOrderReviews] = useState([]);
+  const [inquirySearch, setInquirySearch] = useState('');
+  const [openingReferenceId, setOpeningReferenceId] = useState(null);
+  const [privateReference, setPrivateReference] = useState(null);
+
+  const adminInquiryGate = {
+    environment: import.meta.env.VITE_VERCEL_ENV,
+    supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    optIn: import.meta.env.VITE_ENABLE_STAGING_ADMIN_INQUIRIES,
+  };
+  const useStagingAdminReader = isStagingAdminInquiryEnabled(adminInquiryGate);
+  const stagingPreview = adminInquiryGate.environment === 'preview' &&
+    adminInquiryGate.supabaseUrl === STAGING_ADMIN_SUPABASE_URL;
+  useEffect(() => {
+    if (stagingPreview) setActiveTab('inquiries');
+  }, [stagingPreview]);
+  const productionAdminReader = canUseLiveExternalServices({
+    deploymentEnvironment: adminInquiryGate.environment,
+    supabaseUrl: adminInquiryGate.supabaseUrl,
+  });
+
+  useEffect(() => {
+    if (!privateReference) return;
+    const expiry = Math.max(0, privateReference.expiresAt - Date.now());
+    const timer = setTimeout(() => setPrivateReference(null), expiry);
+    return () => clearTimeout(timer);
+  }, [privateReference]);
+  useEffect(() => { setPrivateReference(null); }, [user?.id, role, activeTab]);
+
+  const handlePrivateReference = async (inquiry) => {
+    if (!useStagingAdminReader || role !== 'admin' || openingReferenceId) return;
+    setPrivateReference(null);
+    setOpeningReferenceId(inquiry.id);
+    try {
+      const url = await openStagingAdminReference(supabase, adminInquiryGate, inquiry);
+      setPrivateReference({ id: inquiry.id, url, expiresAt: Date.now() + 55_000 });
+    } catch {
+      toast.error('The private image is unavailable. Check Staging Admin access.');
+    } finally {
+      setOpeningReferenceId(null);
+    }
+  };
   const [paypalOrders, setPaypalOrders] = useState([]);
   const [products, setProducts] = useState([]);
   const [vouchers, setVouchers] = useState([]); 
@@ -70,14 +127,37 @@ export function AdminPage() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [resOrders, resPaypalOrders, resProducts, resVouchers] = await Promise.all([
-        supabase.from('inquiries').select('*').order('created_at', { ascending: false }),
+      // Never read customer Inquiry rows directly from Preview. A verified
+      // Production environment retains legacy RLS access; the Staging reader
+      // uses a separate server-verified, read-only Admin function.
+      const inquiryFetch = useStagingAdminReader
+        ? loadStagingAdminInquiries(supabase, adminInquiryGate)
+            .then((data) => ({ data, error: null }))
+            .catch((error) => ({ data: null, error }))
+        : productionAdminReader
+          ? supabase.from('inquiries').select('*').order('created_at', { ascending: false })
+          : Promise.resolve({ data: [], error: null });
+      // The isolated Staging reader has no access to the other Admin tables.
+      // Their denied queries must not discard a successfully verified Inbox.
+      if (stagingPreview) {
+        const result = await inquiryFetch;
+        if (result.error) throw result.error;
+        setOrders(result.data || []);
+        setPaypalOrders([]);
+        setProducts([]);
+        setVouchers([]);
+        setOrderReviews([]);
+        return;
+      }
+      const [resOrders, resPaypalOrders, resProducts, resVouchers, resReviews] = await Promise.all([
+        inquiryFetch,
         supabase.from('orders').select('*').order('created_at', { ascending: false }),
         supabase.from('products').select('*').order('created_at', { ascending: false }),
-        supabase.from('vouchers').select('*').order('created_at', { ascending: false }) 
+        supabase.from('vouchers').select('*').order('created_at', { ascending: false }),
+        supabase.from('order_reviews').select('id,order_id,customer_name,product_names,rating,review_comment,admin_reply,is_hidden,created_at').order('created_at', { ascending: false })
       ]);
 
-      const firstError = resOrders.error || resPaypalOrders.error || resProducts.error || resVouchers.error;
+      const firstError = resOrders.error || resPaypalOrders.error || resProducts.error || resVouchers.error || resReviews.error;
       if (firstError) {
         const isAuthError = firstError.code === 'PGRST301'
           || firstError.message?.toLowerCase().includes('jwt')
@@ -96,6 +176,7 @@ export function AdminPage() {
       if (resPaypalOrders.data) setPaypalOrders(resPaypalOrders.data);
       if (resProducts.data) setProducts(resProducts.data);
       if (resVouchers.data) setVouchers(resVouchers.data);
+      if (resReviews.data) setOrderReviews(resReviews.data);
     } catch (err) {
       console.error(err);
       toast.error('Could not load admin data. Please try refreshing the page.');
@@ -109,6 +190,7 @@ export function AdminPage() {
   }, [role]);
 
   const handleUpdateStatus = async (order, newStatus) => {
+    if (!allowAdminWrite()) return;
     setUpdatingId(order.id);
     try {
       const validatedOrderId = requireOrderId(order.id);
@@ -124,11 +206,16 @@ export function AdminPage() {
         updateData.tracking_code = trackingCode;
       }
 
-      const { error } = await supabase.from('orders').update(updateData).eq('id', order.id);
-      if (error) throw error;
+      // RLS or a missing row can make an UPDATE succeed with zero affected rows.
+      // Confirm the persisted row before updating the UI or sending an email.
+      const { data, error } = await supabase.from('orders')
+        .update(updateData)
+        .eq('id', validatedOrderId)
+        .select('id');
+      assertConfirmedMutation({ data, error }, validatedOrderId);
 
-      setPaypalOrders(paypalOrders.map(o =>
-        o.id === order.id ? { ...o, ...updateData } : o
+      setPaypalOrders(current => current.map(o =>
+        o.id === validatedOrderId ? { ...o, ...updateData } : o
       ));
 
       if (newStatus === 'shipping') {
@@ -171,23 +258,39 @@ export function AdminPage() {
   // };
 
   // Admin Reply Review
-  const handleSaveReply = async (id) => {
-    const replyText = replyInputs[id];
+  const handleSaveReply = async (review) => {
+    if (!allowAdminWrite()) return;
+    const { id } = review;
+    const table = requireAdminReviewTable(review);
+    const replyText = replyInputs[`${table}:${id}`];
     if (!replyText) return toast.error("Vui lòng nhập câu trả lời!");
     try {
-      const { error } = await supabase.from('inquiries').update({ admin_reply: replyText }).eq('id', id);
-      if (error) throw error;
-      setOrders(orders.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      const { data, error } = await supabase.from(table)
+        .update({ admin_reply: replyText }).eq('id', id).select('id');
+      assertConfirmedMutation({ data, error }, id);
+      if (table === 'order_reviews') {
+        setOrderReviews(current => current.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      } else {
+        setOrders(current => current.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      }
       toast.success("Đã phản hồi đánh giá!");
     } catch (err) { toast.error(err.message); }
   };
 
   // hide/Unhide Review
-  const handleToggleReviewVisibility = async (id, isHidden) => {
+  const handleToggleReviewVisibility = async (review) => {
+    if (!allowAdminWrite()) return;
+    const { id } = review;
+    const table = requireAdminReviewTable(review);
     try {
-      const { error } = await supabase.from('inquiries').update({ is_hidden: !isHidden }).eq('id', id);
-      if (error) throw error;
-      setOrders(orders.map(o => o.id === id ? { ...o, is_hidden: !isHidden } : o));
+      const { data, error } = await supabase.from(table)
+        .update({ is_hidden: !review.is_hidden }).eq('id', id).select('id');
+      assertConfirmedMutation({ data, error }, id);
+      if (table === 'order_reviews') {
+        setOrderReviews(current => current.map(o => o.id === id ? { ...o, is_hidden: !review.is_hidden } : o));
+      } else {
+        setOrders(current => current.map(o => o.id === id ? { ...o, is_hidden: !review.is_hidden } : o));
+      }
       toast.success(!isHidden ? "Đã ẨN đánh giá này!" : "Đã HIỆN đánh giá này!");
     } catch (err) { toast.error(err.message); }
   };
@@ -227,6 +330,7 @@ export function AdminPage() {
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
+    if (!allowAdminWrite()) return;
     setIsSavingProduct(true);
     try {
       let finalCoverUrl = productForm.image_cover;
@@ -255,8 +359,9 @@ export function AdminPage() {
       }
 
       const dataToSave = { ...productForm, image_cover: finalCoverUrl, images_gallery: finalGalleryUrls.join('|') };
-      const { error } = await supabase.from('products').upsert(dataToSave);
-      if (error) throw error;
+      const { data, error } = await supabase.from('products')
+        .upsert(dataToSave).select('id');
+      assertConfirmedMutation({ data, error }, productForm.id);
       
       await fetchData();
       setIsModalOpen(false);
@@ -269,6 +374,7 @@ export function AdminPage() {
   };
 
   const handleDeleteProduct = async (id) => {
+    if (!allowAdminWrite()) return;
     if(!window.confirm("Bạn có chắc chắn muốn xóa sản phẩm này?")) return;
     try {
       const { data, error } = await supabase.from('products').delete().eq('id', id).select('id');
@@ -280,6 +386,7 @@ export function AdminPage() {
 
   const handleSaveVoucher = async (e) => {
     e.preventDefault();
+    if (!allowAdminWrite()) return;
     if (!voucherForm.code.trim()) return toast.error("Please enter a Promo Code! 🎟️");
     if (hasExpiration && !voucherForm.expires_at) return toast.error("Please completely fill out the Expiration Date and Time! ⏰");
 
@@ -290,8 +397,9 @@ export function AdminPage() {
       else finalData.expires_at = new Date(finalData.expires_at).toISOString();
       finalData.code = finalData.code.toUpperCase();
 
-      const { error } = await supabase.from('vouchers').insert([finalData]);
-      if (error) throw error;
+      const { data, error } = await supabase.from('vouchers')
+        .insert([finalData]).select('id');
+      assertSingleInsertedRow({ data, error });
       
       await fetchData();
       setIsVoucherModalOpen(false);
@@ -302,6 +410,7 @@ export function AdminPage() {
   };
 
   const handleToggleVoucher = async (id, currentStatus) => {
+    if (!allowAdminWrite()) return;
     try {
       const { data, error } = await supabase.from('vouchers').update({ is_active: !currentStatus }).eq('id', id).select('id');
        assertConfirmedMutation({ data, error }, id);
@@ -311,6 +420,7 @@ export function AdminPage() {
   };
 
   const handleDeleteVoucher = async (id) => {
+    if (!allowAdminWrite()) return;
     if(!window.confirm("Bạn có chắc chắn muốn xóa mã giảm giá này vĩnh viễn?")) return;
     try {
       const { data, error } = await supabase.from('vouchers').delete().eq('id', id).select('id');
@@ -323,7 +433,8 @@ export function AdminPage() {
   if (!user || role !== 'admin') return <div className="min-h-screen pt-28 text-center text-white">Checking Auth...</div>;
 
   // Lọc ra các đơn hàng có đánh giá
-  const reviewsList = orders.filter(o => o.rating != null);
+  const reviewsList = buildAdminReviewRows(orders, orderReviews);
+  const visibleInquiries = filterInquiries(orders, inquirySearch);
 
   return (
     <>
@@ -337,6 +448,9 @@ export function AdminPage() {
             <div className="flex flex-wrap gap-2 bg-[var(--card)] dark:bg-[#1A1528] p-1.5 rounded-xl border border-[var(--border)] shadow-sm">
               <button onClick={() => setActiveTab('orders')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'orders' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
                 Orders ({paypalOrders.length})
+              </button>
+              <button onClick={() => setActiveTab('inquiries')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'inquiries' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
+                Inquiries ({orders.length})
               </button>
               <button onClick={() => setActiveTab('products')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'products' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
                 CMS Products ({products.length})
@@ -406,6 +520,94 @@ export function AdminPage() {
                 </table>
               </div>
             </div>
+          ) : activeTab === 'inquiries' ? (
+            /* Read-only Inquiry Inbox: no status changes or customer messaging yet. */
+            <section className="space-y-5" aria-label="Customer inquiries">
+              <div className="bg-[var(--card)] dark:bg-[#1A1528] border border-[var(--border)] rounded-3xl p-5 sm:p-6">
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+                  <div>
+                    <h2 className="font-bold text-lg text-[var(--foreground)]">Customer Inquiry Inbox</h2>
+                    <p className="text-sm text-[var(--muted-foreground)]">Read-only requests • {visibleInquiries.length} of {orders.length} shown</p>
+                    {stagingPreview && !useStagingAdminReader && (
+                      <p role="status" className="text-xs text-[var(--muted-foreground)]">
+                        Staging Admin Inbox is disabled until backend access is approved.
+                      </p>
+                    )}
+                  </div>
+                  <input
+                    type="search"
+                    aria-label="Search inquiries"
+                    placeholder="Search name, email, subject, product or request ID"
+                    value={inquirySearch}
+                    onChange={(event) => setInquirySearch(event.target.value)}
+                    className="w-full md:w-96 rounded-xl border border-[var(--border)] bg-[var(--input-background)] px-4 py-3 text-sm text-[var(--foreground)] outline-none focus:border-[var(--primary)]"
+                  />
+                </div>
+              </div>
+              {visibleInquiries.length === 0 ? (
+                <p role="status" className="rounded-3xl border border-[var(--border)] bg-[var(--card)] p-8 text-center text-[var(--muted-foreground)]">
+                  {inquirySearch.trim() ? 'No inquiries match your search.' : 'No customer inquiries have been received yet.'}
+                </p>
+              ) : (
+                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                  {visibleInquiries.map((inquiry) => {
+                    const referenceUrl = productionAdminReader
+                      ? safeInquiryReferenceUrl(inquiry.image_link) : null;
+                    const privateImage = useStagingAdminReader &&
+                      isPrivateInquiryReference(inquiry.image_link);
+                    return (
+                      <article key={inquiry.id} className="bg-[var(--card)] dark:bg-[#1A1528] border border-[var(--border)] rounded-3xl p-5 sm:p-6 space-y-4 shadow-sm min-w-0">
+                        <header className="flex flex-wrap justify-between items-start gap-3">
+                          <div className="min-w-0">
+                            <h3 className="font-bold text-lg text-[var(--foreground)] break-words">{inquiry.subject || 'New inquiry'}</h3>
+                            <p className="text-sm text-[var(--muted-foreground)] break-words">{inquiry.product_name || 'Product not specified'}</p>
+                          </div>
+                          <time dateTime={inquiry.created_at || undefined} className="text-xs text-[var(--muted-foreground)]">{formatInquiryTimestamp(inquiry.created_at)}</time>
+                        </header>
+                        <dl className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Customer</dt><dd className="font-semibold text-[var(--foreground)] break-words">{inquiry.customer_name || 'Not provided'}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Email</dt><dd className="text-[var(--foreground)] break-all">{inquiry.customer_email || 'Not provided'}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Contact</dt><dd className="text-[var(--foreground)] break-words">{inquiry.contact_info || 'Not provided'}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Quantity / Accessories</dt><dd className="text-[var(--foreground)]">{inquiry.quantity ?? '—'} / {inquiry.accessory_qty ?? 0}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Size</dt><dd className="text-[var(--foreground)] break-words">{inquiry.size || 'Not specified'}</dd></div>
+                          <div className="min-w-0"><dt className="text-[var(--muted-foreground)]">Current status</dt><dd className="text-[var(--foreground)] break-words">{inquiry.status || 'Not set'}</dd></div>
+                        </dl>
+                        {inquiry.note && (
+                          <div className="rounded-xl bg-[var(--muted)] p-3">
+                            <h4 className="text-xs font-semibold text-[var(--muted-foreground)] mb-1">Additional notes</h4>
+                            <p className="text-sm text-[var(--foreground)] whitespace-pre-wrap break-words">{inquiry.note}</p>
+                          </div>
+                        )}
+                        <footer className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-t border-[var(--border)] pt-3 text-xs text-[var(--muted-foreground)]">
+                          <span className="font-mono break-all">ID: {inquiry.id}</span>
+                          {referenceUrl && (
+                            <a href={referenceUrl} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer"
+                              className="text-[var(--primary)] font-semibold underline underline-offset-4">
+                              Open design reference
+                            </a>
+                          )}
+                          {privateImage && (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <button type="button" disabled={!!openingReferenceId}
+                                onClick={() => handlePrivateReference(inquiry)}
+                                className="text-[var(--primary)] font-semibold underline underline-offset-4 disabled:opacity-50">
+                                {openingReferenceId === inquiry.id ? 'Getting secure link...' : 'Get private reference link'}
+                              </button>
+                              {privateReference?.id === inquiry.id && privateReference.expiresAt > Date.now() && (
+                                <a href={privateReference.url} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer"
+                                  className="text-[var(--primary)] font-semibold underline underline-offset-4">
+                                  Private reference (expires shortly)
+                                </a>
+                              )}
+                            </div>
+                          )}
+                        </footer>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
+            </section>
           ) : activeTab === 'reviews' ? (
             /* REVIEWS ADMIN */
             <div className="space-y-6 max-w-4xl mx-auto">
@@ -414,7 +616,7 @@ export function AdminPage() {
               ) : (
                 reviewsList.map(review => (
                   <div
-                    key={review.id}
+                    key={`${review.sourceTable}:${review.id}`}
                     className={`bg-[var(--card)] dark:bg-[#1A1528] border ${
                       review.is_hidden
                         ? 'border-red-500/30 opacity-60'
@@ -424,7 +626,7 @@ export function AdminPage() {
                     <div className="flex flex-col sm:flex-row justify-between items-start gap-4 mb-4">
                       <div>
                         <h4 className="font-bold text-[var(--heading-color)] dark:text-white text-lg">
-                          {review.product_name}
+                          {review.display_product_name}
                         </h4>
                         <p className="text-sm text-[var(--muted-foreground)]">
                           Bởi <strong className="text-[var(--foreground)] dark:text-white">
@@ -436,7 +638,7 @@ export function AdminPage() {
                         </div>
                       </div>
                       <button 
-                        onClick={() => handleToggleReviewVisibility(review.id, review.is_hidden)} 
+                        onClick={() => handleToggleReviewVisibility(review)} 
                         className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-colors cursor-pointer ${review.is_hidden ? 'bg-green-500/10 text-green-400 hover:bg-green-500/20' : 'bg-red-500/10 text-red-400 hover:bg-red-500/20'}`}
                       >
                         {review.is_hidden ? <><Eye className="w-4 h-4"/> Đang Ẩn (Bấm để Hiện)</> : <><EyeOff className="w-4 h-4"/> Đang Hiện (Bấm để Ẩn)</>}
@@ -451,12 +653,12 @@ export function AdminPage() {
                       <input 
                         type="text" 
                         placeholder="Trả lời bình luận với tư cách Dioxyzine Frog..." 
-                        value={replyInputs[review.id] ?? (review.admin_reply || '')}
-                        onChange={(e) => setReplyInputs({...replyInputs, [review.id]: e.target.value})}
+                        value={replyInputs[`${review.sourceTable}:${review.id}`] ?? (review.admin_reply || '')}
+                        onChange={(e) => setReplyInputs({...replyInputs, [`${review.sourceTable}:${review.id}`]: e.target.value})}
                         className="flex-1 bg-[var(--input-background)] dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-xl px-4 py-3 text-sm text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] outline-none"
                       />
                       <button 
-                        onClick={() => handleSaveReply(review.id)} 
+                        onClick={() => handleSaveReply(review)} 
                         className="px-6 py-3 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl text-sm flex items-center justify-center gap-2 transition-colors cursor-pointer"
                       >
                         <MessageSquare className="w-4 h-4" /> Lưu Câu Trả Lời

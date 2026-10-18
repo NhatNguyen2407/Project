@@ -28,6 +28,9 @@ assertPreviewBackendIsolation({
 })
 
 export default defineConfig({
+  define: {
+    'import.meta.env.VITE_VERCEL_ENV': JSON.stringify(process.env.VERCEL_ENV || ''),
+  },
   plugins: [
     figmaAssetResolver(),
     // The React and Tailwind plugins are both required for Make, even if
