@@ -15,6 +15,12 @@ const env={
 function fixture({changes={},budgetResults=[true,true],captchaAction='inquiry_upload',token='single-upload-token',ticketResult=true,ticketError=null}={}) {
  let calls=[];let grants=[...budgetResults];
  const client={
+   auth:{getUser:async token=>{
+     calls.push({kind:'auth'});
+     return token==='verified-user-token'
+       ? {data:{user:{id:'22222222-2222-4222-8222-222222222222'}},error:null}
+       : {data:{user:null},error:Error('Invalid token')};
+   }},
    rpc:async(name,args)=>{
      if(name==='register_inquiry_upload_ticket'){
        calls.push({kind:'ticket',path:args.p_path,mime:args.p_mime_type,bytes:args.p_declared_bytes});
@@ -73,6 +79,16 @@ test('issuer accepts the full supported CAPTCHA token with JSON metadata',async(
  const r=await f.handler(f.req(body,{'content-length':String(Buffer.byteLength(JSON.stringify(body)))}));
  assert.equal(r.status,201);
  assert.equal(new URLSearchParams(f.calls.find(c=>c.kind==='captcha').body).get('response'),captchaToken);
+});
+
+test('signed-in visitors require verified Auth and retain CAPTCHA/budgets; invalid JWT cannot issue',async()=>{
+ const f=fixture();
+ const response=await f.handler(f.req(undefined,{authorization:'Bearer verified-user-token'}));
+ assert.equal(response.status,201);
+ assert.deepEqual(f.calls.map(c=>c.kind),['admin','auth','budget','captcha','budget','ticket','bucket','signed']);
+ const invalid=fixture();
+ assert.equal((await invalid.handler(invalid.req(undefined,{authorization:'Bearer invalid-user-token'}))).status,401);
+ assert.deepEqual(invalid.calls.map(c=>c.kind),['admin','auth']);
 });
 test('invalid origin, wrong caller key, wrong method and wrong content type fail closed',async()=>{
  const f=fixture();
