@@ -192,7 +192,6 @@ export function CheckoutPage() {
         },
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
-      console.log("Đã gửi email biên lai thành công!");
     } catch (emailError) {
       // Gửi email lỗi không ảnh hưởng gì đến việc đơn hàng đã được lưu hay
       // chưa — đơn hàng đã chắc chắn được lưu trước khi hàm này chạy.
