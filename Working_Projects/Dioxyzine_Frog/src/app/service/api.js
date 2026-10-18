@@ -1,4 +1,7 @@
 import { supabase } from './supabase';
+import { mayMirrorInquiryToSheets, maySubmitFeedbackToSheets } from '../utils/inquiryMirrorPolicy';
+
+let pendingInquiry = null;
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuex1g0XqvFfM1lf79CqmZ_oBzRGTGBTt27pjduIw7ZeIROJmU6AA2oRfVXGW3JD-P/exec';
 
@@ -15,49 +18,54 @@ export const api = {
     }
   },
 
-  // Form Inquiry
-  submitInquiry: async (data) => {
+  // Inquiry key survives an uncertain network response while form data is
+  // unchanged. No customer data is persisted to local storage or logged.
+  submitInquiry: async (data, recaptchaToken) => {
+    const fingerprint = JSON.stringify(data);
+    if (pendingInquiry?.fingerprint !== fingerprint) {
+      pendingInquiry = { fingerprint, key: crypto.randomUUID(), promise: null };
+    }
+    const pending = pendingInquiry;
+    if (pending.promise) return pending.promise;
+    const operation = (async () => {
+      const { data: result, error } = await supabase.functions.invoke('submit-inquiry', {
+        body: { inquiry: data, token: recaptchaToken, idempotencyKey: pending.key }
+      });
+      if (error || !result?.success) {
+        throw error || new Error('Inquiry submission failed verification.');
+      }
+      // A replay must not create a duplicate best-effort mirror request.
+      if (!result.replayed && mayMirrorInquiryToSheets({
+        optIn: import.meta.env.VITE_ENABLE_INQUIRY_SHEETS_MIRROR,
+        deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+        supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+      })) {
+        const payload = { type: 'inquiry', ...data };
+        fetch(SCRIPT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(payload)
+        }).catch(() => console.error('Inquiry mirror delivery failed.'));
+      }
+      if (pendingInquiry === pending) pendingInquiry = null;
+      return result.inquiryId;
+    })();
+    pending.promise = operation;
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-
-      const { error } = await supabase
-        .from('inquiries')
-        .insert([
-          {
-            user_id: user ? user.id : null, //import id for display on profile
-            subject: data.subject,
-            customer_name: data.customerName,
-            customer_email: data.customerEmail,
-            contact_info: data.contactInfo,
-            product_name: data.productName,
-            size: data.size || null,
-            quantity: parseInt(data.quantity) || 1,
-            accessory_qty: parseInt(data.accessoryQty) || 0,
-            image_link: data.imageLink,
-            note: data.note || null
-          }
-        ]);
-
-      if (error) throw error;
-
-      // backup in google sheets
-      const payload = { type: 'inquiry', ...data };
-      fetch(SCRIPT_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-        body: JSON.stringify(payload)
-      }).catch(e => console.error("Lỗi backup ra Google Sheet:", e));
-      
-
-      return true;
-    } catch (error) {
-      console.error('Lỗi khi lưu Inqury vào Supabase:', error);
-      throw error;
+      return await operation;
+    } finally {
+      pending.promise = null;
     }
   },
 
   // Feedback
   submitFeedback: async (data) => {
+    if (!maySubmitFeedbackToSheets({
+      deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+      supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+    })) {
+      throw new Error('Feedback submission is disabled outside verified Production.');
+    }
     const payload = { type: 'feedback', ...data };
     return fetch(SCRIPT_URL, {
       method: 'POST',
