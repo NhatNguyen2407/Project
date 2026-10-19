@@ -1,6 +1,6 @@
 # Dioxyzine Frog — acceptance ledger
 
-Updated 2026-10-18. PR #19 and #21 remain Draft; Production is unchanged.
+Updated 2026-10-19. PR #19 and #21 remain Draft; this work does not change Production.
 Evidence below separates hosted checks, browser checks and source-only tests.
 Historical progress entries are dated snapshots; this ledger supersedes their old open/closed states.
 
@@ -8,8 +8,10 @@ Historical progress entries are dated snapshots; this ledger supersedes their ol
 
 | Area | Evidence | Limit |
 | --- | --- | --- |
-| Offline database recovery | 41 table row counts; 43 table definitions; 439 columns; 35 function hashes; 22 policies; table/function ACLs and 10 triggers matched. Role, paid tracking and rollback probes passed. | Isolated local PostgreSQL restore, not full hosted platform recovery. |
-| Storage backup | All 8 files recovered; size and single-part MD5 match snapshot metadata; SHA-256 manifest retained privately. | Storage API re-upload and independent off-device retention not tested. |
+| Database/Auth/Storage recovery | 41 table row counts and nine schema/access-control categories matched; ten restored Auth/Storage API checks passed, including synthetic login, private access and actual expiry. | Isolated no-egress local recovery with new credentials; original OAuth/SMTP and hosted replacement cutover not exercised. |
+| Storage and off-device backup | Eight Storage binaries reuploaded/downloaded and SHA-256 checked. Owner-only encrypted Drive archives downloaded, decrypted and verified; downloaded base restored. | Independent custody of the decryption key is still open; retain local backups. |
+| Workbook recovery | Owner-only native restoration; ten tabs, 2,623 formulas and 113,882 resolved cell/style comparisons matched. | External imports, Apps Script and rendered browser layout were not tested. |
+| Provider recovery | Seventeen readable Config definitions and 26 available Cloudinary originals backed up and verified after encrypted cloud round-trip. | Five write-only definitions, provider/settings/secret recovery and 132 unavailable source-media URLs remain unresolved. |
 | Hosted Storage/Auth | 19 API checks passed, including own-prefix access, cross-user/guest denial, type/size restrictions, overwrite denial and actual signed expiry. | Synthetic Staging only. |
 | Inquiry browser | Real v3 CAPTCHA, private upload, hosted WASM decode and submit passed. Stored ticket claim, checksum and idempotency record verified. Signed-in 2048×2048 PNG (658,886 bytes) also submitted. | Decoder shutdown sample: 382 ms CPU / 52,000,408 bytes memory; not a peak bound or all-input guarantee. |
 | Auth role isolation | 8 hosted checks passed: own role read only; cross-user reads and all client role writes denied. Auth refresh preserves mounted forms; stale account lookups invalidated. | Staging uses a guarded self-read migration. |
@@ -44,7 +46,7 @@ Credentials stay server-only; no real funds, customer records, email or Sheets w
 - Controlled captured-but-not-recorded failure/recovery and the expired-retained-reservation variant now PASS, with exact fixture restoration and the same single provider capture. See PAYPAL_RECONCILIATION_RUNBOOK.md. Durable operations and deleted-reservation recovery remain unimplemented.
 - Test synthetic voucher usage/rollback, shipping email to an approved test destination, review permissions/sync and remaining Admin mutations against a deliberately scoped Staging contract. Do not grant broad table access to make a test pass.
 - Implement/review orphan retention and upload-abuse operations. A read-only 24-hour orphan inventory found zero eligible objects; no cleanup deletion was claimed.
-- Verify full hosted Auth/Storage/provider/settings recovery, deployment rollback and an independent encrypted backup destination. Offline SQL recovery is already accepted.
+- Complete provider/settings/secret recovery and independent decryption-key custody. Database/Auth/Storage API restore, workbook restore, encrypted Drive round-trip and Preview alias rollback already PASS. Hosted replacement-platform cutover and Production rollback have not been rehearsed.
 - Review both PRs against current main; coordinate frontend/function/RLS cutover and rollback; approve release and monitoring. No Production migration, merge or deployment is implied.
 - Phases 3–5 (data integration, PA and AI) have not started.
 

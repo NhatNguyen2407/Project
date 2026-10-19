@@ -15,8 +15,6 @@ export function ProductDetailPage() {
   const { products, loading, error, refetch } = useProducts();
   const { addToCart } = useCart();
 
-  const isReadyUse = location.pathname.startsWith('/products/readyuse');
-
   const customCategoryMap = {
     plushie: 'Plushie',
     doll: 'Doll',
@@ -38,6 +36,8 @@ export function ProductDetailPage() {
   const [liveRating, setLiveRating] = useState(0);
 
   const product = products.find((p) => p.id === id);
+  const isReadyUse = location.pathname.startsWith('/products/readyuse') ||
+    (location.pathname.startsWith('/product/') && product?.type === 'readyuse');
 
   useEffect(() => {
     if (product) {
