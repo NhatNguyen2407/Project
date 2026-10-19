@@ -1,6 +1,6 @@
 # Dioxyzine Frog - Recovery Readiness and Migration Reconciliation
 
-**Assessment date:** 2026-10-18
+**Assessment date:** 2026-10-19
 **Scope:** Phase 1 / Step 2. **Status: OPEN** pending independent key custody and provider/configuration recovery. Phase 1 browser acceptance is tracked separately.
 
 This public document contains sanitized verification results only. Private backups, workbook identifiers, customer records, credentials, encryption keys and cloud archive links are excluded.
@@ -27,7 +27,7 @@ The isolated recovery used an internal Docker network, no published host ports, 
 
 The backed-up Storage schema requires a compatible service version. A cached older image failed its upsert conflict target; using the compatible official image fixed the drill without modifying the backed-up schema.
 
-Workbook verification used native cell/format/rule readback and resolved export comparison. Browser visual verification was unavailable because its tool could not initialize. No source workbook cells or sharing permissions were changed.
+Workbook verification used native cell/format/rule readback and resolved export comparison. Browser visual verification was unavailable during that drill because its tool could not initialize; browser access was restored on October 19, but the workbook visual check has not been repeated. No source workbook cells or sharing permissions were changed.
 
 ### Source-media coverage and gaps
 
@@ -74,7 +74,7 @@ This closes the evidence gap for the historical pair's effective baseline behavi
 - [ ] Verify recovery or recreation of provider settings and secret values: OAuth, SMTP/email, PayPal, CAPTCHA, Sheets/Apps Script and Vercel configuration.
 - [ ] Complete the separately tracked critical Checkout browser acceptance and final release review.
 
-The owner selected a password manager for the key but has not yet confirmed that it was saved. Local backup copies remain retained. A same-device key file is not an independent recovery copy.
+On October 19 the owner confirmed that the key has not been saved off-device and requested retaining the local copies. All local backups and keys remain retained. A same-device key file is not an independent recovery copy.
 
 Provider-managed daily backup/PITR coverage has not been revalidated. The manual encrypted archive and tested local restoration do not establish that coverage or a hosted replacement-platform cutover.
 

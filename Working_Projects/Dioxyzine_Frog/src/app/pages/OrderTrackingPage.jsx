@@ -137,6 +137,9 @@ export function OrderTrackingPage() {
           >
             <input
               type="text"
+              aria-label="Order ID"
+              aria-describedby={error ? 'tracking-error' : undefined}
+              aria-invalid={Boolean(error)}
               placeholder="Enter your Order ID (e.g., 123e4567-...)"
               value={searchId}
               onChange={(e) => setSearchId(e.target.value)}
@@ -146,6 +149,7 @@ export function OrderTrackingPage() {
 
             <button
               type="submit"
+              aria-label={loading ? 'Searching for order' : 'Track order'}
               disabled={loading}
               className="absolute right-2 top-2 bottom-2 aspect-square bg-[var(--primary)] hover:bg-purple-600 rounded-full flex items-center justify-center text-white transition-colors cursor-pointer disabled:opacity-50"
             >
@@ -160,6 +164,8 @@ export function OrderTrackingPage() {
           <AnimatePresence>
             {error && (
               <motion.div
+                id="tracking-error"
+                role="alert"
                 initial={{ opacity: 0, y: -10 }}
                 animate={{ opacity: 1, y: 0 }}
                 className="mt-6 inline-flex items-center gap-2 px-4 py-2 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400"

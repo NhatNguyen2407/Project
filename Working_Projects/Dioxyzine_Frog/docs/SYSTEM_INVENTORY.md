@@ -1,8 +1,8 @@
 # Dioxyzine Frog - System Inventory
 
-> **Baseline (read-only):** 2026-10-14 (Asia/Bangkok)  
-> **Workstream:** Phase 1 / Step 1 - Establish baseline & safe working branch  
-> **Status:** Documentation only. No production, database, payment, or Sheet changes.  
+> **Baseline (read-only):** 2026-10-14 (Asia/Bangkok)\
+> **Workstream:** Phase 1 / Step 1 - Establish baseline & safe working branch\
+> **Status:** Documentation only. No production, database, payment, or Sheet changes.\
 > **Repository visibility:** PUBLIC - never add secrets, customer records, financial detail, or nonpublic Sheet links.
 
 ## 1. Source-control baseline
@@ -98,7 +98,7 @@ The names describe similar changes but versions differ. **Do not blindly replay 
 
 **Phase 3 - Business data:** financial reconciliation, immutable production IDs, normalization, one-way Sheets synchronization.
 
-**Phase 4–5 - Operations and AI:** RBAC/task/calendar/reminders, then LLM read tools and approval-based actions.
+**Phase 4-5 - Operations and AI:** RBAC/task/calendar/reminders, then LLM read tools and approval-based actions.
 
 ## 6. Verification log
 

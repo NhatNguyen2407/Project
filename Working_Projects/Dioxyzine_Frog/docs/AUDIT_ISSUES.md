@@ -51,7 +51,7 @@
 | DF-029 | P1 | Finance and e-commerce transactions have different currencies/sources | Source systems; CONFIRMED | Monetary amount+currency+exchange-rate metadata; sandbox tagging | Correct segmented reporting |
 | DF-030 | P1 | Worker sheet synchronization mechanism not verified | Read-only snapshot matches; mechanism REQUIRES VALIDATION | Establish authoritative source and conflict resolution rules | Update simulation and round-trip verification in copies |
 
-## Phase 4–5 - Required PA capabilities (PLANNED)
+## Phase 4-5 - Required PA capabilities (PLANNED)
 
 | ID | Priority | Required capability | Proposed implementation | Verification |
 | --- | --- | --- | --- | --- |
