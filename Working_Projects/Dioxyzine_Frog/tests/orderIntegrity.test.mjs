@@ -4,6 +4,7 @@ import {
   normalizeOrderId,
   requireOrderId,
   assertConfirmedMutation,
+  assertSingleInsertedRow,
 } from '../src/app/utils/orderIntegrity.js';
 
 const orderId = '123e4567-e89b-42d3-a456-426614174000';
@@ -67,4 +68,16 @@ test('admin mutation requires a target ID', () => {
     () => assertConfirmedMutation({ data: [{ id: undefined }], error: null }, undefined),
     /Database did not confirm/,
   );
+});
+
+test('generated-ID insert confirms exactly one persisted row', () => {
+  assert.deepEqual(assertSingleInsertedRow(
+    { data: [{ id: '93fffc6a-2432-4f74-992f-0f007c706cc6' }], error: null },
+  ), { id: '93fffc6a-2432-4f74-992f-0f007c706cc6' });
+
+  for (const data of [null, [], [{ id: '' }], [{}], [{ id: 'a' }, { id: 'b' }]]) {
+    assert.throws(() => assertSingleInsertedRow({ data, error: null }), /Database did not confirm/);
+  }
+  const rls = new Error('no INSERT policy');
+  assert.throws(() => assertSingleInsertedRow({ data: [], error: rls }), (err) => err === rls);
 });

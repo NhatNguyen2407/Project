@@ -120,9 +120,6 @@ export function LoginPage() {
       });
 
       if (error) throw error;
-      console.log('LOGIN DATA:', data);
-      console.log('LOGIN USER:', data?.user);
-      console.log('LOGIN SESSION:', data?.session);
       
       if (data.user) {
         const { data: roleData } = await supabase

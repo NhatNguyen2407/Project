@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Truck, CreditCard, CheckCircle2, ArrowLeft, Ticket, XCircle, Loader2 } from 'lucide-react';
 import { Link } from 'react-router';
@@ -14,14 +14,30 @@ import { supabase } from '../service/supabase';
 import { useAuth } from '../../app/context/AuthContext';
 import { trackPurchase, trackInitiateCheckout } from '../utils/analytics';
 import { normalizeOrderId } from '../utils/orderIntegrity';
+import { needsPaymentReview } from '../utils/paymentOutcome';
+import { createCaptureAttemptGate } from '../utils/captureAttemptGate';
+import { canUseLiveExternalServices } from '../utils/externalServicePolicy';
+import { canUsePayPalCheckout } from '../utils/paypalEnvironment';
 
 const PAYPAL_CLIENT_ID = import.meta.env.VITE_PAYPAL_CLIENT_ID;
+const allowPayPalCheckout = canUsePayPalCheckout({
+  deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+  supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+  mode: import.meta.env.VITE_PAYPAL_MODE,
+  stagingOptIn: import.meta.env.VITE_ENABLE_STAGING_PAYPAL_SANDBOX,
+  clientId: PAYPAL_CLIENT_ID,
+});
+const liveExternalServices = canUseLiveExternalServices({
+  deploymentEnvironment: import.meta.env.VITE_VERCEL_ENV,
+  supabaseUrl: import.meta.env.VITE_SUPABASE_URL,
+});
 
 export function CheckoutPage() {
   const { user } = useAuth();
   const { cart, cartTotal, clearCart } = useCart();
   const [orderComplete, setOrderComplete] = useState(false);
   const [orderConfirmationWarning, setOrderConfirmationWarning] = useState('');
+  const [paymentReview, setPaymentReview] = useState(null);
   
   const [shippingForm, setShippingForm] = useState({
     email: '', firstName: '', lastName: '', address: '', city: '', postalCode: '',
@@ -34,6 +50,9 @@ export function CheckoutPage() {
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
   
   const [isFinalizing, setIsFinalizing] = useState(false);
+  // A synchronous ref prevents duplicate onApprove callbacks racing before React rerenders.
+  const captureAttemptRef = useRef(null);
+  if (!captureAttemptRef.current) captureAttemptRef.current = createCaptureAttemptGate();
 
   const [promoCodeInput, setPromoCodeInput] = useState('');
   const [appliedVoucher, setAppliedVoucher] = useState(null);
@@ -161,7 +180,7 @@ export function CheckoutPage() {
     trackPurchase(transactionId, Number(capturedAmount), cart);
 
     try {
-      await emailjs.send(
+      if (liveExternalServices) await emailjs.send(
         import.meta.env.VITE_EMAILJS_SERVICE_ID,
         import.meta.env.VITE_EMAILJS_TEMPLATE_CONFIRMED_ID,
         {
@@ -173,7 +192,6 @@ export function CheckoutPage() {
         },
         import.meta.env.VITE_EMAILJS_PUBLIC_KEY
       );
-      console.log("Đã gửi email biên lai thành công!");
     } catch (emailError) {
       // Gửi email lỗi không ảnh hưởng gì đến việc đơn hàng đã được lưu hay
       // chưa — đơn hàng đã chắc chắn được lưu trước khi hàm này chạy.
@@ -224,7 +242,24 @@ export function CheckoutPage() {
             )}
           </AnimatePresence>
 
-          {orderComplete ? (
+          {paymentReview ? (
+            <div className="w-full p-10 md:p-16 flex flex-col items-center justify-center text-center bg-[var(--card)]">
+              <h2 className="text-3xl font-bold text-[var(--heading-color)] dark:text-white mb-4 font-heading">
+                Payment needs review
+              </h2>
+              <p role="alert" className="text-[var(--foreground)] max-w-xl mb-4">
+                {paymentReview.message}
+              </p>
+              {paymentReview.transactionId && (
+                <p className="font-mono text-sm break-all mb-4">
+                  PayPal Transaction ID: {paymentReview.transactionId}
+                </p>
+              )}
+              <p className="max-w-xl text-[var(--muted-foreground)]">
+                Please do not attempt this payment again until support has checked its status.
+              </p>
+            </div>
+          ) : orderComplete ? (
             <div className="w-full p-16 flex flex-col items-center justify-center text-center bg-[var(--card)]">
               <CheckCircle2 className="w-24 h-24 text-green-500 mb-6 shadow-[0_0_30px_rgba(34,197,94,0.3)] rounded-full" />
               <h2 className="text-4xl font-bold text-[var(--heading-color)] dark:text-white mb-4 font-heading">Order Confirmed!</h2>
@@ -447,7 +482,7 @@ export function CheckoutPage() {
                   </div>
 
                   <div className="w-full relative z-0 mt-4">
-                    <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD", locale: "en_US" }}>
+                    {allowPayPalCheckout ? <PayPalScriptProvider options={{ "client-id": PAYPAL_CLIENT_ID, currency: "USD", locale: "en_US" }}>
                       <PayPalButtons 
                         style={{ 
                           layout: "vertical", 
@@ -457,12 +492,14 @@ export function CheckoutPage() {
                           height: 48 
                         }}
                         onClick={(data, actions) => {
+                          if (captureAttemptRef.current.isLocked()) return actions.reject();
                           const isValid = validateCheckoutForm();
                           if (!isValid) return actions.reject();
                           return actions.resolve();
                         }}
                         // Xóa cái createOrder cũ và thay bằng cái này:
                         createOrder={async () => {
+                          if (captureAttemptRef.current.isLocked()) return null;
                           try {
                             // 🚀 GỌI BACKEND: gửi GIỎ HÀNG + mã voucher, không gửi
                             // số tiền trực tiếp nữa — server tự tính lại từ giá
@@ -488,6 +525,9 @@ export function CheckoutPage() {
                           }
                         }}
                         onApprove={async (data) => {
+                          // Ignore duplicate SDK callbacks for the same or another PayPal order.
+                          const approvedOrderId = data?.orderID;
+                          if (!captureAttemptRef.current.begin(approvedOrderId)) return;
                           try {
                             setIsFinalizing(true);
                             // 🚀 Capture diễn ra Ở SERVER (không còn actions.order.capture()
@@ -508,11 +548,21 @@ export function CheckoutPage() {
                             });
 
                             if (error || !result?.success) {
-                              if (result?.paymentCaptured) {
-                                // Tiền đã bị trừ nhưng lưu đơn hàng thất bại — cho khách
-                                // biết rõ mã giao dịch để liên hệ hỗ trợ, không giấu đi.
-                                showToast(`${result.error} (Transaction ID: ${result.transactionId})`, "error");
+                              if (needsPaymentReview(result, error)) {
+                                captureAttemptRef.current.requireReview();
+                                // Capture may have succeeded even if the function response failed.
+                                // Keep the checkout UI locked to avoid an accidental second payment.
+                                setPaymentReview({
+                                  message: result?.paymentCaptured
+                                    ? 'PayPal captured the payment, but your order could not be recorded automatically.'
+                                    : 'We could not confirm whether PayPal captured this payment. Contact support before trying again.',
+                                  transactionId: typeof result?.transactionId === 'string'
+                                    ? result.transactionId
+                                    : null,
+                                });
                               } else {
+                                // Only a response explicitly confirming "not captured" unlocks retry.
+                                captureAttemptRef.current.confirmUncaptured(approvedOrderId);
                                 showToast(result?.error || "Transaction failed or was canceled.", "error");
                               }
                               setIsFinalizing(false);
@@ -521,6 +571,7 @@ export function CheckoutPage() {
 
                             const canonicalOrderId = normalizeOrderId(result.orderId);
                             if (!canonicalOrderId) {
+                              captureAttemptRef.current.requireReview();
                               // A captured payment must never return the customer to PayPal checkout.
                               console.error('Payment succeeded, but the order ID is missing from the response.');
                               trackPurchase(result.transactionId, Number(result.capturedAmount), cart);
@@ -534,19 +585,35 @@ export function CheckoutPage() {
                             }
 
                             await sendConfirmationEmail(canonicalOrderId, result.transactionId, result.capturedAmount);
+                            captureAttemptRef.current.complete(approvedOrderId);
                             setIsFinalizing(false);
                           } catch (error) {
-                            showToast("Transaction failed or was canceled.", "error");
+                            captureAttemptRef.current.requireReview();
+                            console.error('Payment approval outcome could not be confirmed:', error);
+                            setPaymentReview({
+                              message: 'We could not confirm the final payment status. Contact support and check PayPal before trying again.',
+                              transactionId: null,
+                            });
                             setIsFinalizing(false);
                           }
                         }}
                         onError={(err) => {
                           console.error("PayPal Error:", err);
-                          showToast("Payment Gateway encountered an error.", "error");
+                          const status = captureAttemptRef.current.status();
+                          if (status === 'processing') {
+                            // The SDK may fail after server capture began; do not unlock checkout.
+                            captureAttemptRef.current.requireReview();
+                            setPaymentReview({
+                              message: 'We could not confirm the final payment status. Contact support before trying again.',
+                              transactionId: null,
+                            });
+                          } else if (status === 'idle') {
+                            showToast("Payment Gateway encountered an error.", "error");
+                          }
                           setIsFinalizing(false);
                         }}
                       />
-                    </PayPalScriptProvider>
+                    </PayPalScriptProvider> : <p role="status" className="text-sm text-[var(--muted-foreground)]">Checkout is disabled outside the verified Production environment.</p>}
                   </div>
 
                 </div>
