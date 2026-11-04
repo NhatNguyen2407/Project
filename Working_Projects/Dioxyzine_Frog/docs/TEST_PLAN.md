@@ -10,7 +10,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | Part | Current status |
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
-| 2. Auth, Profile and Wishlist | NEXT: inspect and test, confirm causes, then fix and verify each issue |
+| 2. Auth, Profile and Wishlist | In progress: review recorded below; 2.1 session fixes implemented and automated checks PASS; authenticated browser acceptance pending |
 | 3. Inquiry and Admin | Not tested in this review |
 | 4. PayPal Sandbox | Not tested in this review |
 
@@ -25,7 +25,29 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 
 No catalog rows, orders, customer records or payment settings were changed. Missing cut styles must be classified later from confirmed product specifications, not inferred from a title or an ambiguous pricing code. The filter becomes available as classified products are saved in Admin. Verification of Admin saving remains in Part 3. Hosted verification does not imply user acceptance.
 
-**Next checkpoint:** Part 2 only: test Auth, Profile and Wishlist, confirm the cause of each failure, fix it, and update this plan after verification. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update.
+## Part 2 review - 2026-11-04
+
+I am fixing one small group at a time. Findings below are confirmed in current source or backend metadata; this does not mean every failure has been reproduced with a real customer account.
+
+| Step | Confirmed problem and cause | Fix / status |
+| --- | --- | --- |
+| 2.1. Session initialization and permissions | The Auth callback awaited a role query; the whole app was hidden until initialization finished; failed or hung reads had no recovery; late responses could overwrite a newer account or retain an old role; Login duplicated the role lookup and competed with PublicRoute navigation; Login/Register printed full Auth responses | IMPLEMENTED: synchronous notification callback, deferred role queries, 10-second deadlines, retry UI on Auth routes, cancellation and response ordering, role reset on account change, shared signed-in redirect and removal of response logs |
+| 2.2. Registration and password recovery | Forgot Password treats every HTTP 400 as success; Reset Password treats any existing session as a valid recovery session and checks errors only in the URL fragment; after changing the password it redirects to Login without ending the recovery session | PENDING: distinguish delivery failures from account-enumeration-safe responses; validate recovery state and both URL error locations; finish the recovery flow; verify confirmation-email and OAuth paths |
+| 2.3. Profile and account deletion | Saving performs separate writes, so failure can follow an earlier successful change; immediate reload hides notices; membership perks are advertised without checkout enforcement; deployed delete-account v6 sets inquiries.contact_info to null although the column is NOT NULL, after other records may already have changed | PENDING: clear partial-result handling, persistent notices and profile refresh, accurate membership text, and consistent account anonymization; never test deletion on a real account |
+| 2.4. Wishlist | ProductCard does not reset the liked state on sign-out/account change and does not cancel stale reads; removal updates the UI without confirming affected rows | PENDING: reset and scope state by account, cancel stale reads and confirm persisted mutations |
+
+### 2.1 verification
+
+- `pnpm test`: 41/41 PASS, including 17 Auth checks. The Auth lifecycle cases use a simulated client and clock, not real account credentials.
+- Covered: anonymous startup, synchronous callback/deferred request, startup/event races, sign-out, admin-to-customer switch, missing roles, reordered responses, token refresh without returning to loading, RLS/network-style errors, hung reads, aborted requests, cleanup and role-based redirect selection.
+- `pnpm build`: PASS. The existing large-bundle warning remains; no dependencies changed.
+- Public pages now render while Auth is checking; only Auth/protected routes wait or show a retryable error. Server authorization remains in Supabase, not in the frontend role state.
+- Read-only backend inspection: user_roles and wishlists policies scope access to auth.uid(); no customer records, roles, RLS policies, credentials or payment settings changed. Staging remains INACTIVE.
+- Hosted smoke checks and authenticated customer/admin acceptance will be recorded after deployment. Successful real-account login, OAuth, recovery emails, password changes and account deletion have not been claimed.
+
+The historical loss of site access has not been attributed conclusively to Auth. Moving database work out of notifications follows [Supabase's Auth callback guidance](https://supabase.com/docs/reference/javascript/auth-onauthstatechange); the timeout and ordering defects are independently visible in the application code.
+
+**Next checkpoint:** verify 2.1 login, reload and sign-out with a real account; then handle 2.2. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update. Part 3 and Part 4 have not started.
 
 ## 0. Testing safeguards
 

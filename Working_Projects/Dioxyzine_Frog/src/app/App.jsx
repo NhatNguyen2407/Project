@@ -39,24 +39,32 @@ import { OfflineBanner } from './components/common_components/OfflineBanner';
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
 import { useAuth } from './context/AuthContext';
+import { getSignedInPath } from './utils/authSession';
 
 import elements from '../assets/Elements.PNG'
 
 //ROUTES
+const AuthStatus = ({ error, retry }) => (
+  <div className="min-h-screen pt-32 px-4 text-center text-foreground" role={error ? 'alert' : 'status'}>
+    <p>{error || 'Checking your session...'}</p>
+    {error && <button type="button" onClick={retry} className="mt-4 px-6 py-3 rounded-full bg-[var(--primary)] text-white font-bold cursor-pointer">Retry sign-in check</button>}
+  </div>
+);
+
 const ProtectedRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, loading, error, retry } = useAuth();
   
-  if (loading) return null;
+  if (loading || error) return <AuthStatus error={error} retry={retry} />;
   if (!user) return <Navigate to="/login" replace />;
   
   return children;
 };
 
 const PublicRoute = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, role, loading, error, retry } = useAuth();
 
-  if (loading) return null;
-  if (user) return <Navigate to="/" replace />; 
+  if (loading || error) return <AuthStatus error={error} retry={retry} />;
+  if (user) return <Navigate to={getSignedInPath(role)} replace />;
   
   return children;
 };

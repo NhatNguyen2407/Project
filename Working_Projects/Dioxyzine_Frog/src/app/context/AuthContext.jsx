@@ -1,58 +1,21 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../service/supabase';
+import { INITIAL_AUTH_STATE, observeAuthSession } from '../utils/authSession';
 
 const AuthContext = createContext({});
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null);
-  const [role, setRole] = useState('customer');
-  const [loading, setLoading] = useState(true);
-
-  const fetchUserRole = async (userId) => {
-    try {
-      const { data, error } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', userId)
-        .maybeSingle();
-
-      if (error) throw error;
-      if (data) setRole(data.role);
-    } catch (err) {
-      console.error('Không tìm thấy quyền hạn riêng, đặt mặc định customer:', err.message);
-      setRole('customer');
-    }
+  const [auth, setAuth] = useState(INITIAL_AUTH_STATE);
+  const [attempt, setAttempt] = useState(0);
+  useEffect(() => observeAuthSession(supabase, setAuth), [attempt]);
+  const retry = () => {
+    setAuth(INITIAL_AUTH_STATE);
+    setAttempt(current => current + 1);
   };
 
-  useEffect(() => {
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        await fetchUserRole(currentUser.id);
-      } else {
-        setRole('customer');
-      }
-      setLoading(false);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const currentUser = session?.user ?? null;
-      setUser(currentUser);
-      if (currentUser) {
-        await fetchUserRole(currentUser.id);
-      } else {
-        setRole('customer');
-      }
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
-
   return (
-    <AuthContext.Provider value={{ user, role, loading }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ ...auth, retry }}>
+      {children}
     </AuthContext.Provider>
   );
 };

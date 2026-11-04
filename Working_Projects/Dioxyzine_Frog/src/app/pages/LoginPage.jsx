@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, Eye, EyeOff, Loader2, Chrome, Facebook, ArrowRight } from 'lucide-react';
-import { Link, useNavigate } from 'react-router'; 
+import { Link } from 'react-router';
 import { supabase } from '../service/supabase';
 
 //COMPONENTS
@@ -83,7 +83,6 @@ const SocialButton = ({ icon: Icon, label, onClick }) => {
 };
 
 export function LoginPage() {
-  const navigate = useNavigate();
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
@@ -114,26 +113,12 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { error } = await supabase.auth.signInWithPassword({
         email: formData.email,
         password: formData.password,
       });
 
       if (error) throw error;
-      console.log('LOGIN DATA:', data);
-      console.log('LOGIN USER:', data?.user);
-      console.log('LOGIN SESSION:', data?.session);
-      
-      if (data.user) {
-        const { data: roleData } = await supabase
-          .from('user_roles')
-          .select('role')
-          .eq('user_id', data.user.id)
-          .maybeSingle();
-
-        navigate(roleData?.role === 'admin' ? '/admin' : '/profile');
-      }
-      
     } catch (error) {
       console.error(error);
       setErrors({ form: 'Sai email hoặc mật khẩu. Vui lòng kiểm tra lại!' });

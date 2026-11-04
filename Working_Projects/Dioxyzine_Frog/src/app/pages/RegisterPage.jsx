@@ -168,8 +168,6 @@ export function RegisterPage() {
       });
 
       if (error) throw error;
-      
-      console.log('Tạo tài khoản thành công:', data);
 
       // Nếu project bật "Confirm email" trong Supabase Auth, signUp() sẽ
       // KHÔNG trả về session — nghĩa là khách chưa thực sự đăng nhập. Điều
