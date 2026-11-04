@@ -176,6 +176,7 @@ export function LoginPage() {
                 label="Email Address"
                 name="email"
                 type="email"
+                autoComplete="username"
                 placeholder="froggy@dioxyzine.com"
                 icon={Mail}
                 value={formData.email}
@@ -187,6 +188,7 @@ export function LoginPage() {
                 label="Password"
                 name="password"
                 type="password"
+                autoComplete="current-password"
                 placeholder="••••••••"
                 icon={Lock}
                 value={formData.password}

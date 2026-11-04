@@ -10,7 +10,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | Part | Current status |
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
-| 2. Auth, Profile and Wishlist | In progress: 2.1 implemented, deployed and automated/anonymous checks PASS; real-account acceptance pending; 2.2-2.4 await their own fixes |
+| 2. Auth, Profile and Wishlist | In progress: 2.1 implemented; customer login/sign-out accepted on 2026-11-04; Login autocomplete warning corrected in source; 2.2 is next |
 | 3. Inquiry and Admin | Not tested in this review |
 | 4. PayPal Sandbox | Not tested in this review |
 
@@ -44,11 +44,12 @@ I am fixing one small group at a time. Findings below are confirmed in current s
 - Public pages now render while Auth is checking; only Auth/protected routes wait or show a retryable error. Server authorization remains in Supabase, not in the frontend role state.
 - Read-only backend inspection: user_roles and wishlists policies scope access to auth.uid(); no customer records, roles, RLS policies, credentials or payment settings changed. Staging remains INACTIVE.
 - Production `main@899ac86`: READY on 2026-11-04. Anonymous browser checks PASS: Login renders after reload; empty submission shows required-field errors; unauthenticated `/profile` redirects to `/login`; Home still renders its catalog. No credentials were entered and no Auth records changed.
-- Authenticated customer/admin acceptance remains pending. Successful real-account login, OAuth, recovery emails, password changes and account deletion have not been claimed.
+- User acceptance on 2026-11-04: customer login and sign-out PASS, with no functional issue reported. Reload and live Admin sign-in were not explicitly confirmed. OAuth, recovery emails, user-driven password changes and account deletion remain untested.
+- The user also reported Chromium's missing-autocomplete diagnostic on the Login password field. Added `autoComplete="username"` for the email and `autoComplete="current-password"` for the existing password. This improves password-manager field recognition; it does not change authentication logic. The production build passes for this markup-only change.
 
 The historical loss of site access has not been attributed conclusively to Auth. Moving database work out of notifications follows [Supabase's Auth callback guidance](https://supabase.com/docs/reference/javascript/auth-onauthstatechange); the timeout and ordering defects are independently visible in the application code.
 
-**Next checkpoint:** verify 2.1 login, reload and sign-out with a real account; then handle 2.2. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update. Part 3 and Part 4 have not started.
+**Next checkpoint:** handle 2.2 registration and password recovery, with the remaining reload/Admin live checks tracked above. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update. Part 3 and Part 4 have not started.
 
 ## 0. Testing safeguards
 
