@@ -10,7 +10,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | Part | Current status |
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
-| 2. Auth, Profile and Wishlist | In progress: 2.1 accepted for customer login/sign-out; 2.2 implemented with automated checks; real email and OAuth acceptance pending; 2.3 and 2.4 pending |
+| 2. Auth, Profile and Wishlist | Implementation complete for 2.1-2.4; 97 automated checks and SQL account-boundary/rollback checks PASS; combined manual acceptance pending |
 | 3. Inquiry and Admin | Not tested in this review |
 | 4. PayPal Sandbox | Not tested in this review |
 
@@ -33,8 +33,8 @@ I am fixing one small group at a time. Findings below are confirmed in current s
 | --- | --- | --- |
 | 2.1. Session initialization and permissions | The Auth callback awaited a role query; the whole app was hidden until initialization finished; failed or hung reads had no recovery; late responses could overwrite a newer account or retain an old role; Login duplicated the role lookup and competed with PublicRoute navigation; Login/Register printed full Auth responses | IMPLEMENTED: synchronous notification callback, deferred role queries, 10-second deadlines, retry UI on Auth routes, cancellation and response ordering, role reset on account change, shared signed-in redirect and removal of response logs |
 | 2.2. Registration and password recovery | Forgot Password treats every HTTP 400 as success; Reset Password treats any existing session as a valid recovery session and checks errors only in the URL fragment; after changing the password it redirects to Login without ending the recovery session | IMPLEMENTED: report returned delivery errors; require an SDK recovery event or a stored marker matching that verified session; check both URL error locations; end the current recovery session before Login; retry failed sign-out without changing the password again; consistent signup-confirmation and OAuth return routes. Real email and OAuth acceptance pending |
-| 2.3. Profile and account deletion | Saving performs separate writes, so failure can follow an earlier successful change; immediate reload hides notices; membership perks are advertised without checkout enforcement; deployed delete-account v6 sets inquiries.contact_info to null although the column is NOT NULL, after other records may already have changed | PENDING: clear partial-result handling, persistent notices and profile refresh, accurate membership text, and consistent account anonymization; never test deletion on a real account |
-| 2.4. Wishlist | ProductCard does not reset the liked state on sign-out/account change and does not cancel stale reads; removal updates the UI without confirming affected rows | PENDING: reset and scope state by account, cancel stale reads and confirm persisted mutations |
+| 2.3. Profile and account deletion | Saving performs separate writes, so failure can follow an earlier successful change; immediate reload hides notices; membership perks are advertised without checkout enforcement; deployed delete-account v6 sets inquiries.contact_info to null although the column is NOT NULL, after other records may already have changed | IMPLEMENTED: one Auth update for settings, pending-email status, password confirmation, persistent notices, account-scoped orders/reviews, avatar preview cleanup, safe reorder checks and accurate membership wording. Auth deletion now anonymizes records transactionally; the Edge Function checks confirmation/account identity and Storage cleanup. Combined acceptance pending |
+| 2.4. Wishlist | ProductCard does not reset the liked state on sign-out/account change and does not cancel stale reads; removal updates the UI without confirming affected rows | IMPLEMENTED: one shared account-scoped wishlist, cancelled/deadlined reads, late-response guards, confirmed mutation rows, duplicate-click protection and immediate synchronization between cards and Profile |
 
 ### 2.1 verification
 
@@ -61,7 +61,35 @@ The historical loss of site access has not been attributed conclusively to Auth.
 - GitHub Actions `Dioxyzine Frog CI` for `872771d`: PASS (frozen dependency install, all tests and production build).
 - Real confirmation-email delivery, opening a genuine recovery email, password update followed by login with the new password, and Google/Facebook consent/redirect completion are NOT TESTED. Use only an inbox controlled by the tester; dummy addresses without inbox access cannot verify these paths.
 
-**Next checkpoint:** complete 2.2 real email/OAuth acceptance; the next implementation group is 2.3 Profile/account deletion. The remaining reload/Admin live checks are tracked above. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update. Part 3 and Part 4 have not started.
+### 2.3 and 2.4 verification
+
+- `pnpm test`: 97/97 PASS across the project, including 35 new checks for Profile, reorder, shared Wishlist and the deletion HTTP handler. Simulated clients cover success, failure, account swaps, timeouts, duplicate writes and uncertain responses.
+- `pnpm build` and `git diff --check`: PASS. The existing bundle-size warning remains. No frontend dependencies or payment settings changed; the deletion Edge Function now pins its Supabase SDK version.
+- Settings use one Auth update for metadata/password/email instead of three independent writes. Server responses determine saved and pending-email notices. No automatic reload hides the result. Token refresh preserves an unfinished form; account changes clear the form and sensitive input.
+- Orders load only the current user's rows, with cancellation, timeout and retry. Profile reads the separate order_reviews relationship, so submitted reviews appear correctly. Reorder validates the complete selection, current prices and stock before adding anything to the cart.
+- Wishlist loads once per account and shares confirmed state between product cards and Profile. Sign-out/account changes clear visible state; old reads/writes cannot restore it. Zero, missing, mismatched or duplicate mutation rows remain errors.
+- Supabase migration `20261104164504_atomic_account_deletion` is applied. The private trigger anonymizes orders/inquiries in the Auth deletion transaction, keeps accounting totals/status, satisfies the required contact_info column and lets existing foreign keys cascade reviews, roles and wishlists. It has an empty search path and no EXECUTE grant for anonymous or authenticated clients.
+- `supabase/tests/account_deletion.sql` and `supabase/tests/account_access.sql`: PASS against synthetic fixtures, inside an explicit rolled-back transaction. Verified successful anonymization, rollback after simulated later failure, unaffected second account, wishlist RLS allow/deny paths, and review ownership/persistence. No fixture or real customer change was committed. The connector cannot assume the managed Auth database role; these SQL checks do not replace a real Auth API deletion acceptance test.
+- Deployed `delete-account` v8: ACTIVE, JWT verification retained. The handler verifies the token owner against the account being confirmed, paginates and checks avatar cleanup, rejects unsupported methods, hides internal errors and distinguishes failure from confirmed deletion. A changed account cannot be deleted or signed out by an earlier request.
+- Storage cleanup and Auth deletion cannot share one database transaction. A deletion failure may leave some avatar files removed; the response states this. Business-record anonymization rolls back with failed Auth deletion. Accounts owning other business Storage objects may require support rather than deleting those assets automatically.
+- Membership benefits are marked as inactive in Profile and the membership terms. No unimplemented free-shipping or percentage-discount promise remains.
+- Security advisor results are unchanged from the pre-change baseline; no new finding was introduced by the private trigger. Existing public review/tracking RPC and Auth configuration notices are tracked separately.
+
+### Combined Part 2 acceptance - one final batch
+
+Implementation is complete; the checks below require the tester's browser and controlled accounts. Do not mark Part 2 accepted until results are recorded. Use an inbox you control for registration, recovery and email-change tests. Do not use a real customer account for deletion or a live order for review/reorder testing.
+
+1. **Session and roles:** customer login, F5 on Profile, sign-out, direct Profile access while signed out; normal users cannot enter Admin. If an Admin test account is available, confirm its Admin redirect and return to a customer account without retaining Admin state.
+2. **Registration, email and recovery:** register with a controlled inbox, confirm the email, request a reset, open the real reset email, change the password and sign in again. Direct/expired reset links must stay invalid. Complete Google/Facebook sign-in where configured and record any provider error.
+3. **Profile and orders:** save a name/avatar and verify the header, persistent notice and F5 result. Check password confirmation and a controlled email change. With a Sandbox order, submit/read a review and reorder; unavailable items or insufficient stock must not report a complete reorder.
+4. **Wishlist:** add a product, see it immediately in Profile, remove it and check the product heart. Reload to verify persistence; sign out and switch accounts to verify isolation. A failed request must show a retryable error.
+5. **Disposable account deletion:** use a newly created test-only account, cancel once, then type DELETE and confirm. The account must be signed out and unable to sign in again. Verify its business history is anonymized and another account remains unaffected. Never delete the main Admin or an account with real orders as a test.
+
+**Release checkpoint:** frontend deployment/CI and anonymous smoke checks for this batch are recorded after publishing. Real inbox delivery, OAuth consent, settings writes/uploads and actual Auth API deletion remain pending user acceptance.
+
+**Recovery:** the migration adds a private function and one Auth deletion trigger without rewriting existing rows. If deletion needs to be paused, deploy a handler returning 503 before reverting related code; do not restore the previous partial-anonymization pipeline. Database rollback removes the new trigger/function, but cannot restore an account the user has already deliberately deleted.
+
+**Next checkpoint:** complete the combined Part 2 acceptance batch. Part 3 Inquiry/Admin implementation starts after that review. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
 
 ## 0. Testing safeguards
 

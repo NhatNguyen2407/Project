@@ -3,6 +3,7 @@ import * as Sentry from "@sentry/react";
 import App from "./app/App.jsx";
 import "./styles/index.css";
 import { AuthProvider } from "./app/context/AuthContext.jsx"; 
+import { WishlistProvider } from "./app/context/WishlistContext.jsx";
 
 // Only report to Sentry in production, and only if a DSN is actually
 // configured — keeps local dev quiet and avoids crashing on a missing env var.
@@ -20,6 +21,6 @@ if (import.meta.env.MODE === 'production' && sentryDsn) {
 
 createRoot(document.getElementById("root")).render(
   <AuthProvider>
-    <App />
+    <WishlistProvider><App /></WishlistProvider>
   </AuthProvider>
 );

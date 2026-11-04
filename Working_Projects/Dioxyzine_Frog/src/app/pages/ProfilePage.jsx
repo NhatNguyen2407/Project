@@ -1,28 +1,32 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, Mail, LogOut, Package, Calendar, Tag, CreditCard, Crown, Check, Star, MessageSquare, Truck, AlertCircle, PlusCircle, Settings, Save, Lock, Camera, Trash2, Heart, RefreshCw } from 'lucide-react';
 import { useNavigate } from 'react-router';
 import { useAuth } from '../context/AuthContext';
 import { supabase } from '../service/supabase';
 import { useProducts } from '../context/ProductContext';
+import { useWishlist } from '../context/WishlistContext';
+import { useAccountOrders } from '../hooks/useAccountOrders';
+import { deleteCustomerAccount, profileFromUser, saveCustomerProfile, prepareReorder } from '../service/customerProfile';
+import { getProductUrl } from '../utils/catalog';
 
 import { useCart } from '../context/CartContext';
-import { MOCK_PRODUCTS } from '../data/storeData';
 import { toast, Toaster } from 'sonner';
 
 export function ProfilePage() {
   const { user } = useAuth();
   const navigate = useNavigate();
   
-  const { addToCart, setIsCartOpen } = useCart();
+  const { cart, addToCart, setIsCartOpen } = useCart();
   const { products, loading: loadingProducts } = useProducts();
   const [activeView, setActiveView] = useState('orders'); 
 
-  const [orders, setOrders] = useState([]);
-  const [loadingOrders, setLoadingOrders] = useState(true);
-
-  const [wishlist, setWishlist] = useState([]);
-  const [loadingWishlist, setLoadingWishlist] = useState(true);
+  const { items: orders, loading: loadingOrders, error: ordersError, reload: fetchMyOrders } = useAccountOrders(user?.id);
+  const { items: wishlist, loading: loadingWishlist, error: wishlistError, pending: wishlistPending, refresh: fetchMyWishlist, setLiked } = useWishlist();
+  const accountId = useRef(user?.id);
+  accountId.current = user?.id;
+  const currentCart = useRef(cart);
+  currentCart.current = cart;
 
   const [reviewOrder, setReviewOrder] = useState(null);
   const [returnOrder, setReturnOrder] = useState(null);
@@ -33,6 +37,11 @@ export function ProfilePage() {
 
   const [profileForm, setProfileForm] = useState({ fullName: '', avatarUrl: '', email: '' });
   const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [profileNotice, setProfileNotice] = useState(null);
+  const [loggingOut, setLoggingOut] = useState(false);
+  const [deleteResult, setDeleteResult] = useState(false);
+  const [reordering, setReordering] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteConfirmText, setDeleteConfirmText] = useState('');
   const [deletingAccount, setDeletingAccount] = useState(false);
@@ -44,93 +53,63 @@ export function ProfilePage() {
   // 🚀 Cập nhật lại các bước Tracking cho chuẩn hóa
   const STEPS = ['Pending', 'Confirmed', 'Processing', 'Shipping', 'Completed'];
 
-  const fetchMyWishlist = async () => {
-    if (!user?.id) {
-      setWishlist([]);
-      setLoadingWishlist(false);
-      return;
-    }
-
-    setLoadingWishlist(true);
-    try {
-      const { data, error } = await supabase
-        .from('wishlists')
-        .select('product_id, created_at')
-        .eq('user_id', user.id)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setWishlist(data || []);
-    } catch (error) {
-      console.error('Lỗi khi lấy Wishlist:', error);
-      toast.error('Could not load your wishlist. Please try again.');
-    } finally {
-      setLoadingWishlist(false);
-    }
-  };
-
   const handleRemoveFromWishlist = async (productId) => {
+    const userId = user?.id;
     try {
-      const { error } = await supabase
-        .from('wishlists')
-        .delete()
-        .eq('user_id', user.id)
-        .eq('product_id', productId);
-
-      if (error) throw error;
-
-      setWishlist((current) =>
-        current.filter((item) => String(item.product_id) !== String(productId))
-      );
-      toast.success('Removed from your wishlist.');
+      const saved = await setLiked(productId, false);
+      if (saved && accountId.current === userId) toast.success('Removed from your wishlist.');
     } catch (error) {
-      console.error('Could not remove wishlist item:', error);
-      toast.error('Could not remove this item. Please try again.');
+      if (accountId.current === userId) toast.error(error.message);
     }
   };
 
-  const fetchMyOrders = async () => {
-    try {
-      // Explicitly scoped to this user's own orders. This is defense-in-depth:
-      // it should never rely on RLS alone to hide other customers' orders
-      // (name, email, phone, address) from this page.
-      const { data, error } = await supabase.from('orders').select('*').eq('user_id', user.id).order('created_at', { ascending: false });
-      if (error) throw error;
-      setOrders(data || []);
-    } catch (error) {
-      console.error('Lỗi khi lấy danh sách đơn hàng:', error.message);
-      const isAuthError = error.code === 'PGRST301'
-        || error.message?.toLowerCase().includes('jwt')
-        || error.status === 401;
-      if (isAuthError) {
-        toast.error('Your session has expired. Please log in again.');
-        await supabase.auth.signOut();
-        navigate('/login');
-      } else {
-        toast.error('Could not load your orders. Please try again.');
-      }
-    } finally { setLoadingOrders(false); }
-  };
+  // Token refreshes must not overwrite an account settings draft.
+  useEffect(() => {
+    setProfileForm(profileFromUser(user));
+    setNewPassword('');
+    setConfirmPassword('');
+    setProfileNotice(null);
+    setAvatarFile(null);
+    setReviewOrder(null);
+    setSubmittingReview(false);
+    setRating(5);
+    setComment('');
+    setReturnOrder(null);
+    setShowDeleteModal(false);
+    setDeleteConfirmText('');
+    setDeletingAccount(false);
+    setUpdatingProfile(false);
+    setLoggingOut(false);
+    setReordering(false);
+    setDeleteResult(false);
+  }, [user?.id]);
 
   useEffect(() => {
-    if (user) {
-      setProfileForm({ fullName: user.user_metadata?.full_name || '', avatarUrl: user.user_metadata?.avatar_url || '', email: user.email || '' });
-      fetchMyOrders();
-      fetchMyWishlist(); 
-    }
-  }, [user]);
+    if (!avatarFile) { setAvatarPreview(null); return; }
+    const preview = URL.createObjectURL(avatarFile);
+    setAvatarPreview(preview);
+    return () => URL.revokeObjectURL(preview);
+  }, [avatarFile]);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    navigate('/login');
+    if (loggingOut || updatingProfile || deletingAccount) return;
+    setLoggingOut(true);
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) throw error;
+      navigate('/login', { replace: true });
+    } catch {
+      toast.error('Could not sign out. Please retry.');
+    } finally { setLoggingOut(false); }
   };
 
   const completedCount = orders.filter((order) => order.order_status?.toLowerCase() === 'completed').length;
 
   const getMembershipDetails = () => {
-    if (completedCount >= 10) return { tierName: 'GOLD VIP MEMBER', perks: 'Free Shipping + 10% OFF Total Bill', gradient: 'from-[#4A154B] via-[#2C1654] to-[#120C1F]' };
-    if (completedCount >= 7) return { tierName: 'SILVER MEMBER', perks: 'Free Shipping + 5% OFF Total Bill', gradient: 'from-[#3A1C6E] via-[#211343] to-[#100A21]' };
-    if (completedCount >= 5) return { tierName: 'BRONZE MEMBER', perks: 'Free Shipping on All Orders', gradient: 'from-[#2D1B54] via-[#1C1236] to-[#0A0614]' };
+    const perks = 'Benefits coming soon. Standard checkout rates apply.';
+    if (completedCount >= 10) return { tierName: 'GOLD VIP MEMBER', perks, gradient: 'from-[#4A154B] via-[#2C1654] to-[#120C1F]' };
+    if (completedCount >= 7) return { tierName: 'SILVER MEMBER', perks, gradient: 'from-[#3A1C6E] via-[#211343] to-[#100A21]' };
+    if (completedCount >= 5) return { tierName: 'BRONZE MEMBER', perks, gradient: 'from-[#2D1B54] via-[#1C1236] to-[#0A0614]' };
     return { tierName: 'STANDARD MEMBER', perks: 'Standard Shipping Rates Apply', gradient: 'from-[#1E1135] via-[#130B22] to-[#08040F]' };
   };
 
@@ -143,17 +122,12 @@ export function ProfilePage() {
 
   const handleSubmitReview = async (e) => {
     e.preventDefault();
-    if (!reviewOrder) return;
+    if (!reviewOrder || submittingReview) return;
+    const userId = user.id;
     
     setSubmittingReview(true);
     try {
-      // Uses submit_order_review RPC instead of a direct .update() on
-      // inquiries. Row-level security intentionally has no general "user
-      // can update own order" policy on inquiries (that table also holds
-      // payment_status/total_paid/admin_reply — a row-scoped policy alone
-      // can't stop a user editing the wrong columns on their own order).
-      // This RPC only ever touches status/rating/review_comment, and only
-      // for a row that belongs to the caller. See supabase/fix_rls_part2.sql.
+      // The RPC checks ownership and writes the separate order_reviews record.
       const { data, error } = await supabase.rpc('submit_order_review', {
         p_order_id: reviewOrder.id,
         p_rating: rating,
@@ -161,6 +135,7 @@ export function ProfilePage() {
       });
 
       if (error) throw error;
+      if (accountId.current !== userId) return;
       if (data !== true) {
         throw new Error("Không thể gửi đánh giá cho đơn hàng này. Vui lòng thử lại hoặc liên hệ hỗ trợ.");
       }
@@ -171,99 +146,73 @@ export function ProfilePage() {
       await fetchMyOrders(); 
       toast.success("Cảm ơn bạn đã xác nhận và đánh giá!");
     } catch (error) { 
-      toast.error('Lỗi cập nhật: ' + error.message); 
+      if (accountId.current === userId) toast.error('Could not save your review. Refresh your orders and retry.');
     } finally { 
-      setSubmittingReview(false); 
+      if (accountId.current === userId) setSubmittingReview(false);
     }
   };
 
   const handleDeleteAccount = async () => {
-    if (deleteConfirmText !== 'DELETE') return;
+    if (deleteConfirmText !== 'DELETE' || deletingAccount || updatingProfile) return;
+    const userId = user.id;
     setDeletingAccount(true);
     try {
-      const { data, error } = await supabase.functions.invoke('delete-account');
-      if (error || !data?.success) {
-        throw new Error(data?.error || error?.message || 'Không thể xóa tài khoản.');
-      }
-      // Tài khoản đã bị xóa khỏi Supabase Auth ở server — session hiện tại
-      // trên trình duyệt không còn hợp lệ nữa, đăng xuất để dọn sạch state.
-      await supabase.auth.signOut();
-      navigate('/');
+      const { signedOut } = await deleteCustomerAccount(supabase, userId);
+      if (accountId.current && accountId.current !== userId) return;
+      if (signedOut) navigate('/', { replace: true });
+      else setDeleteResult(true);
     } catch (err) {
-      console.error('Lỗi khi xóa tài khoản:', err);
-      alert(err.message || 'Có lỗi xảy ra, vui lòng thử lại hoặc liên hệ hỗ trợ.');
-      setDeletingAccount(false);
+      if (accountId.current === userId) { toast.error(err.message); setDeletingAccount(false); }
     }
   };
 
   const handleUpdateProfile = async (e) => {
     e.preventDefault();
+    if (updatingProfile || deletingAccount) return;
+    const userId = user.id;
     setUpdatingProfile(true);
+    setProfileNotice(null);
     try {
-      let finalAvatarUrl = profileForm.avatarUrl;
-      if (avatarFile) {
-        const fileExt = avatarFile.name.split('.').pop();
-        const fileName = `${user.id}-${Math.random()}.${fileExt}`;
-        const { error: uploadError } = await supabase.storage.from('avatars').upload(fileName, avatarFile);
-        if (uploadError) throw uploadError;
-        const { data: { publicUrl } } = supabase.storage.from('avatars').getPublicUrl(fileName);
-        finalAvatarUrl = publicUrl;
-      }
-
-      const { error: metaError } = await supabase.auth.updateUser({ data: { full_name: profileForm.fullName, avatar_url: finalAvatarUrl } });
-      if (metaError) throw metaError;
-
-      if (newPassword.trim() !== '') {
-        const { error: pwError } = await supabase.auth.updateUser({ password: newPassword });
-        if (pwError) throw pwError;
-      }
-
-      if (profileForm.email !== user.email) {
-        const { error: emailError } = await supabase.auth.updateUser({ email: profileForm.email });
-        if (emailError) throw emailError;
-        toast.info('Supabase đã gửi link xác nhận đến CẢ EMAIL CŨ VÀ MỚI. Vui lòng check cả 2 hộp thư.');
-      } else {
-        toast.success('Đã lưu cấu hình tài khoản thành công! 🐸');
-      }
-      window.location.reload();
-    } catch (error) { toast.error('Lỗi cập nhật: ' + error.message); } finally { setUpdatingProfile(false); }
+      const result = await saveCustomerProfile(supabase, user, profileForm, newPassword, confirmPassword, avatarFile, window.location.origin);
+      if (accountId.current !== userId) return;
+      setProfileForm(profileFromUser(result.user));
+      setAvatarFile(null);
+      setNewPassword('');
+      setConfirmPassword('');
+      setProfileNotice({ message: result.emailPending ? 'Changes saved. Check your inbox to confirm the pending email change.' : 'Your account changes have been saved.' });
+    } catch (error) {
+      if (accountId.current !== userId) return;
+      if (error.currentUser) { setProfileForm(profileFromUser(error.currentUser)); setAvatarFile(null); }
+      setNewPassword('');
+      setConfirmPassword('');
+      setProfileNotice({ error: true, message: error.message });
+    } finally { if (accountId.current === userId) setUpdatingProfile(false); }
   };
 
   const handleOrderAgain = async (order) => {
-  if (!Array.isArray(order.cart_items) || order.cart_items.length === 0) {
-    toast.error('Không thể đặt lại đơn hàng này.');
-    return;
-  }
-
-  try {
-    for (const item of order.cart_items) {
-      const productId = item.id;
-      const quantity = Number(item.qty || 1);
-
-      const { data: dbProduct, error } = await supabase
-        .from('products')
-        .select('*')
-        .eq('id', productId)
-        .maybeSingle();
-
-      if (error) throw error;
-
-      if (dbProduct) {
-        addToCart({
-          ...dbProduct,
-          qty: quantity,
-        });
-      }
+    if (reordering) return;
+    const userId = user.id;
+    if (!Array.isArray(order.cart_items) || order.cart_items.length === 0) {
+      toast.error('Không thể đặt lại đơn hàng này.');
+      return;
     }
 
-    setIsCartOpen(true);
-    toast.success('Đã thêm các sản phẩm từ đơn cũ vào giỏ hàng! 🛒');
-  } catch (error) {
-    console.error('Order Again error:', error);
-    toast.error('Không thể tự động đặt lại đơn này.');
-  }
-};
+    setReordering(true);
+    try {
+      const ids = [...new Set(order.cart_items.map(item => item.id))];
+      const { data, error } = await supabase.from('products').select('*').in('id', ids);
+      if (error) throw error;
+      if (accountId.current !== userId) return;
+      const items = prepareReorder(order.cart_items, data, currentCart.current);
+      items.forEach(addToCart);
+      setIsCartOpen(true);
+      toast.success('Đã thêm các sản phẩm từ đơn cũ vào giỏ hàng! 🛒');
+    } catch (error) {
+      if (accountId.current === userId) toast.error(error.message || 'Could not reorder these items.');
+    } finally { if (accountId.current === userId) setReordering(false); }
+  };
 
+  if (deleteResult) return <div className="min-h-screen pt-32 px-4 text-center" role="status"><p>Your account was deleted. Reload to finish clearing this session.</p><button onClick={() => window.location.reload()} className="mt-4 px-6 py-3 rounded-xl bg-[var(--primary)] text-white">Finish sign-out</button></div>;
   if (!user) return <div className="min-h-screen pt-24 pb-16 flex items-center justify-center text-[var(--primary)] text-lg font-medium">Please login to view this page...</div>;
 
   return (
@@ -294,7 +243,7 @@ export function ProfilePage() {
                 : 'hover:bg-[var(--accent)]/50 text-[var(--foreground)] dark:text-gray-400 dark:hover:text-white'}`}>
                 <Settings className="w-5 h-5" /> Settings</button>
               <div className="border-t border-[var(--border)] my-2"></div>
-              <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-400 hover:bg-red-400/10 transition-colors"><LogOut className="w-5 h-5" /> Sign Out</button>
+              <button onClick={handleLogout} disabled={loggingOut || updatingProfile || deletingAccount} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-red-400 hover:bg-red-400/10 transition-colors disabled:opacity-50"><LogOut className="w-5 h-5" /> {loggingOut ? 'Signing out...' : 'Sign Out'}</button>
             </div>
           </div>
 
@@ -308,18 +257,18 @@ export function ProfilePage() {
                   <div className="flex justify-between items-start mb-10">
                     <div className="space-y-1">
                       <p className="text-xs font-mono text-[var(--primary)] tracking-widest opacity-60">DIOXYZINE FROG LOYALTY</p>
-                      <h3 className="text-xl font-black text-[var(--primary)] tracking-wider">{currentTier.tierName}</h3>
+                      <h3 className="text-xl font-black text-[var(--primary)] tracking-wider">{loadingOrders ? 'Checking membership...' : ordersError ? 'Membership unavailable' : currentTier.tierName}</h3>
                     </div>
                     <div className="p-2 bg-white/5 rounded-xl border border-white/10 text-[var(--primary)]"><CreditCard className="w-6 h-6" /></div>
                   </div>
                   <div className="flex justify-between items-end">
                     <div className="space-y-1">
                       <p className="text-[10px] font-mono text-[var(--primary)] uppercase tracking-wider opacity-60">Current Benefits</p>
-                      <p className="text-sm font-bold text-[var(--primary)] flex items-center gap-1.5"><Crown className="w-4 h-4" /> {currentTier.perks}</p>
+                      <p className="text-sm font-bold text-[var(--primary)] flex items-center gap-1.5"><Crown className="w-4 h-4" /> {loadingOrders || ordersError ? 'Load your orders to view your membership.' : currentTier.perks}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-[10px] font-mono text-[var(--primary)] uppercase tracking-wider opacity-60">Completed</p>
-                      <p className="text-lg font-bold font-mono text-[var(--primary)]">{completedCount} Orders</p>
+                      <p className="text-lg font-bold font-mono text-[var(--primary)]">{loadingOrders || ordersError ? '-' : completedCount} Orders</p>
                     </div>
                   </div>
                 </div>
@@ -329,6 +278,8 @@ export function ProfilePage() {
 
                   {loadingOrders ? (
                     <div className="text-center py-8 text-[var(--primary)] opacity-60">Loading your orders...</div>
+                  ) : ordersError ? (
+                    <div className="text-center space-y-3" role="alert"><p>{ordersError}</p><button type="button" onClick={fetchMyOrders} className="px-4 py-2 rounded-xl bg-[var(--primary)] text-white">Retry orders</button></div>
                   ) : orders.length === 0 ? (
                     <div className="bg-[var(--muted)] dark:bg-[#1A1528] rounded-2xl p-8 text-center border border-[var(--border)] border-dashed">
                       <p className="text-[var(--primary)] opacity-70">You don't have any orders yet.</p>
@@ -348,6 +299,7 @@ export function ProfilePage() {
                             {isCompleted && (
                               <button 
                                 onClick={() => handleOrderAgain(order)}
+                                disabled={reordering}
                                 className="absolute top-4 right-4 p-2.5 rounded-xl bg-[var(--primary)] text-white hover:bg-purple-600 transition-all flex items-center gap-2 shadow-lg z-10 cursor-pointer"
                               >
                                 <RefreshCw className="w-4 h-4" />
@@ -486,7 +438,7 @@ export function ProfilePage() {
                   <button
                     type="button"
                     onClick={fetchMyWishlist}
-                    disabled={loadingWishlist}
+                    disabled={loadingWishlist || wishlistPending.length > 0}
                     className="px-4 py-2 rounded-xl border border-[var(--border)] text-sm font-semibold hover:border-[var(--primary)] disabled:opacity-50"
                   >
                     {loadingWishlist ? 'Refreshing...' : 'Refresh'}
@@ -497,6 +449,8 @@ export function ProfilePage() {
                   <div className="text-center py-10 text-[var(--muted-foreground)]">
                     Loading your wishlist...
                   </div>
+                ) : wishlistError ? (
+                  <p role="alert" className="py-8 text-center text-red-400">{wishlistError}</p>
                 ) : wishlist.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-[var(--border)] p-8 sm:p-10 text-center">
                     <Heart className="w-10 h-10 mx-auto mb-3 text-[var(--primary)] opacity-70" />
@@ -528,7 +482,7 @@ export function ProfilePage() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => navigate(`/product/${product.id}`)}
+                                onClick={() => navigate(getProductUrl(product))}
                                 className="block w-full text-left"
                                 aria-label={`View ${product.title}`}
                               >
@@ -552,7 +506,7 @@ export function ProfilePage() {
                               <div className="flex gap-2 px-4 pb-4">
                                 <button
                                   type="button"
-                                  onClick={() => navigate(`/product/${product.id}`)}
+                                  onClick={() => navigate(getProductUrl(product))}
                                   className="flex-1 px-3 py-2 rounded-xl bg-[var(--primary)] text-white text-sm font-bold hover:opacity-90"
                                 >
                                   View Product
@@ -560,6 +514,7 @@ export function ProfilePage() {
                                 <button
                                   type="button"
                                   onClick={() => handleRemoveFromWishlist(item.product_id)}
+                                  disabled={wishlistPending.includes(String(item.product_id))}
                                   className="px-3 py-2 rounded-xl border border-red-500/40 text-red-500 text-sm font-bold hover:bg-red-500/10"
                                 >
                                   Remove
@@ -575,6 +530,7 @@ export function ProfilePage() {
                               <button
                                 type="button"
                                 onClick={() => handleRemoveFromWishlist(item.product_id)}
+                                disabled={wishlistPending.includes(String(item.product_id))}
                                 className="px-3 py-2 rounded-xl border border-red-500/40 text-red-500 text-sm font-bold hover:bg-red-500/10"
                               >
                                 Remove from Wishlist
@@ -600,104 +556,118 @@ export function ProfilePage() {
                 </h3>
 
                 <form onSubmit={handleUpdateProfile} className="space-y-6">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-5 border-b border-[var(--border)]">
-                    <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-[var(--muted)] dark:bg-[#1A1528] border-2 border-[var(--primary)]/60 shrink-0">
-                      {(avatarPreview || profileForm.avatarUrl) ? (
-                        <img
-                          src={avatarPreview || profileForm.avatarUrl}
-                          alt="Profile avatar preview"
-                          className="w-full h-full object-cover"
+                  {profileNotice && <p role={profileNotice.error ? 'alert' : 'status'} className={`rounded-xl p-4 text-sm ${profileNotice.error ? 'bg-red-500/10 text-red-400' : 'bg-[var(--primary)]/10 text-[var(--foreground)]'}`}>{profileNotice.message}</p>}
+                  <fieldset disabled={updatingProfile || deletingAccount || loggingOut} className="space-y-6 min-w-0">
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4 pb-5 border-b border-[var(--border)]">
+                      <div className="w-20 h-20 rounded-full overflow-hidden flex items-center justify-center bg-[var(--muted)] dark:bg-[#1A1528] border-2 border-[var(--primary)]/60 shrink-0">
+                        {(avatarPreview || profileForm.avatarUrl) ? (
+                          <img
+                            src={avatarPreview || profileForm.avatarUrl}
+                            alt="Profile avatar preview"
+                            className="w-full h-full object-cover"
+                          />
+                        ) : (
+                          <User className="w-8 h-8 text-[var(--primary)]" />
+                        )}
+                      </div>
+                      <div className="space-y-2">
+                        <label htmlFor="profile-avatar" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--primary)] cursor-pointer font-semibold text-sm">
+                          <Camera className="w-4 h-4" /> Choose avatar
+                        </label>
+                        <input
+                          id="profile-avatar"
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          className="sr-only"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0] || null;
+                            if (!file) return;
+                            if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+                              toast.error('Please choose a PNG, JPEG, or WebP image.');
+                              e.target.value = '';
+                              return;
+                            }
+                            if (file.size > 5 * 1024 * 1024) {
+                              toast.error('Avatar must be 5 MB or smaller.');
+                              e.target.value = '';
+                              return;
+                            }
+                            setAvatarFile(file);
+                            e.target.value = '';
+                          }}
                         />
-                      ) : (
-                        <User className="w-8 h-8 text-[var(--primary)]" />
-                      )}
+                        <p className="text-xs text-[var(--muted-foreground)]">PNG, JPEG or WebP · Maximum 5 MB</p>
+                      </div>
                     </div>
+
                     <div className="space-y-2">
-                      <label htmlFor="profile-avatar" className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-[var(--border)] text-[var(--foreground)] hover:border-[var(--primary)] cursor-pointer font-semibold text-sm">
-                        <Camera className="w-4 h-4" /> Choose avatar
+                      <label htmlFor="profile-display-name" className="block text-sm font-semibold text-[var(--foreground)]">
+                        <User className="w-4 h-4 inline-block mr-2 align-text-bottom" /> Display Name
                       </label>
                       <input
-                        id="profile-avatar"
-                        type="file"
-                        accept="image/png,image/jpeg,image/webp"
-                        className="sr-only"
-                        onChange={(e) => {
-                          const file = e.target.files?.[0] || null;
-                          if (!file) return;
-                          if (!['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
-                            toast.error('Please choose a PNG, JPEG, or WebP image.');
-                            e.target.value = '';
-                            return;
-                          }
-                          if (file.size > 5 * 1024 * 1024) {
-                            toast.error('Avatar must be 5 MB or smaller.');
-                            e.target.value = '';
-                            return;
-                          }
-                          setAvatarFile(file);
-                          setAvatarPreview(URL.createObjectURL(file));
-                        }}
+                        id="profile-display-name"
+                        required
+                        type="text"
+                        autoComplete="name"
+                        maxLength={80}
+                        value={profileForm.fullName}
+                        onChange={(e) => setProfileForm({ ...profileForm, fullName: e.target.value })}
+                        className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
                       />
-                      <p className="text-xs text-[var(--muted-foreground)]">PNG, JPEG or WebP · Maximum 5 MB</p>
                     </div>
-                  </div>
 
-                  <div className="space-y-2">
-                    <label htmlFor="profile-display-name" className="block text-sm font-semibold text-[var(--foreground)]">
-                      <User className="w-4 h-4 inline-block mr-2 align-text-bottom" /> Display Name
-                    </label>
-                    <input
-                      id="profile-display-name"
-                      required
-                      type="text"
-                      autoComplete="name"
-                      value={profileForm.fullName}
-                      onChange={(e) => setProfileForm({ ...profileForm, fullName: e.target.value })}
-                      className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
-                    />
-                  </div>
+                    <div className="space-y-2">
+                      <label htmlFor="profile-email" className="block text-sm font-semibold text-[var(--foreground)]">
+                        <Mail className="w-4 h-4 inline-block mr-2 align-text-bottom" /> Email Address
+                      </label>
+                      <input
+                        id="profile-email"
+                        required
+                        type="email"
+                        autoComplete="email"
+                        value={profileForm.email}
+                        onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
+                        className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
+                      />
+                      <p className="text-xs text-[var(--muted-foreground)]">Changing your email may require confirmation through your email inbox.</p>
+                      {user.new_email && <p role="status" className="text-xs text-[var(--primary)]">Email change pending confirmation. Your current login email is {user.email}.</p>}
+                    </div>
 
-                  <div className="space-y-2">
-                    <label htmlFor="profile-email" className="block text-sm font-semibold text-[var(--foreground)]">
-                      <Mail className="w-4 h-4 inline-block mr-2 align-text-bottom" /> Email Address
-                    </label>
-                    <input
-                      id="profile-email"
-                      required
-                      type="email"
-                      autoComplete="email"
-                      value={profileForm.email}
-                      onChange={(e) => setProfileForm({ ...profileForm, email: e.target.value })}
-                      className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
-                    />
-                    <p className="text-xs text-[var(--muted-foreground)]">Changing your email may require confirmation through your email inbox.</p>
-                  </div>
+                    <div className="space-y-2">
+                      <label htmlFor="profile-new-password" className="block text-sm font-semibold text-[var(--foreground)]">
+                        <Lock className="w-4 h-4 inline-block mr-2 align-text-bottom" /> New Password <span className="font-normal text-[var(--muted-foreground)]">(optional)</span>
+                      </label>
+                      <input
+                        id="profile-new-password"
+                        type="password"
+                        autoComplete="new-password"
+                        minLength={8}
+                        value={newPassword}
+                        onChange={(e) => { setNewPassword(e.target.value); if (!e.target.value) setConfirmPassword(''); }}
+                        placeholder="Leave blank to keep your current password"
+                        className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
+                      />
+                      <p className="text-xs text-[var(--muted-foreground)]">Use at least 8 characters if you want to change it.</p>
+                    </div>
 
-                  <div className="space-y-2">
-                    <label htmlFor="profile-new-password" className="block text-sm font-semibold text-[var(--foreground)]">
-                      <Lock className="w-4 h-4 inline-block mr-2 align-text-bottom" /> New Password <span className="font-normal text-[var(--muted-foreground)]">(optional)</span>
-                    </label>
-                    <input
-                      id="profile-new-password"
-                      type="password"
-                      autoComplete="new-password"
-                      minLength={8}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Leave blank to keep your current password"
-                      className="w-full px-4 py-3 bg-[var(--input-background)] dark:bg-[#1A1528] border border-[var(--border)] rounded-xl text-[var(--foreground)] dark:text-white placeholder:text-[var(--muted-foreground)] focus:border-[var(--primary)] focus:ring-2 focus:ring-[var(--primary)]/20 outline-none"
-                    />
-                    <p className="text-xs text-[var(--muted-foreground)]">Use at least 8 characters if you want to change it.</p>
-                  </div>
+                    {newPassword && (
+                      <div className="space-y-2">
+                        <label htmlFor="profile-confirm-password" className="block text-sm font-semibold">Confirm New Password</label>
+                        <input id="profile-confirm-password" type="password" autoComplete="new-password" required
+                          value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
+                          className="w-full px-4 py-3 bg-[var(--input-background)] border border-[var(--border)] rounded-xl" />
+                      </div>
+                    )}
 
-                  <button
-                    type="submit"
-                    disabled={updatingProfile}
-                    className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl shadow-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
-                  >
-                    <Save className="w-4 h-4" />
-                    {updatingProfile ? 'Saving...' : 'Save Changes'}
-                  </button>
+                    <button
+                      type="submit"
+                      disabled={updatingProfile}
+                      className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-3.5 bg-[var(--primary)] hover:bg-purple-600 text-white font-bold rounded-xl shadow-lg transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                    >
+                      <Save className="w-4 h-4" />
+                      {updatingProfile ? 'Saving...' : 'Save Changes'}
+                    </button>
+                  </fieldset>
                 </form>
 
                 <div className="mt-10 pt-8 border-t border-red-500/20">
@@ -710,6 +680,7 @@ export function ProfilePage() {
                   <button
                     type="button"
                     onClick={() => setShowDeleteModal(true)}
+                    disabled={updatingProfile || loggingOut}
                     className="px-6 py-3 border border-red-500/50 text-red-400 hover:bg-red-500/10 font-bold rounded-xl transition-colors cursor-pointer"
                   >
                     Delete my account
@@ -763,13 +734,14 @@ export function ProfilePage() {
                 <div className="w-14 h-14 mx-auto mb-4 rounded-full bg-red-500/10 flex items-center justify-center">
                   <Trash2 className="w-7 h-7 text-red-400" />
                 </div>
-                <h3 className="text-xl font-bold text-[var(--foreground)] dark:text-white">Delete your account?</h3>
+                <h3 id="delete-account-title" className="text-xl font-bold text-[var(--foreground)] dark:text-white">Delete your account?</h3>
                 <p className="text-sm text-[var(--muted-foreground)] mt-2">
                   This cannot be undone. Your login will be permanently deleted{user?.email ? ` (${user.email})` : ''}. Type <span className="font-mono font-bold text-red-400">DELETE</span> to confirm.
                 </p>
               </div>
               <input
                 type="text"
+                aria-label="Type DELETE to confirm account deletion"
                 value={deleteConfirmText}
                 onChange={(e) => setDeleteConfirmText(e.target.value)}
                 placeholder="DELETE"

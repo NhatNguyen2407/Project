@@ -14,7 +14,7 @@ export function TermsPage() {
     { id: 'membership', label: 'Terms of Membership', icon: Crown, path: '/about/terms/membership' },
   ];
 
-  const ComingSoon = ({ title }) => (
+  const ComingSoon = ({ title, description }) => (
     <motion.div 
       initial={{ opacity: 0, scale: 0.95 }} 
       animate={{ opacity: 1, scale: 1 }} 
@@ -26,7 +26,7 @@ export function TermsPage() {
       </div>
       <h2 className="text-2xl font-bold font-heading">Coming Soon</h2>
       <p className="text-muted-foreground max-w-md font-medium">
-        The "{title}" section is under construction. We are working hard to bring you the best experience!
+        {description || `The "${title}" section is under construction. We are working hard to bring you the best experience!`}
       </p>
     </motion.div>
   );
@@ -84,45 +84,7 @@ export function TermsPage() {
         );
 
       case 'membership':
-        return (
-          <motion.div key="membership" initial={{ opacity: 0, x: 20 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: -20 }} className="space-y-6">
-            <h2 className="text-3xl font-bold font-heading mb-6">Terms of Membership</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div className="bg-gradient-to-br from-[#2D1B54] via-[#1C1236] to-[#0A0614] p-6 rounded-3xl border border-white/5 dark:border-white/5 relative overflow-hidden shadow-lg hover:border-[var(--primary)]/50 transition-colors">
-                <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
-                <div className="text-5xl font-black text-[var(--heading-color)] dark:text-[var(--primary)] mb-2 relative z-10">05</div>
-                <h4 className="text-[var(--heading-color)] dark:text-[var(--primary)] font-bold mb-2 uppercase tracking-widest text-sm opacity-90 relative z-10">Bronze Tier</h4>
-                <div className="space-y-1 relative z-10">
-                  <p className="text-[var(--foreground)] dark:text-[var(--primary)] font-semibold text-sm">Free Shipping</p>
-                  <p className="text-xs text-[var(--muted-foreground)] dark:text-[var(--primary)] opacity-70">Unlock free shipping for all orders from your 5th order onwards.</p>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-[#3A1C6E] via-[#211343] to-[#100A21] p-6 rounded-3xl border border-white/5 dark:border-white/5 relative overflow-hidden shadow-lg hover:border-[var(--primary)]/50 transition-colors">
-                <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
-                <div className="text-5xl font-black text-[var(--heading-color)] dark:text-[var(--primary)] mb-2 relative z-10">07</div>
-                <h4 className="text-[var(--heading-color)] dark:text-[var(--primary)] font-bold mb-2 uppercase tracking-widest text-sm opacity-90 relative z-10">Silver Tier</h4>
-                <div className="space-y-1 relative z-10">
-                  <p className="text-[var(--foreground)] dark:text-[var(--primary)] font-semibold text-sm">-5% OFF + Freeship</p>
-                  <p className="text-xs text-[var(--muted-foreground)] dark:text-[var(--primary)] opacity-70">Get 5% discount on total bills plus permanent free shipping.</p>
-                </div>
-              </div>
-
-              <div className="bg-gradient-to-br from-[#4A154B] via-[#2C1654] to-[#120C1F] p-6 rounded-3xl border border-white/5 dark:border-white/5 relative overflow-hidden shadow-lg hover:border-[var(--primary)]/50 transition-colors">
-                <div className="absolute -right-10 -bottom-10 w-32 h-32 bg-white/5 rounded-full blur-xl pointer-events-none"></div>
-                <div className="text-5xl font-black text-[var(--heading-color)] dark:text-[var(--primary)] mb-2 relative z-10">10</div>
-                <h4 className="text-[var(--heading-color)] dark:text-[var(--primary)] font-bold mb-2 uppercase tracking-widest text-sm opacity-90 relative z-10">Gold TIER</h4>
-                <div className="space-y-1 relative z-10">
-                  <p className="text-[var(--foreground)] dark:text-[var(--primary)] font-semibold text-sm">-10% OFF + Freeship</p>
-                  <p className="text-xs text-[var(--muted-foreground)] dark:text-[var(--primary)] opacity-70">Gold VIP status: 10% off permanently for all future orders.</p>
-                </div>
-              </div>
-            </div>
-            
-            <p className="text-xs text-muted-foreground mt-4 italic font-medium">*Note: The system counts your milestones based on successfully completed orders within your account.</p>
-          </motion.div>
-        );
+        return <ComingSoon key="membership" title="Terms of Membership" description="Membership benefits are not active yet. Standard shipping rates and the discounts shown at checkout apply to all accounts. We will publish the membership terms before activating any benefits." />;
       default:
         return <Navigate to="/about/terms/printing" replace />;
     }

@@ -1,8 +1,7 @@
 import { Link } from 'react-router';
-import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
-import { supabase } from '../service/supabase';
 import { useAuth } from '../context/AuthContext';
+import { useWishlist } from '../context/WishlistContext';
 import { getProductUrl } from '../utils/catalog';
 
 import { SmartImage } from '../components/common_components/SmartImage';
@@ -22,24 +21,9 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
   };
 
   const { user } = useAuth();
-  const [isLiked, setIsLiked] = useState(false);
-  const [isLiking, setIsLiking] = useState(false);
-
-  useEffect(() => {
-    if (user) {
-      const checkWishlist = async () => {
-        const { data } = await supabase
-          .from('wishlists')
-          .select('id')
-          .eq('user_id', user.id)
-          .eq('product_id', id)
-          .maybeSingle();
-          
-        if (data) setIsLiked(true);
-      };
-      checkWishlist();
-    }
-  }, [user, id]);
+  const { items, loading, pending, error, refresh, setLiked } = useWishlist();
+  const isLiked = items.some(item => String(item.product_id) === String(id));
+  const isLiking = pending.includes(String(id));
 
   const toggleWishlist = async () => {
     if (!user) {
@@ -47,31 +31,11 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
       return;
     }
 
-    const previousLiked = isLiked;
-    setIsLiked(!previousLiked);
-    setIsLiking(true);
-
     try {
-      if (previousLiked) {
-        const { error } = await supabase
-          .from('wishlists')
-          .delete()
-          .eq('user_id', user.id)
-          .eq('product_id', id);
-
-        if (error) throw error;
-      } else {
-        const { error } = await supabase
-          .from('wishlists')
-          .insert([{ user_id: user.id, product_id: id }]);
-
-        if (error) throw error;
-      }
+      if (error) { if (!await refresh()) alert(error); return; }
+      await setLiked(id, !isLiked);
     } catch (err) {
-      console.error(err);
-      setIsLiked(previousLiked);
-    } finally {
-      setIsLiking(false);
+      alert(err.message);
     }
   };
 
@@ -80,8 +44,9 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
       <button
         type="button"
         onClick={toggleWishlist}
-        disabled={isLiking}
-        aria-label={isLiked ? `Remove ${title} from wishlist` : `Add ${title} to wishlist`}
+        disabled={loading || isLiking}
+        aria-label={error ? `Retry loading wishlist for ${title}` : isLiked ? `Remove ${title} from wishlist` : `Add ${title} to wishlist`}
+        title={error || undefined}
         aria-pressed={isLiked}
         className="absolute top-3 right-3 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-sm transition-all z-20 cursor-pointer disabled:opacity-50 flex items-center justify-center"
       >
