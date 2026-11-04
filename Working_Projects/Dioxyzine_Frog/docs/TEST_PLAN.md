@@ -9,17 +9,19 @@ I am handling the current review in four parts. The older phases below remain a 
 
 | Part | Current status |
 | --- | --- |
-| 1. Products and cart | Code fixes implemented; 25 automated tests and production build PASS; hosted smoke check and user acceptance pending |
+| 1. Products and cart | 25 automated tests and production build PASS; three issues verified on Production; Cut Style code fixed, business classification and user acceptance pending |
 | 2. Auth, Profile and Wishlist | Not tested in this review |
 | 3. Inquiry and Admin | Not tested in this review |
 | 4. PayPal Sandbox | Not tested in this review |
 
 | Part 1 issue | Change | Verification / remaining work |
 | --- | --- | --- |
-| Ready-made item shows Custom Quote on a generic product URL | Detail behavior uses product type; cards show ready-made prices and use consistent links | Route regression tests PASS; recheck generic URL and checkout navigation after deployment |
-| Custom tab includes ready-made products | Filter product type before category, search and cut style | Regression tests PASS, including overlapping categories |
-| Cut Style always returns an empty list | Preserve `cut_style` in product context; disable styles with no classified products; Admin preserves unspecified values | Both styles and missing values covered by tests; all current catalog values are null, so business classification remains pending |
-| Two cart drawers open on product detail | Keep only the application-level drawer | Recheck one drawer, quantity changes, reload persistence and checkout navigation after deployment |
+| Ready-made item shows Custom Quote on a generic product URL | Detail behavior uses product type; cards show ready-made prices and use consistent links | Production `/product/RDY-01` shows $40 and Add to Cart; back/previous/next links stay in ready-made; route tests PASS |
+| Custom tab includes ready-made products | Filter product type before category, search and cut style | Production shows 15 CUS products, no RDY cards; category/search regression tests PASS |
+| Cut Style always returns an empty list | Preserve `cut_style` in product context; disable styles with no classified products; Admin preserves unspecified values | Production keeps all seven unclassified plushies visible and disables unavailable styles; both classified styles and null values pass automated tests; confirmed business classification remains pending |
+| Two cart drawers open on product detail | Keep only the application-level drawer | Production has one drawer; adding, increasing to two ($80), reloading, decreasing to one ($40), checkout navigation and removal PASS; test cart emptied |
+
+**Release verified:** `main@b1170f4`, Vercel Production READY, checked on 2026-11-04. No payment was initiated. These browser checks cover the listed paths only. Admin saving a classification has not been tested with a real write.
 
 No catalog rows, orders, customer records or payment settings were changed. Missing cut styles must be classified from confirmed product specifications, not inferred from a title or an ambiguous pricing code. The filter becomes available as classified products are saved in Admin. Hosted verification does not imply user acceptance.
 
