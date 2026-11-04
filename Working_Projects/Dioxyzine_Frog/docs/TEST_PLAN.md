@@ -57,9 +57,11 @@ The historical loss of site access has not been attributed conclusively to Auth.
 - The recovery marker contains only user/session identifiers and a bounded expiry, never access/refresh tokens or passwords. It is scoped to the browser tab, matches the current session and expires no later than the original token or one hour. Supabase still authorizes the password update.
 - Registration, reset and recovery inputs now have matching labels and autocomplete attributes. Registration retains the existing reCAPTCHA check before signup.
 - `pnpm build`: PASS; the existing large-bundle warning remains. No dependencies, Auth records, database policies, provider settings or payment settings changed.
-- Hosted anonymous smoke checks: pending deployment of this change. Real confirmation-email delivery, opening a genuine recovery email, password update followed by login with the new password, and Google/Facebook consent/redirect completion are NOT TESTED. Use only an inbox controlled by the tester; dummy addresses without inbox access cannot verify these paths.
+- Production `main@872771d`: READY on 2026-11-04. Anonymous browser checks PASS: direct reset access and query/fragment errors show the invalid-link page; requesting a new link opens Forgot Password; empty/malformed email stays on the form with an error; empty registration shows required-field and terms errors; labels and autocomplete values match the intended fields. No Auth request was submitted and no email or credentials were used.
+- GitHub Actions `Dioxyzine Frog CI` for `872771d`: PASS (frozen dependency install, all tests and production build).
+- Real confirmation-email delivery, opening a genuine recovery email, password update followed by login with the new password, and Google/Facebook consent/redirect completion are NOT TESTED. Use only an inbox controlled by the tester; dummy addresses without inbox access cannot verify these paths.
 
-**Next checkpoint:** complete 2.2 hosted smoke checks and real email/OAuth acceptance; the next implementation group is 2.3 Profile/account deletion. The remaining reload/Admin live checks are tracked above. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update. Part 3 and Part 4 have not started.
+**Next checkpoint:** complete 2.2 real email/OAuth acceptance; the next implementation group is 2.3 Profile/account deletion. The remaining reload/Admin live checks are tracked above. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update. Part 3 and Part 4 have not started.
 
 ## 0. Testing safeguards
 
