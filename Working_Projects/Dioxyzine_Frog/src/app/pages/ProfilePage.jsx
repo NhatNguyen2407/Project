@@ -7,7 +7,7 @@ import { supabase } from '../service/supabase';
 import { useProducts } from '../context/ProductContext';
 import { useWishlist } from '../context/WishlistContext';
 import { useAccountOrders } from '../hooks/useAccountOrders';
-import { deleteCustomerAccount, profileFromUser, saveCustomerProfile, prepareReorder } from '../service/customerProfile';
+import { deleteCustomerAccount, finishDeletedAccountSignOut, profileFromUser, saveCustomerProfile, prepareReorder } from '../service/customerProfile';
 import { getProductUrl } from '../utils/catalog';
 
 import { useCart } from '../context/CartContext';
@@ -160,10 +160,19 @@ export function ProfilePage() {
       const { signedOut } = await deleteCustomerAccount(supabase, userId);
       if (accountId.current && accountId.current !== userId) return;
       if (signedOut) navigate('/', { replace: true });
-      else setDeleteResult(true);
+      else setDeleteResult(userId);
     } catch (err) {
       if (accountId.current === userId) { toast.error(err.message); setDeletingAccount(false); }
     }
+  };
+
+  const finishDeleteSignOut = async () => {
+    if (loggingOut) return;
+    setLoggingOut(true);
+    const result = await finishDeletedAccountSignOut(supabase, deleteResult);
+    if (result.signedOut) navigate('/', { replace: true });
+    if (result.accountChanged) setDeleteResult(false);
+    setLoggingOut(false);
   };
 
   const handleUpdateProfile = async (e) => {
@@ -212,7 +221,14 @@ export function ProfilePage() {
     } finally { if (accountId.current === userId) setReordering(false); }
   };
 
-  if (deleteResult) return <div className="min-h-screen pt-32 px-4 text-center" role="status"><p>Your account was deleted. Reload to finish clearing this session.</p><button onClick={() => window.location.reload()} className="mt-4 px-6 py-3 rounded-xl bg-[var(--primary)] text-white">Finish sign-out</button></div>;
+  if (deleteResult && (!user || user.id === deleteResult)) return (
+    <div className="min-h-screen pt-32 px-4 text-center" role="alert">
+      <p>Your account was deleted. Sign-out could not finish. Retry when your connection is available.</p>
+      <button onClick={finishDeleteSignOut} disabled={loggingOut} className="mt-4 px-6 py-3 rounded-xl bg-[var(--primary)] text-white disabled:opacity-50">
+        {loggingOut ? 'Signing out...' : 'Retry sign-out'}
+      </button>
+    </div>
+  );
   if (!user) return <div className="min-h-screen pt-24 pb-16 flex items-center justify-center text-[var(--primary)] text-lg font-medium">Please login to view this page...</div>;
 
   return (

@@ -96,6 +96,10 @@ export async function deleteCustomerAccount(client, userId) {
     try { if (error?.context) details = await error.context.json(); } catch { /* Use a safe fallback. */ }
     throw new Error(details?.error || 'Account deletion could not be confirmed. Please try again or contact support.');
   }
+  return finishDeletedAccountSignOut(client, userId);
+}
+
+export async function finishDeletedAccountSignOut(client, userId) {
   try {
     const current = await client.auth.getSession();
     if (current.error) return { signedOut: false };

@@ -1,7 +1,5 @@
 import { Link } from 'react-router';
-import { Heart } from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { useWishlist } from '../context/WishlistContext';
+import { WishlistButton } from './WishlistButton';
 import { getProductUrl } from '../utils/catalog';
 
 import { SmartImage } from '../components/common_components/SmartImage';
@@ -20,38 +18,9 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
     return `From $${minPrice.toFixed(2)}`;
   };
 
-  const { user } = useAuth();
-  const { items, loading, pending, error, refresh, setLiked } = useWishlist();
-  const isLiked = items.some(item => String(item.product_id) === String(id));
-  const isLiking = pending.includes(String(id));
-
-  const toggleWishlist = async () => {
-    if (!user) {
-      alert("Please login to save your favorite items! 🐸");
-      return;
-    }
-
-    try {
-      if (error) { if (!await refresh()) alert(error); return; }
-      await setLiked(id, !isLiked);
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
   return (
     <div className="group relative bg-[var(--card)] rounded-3xl border border-[var(--border)] p-4 hover:border-[var(--primary)] transition-all flex flex-col h-full z-20 hover:shadow-[0_0_20px_rgba(139,114,190,0.2)]">
-      <button
-        type="button"
-        onClick={toggleWishlist}
-        disabled={loading || isLiking}
-        aria-label={error ? `Retry loading wishlist for ${title}` : isLiked ? `Remove ${title} from wishlist` : `Add ${title} to wishlist`}
-        title={error || undefined}
-        aria-pressed={isLiked}
-        className="absolute top-3 right-3 w-11 h-11 rounded-full bg-black/40 hover:bg-black/70 backdrop-blur-sm transition-all z-20 cursor-pointer disabled:opacity-50 flex items-center justify-center"
-      >
-        <Heart className={`w-5 h-5 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
-      </button>
+      <WishlistButton id={id} title={title} />
 
       <Link to={getProductUrl({ id, type })} className="flex flex-col flex-grow">
         <div className="relative aspect-square rounded-2xl overflow-hidden mb-4 bg-black">

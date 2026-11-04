@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { profileFromUser, mergeOrderReview, prepareReorder, saveCustomerProfile, deleteCustomerAccount } from '../src/app/service/customerProfile.js';
+import { profileFromUser, mergeOrderReview, prepareReorder, saveCustomerProfile, deleteCustomerAccount, finishDeletedAccountSignOut } from '../src/app/service/customerProfile.js';
 
 function setup() {
   const user = { id: 'customer', email: 'current@example.com', user_metadata: { full_name: 'Customer', avatar_url: 'https://example.invalid/old.png' } };
@@ -153,8 +153,12 @@ test('confirmed deletion signs out only afterward, with separate handling for se
   const { client, calls } = setup();
   assert.deepEqual(await deleteCustomerAccount(client, 'customer'), { signedOut: true });
   assert.deepEqual(calls, [['invoke', 'delete-account', { body: { confirmation: 'DELETE', userId: 'customer' } }], ['signOut', { scope: 'local' }]]);
-  client.auth.signOut = async () => ({ error: new Error('offline') });
-  assert.deepEqual(await deleteCustomerAccount(client, 'customer'), { signedOut: false });
+  const failed = setup();
+  failed.client.auth.signOut = async () => ({ error: new Error('offline') });
+  assert.deepEqual(await deleteCustomerAccount(failed.client, 'customer'), { signedOut: false });
+  failed.client.auth.signOut = async () => ({ error: null });
+  assert.deepEqual(await finishDeletedAccountSignOut(failed.client, 'customer'), { signedOut: true });
+  assert.equal(failed.calls.filter(call => call[0] === 'invoke').length, 1);
 });
 
 test('failed deletion does not sign out or announce success and preserves safe server guidance', async () => {
