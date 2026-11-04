@@ -10,7 +10,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | Part | Current status |
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
-| 2. Auth, Profile and Wishlist | In progress: review recorded below; 2.1 session fixes implemented and automated checks PASS; authenticated browser acceptance pending |
+| 2. Auth, Profile and Wishlist | In progress: 2.1 implemented, deployed and automated/anonymous checks PASS; real-account acceptance pending; 2.2-2.4 await their own fixes |
 | 3. Inquiry and Admin | Not tested in this review |
 | 4. PayPal Sandbox | Not tested in this review |
 
@@ -43,7 +43,8 @@ I am fixing one small group at a time. Findings below are confirmed in current s
 - `pnpm build`: PASS. The existing large-bundle warning remains; no dependencies changed.
 - Public pages now render while Auth is checking; only Auth/protected routes wait or show a retryable error. Server authorization remains in Supabase, not in the frontend role state.
 - Read-only backend inspection: user_roles and wishlists policies scope access to auth.uid(); no customer records, roles, RLS policies, credentials or payment settings changed. Staging remains INACTIVE.
-- Hosted smoke checks and authenticated customer/admin acceptance will be recorded after deployment. Successful real-account login, OAuth, recovery emails, password changes and account deletion have not been claimed.
+- Production `main@899ac86`: READY on 2026-11-04. Anonymous browser checks PASS: Login renders after reload; empty submission shows required-field errors; unauthenticated `/profile` redirects to `/login`; Home still renders its catalog. No credentials were entered and no Auth records changed.
+- Authenticated customer/admin acceptance remains pending. Successful real-account login, OAuth, recovery emails, password changes and account deletion have not been claimed.
 
 The historical loss of site access has not been attributed conclusively to Auth. Moving database work out of notifications follows [Supabase's Auth callback guidance](https://supabase.com/docs/reference/javascript/auth-onauthstatechange); the timeout and ordering defects are independently visible in the application code.
 
