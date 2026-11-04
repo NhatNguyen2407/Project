@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { User, Mail, Lock, Eye, EyeOff, Loader2, Chrome, Facebook, UserPlus, CheckCircle2 } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import { supabase } from '../service/supabase';
+import { registerCustomer, signInWithSocial } from '../service/authFlows';
 import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
@@ -16,7 +17,7 @@ const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
 
   return (
     <div className="space-y-2 w-full">
-      <label className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">
+      <label htmlFor={props.name} className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">
         {label}
       </label>
       <div className="relative">
@@ -24,6 +25,7 @@ const AuthInput = ({ label, icon: Icon, type, error, ...props }) => {
           <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-[var(--muted-foreground)] dark:text-gray-500'}`} />
         </div>
         <input
+          id={props.name}
           type={inputType}
           className={`w-full pl-11 pr-12 py-3.5 bg-[var(--input-background)] border ${
             error 
@@ -116,8 +118,8 @@ export function RegisterPage() {
     const newErrors = {};
     if (!formData.fullName.trim()) newErrors.fullName = 'Name is required';
     
-    if (!formData.email) newErrors.email = 'Email is required';
-    else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Invalid email format';
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) newErrors.email = 'Invalid email format';
     
     if (!formData.password) newErrors.password = 'Password is required';
     else if (formData.password.length < 6) newErrors.password = 'Password must be at least 6 characters';
@@ -136,6 +138,7 @@ export function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (isLoading) return;
     if (!validateForm()) return;
 
     if (!executeRecaptcha) {
@@ -157,17 +160,7 @@ export function RegisterPage() {
         return; 
       }
 
-      const { data, error } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.fullName,
-          }
-        }
-      });
-
-      if (error) throw error;
+      const data = await registerCustomer(supabase, formData, window.location.origin);
 
       // Nếu project bật "Confirm email" trong Supabase Auth, signUp() sẽ
       // KHÔNG trả về session — nghĩa là khách chưa thực sự đăng nhập. Điều
@@ -190,13 +183,7 @@ export function RegisterPage() {
 
   const handleSocialLogin = async (provider) => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: provider,
-        options: {
-          redirectTo: window.location.origin
-        }
-      });
-      if (error) throw error;
+      await signInWithSocial(supabase, provider, window.location.origin);
     } catch (error) {
       console.error(`Lỗi đăng nhập ${provider}:`, error.message);
       setErrors({ form: `Không thể kết nối với ${provider}. Vui lòng thử lại!` });
@@ -253,6 +240,7 @@ export function RegisterPage() {
               label="Full Name / Username"
               name="fullName"
               type="text"
+              autoComplete="name"
               placeholder="John Doe"
               icon={User}
               value={formData.fullName}
@@ -264,6 +252,7 @@ export function RegisterPage() {
               label="Email Address"
               name="email"
               type="email"
+              autoComplete="username"
               placeholder="froggy@example.com"
               icon={Mail}
               value={formData.email}
@@ -276,6 +265,7 @@ export function RegisterPage() {
                 label="Password"
                 name="password"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 icon={Lock}
                 value={formData.password}
@@ -287,6 +277,7 @@ export function RegisterPage() {
                 label="Confirm Password"
                 name="confirmPassword"
                 type="password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 icon={Lock}
                 value={formData.confirmPassword}
@@ -304,7 +295,7 @@ export function RegisterPage() {
                 onChange={handleChange}
                 className="w-5 h-5 mt-0.5 rounded border-[var(--border)] bg-[var(--input-background)] dark:bg-[#1A1528] accent-[var(--primary)] text-[var(--primary)] focus:ring-[var(--primary)]/30 cursor-pointer flex-shrink-0"
               />
-              <label className="text-sm text-[var(--foreground)] dark:text-[var(--silver-gray)] leading-relaxed">
+              <label htmlFor="acceptedTerms" className="text-sm text-[var(--foreground)] dark:text-[var(--silver-gray)] leading-relaxed">
                 I agree to the{' '}
                 <button 
                   type="button" 

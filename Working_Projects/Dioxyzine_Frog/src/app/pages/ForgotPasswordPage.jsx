@@ -3,15 +3,17 @@ import { motion } from 'motion/react';
 import { Mail, Loader2, ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { Link } from 'react-router';
 import { supabase } from '../service/supabase';
+import { requestPasswordReset } from '../service/authFlows';
 
 const AuthInput = ({ label, icon: Icon, error, ...props }) => (
   <div className="space-y-2 w-full">
-    <label className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">{label}</label>
+    <label htmlFor={props.name} className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">{label}</label>
     <div className="relative">
       <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
         <Icon className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-500'}`} />
       </div>
       <input
+        id={props.name}
         className={`w-full pl-11 pr-4 py-3.5 bg-[var(--input-background)] dark:bg-[#1A1528] border ${
           error
             ? 'border-red-500/50 focus:border-red-500 focus:ring-red-500/10'
@@ -43,28 +45,18 @@ export function ForgotPasswordPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!email || !/\S+@\S+\.\S+/.test(email)) {
+    if (isLoading) return;
+    if (!email.trim() || !/^\S+@\S+\.\S+$/.test(email.trim())) {
       setError('Vui lòng nhập email hợp lệ.');
       return;
     }
     setError('');
     setIsLoading(true);
     try {
-      // redirectTo trỏ về trang đặt mật khẩu mới. Supabase sẽ tự thêm
-      // access_token vào URL khi khách bấm link trong email.
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`,
-      });
-      // Không tiết lộ email có tồn tại trong hệ thống hay không — luôn báo
-      // "đã gửi" dù email có thật hay không, tránh lộ danh sách user cho
-      // kẻ dò email hàng loạt. Supabase mặc định cũng hoạt động theo cách
-      // này (không báo lỗi nếu email không tồn tại).
-      if (resetError && resetError.status !== 400) {
-        throw resetError;
-      }
+      // Supabase returns success for unknown addresses; real delivery errors must remain errors.
+      await requestPasswordReset(supabase, email, window.location.origin);
       setSent(true);
     } catch (err) {
-      console.error('Lỗi khi gửi email đặt lại mật khẩu:', err);
       setError('Có lỗi xảy ra, vui lòng thử lại sau.');
     } finally {
       setIsLoading(false);
@@ -116,7 +108,9 @@ export function ForgotPasswordPage() {
               )}
               <AuthInput
                 label="Email Address"
+                name="reset-email"
                 type="email"
+                autoComplete="email"
                 placeholder="froggy@dioxyzine.com"
                 icon={Mail}
                 value={email}

@@ -10,7 +10,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | Part | Current status |
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
-| 2. Auth, Profile and Wishlist | In progress: 2.1 implemented; customer login/sign-out accepted on 2026-11-04; Login autocomplete warning corrected in source; 2.2 is next |
+| 2. Auth, Profile and Wishlist | In progress: 2.1 accepted for customer login/sign-out; 2.2 implemented with automated checks; real email and OAuth acceptance pending; 2.3 and 2.4 pending |
 | 3. Inquiry and Admin | Not tested in this review |
 | 4. PayPal Sandbox | Not tested in this review |
 
@@ -32,7 +32,7 @@ I am fixing one small group at a time. Findings below are confirmed in current s
 | Step | Confirmed problem and cause | Fix / status |
 | --- | --- | --- |
 | 2.1. Session initialization and permissions | The Auth callback awaited a role query; the whole app was hidden until initialization finished; failed or hung reads had no recovery; late responses could overwrite a newer account or retain an old role; Login duplicated the role lookup and competed with PublicRoute navigation; Login/Register printed full Auth responses | IMPLEMENTED: synchronous notification callback, deferred role queries, 10-second deadlines, retry UI on Auth routes, cancellation and response ordering, role reset on account change, shared signed-in redirect and removal of response logs |
-| 2.2. Registration and password recovery | Forgot Password treats every HTTP 400 as success; Reset Password treats any existing session as a valid recovery session and checks errors only in the URL fragment; after changing the password it redirects to Login without ending the recovery session | PENDING: distinguish delivery failures from account-enumeration-safe responses; validate recovery state and both URL error locations; finish the recovery flow; verify confirmation-email and OAuth paths |
+| 2.2. Registration and password recovery | Forgot Password treats every HTTP 400 as success; Reset Password treats any existing session as a valid recovery session and checks errors only in the URL fragment; after changing the password it redirects to Login without ending the recovery session | IMPLEMENTED: report returned delivery errors; require an SDK recovery event or a stored marker matching that verified session; check both URL error locations; end the current recovery session before Login; retry failed sign-out without changing the password again; consistent signup-confirmation and OAuth return routes. Real email and OAuth acceptance pending |
 | 2.3. Profile and account deletion | Saving performs separate writes, so failure can follow an earlier successful change; immediate reload hides notices; membership perks are advertised without checkout enforcement; deployed delete-account v6 sets inquiries.contact_info to null although the column is NOT NULL, after other records may already have changed | PENDING: clear partial-result handling, persistent notices and profile refresh, accurate membership text, and consistent account anonymization; never test deletion on a real account |
 | 2.4. Wishlist | ProductCard does not reset the liked state on sign-out/account change and does not cancel stale reads; removal updates the UI without confirming affected rows | PENDING: reset and scope state by account, cancel stale reads and confirm persisted mutations |
 
@@ -49,7 +49,17 @@ I am fixing one small group at a time. Findings below are confirmed in current s
 
 The historical loss of site access has not been attributed conclusively to Auth. Moving database work out of notifications follows [Supabase's Auth callback guidance](https://supabase.com/docs/reference/javascript/auth-onauthstatechange); the timeout and ordering defects are independently visible in the application code.
 
-**Next checkpoint:** handle 2.2 registration and password recovery, with the remaining reload/Admin live checks tracked above. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update. Part 3 and Part 4 have not started.
+### 2.2 verification
+
+- `pnpm test`: 62/62 PASS, including 21 new recovery and registration/service checks. These use simulated Auth responses, sessions and clocks; they do not prove email delivery or provider configuration.
+- Covered: ordinary sessions denied recovery, early recovery events, SDK event ordering, reload with the same verified session, account/session changes, sign-out, expired proof, malformed tokens/storage, disabled storage, both URL error locations, startup deadline and cleanup.
+- Covered: trimmed signup/reset input, explicit confirmation/reset return URLs, consistent Google/Facebook return routes, returned HTTP 400/429/500 and network failures, session revalidation before password update, update failure, local sign-out and independent sign-out retry.
+- The recovery marker contains only user/session identifiers and a bounded expiry, never access/refresh tokens or passwords. It is scoped to the browser tab, matches the current session and expires no later than the original token or one hour. Supabase still authorizes the password update.
+- Registration, reset and recovery inputs now have matching labels and autocomplete attributes. Registration retains the existing reCAPTCHA check before signup.
+- `pnpm build`: PASS; the existing large-bundle warning remains. No dependencies, Auth records, database policies, provider settings or payment settings changed.
+- Hosted anonymous smoke checks: pending deployment of this change. Real confirmation-email delivery, opening a genuine recovery email, password update followed by login with the new password, and Google/Facebook consent/redirect completion are NOT TESTED. Use only an inbox controlled by the tester; dummy addresses without inbox access cannot verify these paths.
+
+**Next checkpoint:** complete 2.2 hosted smoke checks and real email/OAuth acceptance; the next implementation group is 2.3 Profile/account deletion. The remaining reload/Admin live checks are tracked above. Product titles, images, descriptions, pricing data and Cut Style classification remain a separate deferred catalog update. Part 3 and Part 4 have not started.
 
 ## 0. Testing safeguards
 

@@ -2,18 +2,20 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { Lock, Eye, EyeOff, Loader2, CheckCircle2, XCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
-import { supabase } from '../service/supabase';
+import { supabase, passwordRecovery } from '../service/supabase';
+import { completePasswordRecovery, endRecoverySession } from '../service/authFlows';
 
 const AuthInput = ({ label, error, ...props }) => {
   const [showPassword, setShowPassword] = useState(false);
   return (
     <div className="space-y-2 w-full">
-      <label className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">{label}</label>
+      <label htmlFor={props.name} className="block text-sm font-semibold text-[var(--foreground)] dark:text-white/90">{label}</label>
       <div className="relative">
         <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
           <Lock className={`h-5 w-5 ${error ? 'text-red-400' : 'text-gray-500'}`} />
         </div>
         <input
+          id={props.name}
           type={showPassword ? 'text' : 'password'}
           className={`w-full pl-11 pr-12 py-3.5 bg-[var(--input-background)] dark:bg-[#1A1528] border ${
             error
@@ -47,47 +49,22 @@ const AuthButton = ({ children, isLoading, ...props }) => (
   </button>
 );
 
-// 3 trạng thái của trang: đang chờ xác định link có hợp lệ không, link hợp
-// lệ (cho nhập mật khẩu mới), hoặc link hỏng/hết hạn.
-const STATUS = { CHECKING: 'checking', READY: 'ready', INVALID: 'invalid', DONE: 'done' };
-
 export function ResetPasswordPage() {
   const navigate = useNavigate();
-  const [status, setStatus] = useState(STATUS.CHECKING);
+  const [recoveryStatus, setRecoveryStatus] = useState(() => passwordRecovery.getStatus());
+  const [completion, setCompletion] = useState(null);
+  const status = completion || recoveryStatus;
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => passwordRecovery.subscribe(setRecoveryStatus), []);
   useEffect(() => {
-    // Supabase gửi link kèm token qua URL. supabase-js tự đọc URL này khi
-    // trang tải và bắn ra sự kiện PASSWORD_RECOVERY nếu token hợp lệ. Nếu
-    // link đã hết hạn/bị dùng rồi, Supabase redirect kèm "error" trong URL
-    // thay vì token — ta kiểm tra cả 2 trường hợp.
-    const hashParams = new URLSearchParams(window.location.hash.replace('#', ''));
-    if (hashParams.get('error') || hashParams.get('error_code')) {
-      setStatus(STATUS.INVALID);
-      return;
-    }
-
-    const { data: listener } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setStatus(STATUS.READY);
-      }
-    });
-
-    // Phòng trường hợp sự kiện đã bắn ra trước khi listener kịp gắn vào
-    // (race condition hiếm gặp) — kiểm tra lại session hiện có sau 1 nhịp.
-    const timeout = setTimeout(async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      setStatus((prev) => (prev === STATUS.CHECKING ? (session ? STATUS.READY : STATUS.INVALID) : prev));
-    }, 1500);
-
-    return () => {
-      listener?.subscription?.unsubscribe();
-      clearTimeout(timeout);
-    };
-  }, []);
+    if (completion !== 'done') return;
+    const timeout = setTimeout(() => navigate('/login', { replace: true }), 3000);
+    return () => clearTimeout(timeout);
+  }, [completion, navigate]);
 
   const validate = () => {
     const newErrors = {};
@@ -99,19 +76,27 @@ export function ResetPasswordPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (status !== 'ready' || isLoading) return;
     if (!validate()) return;
     setIsLoading(true);
     try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) throw error;
-      setStatus(STATUS.DONE);
-      setTimeout(() => navigate('/login'), 3000);
+      const signedOut = await completePasswordRecovery(supabase, passwordRecovery, password, () => {
+        setCompletion('signingOut');
+        setPassword('');
+        setConfirmPassword('');
+      });
+      setCompletion(signedOut ? 'done' : 'signOutFailed');
     } catch (err) {
-      console.error('Lỗi khi đặt lại mật khẩu:', err);
       setErrors({ form: 'Không thể đặt lại mật khẩu. Vui lòng thử lại hoặc yêu cầu link mới.' });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const retrySignOut = async () => {
+    setCompletion('signingOut');
+    const signedOut = await endRecoverySession(supabase);
+    setCompletion(signedOut ? 'done' : 'signOutFailed');
   };
 
   return (
@@ -131,21 +116,28 @@ export function ResetPasswordPage() {
         </div>
 
         <div className="bg-[var(--card)] border border-[var(--border)] rounded-3xl p-6 sm:p-8 shadow-[0_0_40px_rgba(139,114,190,0.12)]">
-          {status === STATUS.CHECKING && (
+          {(status === 'checking' || status === 'signingOut') && (
             <div className="flex flex-col items-center py-8 gap-3 text-[var(--silver-gray)]">
               <Loader2 className="w-8 h-8 animate-spin text-[var(--primary)]" />
-              <p>Verifying your reset link...</p>
+              <p>{status === 'signingOut' ? 'Password updated. Signing you out...' : 'Verifying your reset link...'}</p>
             </div>
           )}
 
-          {status === STATUS.INVALID && (
+          {status === 'error' && (
+            <div className="text-center py-4 space-y-4" role="alert">
+              <p className="text-[var(--silver-gray)]">We could not verify your reset link. Please retry.</p>
+              <AuthButton type="button" onClick={() => window.location.reload()}>Retry verification</AuthButton>
+            </div>
+          )}
+
+          {status === 'invalid' && (
             <div className="text-center py-4">
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-red-500/10 flex items-center justify-center">
                 <XCircle className="w-8 h-8 text-red-400" />
               </div>
               <h2 className="text-xl font-bold text-[var(--heading-color)] dark:text-white mb-2">Link expired or invalid</h2>
               <p className="text-[var(--silver-gray)] mb-6">
-                This password reset link is no longer valid — reset links only work once and expire after a while. Request a new one below.
+                This password reset link is no longer valid. Request a new one below.
               </p>
               <Link
                 to="/forgot-password"
@@ -156,7 +148,7 @@ export function ResetPasswordPage() {
             </div>
           )}
 
-          {status === STATUS.READY && (
+          {status === 'ready' && (
             <form onSubmit={handleSubmit} className="space-y-6" noValidate>
               {errors.form && (
                 <div className="p-3 bg-red-500/10 border border-red-500/50 rounded-lg text-center text-red-400 text-sm font-medium">
@@ -165,6 +157,8 @@ export function ResetPasswordPage() {
               )}
               <AuthInput
                 label="New Password"
+                name="new-password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); if (errors.password) setErrors((p) => ({ ...p, password: '' })); }}
@@ -172,6 +166,8 @@ export function ResetPasswordPage() {
               />
               <AuthInput
                 label="Confirm New Password"
+                name="confirm-new-password"
+                autoComplete="new-password"
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => { setConfirmPassword(e.target.value); if (errors.confirmPassword) setErrors((p) => ({ ...p, confirmPassword: '' })); }}
@@ -181,7 +177,15 @@ export function ResetPasswordPage() {
             </form>
           )}
 
-          {status === STATUS.DONE && (
+          {status === 'signOutFailed' && (
+            <div className="text-center py-4 space-y-4" role="alert">
+              <h2 className="text-xl font-bold text-[var(--heading-color)] dark:text-white">Password updated</h2>
+              <p className="text-[var(--silver-gray)]">Sign-out could not finish. Retry to return to login.</p>
+              <AuthButton type="button" onClick={retrySignOut}>Retry sign-out</AuthButton>
+            </div>
+          )}
+
+          {status === 'done' && (
             <div className="text-center py-4">
               <div className="w-16 h-16 mx-auto mb-6 rounded-full bg-green-500/10 flex items-center justify-center">
                 <CheckCircle2 className="w-8 h-8 text-green-400" />

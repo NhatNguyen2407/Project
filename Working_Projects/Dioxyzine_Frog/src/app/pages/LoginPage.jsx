@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Lock, Eye, EyeOff, Loader2, Chrome, Facebook, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router';
 import { supabase } from '../service/supabase';
+import { signInWithSocial } from '../service/authFlows';
 
 //COMPONENTS
 
@@ -129,13 +130,7 @@ export function LoginPage() {
 
   const handleSocialLogin = async (provider) => {
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
-        provider: provider,
-        options: {
-          redirectTo: `${window.location.origin}/profile`
-        }
-      });
-      if (error) throw error;
+      await signInWithSocial(supabase, provider, window.location.origin);
     } catch (error) {
       console.error(`Lỗi đăng nhập ${provider}:`, error.message);
       setErrors({ form: `Không thể kết nối với ${provider}. Vui lòng thử lại!` });
