@@ -1,22 +1,19 @@
 import { useState, useEffect } from 'react';
-import { useLocation, useParams, Link } from 'react-router';
+import { useParams, Link } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight, PlusCircle, Sparkles, ShoppingCart, Star, MessageSquare, Plus, Minus, Clock, Component, Package, Tag, Check, Shield, RefreshCw } from 'lucide-react';
 
 import { useProducts } from '../context/ProductContext';
 import { useCart } from '../context/CartContext';
 // import { MOCK_PRODUCTS } from '../data/storeData';
-import { CartDrawer } from '../components/store/CartDrawer';
 import { SEO } from '../components/common_components/SEO';
 import { supabase } from '../service/supabase';
+import { getProductUrl } from '../utils/catalog';
 
 export function ProductDetailPage() {
   const { category, id } = useParams();
-  const location = useLocation();
   const { products, loading, error, refetch } = useProducts();
   const { addToCart } = useCart();
-
-  const isReadyUse = location.pathname.startsWith('/products/readyuse');
 
   const customCategoryMap = {
     plushie: 'Plushie',
@@ -35,11 +32,11 @@ export function ProductDetailPage() {
   const [hasAccessory, setHasAccessory] = useState(false);
   const [accessoryQuantity, setAccessoryQuantity] = useState(11);
 
-  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
   const [reviews, setReviews] = useState([]);
   const [liveRating, setLiveRating] = useState(0);
 
   const product = products.find((p) => p.id === id);
+  const isReadyUse = product?.type === 'readyuse';
 
   useEffect(() => {
     if (product) {
@@ -114,17 +111,9 @@ export function ProductDetailPage() {
     ...galleryImages,
   ].filter(Boolean);
 
-  const listToUse = isReadyUse
-  ? products.filter((p) => p.type === 'readyuse')
-  : selectedCategory
-    ? products.filter((p) => {
-        const categories = Array.isArray(p.category)
-          ? p.category
-          : [p.category];
-
-        return categories.includes(selectedCategory);
-      })
-    : products;
+  const listToUse = products.filter((p) =>
+    p.type === product.type && (isReadyUse || !selectedCategory || p.category.includes(selectedCategory))
+  );
 
   const currentIndex = listToUse.findIndex((p) => p.id === id);
   const prevProduct = currentIndex > 0 ? listToUse[currentIndex - 1] : listToUse[listToUse.length - 1];
@@ -138,18 +127,6 @@ export function ProductDetailPage() {
   const selectImage = (index) => {
     setCurrentImage(index);
   };
-
-  const getProductUrl = (productId) => {
-  if (isReadyUse) {
-    return `/products/readyuse/${productId}`;
-  }
-
-  if (selectedCategory) {
-    return `/products/custom/${category}/${productId}`;
-  }
-
-  return `/product/${productId}`;
-};
 
 const backUrl = isReadyUse
   ? '/products/readyuse'
@@ -233,11 +210,11 @@ const backUrl = isReadyUse
             </Link>
 
             <div className="flex items-center gap-3">
-              <Link to={getProductUrl(prevProduct.id)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
+              <Link to={getProductUrl(prevProduct, selectedCategory ? category : undefined)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
                 <ChevronLeft className="w-4 h-4" />
                 <span className="hidden sm:inline text-sm font-bold">Previous</span>
               </Link>
-              <Link to={getProductUrl(nextProduct.id)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
+              <Link to={getProductUrl(nextProduct, selectedCategory ? category : undefined)} className="flex items-center gap-2 px-4 py-2 rounded-full bg-card border border-border text-muted-foreground hover:text-[var(--primary)] hover:border-[var(--primary)] shadow-sm transition-all">
                 <span className="hidden sm:inline text-sm font-bold">Next</span>
                 <ChevronRight className="w-4 h-4" />
               </Link>
@@ -522,8 +499,6 @@ const backUrl = isReadyUse
           </div>
         </div>
       </div>
-
-      <CartDrawer onProceedToCheckout={() => setIsCheckoutOpen(true)} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-12 mb-24">
         <h3 className="text-2xl font-bold text-foreground mb-6 flex items-center gap-2 font-heading">

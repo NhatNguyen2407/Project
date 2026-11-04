@@ -7,6 +7,7 @@ import { Search, Filter, Paintbrush, ShoppingBag, SlidersHorizontal, RefreshCw, 
 import { useProducts } from '../context/ProductContext';
 import { ReadyUsePage } from './ReadyUsePage';
 import { SEO } from '../components/common_components/SEO';
+import { filterCustomProducts } from '../utils/catalog';
 
 
 const categories = ['All', 'Plushie', 'Doll', 'Customize'];
@@ -29,6 +30,10 @@ export function ProductsPage() {
 
   const [searchQuery, setSearchQuery] = useState('');
   const [cutStyleFilter, setCutStyleFilter] = useState('All');
+  const availableCutStyles = new Set(products
+    .filter(product => product.type === 'custom' && product.category.includes('Plushie'))
+    .map(product => product.cut_style));
+  const hasCutStyles = ['borderless', 'bordered'].some(style => availableCutStyles.has(style));
 
   const handleTabChange = (tabName) => {
     const routes = {
@@ -45,17 +50,10 @@ export function ProductsPage() {
     setCutStyleFilter('All');
   };
 
-  const filteredProducts = products.filter((product) => {
-    const matchesCategory = selectedCategory === 'All' || product.category.includes(selectedCategory);
-    const titleEn = (product.title || '').toLowerCase();
-    const matchesSearch = titleEn.includes(searchQuery.toLowerCase());
-    
-    let matchesCutStyle = true;
-    if (selectedCategory === 'Plushie' && cutStyleFilter !== 'All') {
-      matchesCutStyle = product.cut_style === cutStyleFilter;
-    }
-
-    return matchesCategory && matchesSearch && matchesCutStyle;
+  const filteredProducts = filterCustomProducts(products, {
+    category: selectedCategory,
+    search: searchQuery,
+    cutStyle: cutStyleFilter,
   });
 
   return (
@@ -149,8 +147,10 @@ export function ProductsPage() {
                     ].map(style => (
                       <button
                         key={style.key}
+                        disabled={style.key !== 'All' && !availableCutStyles.has(style.key)}
+                        aria-pressed={cutStyleFilter === style.key}
                         onClick={() => setCutStyleFilter(style.key)}
-                        className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        className={`px-4 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed ${
                           cutStyleFilter === style.key
                             ? 'bg-[var(--accent)] text-[var(--primary)] border border-[var(--primary)]/30'
                             : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] hover:bg-[var(--accent)]/50'
@@ -160,6 +160,7 @@ export function ProductsPage() {
                       </button>
                     ))}
                   </div>
+                  {!hasCutStyles && <p className="text-xs text-[var(--muted-foreground)]">Cut style details are available on request.</p>}
                 </motion.div>
               )}
             </AnimatePresence>

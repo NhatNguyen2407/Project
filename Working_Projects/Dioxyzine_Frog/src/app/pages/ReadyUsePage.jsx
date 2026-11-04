@@ -3,6 +3,7 @@ import { motion } from 'motion/react';
 import { Filter, ArrowDownUp, Star } from 'lucide-react';
 import { Link } from 'react-router';
 import { useProducts } from '../context/ProductContext';
+import { getProductUrl } from '../utils/catalog';
 
 export function ReadyUsePage() {
   const { products } = useProducts();
@@ -50,7 +51,7 @@ export function ReadyUsePage() {
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
         {displayedProducts.map(product => (
           <Link 
-            to={`/products/readyuse/${product.id}`} 
+            to={getProductUrl(product)}
             key={product.id} 
             className="bg-[var(--card)] border border-[var(--border)] rounded-2xl md:rounded-3xl overflow-hidden group hover:border-[var(--primary)] transition-colors flex flex-col z-20 relative shadow-sm hover:shadow-[0_0_20px_rgba(139,114,190,0.2)] block"
           >

@@ -149,6 +149,8 @@ export function HomePage() {
                   moq={product.moq}
                   category={product.category[0]}
                   pricingType={product.pricingType}
+                  type={product.type}
+                  price={product.price}
                 />
               ))
             )}

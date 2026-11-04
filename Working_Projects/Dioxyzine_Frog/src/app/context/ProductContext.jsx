@@ -46,6 +46,7 @@ export function ProductProvider({ children }) {
           title: item.title || '',
           category: item.category ? String(item.category).split('|').map(c => c.trim()) : [],
           type: item.type || 'custom',
+          cut_style: item.cut_style || null,
           moq: Number(item.moq) || 11,
           pricingType: item.pricing_type,
           price: Number(item.price) || 0,

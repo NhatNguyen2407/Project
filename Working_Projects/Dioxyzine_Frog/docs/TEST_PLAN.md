@@ -1,7 +1,27 @@
 # Dioxyzine Frog - Baseline and Regression Test Plan
 
-**Created:** 2026-10-14 | **Status:** PLAN ONLY - NO TEST RUNS CLAIMED\
+**Created:** 2026-10-14 | **Updated:** 2026-11-04\
 **Scope:** Phase 1, Step 1: describe verification before introducing new implementation.
+
+## Storefront review - 2026-11-04
+
+I am handling the current review in four parts. The older phases below remain a historical baseline.
+
+| Part | Current status |
+| --- | --- |
+| 1. Products and cart | Code fixes implemented; 25 automated tests and production build PASS; hosted smoke check and user acceptance pending |
+| 2. Auth, Profile and Wishlist | Not tested in this review |
+| 3. Inquiry and Admin | Not tested in this review |
+| 4. PayPal Sandbox | Not tested in this review |
+
+| Part 1 issue | Change | Verification / remaining work |
+| --- | --- | --- |
+| Ready-made item shows Custom Quote on a generic product URL | Detail behavior uses product type; cards show ready-made prices and use consistent links | Route regression tests PASS; recheck generic URL and checkout navigation after deployment |
+| Custom tab includes ready-made products | Filter product type before category, search and cut style | Regression tests PASS, including overlapping categories |
+| Cut Style always returns an empty list | Preserve `cut_style` in product context; disable styles with no classified products; Admin preserves unspecified values | Both styles and missing values covered by tests; all current catalog values are null, so business classification remains pending |
+| Two cart drawers open on product detail | Keep only the application-level drawer | Recheck one drawer, quantity changes, reload persistence and checkout navigation after deployment |
+
+No catalog rows, orders, customer records or payment settings were changed. Missing cut styles must be classified from confirmed product specifications, not inferred from a title or an ambiguous pricing code. The filter becomes available as classified products are saved in Admin. Hosted verification does not imply user acceptance.
 
 ## 0. Testing safeguards
 

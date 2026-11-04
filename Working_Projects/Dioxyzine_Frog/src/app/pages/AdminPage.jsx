@@ -43,7 +43,7 @@ export function AdminPage() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [productForm, setProductForm] = useState({
     id: '', title: '', description: '', category: 'Customize', type: 'custom',
-    price: 0, stock: 0, moq: 11, image_cover: '', images_gallery: '', cut_style: 'borderless'
+    price: 0, stock: 0, moq: 11, image_cover: '', images_gallery: '', cut_style: ''
   });
 
   const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
@@ -201,7 +201,7 @@ export function AdminPage() {
       setProductForm({
         id: `NEW-${Math.floor(Math.random()*1000)}`, title: '', description: '', 
         category: 'Customize', type: 'custom', price: 0, stock: 0, moq: 11, 
-        image_cover: '', images_gallery: '', cut_style: 'borderless'
+        image_cover: '', images_gallery: '', cut_style: ''
       });
     }
     setIsModalOpen(true);
@@ -254,7 +254,7 @@ export function AdminPage() {
         finalGalleryUrls = [...finalGalleryUrls, ...uploadedUrls];
       }
 
-      const dataToSave = { ...productForm, image_cover: finalCoverUrl, images_gallery: finalGalleryUrls.join('|') };
+      const dataToSave = { ...productForm, cut_style: productForm.cut_style || null, image_cover: finalCoverUrl, images_gallery: finalGalleryUrls.join('|') };
       const { error } = await supabase.from('products').upsert(dataToSave);
       if (error) throw error;
       
@@ -655,7 +655,8 @@ export function AdminPage() {
 
                 <div>
                   <label className="text-xs text-[var(--muted-foreground)] dark:text-gray-400 font-bold">Cut Style (Plushie Only)</label>
-                  <select value={productForm.cut_style || 'borderless'} onChange={e => setProductForm({...productForm, cut_style: e.target.value})} className="w-full bg-[var(--input-background)] dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-xl p-3 text-sm text-[var(--foreground)] dark:text-white outline-none mt-1 cursor-pointer">
+                  <select value={productForm.cut_style || ''} onChange={e => setProductForm({...productForm, cut_style: e.target.value})} className="w-full bg-[var(--input-background)] dark:bg-black/40 border border-[var(--border)] dark:border-white/10 rounded-xl p-3 text-sm text-[var(--foreground)] dark:text-white outline-none mt-1 cursor-pointer">
+                    <option value="">Not specified</option>
                     <option value="borderless">Không sát viền (Borderless)</option>
                     <option value="bordered">Sát viền (Bordered)</option>
                   </select>

@@ -3,14 +3,17 @@ import { useState, useEffect } from 'react';
 import { Heart } from 'lucide-react';
 import { supabase } from '../service/supabase';
 import { useAuth } from '../context/AuthContext';
+import { getProductUrl } from '../utils/catalog';
 
 import { SmartImage } from '../components/common_components/SmartImage';
 
-export function ProductCard({ id, title, image, basePriceObj, moq, category, pricingType }) {
+export function ProductCard({ id, title, image, basePriceObj, moq, category, pricingType, type, price }) {
+  const isReadyUse = type === 'readyuse';
   const isContactPricing = pricingType === 'contact';
-  const isQuote = isContactPricing || !basePriceObj;
+  const isQuote = !isReadyUse && (isContactPricing || !basePriceObj);
   
   const displayPrice = () => {
+    if (isReadyUse) return `$${Number(price).toFixed(2)}`;
     if (isContactPricing) return 'Custom Quote';
     if (!basePriceObj) return 'Custom Quote';
     const prices = Object.values(basePriceObj);
@@ -85,7 +88,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
         <Heart className={`w-5 h-5 transition-colors ${isLiked ? 'fill-red-500 text-red-500' : 'text-white'}`} />
       </button>
 
-      <Link to={`/product/${id}`} className="flex flex-col flex-grow">
+      <Link to={getProductUrl({ id, type })} className="flex flex-col flex-grow">
         <div className="relative aspect-square rounded-2xl overflow-hidden mb-4 bg-black">
           
           {/* SmartImage */}
@@ -104,7 +107,7 @@ export function ProductCard({ id, title, image, basePriceObj, moq, category, pri
           </div>
 
           <div className="absolute top-3 right-3 flex flex-col gap-2">
-            {moq && (
+            {!isReadyUse && moq && (
               <span className="px-3 py-1 text-xs font-bold text-white bg-[var(--primary)]/20 backdrop-blur-md rounded-full border border-[var(--primary)]/30 shadow-sm">
                 MOQ: {moq}
               </span>
