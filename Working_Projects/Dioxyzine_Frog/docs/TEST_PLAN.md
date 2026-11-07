@@ -1,6 +1,6 @@
 # Dioxyzine Frog - Baseline and Regression Test Plan
 
-**Created:** 2026-10-14 | **Updated:** 2026-11-04\
+**Created:** 2026-10-14 | **Updated:** 2026-11-07\
 **Scope:** Current four-part functional review, with the older baseline retained below.
 
 ## Storefront review - 2026-11-04
@@ -10,7 +10,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | Part | Current status |
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
-| 2. Auth, Profile and Wishlist | Implementation complete for 2.1-2.4; 97 automated checks and SQL account-boundary/rollback checks PASS; combined manual acceptance pending |
+| 2. Auth, Profile and Wishlist | Complete: 2.1-2.4 implemented; 97 automated checks and SQL account-boundary/rollback checks PASS; five-group manual acceptance reported PASS on 2026-11-07 |
 | 3. Inquiry and Admin | Not tested in this review |
 | 4. PayPal Sandbox | Not tested in this review |
 
@@ -32,8 +32,8 @@ I am fixing one small group at a time. Findings below are confirmed in current s
 | Step | Confirmed problem and cause | Fix / status |
 | --- | --- | --- |
 | 2.1. Session initialization and permissions | The Auth callback awaited a role query; the whole app was hidden until initialization finished; failed or hung reads had no recovery; late responses could overwrite a newer account or retain an old role; Login duplicated the role lookup and competed with PublicRoute navigation; Login/Register printed full Auth responses | IMPLEMENTED: synchronous notification callback, deferred role queries, 10-second deadlines, retry UI on Auth routes, cancellation and response ordering, role reset on account change, shared signed-in redirect and removal of response logs |
-| 2.2. Registration and password recovery | Forgot Password treats every HTTP 400 as success; Reset Password treats any existing session as a valid recovery session and checks errors only in the URL fragment; after changing the password it redirects to Login without ending the recovery session | IMPLEMENTED: report returned delivery errors; require an SDK recovery event or a stored marker matching that verified session; check both URL error locations; end the current recovery session before Login; retry failed sign-out without changing the password again; consistent signup-confirmation and OAuth return routes. Real email and OAuth acceptance pending |
-| 2.3. Profile and account deletion | Saving performs separate writes, so failure can follow an earlier successful change; immediate reload hides notices; membership perks are advertised without checkout enforcement; deployed delete-account v6 sets inquiries.contact_info to null although the column is NOT NULL, after other records may already have changed | IMPLEMENTED: one Auth update for settings, pending-email status, password confirmation, persistent notices, account-scoped orders/reviews, avatar preview cleanup, safe reorder checks and accurate membership wording. Auth deletion now anonymizes records transactionally; the Edge Function checks confirmation/account identity and Storage cleanup. Combined acceptance pending |
+| 2.2. Registration and password recovery | Forgot Password treats every HTTP 400 as success; Reset Password treats any existing session as a valid recovery session and checks errors only in the URL fragment; after changing the password it redirects to Login without ending the recovery session | IMPLEMENTED: report returned delivery errors; require an SDK recovery event or a stored marker matching that verified session; check both URL error locations; end the current recovery session before Login; retry failed sign-out without changing the password again; consistent signup-confirmation and OAuth return routes. User-reported acceptance PASS on 2026-11-07 |
+| 2.3. Profile and account deletion | Saving performs separate writes, so failure can follow an earlier successful change; immediate reload hides notices; membership perks are advertised without checkout enforcement; deployed delete-account v6 sets inquiries.contact_info to null although the column is NOT NULL, after other records may already have changed | IMPLEMENTED: one Auth update for settings, pending-email status, password confirmation, persistent notices, account-scoped orders/reviews, avatar preview cleanup, safe reorder checks and accurate membership wording. Auth deletion now anonymizes records transactionally; the Edge Function checks confirmation/account identity and Storage cleanup. User-reported acceptance PASS on 2026-11-07 |
 | 2.4. Wishlist | ProductCard does not reset the liked state on sign-out/account change and does not cancel stale reads; removal updates the UI without confirming affected rows | IMPLEMENTED: one shared account-scoped wishlist, cancelled/deadlined reads, late-response guards, confirmed mutation rows, duplicate-click protection and immediate synchronization between cards and Profile |
 
 ### 2.1 verification
@@ -59,7 +59,7 @@ The historical loss of site access has not been attributed conclusively to Auth.
 - `pnpm build`: PASS; the existing large-bundle warning remains. No dependencies, Auth records, database policies, provider settings or payment settings changed.
 - Production `main@872771d`: READY on 2026-11-04. Anonymous browser checks PASS: direct reset access and query/fragment errors show the invalid-link page; requesting a new link opens Forgot Password; empty/malformed email stays on the form with an error; empty registration shows required-field and terms errors; labels and autocomplete values match the intended fields. No Auth request was submitted and no email or credentials were used.
 - GitHub Actions `Dioxyzine Frog CI` for `872771d`: PASS (frozen dependency install, all tests and production build).
-- Real confirmation-email delivery, opening a genuine recovery email, password update followed by login with the new password, and Google/Facebook consent/redirect completion are NOT TESTED. Use only an inbox controlled by the tester; dummy addresses without inbox access cannot verify these paths.
+- At implementation verification on 2026-11-04, real email delivery, recovery-link completion and OAuth consent/redirect completion had not been tested. The later user-reported acceptance is recorded below; the automated checks above remain separate evidence.
 
 ### 2.3 and 2.4 verification
 
@@ -79,7 +79,9 @@ The historical loss of site access has not been attributed conclusively to Auth.
 
 ### Combined Part 2 acceptance - one final batch
 
-Implementation is complete; the checks below require the tester's browser and controlled accounts. Do not mark Part 2 accepted until results are recorded. Use an inbox you control for registration, recovery and email-change tests. Do not use a real customer account for deletion or a live order for review/reorder testing.
+**Accepted on 2026-11-07 (user-reported).** After the combined checklist, I reported PASS for all five groups: session/access, registration/recovery, Profile, Wishlist and disposable-account deletion. This records my browser acceptance, separately from the automated and SQL checks above. Dedicated PayPal Sandbox and order-flow validation remain in Part 4.
+
+The checklist below is retained for regression testing. Use controlled inboxes and disposable accounts; use Sandbox orders for review/reorder checks.
 
 1. **Session and roles:** customer login, F5 on Profile, sign-out, direct Profile access while signed out; normal users cannot enter Admin. If an Admin test account is available, confirm its Admin redirect and return to a customer account without retaining Admin state.
 2. **Registration, email and recovery:** register with a controlled inbox, confirm the email, request a reset, open the real reset email, change the password and sign in again. Direct/expired reset links must stay invalid. Complete Google/Facebook sign-in where configured and record any provider error.
@@ -87,11 +89,11 @@ Implementation is complete; the checks below require the tester's browser and co
 4. **Wishlist:** add a product, see it immediately in Profile, remove it and check the product heart. Reload to verify persistence; sign out and switch accounts to verify isolation. A failed request must show a retryable error.
 5. **Disposable account deletion:** use a newly created test-only account, cancel once, then type DELETE and confirm. The account must be signed out and unable to sign in again. Verify its business history is anonymized and another account remains unaffected. Never delete the main Admin or an account with real orders as a test.
 
-**Release checkpoint:** `main@536ff22` was deployed to Production READY with GitHub Actions PASS. Hosted anonymous checks passed: membership benefits are marked inactive; Custom/Ready-made catalogs render; the Custom Wishlist control requests sign-in and stays unliked for a guest; direct Profile access redirects to Login; direct password reset stays invalid. The Ready-made Wishlist control was added in the follow-up using the same shared button. Real inbox delivery, OAuth consent, settings writes/uploads and actual Auth API deletion remain pending user acceptance.
+**Release checkpoint:** `main@536ff22` was deployed to Production READY with GitHub Actions PASS. Hosted anonymous checks passed: membership benefits are marked inactive; Custom/Ready-made catalogs render; the Custom Wishlist control requests sign-in and stays unliked for a guest; direct Profile access redirects to Login; direct password reset stays invalid. The follow-up `main@8377e6e` added the shared Ready-made Wishlist control and passed CI; Production was READY and its three Ready-made Wishlist buttons were verified. On 2026-11-07, the user reported PASS for the combined Part 2 acceptance checklist.
 
 **Recovery:** the migration adds a private function and one Auth deletion trigger without rewriting existing rows. If deletion needs to be paused, deploy a handler returning 503 before reverting related code; do not restore the previous partial-anonymization pipeline. Database rollback removes the new trigger/function, but cannot restore an account the user has already deliberately deleted.
 
-**Next checkpoint:** complete the combined Part 2 acceptance batch. Part 3 Inquiry/Admin implementation starts after that review. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
+**Next checkpoint:** Part 2 is accepted. Start Part 3 by reviewing the Inquiry submission and Admin management flows, confirm each issue's cause, then fix one small group at a time. Part 3 has not yet been reviewed in this pass. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
 
 ## 0. Testing safeguards
 
