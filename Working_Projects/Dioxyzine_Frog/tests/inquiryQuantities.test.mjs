@@ -10,9 +10,10 @@ test('valid inquiry counts are normalized exactly, without parseInt truncation o
 });
 
 test('zero, negative, fractional, malformed and out-of-range quantities are rejected instead of becoming one', () => {
-  for (const quantity of [0, '0', '-0', -1, '-1', 1.5, '1.5', '', ' ', undefined, null, true, [], {}, '1abc', 'NaN', NaN, Infinity, INQUIRY_COUNT_MAX + 1]) {
+  for (const quantity of [0, '0', '-0', -1, '-1', 1.5, '1.5', '', ' ', undefined, null, true, [], {}, '1abc', 'NaN', NaN, Infinity]) {
     assert.throws(() => getInquiryQuantities({ quantity }), /Quantity must be a whole number/);
   }
+  assert.throws(() => getInquiryQuantities({ quantity: INQUIRY_COUNT_MAX + 1 }), /Quantity is too large/);
 });
 
 test('optional accessory count defaults only missing or blank input to zero', () => {
@@ -22,7 +23,8 @@ test('optional accessory count defaults only missing or blank input to zero', ()
 });
 
 test('invalid accessories are rejected without rounding, clamping or silently becoming zero', () => {
-  for (const accessoryQty of [-1, '-1', 1.5, '1.5', '2abc', true, [], {}, NaN, Infinity, INQUIRY_COUNT_MAX + 1]) {
+  for (const accessoryQty of [-1, '-1', 1.5, '1.5', '2abc', true, [], {}, NaN, Infinity]) {
     assert.throws(() => getInquiryQuantities({ quantity: '1', accessoryQty }), /Accessories per unit must be a whole number/);
   }
+  assert.throws(() => getInquiryQuantities({ quantity: '1', accessoryQty: INQUIRY_COUNT_MAX + 1 }), /Accessories per unit is too large/);
 });
