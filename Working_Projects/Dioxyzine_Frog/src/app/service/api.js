@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { getInquiryQuantities } from '../utils/inquiryQuantities';
 
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwuex1g0XqvFfM1lf79CqmZ_oBzRGTGBTt27pjduIw7ZeIROJmU6AA2oRfVXGW3JD-P/exec';
 
@@ -18,6 +19,7 @@ export const api = {
   // Form Inquiry
   submitInquiry: async (data) => {
     try {
+      const quantities = getInquiryQuantities(data);
       const { data: { user } } = await supabase.auth.getUser();
 
       const { error } = await supabase
@@ -31,8 +33,8 @@ export const api = {
             contact_info: data.contactInfo,
             product_name: data.productName,
             size: data.size || null,
-            quantity: parseInt(data.quantity) || 1,
-            accessory_qty: parseInt(data.accessoryQty) || 0,
+            quantity: quantities.quantity,
+            accessory_qty: quantities.accessoryQty,
             image_link: data.imageLink,
             note: data.note || null
           }
@@ -41,7 +43,7 @@ export const api = {
       if (error) throw error;
 
       // backup in google sheets
-      const payload = { type: 'inquiry', ...data };
+      const payload = { type: 'inquiry', ...data, ...quantities };
       fetch(SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },

@@ -11,6 +11,7 @@ import { ToastNotification } from '../components/common_components/ToastNotifica
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { SEO } from '../components/common_components/SEO';
 import { useAuth } from '../context/AuthContext';
+import { getInquiryQuantities, INQUIRY_COUNT_MAX } from '../utils/inquiryQuantities';
 
 import { pricingMatrix } from '../data/pricingMatrix';
 
@@ -39,6 +40,11 @@ export function InquiryPage() {
 
   const currentProduct = pricingMatrix[formData.productType];
   const availableSizes = currentProduct?.sizes || [];
+  let quantities, quantityError;
+  try { quantities = getInquiryQuantities(formData); }
+  catch (error) { quantityError = error.message; }
+  const quantity = quantities?.quantity;
+  const accessoryQty = quantities?.accessoryQty;
 
   useEffect(() => {
     if (currentProduct && currentProduct.sizes.length > 0) {
@@ -50,12 +56,9 @@ export function InquiryPage() {
   }, [formData.productType, currentProduct]);
 
   const estimatedQuote = useMemo(() => {
-    if (!currentProduct || currentProduct.name === 'Custom Requirements') return null;
-    
-    const qty = parseInt(formData.quantity) || 0;
-    if (qty < 1) return null;
+    if (!quantity || !currentProduct || currentProduct.name === 'Custom Requirements') return null;
 
-    const bracket = currentProduct.priceBrackets.find(b => qty >= b.min && qty <= b.max);
+    const bracket = currentProduct.priceBrackets.find(b => quantity >= b.min && quantity <= b.max);
     if (!bracket) return null;
 
     const sizeIndex = currentProduct.sizes.findIndex(s => s.key === formData.size);
@@ -63,11 +66,10 @@ export function InquiryPage() {
 
     const basePrice = bracket.prices[sizeIndex];
     const addonPrice = currentProduct.addons?.phuKien?.[sizeIndex] || 0;
-    const accQty = parseInt(formData.accessoryQty) || 0;
 
-    const totalPerItem = basePrice + (addonPrice * accQty);
-    return (totalPerItem * qty).toFixed(2);
-  }, [formData.productType, formData.quantity, formData.size, formData.accessoryQty, currentProduct]);
+    const totalPerItem = basePrice + (addonPrice * accessoryQty);
+    return (totalPerItem * quantity).toFixed(2);
+  }, [quantity, accessoryQty, formData.size, currentProduct]);
 
   useEffect(() => {
     if (user) {
@@ -117,6 +119,8 @@ export function InquiryPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (status === 'loading' || isUploading) return;
+    if (quantityError) return showToast(quantityError, 'error');
     if (!formData.subject || !formData.customerName || !formData.customerEmail || !formData.contactInfo || !formData.quantity) {
       return showToast('Please fill in all required fields!', 'error');
     }
@@ -150,6 +154,7 @@ export function InquiryPage() {
 
       const payload = {
         ...formData,
+        ...quantities,
         productName: currentProduct?.name || 'Custom Requirements'
       };
       
@@ -257,13 +262,13 @@ export function InquiryPage() {
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-bold text-foreground">Quantity * (Min 1)</label>
-                  <input required type="number" min="1" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground font-medium outline-none focus:border-[var(--primary)] transition-colors shadow-sm" />
+                  <label htmlFor="inquiry-quantity" className="text-sm font-bold text-foreground">Quantity * (Min 1)</label>
+                  <input id="inquiry-quantity" required type="number" min="1" max={INQUIRY_COUNT_MAX} step="1" name="quantity" value={formData.quantity} onChange={handleChange} className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground font-medium outline-none focus:border-[var(--primary)] transition-colors shadow-sm" />
                 </div>
 
                 <div className="space-y-2 md:col-span-2">
-                  <label className="text-sm font-bold text-foreground">Number of Custom Accessories (Per Unit)</label>
-                  <input type="number" min="0" name="accessoryQty" value={formData.accessoryQty} onChange={handleChange} placeholder="E.g., 1 Hat + 1 Shirt = 2" className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground font-medium outline-none focus:border-[var(--primary)] transition-colors shadow-sm" />
+                  <label htmlFor="inquiry-accessories" className="text-sm font-bold text-foreground">Number of Custom Accessories (Per Unit)</label>
+                  <input id="inquiry-accessories" type="number" min="0" max={INQUIRY_COUNT_MAX} step="1" name="accessoryQty" value={formData.accessoryQty} onChange={handleChange} placeholder="E.g., 1 Hat + 1 Shirt = 2" className="w-full px-4 py-3 bg-background border border-border rounded-xl text-foreground font-medium outline-none focus:border-[var(--primary)] transition-colors shadow-sm" />
                 </div>
 
                 {/* KHU VỰC UPLOAD ẢNH THAY CHO GOOGLE DRIVE */}
@@ -382,7 +387,7 @@ export function InquiryPage() {
                   </div>
                 ) : (
                   <div className="text-center text-yellow-600 dark:text-yellow-500 font-bold text-sm">
-                    {parseInt(formData.quantity) < 1 ? 'Minimum order is 1 units' : 'Please contact us for quote'}
+                    {quantityError || 'Please contact us for quote'}
                   </div>
                 )}
               </div>
