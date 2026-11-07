@@ -11,7 +11,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
 | 2. Auth, Profile and Wishlist | Complete: 2.1-2.4 implemented; 97 automated checks and SQL account-boundary/rollback checks PASS; five-group manual acceptance reported PASS on 2026-11-07 |
-| 3. Inquiry and Admin | In progress: Inquiry quantity validation fixed; automated, SQL and hosted validation checks PASS; full Inquiry/Admin acceptance pending |
+| 3. Inquiry and Admin | In progress: 3.1 quantity correction accepted by the user on 2026-11-07; automated, SQL and hosted validation checks PASS; remaining Inquiry/Admin checks pending |
 | 4. PayPal Sandbox | Not tested in this review |
 
 | Part 1 issue | Change | Verification / remaining work |
@@ -93,7 +93,7 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 
 **Recovery:** the migration adds a private function and one Auth deletion trigger without rewriting existing rows. If deletion needs to be paused, deploy a handler returning 503 before reverting related code; do not restore the previous partial-anonymization pipeline. Database rollback removes the new trigger/function, but cannot restore an account the user has already deliberately deleted.
 
-**Next checkpoint:** Part 2 is accepted. Continue Part 3 with Inquiry acceptance after the quantity correction below, then Admin management. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
+**Next checkpoint:** Part 2 and the Part 3.1 quantity correction are accepted. Continue with the remaining Inquiry/Admin checks, starting with the submitted Inquiry in Admin. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
 
 ## Part 3 review - 2026-11-07
 
@@ -103,9 +103,12 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 - The shared form/API validator now requires a positive whole-number quantity and nonnegative whole-number accessories per unit. Optional blank accessories normalize to zero. Both counts must fit a PostgreSQL integer. The estimate, database payload and Sheets backup use the same normalized values. Invalid submissions stop before the API's Auth lookup or database/Sheets writes.
 - Applied migration `20261107075654_guard_inquiry_quantities`: a private invoker trigger rejects invalid counts on INSERT or explicit count updates. Existing invalid historical rows remain unchanged for review. Unrelated updates, including account anonymization, remain available; add validated CHECK constraints after historical cleanup. No customer quantity was guessed or rewritten.
 - Verification: `pnpm test` 101/101 PASS, production build PASS, and `supabase/tests/inquiry_quantities.sql` PASS inside a rolled-back transaction. SQL checks cover invalid inserts/updates, valid counts, unrelated updates and fixture cleanup. Security advisor results are unchanged from the baseline. The existing bundle-size warning remains.
-- Production `main@83dd864` was READY with GitHub Actions CI PASS. Hosted anonymous checks PASS: quantity `0`, `-1`, `1.5` and blank, plus negative/fractional accessories, are rejected; quantity `1` with accessories `0` advances to the ordinary required-fields check. No Inquiry was submitted during these browser checks. Full successful Inquiry/reCAPTCHA/Sheets/Admin acceptance remains pending; these checks do not establish delivery to external integrations.
+- Production `main@83dd864` was READY with GitHub Actions CI PASS. Hosted anonymous checks PASS: quantity `0`, `-1`, `1.5` and blank, plus negative/fractional accessories, are rejected; quantity `1` with accessories `0` advances to the ordinary required-fields check. No Inquiry was submitted during these browser checks; they do not establish delivery to external integrations.
+- Follow-up `main@b2cdc5a` shortened quantity/accessory errors and removed the displayed database maximum. The upper bound remains enforced with a separate short error. Tests 101/101, build and CI PASS; Production READY.
 
-**Retest:** after deployment, reload Inquiry and try quantity `0`, `-1`, `1.5` and blank; all must show an error without success. Negative/fractional accessories must also fail. Quantity `1` with accessories `0` must pass count validation and proceed through the normal required-fields, upload and CAPTCHA checks. Then complete one controlled valid Inquiry and verify its exact counts in Admin before continuing the remaining Admin checklist.
+**User acceptance - 2026-11-07:** the latest Inquiry retest was reported PASS after the quantity and message corrections. Part 3.1 is accepted. Broader Admin and external-integration acceptance remains to be recorded separately.
+
+**Regression checklist:** reload Inquiry and try quantity `0`, `-1`, `1.5` and blank; all must show an error without success. Negative/fractional accessories must also fail. Quantity `1` with accessories `0` must pass count validation and proceed through the normal required-fields, upload and CAPTCHA checks. Complete one controlled valid Inquiry and verify its exact counts in Admin before continuing the remaining Admin checklist.
 
 ## 0. Testing safeguards
 
