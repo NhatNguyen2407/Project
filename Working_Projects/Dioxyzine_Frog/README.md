@@ -8,9 +8,9 @@ Dioxyzine Frog is an e-commerce website for custom plushies, dolls, and accessor
 
 - Custom and ready-use product listings and product detail pages
 - Cart and checkout flows, with PayPal Sandbox integration
-- Account registration, login, password reset, and profile pages
+- Account registration, login, password recovery, profile management, and account deletion flows
 - Order tracking, customer inquiries, feedback, and gallery pages
-- Administration UI for product and order-related workflows
+- Wishlist and account order views, plus administration UI for product and order-related workflows
 - Responsive layouts, accessibility-oriented components, and basic SEO/analytics hooks
 
 Some experimental tools have source files but are not active public routes. Their existence does not mean they are ready for production.
@@ -64,19 +64,20 @@ A local frontend does not reproduce the full checkout system by itself. Payment 
 | --- | --- |
 | `src/app/pages/` | Storefront, auth, checkout, tracking, profile, and admin pages |
 | `src/app/components/` | Shared interface, layout, and storefront components |
-| `src/app/context/` | Auth, cart, products, and language state |
+| `src/app/context/` | Auth, cart, products, wishlist, and language state |
 | `src/app/service/` | Supabase, API, and media integrations |
 | `supabase/functions/` | Payment creation/capture, account deletion, reCAPTCHA verification |
 | `supabase/migrations/` | Versioned SQL changes tracked in source |
-| `tests/` | Node-based contract and regression tests |
+| `tests/` | Node-based tests for auth, account management, catalog, inquiries, wishlist, tracking, and payments |
 | `scripts/` | Backup inspection, restore preparation, and environment checks |
+| `supabase/tests/` | SQL regression checks for account permissions, deletion, and inquiry quantities |
 | `docs/` | Audits, test plan, inventory, preview isolation, recovery notes |
 
 ## Testing and operational cautions
 
 The repository includes automated tests and CI, but it also relies on manual end-to-end verification of payment, product, profile, and administration flows. See [TEST_PLAN.md](docs/TEST_PLAN.md).
 
-Do not reapply repository migrations to a live database without checking its existing schema and migration history. The [recovery notes](docs/RECOVERY_READINESS.md) document differences between tracked migration filenames and live records, as well as recovery checks that remain incomplete.
+Recent tracked SQL changes include atomic account deletion and inquiry quantity guards. These files demonstrate the intended backend rules, but Git history alone does not establish the state of the hosted database. Do not reapply repository migrations to a live database without checking its existing schema and migration history. The [recovery notes](docs/RECOVERY_READINESS.md) document differences between tracked migration filenames and live records, as well as recovery checks that remain incomplete.
 
 Vercel Preview is not automatically isolated from Production Supabase. Check environment configuration before using real accounts or attempting any data-changing tests.
 
