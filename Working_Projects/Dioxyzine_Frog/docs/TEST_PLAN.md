@@ -11,7 +11,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
 | 2. Auth, Profile and Wishlist | Complete: 2.1-2.4 implemented; 97 automated checks and SQL account-boundary/rollback checks PASS; five-group manual acceptance reported PASS on 2026-11-07 |
-| 3. Inquiry and Admin | In progress: 3.1 accepted; 3.2 signed-in list/details confirmed by the user on 2026-11-09; 3.3 confirmed Admin writes implemented, automated/SQL checks PASS; remaining acceptance and Inquiry/Admin work pending |
+| 3. Inquiry and Admin | In progress: 3.1 accepted; 3.2 signed-in list/details confirmed; 3.3 Completed status persistence confirmed by the user on 2026-11-09, automated/SQL checks PASS; other Admin acceptance and Inquiry work pending |
 | 4. PayPal Sandbox | Not tested in this review |
 
 | Part 1 issue | Change | Verification / remaining work |
@@ -134,11 +134,13 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 - All active Admin database writes now require exactly one returned ID through the existing confirmation helper. Failed or unconfirmed saves keep the form/visible records unchanged and cannot trigger the shipping email. Order/review state updates use the latest state. Product creation inserts; editing updates the original ID. Review replies reject whitespace-only input and voucher codes use trimmed uppercase text.
 - Verification: five executable handler tests failed against the old source and pass after the correction. The full suite is 110/110 PASS; production build PASS with the existing bundle warning. Tests use fake database/email services, including empty, absent, malformed, duplicate and denied responses, valid writes, mismatched shipping-order IDs, product create/edit paths and normalized inputs. No real notification was sent.
 - `supabase/tests/admin_inquiry_access.sql` PASS in a rolled-back transaction, including a customer's denied update returning zero rows and an Admin update returning the saved fixture ID. Existing read/ownership checks and fixture cleanup also pass. No schema, RLS policy, real customer row, catalog row or payment state was changed by these tests.
-- Implemented; controlled browser acceptance remains pending. This does not establish full Part 3 completion, server-enforced Inquiry spam protection, durable email retries or live-payment readiness.
+- Implemented; controlled browser acceptance is partial. This does not establish full Part 3 completion, server-enforced Inquiry spam protection, durable email retries or live-payment readiness.
 
-**Controlled acceptance (pending):**
+**User checkpoint - 2026-11-09:** the user reported that the order correctly remained Completed after F5. This confirms persistence for that reported status case. Reviews, product/code saves and shipping/email acceptance remain pending.
 
-1. On a Sandbox test order, change Pending to Confirmed, reload and verify the saved status. Shipping/email verification requires a controlled test recipient and remains separate.
+**Controlled acceptance (partial; retain for regression):**
+
+1. User-reported PASS: Completed remained after F5 on 2026-11-09. Retain Pending to Confirmed on a Sandbox order as another regression case; it was not separately reported. Shipping/email verification requires a controlled test recipient and remains separate.
 2. On a test review, save a reply and toggle visibility; reload after each action. A blank reply must fail without a saved change.
 3. When testing products/codes, use disposable test records. Verify a confirmed save persists after reload; duplicate new product IDs must fail rather than overwrite an existing item.
 
