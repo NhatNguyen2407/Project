@@ -136,13 +136,14 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 - `supabase/tests/admin_inquiry_access.sql` PASS in a rolled-back transaction, including a customer's denied update returning zero rows and an Admin update returning the saved fixture ID. Existing read/ownership checks and fixture cleanup also pass. No schema, RLS policy, real customer row, catalog row or payment state was changed by these tests.
 - Implemented; controlled browser acceptance is partial. This does not establish full Part 3 completion, server-enforced Inquiry spam protection, durable email retries or live-payment readiness.
 
-**User checkpoint - 2026-11-09:** the user reported that Completed remained after F5, the edited review reply retained its new content, and both Hide and Show states persisted after reload. These confirm the reported Admin persistence cases. Product/code saves, public review visibility and shipping/email acceptance remain pending.
+**User checkpoint - 2026-11-09:** the user reported that Completed remained after F5, the edited review reply retained its new content, and both Hide and Show states persisted after reload. The user subsequently created a test Promo Code and created/deleted a test product. A scoped read in the correct production project confirmed that the reported test product was absent; the screenshots show its creation and removal. The supplied numeric Promo Code retained its leading zero, percent discount and usage limit, and was enabled at the time of verification. Product price-edit/image-upload acceptance, Promo deactivation persistence, public review visibility and shipping/email remain pending. No database row was modified during this verification.
 
 **Controlled acceptance (partial; retain for regression):**
 
 1. User-reported PASS: Completed remained after F5 on 2026-11-09. Retain Pending to Confirmed on a Sandbox order as another regression case; it was not separately reported. Shipping/email verification requires a controlled test recipient and remains separate.
 2. User-reported PASS on 2026-11-09: the edited review reply, Hide state and Show state each persisted after reload. Retain blank-reply rejection and public visibility as separate regression checks; these were not reported.
-3. When testing products/codes, use disposable test records. Verify a confirmed save persists after reload; duplicate new product IDs must fail rather than overwrite an existing item.
+3. Product create/delete: user-reported PASS, with screenshots and a database absence check on 2026-11-09. Price-edit persistence, image upload and duplicate-ID rejection remain separate pending checks. Use disposable products for these checks.
+4. Promo creation: user-reported PASS; a scoped read confirmed the supplied code's discount and limit, with its active flag enabled. Disabling/reloading and applying the discount at Checkout were not separately established by this verification.
 
 ## 0. Testing safeguards
 
