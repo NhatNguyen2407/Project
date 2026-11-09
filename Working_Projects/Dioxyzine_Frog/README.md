@@ -10,7 +10,7 @@ Dioxyzine Frog is an e-commerce website for custom plushies, dolls, and accessor
 - Cart and checkout flows, with PayPal Sandbox integration
 - Account registration, login, password recovery, profile management, and account deletion flows
 - Order tracking, customer inquiries, feedback, and gallery pages
-- Wishlist and account order views, plus administration UI for product and order-related workflows
+- Wishlist and account order views, plus administration UI for products, orders, and searchable read-only Inquiry details
 - Responsive layouts, accessibility-oriented components, and basic SEO/analytics hooks
 
 Some experimental tools have source files but are not active public routes. Their existence does not mean they are ready for production.

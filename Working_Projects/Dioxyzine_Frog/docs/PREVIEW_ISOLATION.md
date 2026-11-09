@@ -1,6 +1,14 @@
 # Vercel Preview / Supabase Backend Isolation
 
-**Status (2026-10-16): Preview-only URL and staging project marker verified against the separate, healthy Supabase Staging project. GitHub CI and guarded Vercel Preview BUILD have passed. Browser/runtime identity, complete staging compatibility and external integration isolation remain unverified.**
+**Historical checkpoint (2026-10-16): Preview-only URL and staging project marker verified against the separate, healthy Supabase Staging project. GitHub CI and guarded Vercel Preview BUILD have passed. Browser/runtime identity, complete staging compatibility and external integration isolation remained unverified.**
+
+## Staging deletion review - 2026-11-09
+
+- Supabase currently reports Dioxyzine Frog Staging as INACTIVE. This does not establish that its data or Preview configuration is disposable.
+- The Preview build guard still requires a separate staging reference and matching URL. Production builds and GitHub CI's ordinary local build are exempt from that guard; the CI workflow does not connect to a staging database.
+- Current Vercel environment inspection is blocked by a team-access 403. The earlier Preview-to-Staging mapping above is historical until access is restored and its current URL/reference are checked.
+- Deletion is not cleared. First verify or retire the Preview dependency and establish whether any staging-only data must be retained. Do not point Preview at Production to remove this dependency.
+- This review made no deletion or environment change.
 
 ## Purpose
 

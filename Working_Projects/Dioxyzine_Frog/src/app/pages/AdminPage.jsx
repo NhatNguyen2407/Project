@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { assertConfirmedMutation, requireOrderId } from '../utils/orderIntegrity';
+import { AdminInquiries } from '../components/admin/AdminInquiries';
 
 export function AdminPage() {
   const { user, role } = useAuth();
@@ -28,6 +29,7 @@ export function AdminPage() {
   const [products, setProducts] = useState([]);
   const [vouchers, setVouchers] = useState([]); 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [updatingId, setUpdatingId] = useState(null);
 
   // Textbox Review
@@ -69,6 +71,7 @@ export function AdminPage() {
 
   const fetchData = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const [resOrders, resPaypalOrders, resProducts, resVouchers] = await Promise.all([
         supabase.from('inquiries').select('*').order('created_at', { ascending: false }),
@@ -98,6 +101,7 @@ export function AdminPage() {
       if (resVouchers.data) setVouchers(resVouchers.data);
     } catch (err) {
       console.error(err);
+      setLoadError(true);
       toast.error('Could not load admin data. Please try refreshing the page.');
     } finally {
       setLoading(false);
@@ -338,6 +342,9 @@ export function AdminPage() {
               <button onClick={() => setActiveTab('orders')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'orders' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
                 Orders ({paypalOrders.length})
               </button>
+              <button type="button" aria-pressed={activeTab === 'inquiries'} onClick={() => setActiveTab('inquiries')} className={`min-h-11 px-4 sm:px-6 py-2 rounded-lg font-bold transition-all focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] ${activeTab === 'inquiries' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
+                Inquiries ({orders.length})
+              </button>
               <button onClick={() => setActiveTab('products')} className={`px-4 sm:px-6 py-2 rounded-lg font-bold transition-all ${activeTab === 'products' ? 'bg-[var(--primary)] text-white' : 'text-[var(--muted-foreground)] hover:text-[var(--primary)] cursor-pointer'}`}>
                 CMS Products ({products.length})
               </button>
@@ -364,6 +371,13 @@ export function AdminPage() {
 
           {loading ? (
             <div className="text-center py-20 text-[var(--primary)]">Loading database...</div>
+          ) : loadError ? (
+            <div role="alert" className="rounded-2xl border border-[var(--border)] bg-[var(--card)] p-6 text-[var(--foreground)]">
+              <p>Could not load admin data.</p>
+              <button type="button" onClick={fetchData} className="mt-3 min-h-11 rounded-xl bg-[var(--primary)] px-5 py-2 font-bold text-white focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--primary)] cursor-pointer">Try again</button>
+            </div>
+          ) : activeTab === 'inquiries' ? (
+            <AdminInquiries inquiries={orders} onRefresh={fetchData} />
           ) : activeTab === 'orders' ? (
             <div className="bg-[var(--card)] dark:bg-[#1A1528] border border-[var(--border)] rounded-3xl overflow-hidden shadow-sm dark:shadow-2xl relative z-0">
               <div className="overflow-x-auto">

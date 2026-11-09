@@ -1,6 +1,6 @@
 # Dioxyzine Frog - Baseline and Regression Test Plan
 
-**Created:** 2026-10-14 | **Updated:** 2026-11-07\
+**Created:** 2026-10-14 | **Updated:** 2026-11-09\
 **Scope:** Current four-part functional review, with the older baseline retained below.
 
 ## Storefront review - 2026-11-04
@@ -11,7 +11,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
 | 2. Auth, Profile and Wishlist | Complete: 2.1-2.4 implemented; 97 automated checks and SQL account-boundary/rollback checks PASS; five-group manual acceptance reported PASS on 2026-11-07 |
-| 3. Inquiry and Admin | In progress: 3.1 quantity correction accepted by the user on 2026-11-07; automated, SQL and hosted validation checks PASS; remaining Inquiry/Admin checks pending |
+| 3. Inquiry and Admin | In progress: 3.1 quantity correction accepted on 2026-11-07; 3.2 Admin Inquiry list/details implemented with automated and SQL checks PASS; signed-in browser acceptance and remaining Admin checks pending |
 | 4. PayPal Sandbox | Not tested in this review |
 
 | Part 1 issue | Change | Verification / remaining work |
@@ -109,6 +109,21 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 **User acceptance - 2026-11-07:** the latest Inquiry retest was reported PASS after the quantity and message corrections. Part 3.1 is accepted. Broader Admin and external-integration acceptance remains to be recorded separately.
 
 **Regression checklist:** reload Inquiry and try quantity `0`, `-1`, `1.5` and blank; all must show an error without success. Negative/fractional accessories must also fail. Quantity `1` with accessories `0` must pass count validation and proceed through the normal required-fields, upload and CAPTCHA checks. Complete one controlled valid Inquiry and verify its exact counts in Admin before continuing the remaining Admin checklist.
+
+### 3.2 Admin Inquiry view - 2026-11-09
+
+- Confirmed gap: Admin already fetched inquiries but displayed them only when they had a review. The Orders tab displays PayPal orders, so a newly submitted Inquiry had no dedicated screen.
+- Added an Inquiries tab with newest-first requests, search by subject/customer/email/product/full ID, and expandable details. Each request preserves its saved quantity, accessories per unit, contact, size, notes and submission time; the design reference opens in a new tab. HTTPS reference links reject executable or credential-bearing URLs, and customer text is rendered as text.
+- Reused the existing Admin fetch, role gate, RLS and shared Accordion. Added refresh and an explicit load-error/retry state. The view is read-only. It shows 25 matches at a time; Show more reveals the next group. Search/count cover the existing Admin batch, so server pagination is needed before exceeding the configured API row limit.
+- Verification: `pnpm test` 105/105 PASS, including search, unsafe-link rejection and server-render checks for exact counts, accessories `0`, escaped text, empty state and the initial display limit. Production build PASS with the existing bundle warning. `supabase/tests/admin_inquiry_access.sql` PASS inside a rolled-back transaction: anonymous reads denied, customer reads scoped to ownership, Admin reads both synthetic requests, and fixtures removed. No schema/policy change or persistent customer-record mutation was required.
+- Browser limitation: the cloud browser blocked the local fixture HTML protocol. Interactive expansion/search, responsive layout and signed-in Production behavior still require browser acceptance. Server-render checks are not interactive browser tests. Part 3 remains in progress.
+
+**Acceptance checklist (pending):**
+
+1. Sign in as Admin, open Admin, select Inquiries and find the submitted test request by email or subject.
+2. Open it and compare customer details, product/size, quantity, accessories per unit and multiline notes with the submitted form. Accessories `0` must stay visible as `0`.
+3. Open the design reference and verify the expected image. Search for a nonexistent value, confirm the empty result, then clear the search.
+4. Refresh inquiries; reload the page, return to Inquiries and confirm the saved request remains. Check the view on a narrow screen and verify expansion with Enter/Space.
 
 ## 0. Testing safeguards
 
