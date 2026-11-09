@@ -11,7 +11,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
 | 2. Auth, Profile and Wishlist | Complete: 2.1-2.4 implemented; 97 automated checks and SQL account-boundary/rollback checks PASS; five-group manual acceptance reported PASS on 2026-11-07 |
-| 3. Inquiry and Admin | In progress: 3.1 accepted; 3.2 signed-in list/details confirmed; 3.3 Completed status persistence confirmed by the user on 2026-11-09, automated/SQL checks PASS; other Admin acceptance and Inquiry work pending |
+| 3. Inquiry and Admin | In progress: 3.1 accepted; 3.2 signed-in list/details confirmed; 3.3 Completed status, saved review replies and visibility persistence confirmed by the user on 2026-11-09; product/code acceptance and Inquiry work pending |
 | 4. PayPal Sandbox | Not tested in this review |
 
 | Part 1 issue | Change | Verification / remaining work |
@@ -136,12 +136,12 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 - `supabase/tests/admin_inquiry_access.sql` PASS in a rolled-back transaction, including a customer's denied update returning zero rows and an Admin update returning the saved fixture ID. Existing read/ownership checks and fixture cleanup also pass. No schema, RLS policy, real customer row, catalog row or payment state was changed by these tests.
 - Implemented; controlled browser acceptance is partial. This does not establish full Part 3 completion, server-enforced Inquiry spam protection, durable email retries or live-payment readiness.
 
-**User checkpoint - 2026-11-09:** the user reported that the order correctly remained Completed after F5. This confirms persistence for that reported status case. Reviews, product/code saves and shipping/email acceptance remain pending.
+**User checkpoint - 2026-11-09:** the user reported that Completed remained after F5, the edited review reply retained its new content, and both Hide and Show states persisted after reload. These confirm the reported Admin persistence cases. Product/code saves, public review visibility and shipping/email acceptance remain pending.
 
 **Controlled acceptance (partial; retain for regression):**
 
 1. User-reported PASS: Completed remained after F5 on 2026-11-09. Retain Pending to Confirmed on a Sandbox order as another regression case; it was not separately reported. Shipping/email verification requires a controlled test recipient and remains separate.
-2. On a test review, save a reply and toggle visibility; reload after each action. A blank reply must fail without a saved change.
+2. User-reported PASS on 2026-11-09: the edited review reply, Hide state and Show state each persisted after reload. Retain blank-reply rejection and public visibility as separate regression checks; these were not reported.
 3. When testing products/codes, use disposable test records. Verify a confirmed save persists after reload; duplicate new product IDs must fail rather than overwrite an existing item.
 
 ## 0. Testing safeguards
