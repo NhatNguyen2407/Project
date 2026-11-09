@@ -6,8 +6,8 @@
 
 - Supabase currently reports Dioxyzine Frog Staging as INACTIVE. This does not establish that its data or Preview configuration is disposable.
 - The Preview build guard still requires a separate staging reference and matching URL. Production builds and GitHub CI's ordinary local build are exempt from that guard; the CI workflow does not connect to a staging database.
-- Current Vercel environment inspection is blocked by a team-access 403. The earlier Preview-to-Staging mapping above is historical until access is restored and its current URL/reference are checked.
-- Deletion is not cleared. First verify or retire the Preview dependency and establish whether any staging-only data must be retained. Do not point Preview at Production to remove this dependency.
+- Vercel team access was restored after the initial 403. Current Preview-only `STAGING_SUPABASE_REF` and `VITE_SUPABASE_URL` both still match this Staging project. No API key was needed for this check.
+- Keep Staging while that dependency exists. Deletion is not cleared: first retire or replace the Preview backend and establish whether any staging-only data must be retained. Do not point Preview at Production to remove this dependency.
 - This review made no deletion or environment change.
 
 ## Purpose

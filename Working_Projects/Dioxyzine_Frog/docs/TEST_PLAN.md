@@ -117,6 +117,7 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 - Reused the existing Admin fetch, role gate, RLS and shared Accordion. Added refresh and an explicit load-error/retry state. The view is read-only. It shows 25 matches at a time; Show more reveals the next group. Search/count cover the existing Admin batch, so server pagination is needed before exceeding the configured API row limit.
 - Verification: `pnpm test` 105/105 PASS, including search, unsafe-link rejection and server-render checks for exact counts, accessories `0`, escaped text, empty state and the initial display limit. Production build PASS with the existing bundle warning. `supabase/tests/admin_inquiry_access.sql` PASS inside a rolled-back transaction: anonymous reads denied, customer reads scoped to ownership, Admin reads both synthetic requests, and fixtures removed. No schema/policy change or persistent customer-record mutation was required.
 - Browser limitation: the cloud browser blocked the local fixture HTML protocol. Interactive expansion/search, responsive layout and signed-in Production behavior still require browser acceptance. Server-render checks are not interactive browser tests. Part 3 remains in progress.
+- Release `main@3023501`: GitHub Actions CI PASS and Vercel Production READY, with the deployment commit verified. Hosted anonymous `/admin` access redirected to Login and did not show Inquiry data. No Admin credentials were entered; signed-in acceptance remains pending.
 
 **Acceptance checklist (pending):**
 
