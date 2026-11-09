@@ -128,10 +128,10 @@ export function AdminPage() {
         updateData.tracking_code = trackingCode;
       }
 
-      const { error } = await supabase.from('orders').update(updateData).eq('id', order.id);
-      if (error) throw error;
+      const { data, error } = await supabase.from('orders').update(updateData).eq('id', order.id).select('id');
+      assertConfirmedMutation({ data, error }, order.id);
 
-      setPaypalOrders(paypalOrders.map(o =>
+      setPaypalOrders(current => current.map(o =>
         o.id === order.id ? { ...o, ...updateData } : o
       ));
 
@@ -176,12 +176,12 @@ export function AdminPage() {
 
   // Admin Reply Review
   const handleSaveReply = async (id) => {
-    const replyText = replyInputs[id];
+    const replyText = replyInputs[id]?.trim();
     if (!replyText) return toast.error("Vui lòng nhập câu trả lời!");
     try {
-      const { error } = await supabase.from('inquiries').update({ admin_reply: replyText }).eq('id', id);
-      if (error) throw error;
-      setOrders(orders.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
+      const { data, error } = await supabase.from('inquiries').update({ admin_reply: replyText }).eq('id', id).select('id');
+      assertConfirmedMutation({ data, error }, id);
+      setOrders(current => current.map(o => o.id === id ? { ...o, admin_reply: replyText } : o));
       toast.success("Đã phản hồi đánh giá!");
     } catch (err) { toast.error(err.message); }
   };
@@ -189,9 +189,9 @@ export function AdminPage() {
   // hide/Unhide Review
   const handleToggleReviewVisibility = async (id, isHidden) => {
     try {
-      const { error } = await supabase.from('inquiries').update({ is_hidden: !isHidden }).eq('id', id);
-      if (error) throw error;
-      setOrders(orders.map(o => o.id === id ? { ...o, is_hidden: !isHidden } : o));
+      const { data, error } = await supabase.from('inquiries').update({ is_hidden: !isHidden }).eq('id', id).select('id');
+      assertConfirmedMutation({ data, error }, id);
+      setOrders(current => current.map(o => o.id === id ? { ...o, is_hidden: !isHidden } : o));
       toast.success(!isHidden ? "Đã ẨN đánh giá này!" : "Đã HIỆN đánh giá này!");
     } catch (err) { toast.error(err.message); }
   };
@@ -231,6 +231,7 @@ export function AdminPage() {
 
   const handleSaveProduct = async (e) => {
     e.preventDefault();
+    if (isSavingProduct) return;
     setIsSavingProduct(true);
     try {
       let finalCoverUrl = productForm.image_cover;
@@ -259,8 +260,11 @@ export function AdminPage() {
       }
 
       const dataToSave = { ...productForm, cut_style: productForm.cut_style || null, image_cover: finalCoverUrl, images_gallery: finalGalleryUrls.join('|') };
-      const { error } = await supabase.from('products').upsert(dataToSave);
-      if (error) throw error;
+      const mutation = editingProduct
+        ? supabase.from('products').update(dataToSave).eq('id', editingProduct.id)
+        : supabase.from('products').insert(dataToSave);
+      const { data, error } = await mutation.select('id');
+      assertConfirmedMutation({ data, error }, dataToSave.id);
       
       await fetchData();
       setIsModalOpen(false);
@@ -292,10 +296,11 @@ export function AdminPage() {
       if (!finalData.usage_limit) finalData.usage_limit = null;
       if (!hasExpiration || !finalData.expires_at) finalData.expires_at = null; 
       else finalData.expires_at = new Date(finalData.expires_at).toISOString();
-      finalData.code = finalData.code.toUpperCase();
+      finalData.code = finalData.code.trim().toUpperCase();
 
-      const { error } = await supabase.from('vouchers').insert([finalData]);
-      if (error) throw error;
+      const { data, error } = await supabase.from('vouchers').insert([finalData]).select('id');
+      // Voucher IDs are assigned by the database.
+      assertConfirmedMutation({ data, error }, data?.[0]?.id);
       
       await fetchData();
       setIsVoucherModalOpen(false);

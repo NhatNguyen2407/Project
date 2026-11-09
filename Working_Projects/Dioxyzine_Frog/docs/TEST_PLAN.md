@@ -11,7 +11,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
 | 2. Auth, Profile and Wishlist | Complete: 2.1-2.4 implemented; 97 automated checks and SQL account-boundary/rollback checks PASS; five-group manual acceptance reported PASS on 2026-11-07 |
-| 3. Inquiry and Admin | In progress: 3.1 quantity correction accepted on 2026-11-07; 3.2 Admin Inquiry list/details implemented with automated and SQL checks PASS; signed-in browser acceptance and remaining Admin checks pending |
+| 3. Inquiry and Admin | In progress: 3.1 accepted; 3.2 signed-in list/details confirmed by the user on 2026-11-09; 3.3 confirmed Admin writes implemented, automated/SQL checks PASS; remaining acceptance and Inquiry/Admin work pending |
 | 4. PayPal Sandbox | Not tested in this review |
 
 | Part 1 issue | Change | Verification / remaining work |
@@ -93,7 +93,7 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 
 **Recovery:** the migration adds a private function and one Auth deletion trigger without rewriting existing rows. If deletion needs to be paused, deploy a handler returning 503 before reverting related code; do not restore the previous partial-anonymization pipeline. Database rollback removes the new trigger/function, but cannot restore an account the user has already deliberately deleted.
 
-**Next checkpoint:** Part 2 and the Part 3.1 quantity correction are accepted. Continue with the remaining Inquiry/Admin checks, starting with the submitted Inquiry in Admin. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
+**Next checkpoint:** Part 2 and the Part 3.1 quantity correction are accepted; the user confirmed the basic Part 3.2 Admin view. Validate the confirmed-save behavior in 3.3, then continue the remaining Inquiry/Admin review, including the trusted Inquiry submission boundary. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
 
 ## Part 3 review - 2026-11-07
 
@@ -119,12 +119,28 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 - Browser limitation: the cloud browser blocked the local fixture HTML protocol. Interactive expansion/search, responsive layout and signed-in Production behavior still require browser acceptance. Server-render checks are not interactive browser tests. Part 3 remains in progress.
 - Release `main@3023501`: GitHub Actions CI PASS and Vercel Production READY, with the deployment commit verified. Hosted anonymous `/admin` access redirected to Login and did not show Inquiry data. No Admin credentials were entered; signed-in acceptance remains pending.
 
-**Acceptance checklist (pending):**
+**User checkpoint - 2026-11-09:** the user reported the view working and supplied a signed-in screenshot with a request expanded, quantity `1` and accessories `0` visible. Basic list/details behavior is confirmed. Search, empty-state, keyboard and narrow-screen checks were not separately reported; retain the checklist for regression.
+
+**Acceptance checklist (remaining checks and regression):**
 
 1. Sign in as Admin, open Admin, select Inquiries and find the submitted test request by email or subject.
 2. Open it and compare customer details, product/size, quantity, accessories per unit and multiline notes with the submitted form. Accessories `0` must stay visible as `0`.
 3. Open the design reference and verify the expected image. Search for a nonexistent value, confirm the empty result, then clear the search.
 4. Refresh inquiries; reload the page, return to Inquiries and confirm the saved request remains. Check the view on a narrow screen and verify expansion with Enter/Space.
+
+### 3.3 Confirmed Admin writes - 2026-11-09
+
+- Confirmed defects: order status, review reply/visibility, product save and voucher creation checked only returned errors, so a zero-row response could still change the UI or report success. A shipping notification could follow an unconfirmed status update. Product upsert could overwrite a colliding new ID or recreate a product removed before an edit was saved.
+- All active Admin database writes now require exactly one returned ID through the existing confirmation helper. Failed or unconfirmed saves keep the form/visible records unchanged and cannot trigger the shipping email. Order/review state updates use the latest state. Product creation inserts; editing updates the original ID. Review replies reject whitespace-only input and voucher codes use trimmed uppercase text.
+- Verification: five executable handler tests failed against the old source and pass after the correction. The full suite is 110/110 PASS; production build PASS with the existing bundle warning. Tests use fake database/email services, including empty, absent, malformed, duplicate and denied responses, valid writes, mismatched shipping-order IDs, product create/edit paths and normalized inputs. No real notification was sent.
+- `supabase/tests/admin_inquiry_access.sql` PASS in a rolled-back transaction, including a customer's denied update returning zero rows and an Admin update returning the saved fixture ID. Existing read/ownership checks and fixture cleanup also pass. No schema, RLS policy, real customer row, catalog row or payment state was changed by these tests.
+- Implemented; controlled browser acceptance remains pending. This does not establish full Part 3 completion, server-enforced Inquiry spam protection, durable email retries or live-payment readiness.
+
+**Controlled acceptance (pending):**
+
+1. On a Sandbox test order, change Pending to Confirmed, reload and verify the saved status. Shipping/email verification requires a controlled test recipient and remains separate.
+2. On a test review, save a reply and toggle visibility; reload after each action. A blank reply must fail without a saved change.
+3. When testing products/codes, use disposable test records. Verify a confirmed save persists after reload; duplicate new product IDs must fail rather than overwrite an existing item.
 
 ## 0. Testing safeguards
 

@@ -6,6 +6,7 @@ declare
   admin_user uuid := gen_random_uuid();
   own_inquiry uuid := gen_random_uuid();
   other_inquiry uuid := gen_random_uuid();
+  changed integer;
   verified boolean := false;
 begin
   begin
@@ -39,6 +40,9 @@ begin
        or exists(select 1 from public.inquiries where id=other_inquiry) then
       raise exception 'Customer inquiry access crossed the account boundary';
     end if;
+    update public.inquiries set admin_reply='Forbidden fixture reply' where id=other_inquiry;
+    get diagnostics changed=row_count;
+    if changed<>0 then raise exception 'Customer could change another inquiry'; end if;
     reset role;
 
     perform set_config('request.jwt.claim.sub',admin_user::text,true);
@@ -46,6 +50,12 @@ begin
     set local role authenticated;
     if not public.is_admin() or (select count(*) from public.inquiries where id in(own_inquiry,other_inquiry))<>2 then
       raise exception 'Admin could not read both inquiry fixtures';
+    end if;
+    with saved as (
+      update public.inquiries set admin_reply='Admin fixture reply' where id=own_inquiry returning id
+    ) select count(*) into changed from saved;
+    if changed<>1 or not exists(select 1 from public.inquiries where id=own_inquiry and admin_reply='Admin fixture reply') then
+      raise exception 'Admin update did not return its saved inquiry';
     end if;
     reset role;
     verified := true;
