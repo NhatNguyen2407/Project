@@ -79,7 +79,7 @@ Inquiry submissions use the `submit-inquiry` Edge Function. It verifies reCAPTCH
 
 The repository includes automated tests and CI, but it also relies on manual end-to-end verification of payment, product, profile, and administration flows. See [TEST_PLAN.md](docs/TEST_PLAN.md).
 
-Recent tracked SQL changes include atomic account deletion and inquiry quantity guards. These files demonstrate the intended backend rules, but Git history alone does not establish the state of the hosted database. Do not reapply repository migrations to a live database without checking its existing schema and migration history. The [recovery notes](docs/RECOVERY_READINESS.md) document differences between tracked migration filenames and live records, as well as recovery checks that remain incomplete.
+Recent tracked SQL changes include atomic account deletion, Inquiry quantity guards and trusted Inquiry submission with restricted write permissions. These files demonstrate the intended backend rules, but Git history alone does not establish the state of the hosted database. Do not reapply repository migrations to a live database without checking its existing schema and migration history. The [recovery notes](docs/RECOVERY_READINESS.md) document differences between tracked migration filenames and live records, as well as recovery checks that remain incomplete.
 
 Vercel Preview is not automatically isolated from Production Supabase. Check environment configuration before using real accounts or attempting any data-changing tests.
 
