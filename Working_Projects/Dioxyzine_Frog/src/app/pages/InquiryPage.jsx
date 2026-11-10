@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useLocation } from 'react-router';
 import { motion, AnimatePresence } from 'motion/react';
 import { Send, CheckCircle, Loader2, Lock, Calculator, Layers, UploadCloud } from 'lucide-react';
@@ -6,7 +6,6 @@ import { useGoogleReCaptcha } from 'react-google-recaptcha-v3';
 
 import { api } from '../service/api';
 import { uploadImageToCloudinary } from '../service/cloudinary';
-import { supabase } from '../service/supabase';
 import { ToastNotification } from '../components/common_components/ToastNotification';
 import { TermsOfServiceModal } from '../components/common_components/TermsOfServiceModal';
 import { SEO } from '../components/common_components/SEO';
@@ -37,6 +36,7 @@ export function InquiryPage() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [showTermsOfServiceModal, setShowTermsOfServiceModal] = useState(false);
   const [toast, setToast] = useState({ show: false, msg: '', type: '' });
+  const submissionRef = useRef(null);
 
   const currentProduct = pricingMatrix[formData.productType];
   const availableSizes = currentProduct?.sizes || [];
@@ -141,24 +141,17 @@ export function InquiryPage() {
     try {
       const token = await executeRecaptcha('inquiry_submit');
 
-      const { data: verifyData, error: verifyError } =
-        await supabase.functions.invoke('verify-recaptcha', {
-          body: { token }
-        });
-
-      if (verifyError || !verifyData?.success) {
-        showToast('Security verification failed. Please try again.', 'error');
-        setStatus('idle');
-        return;
-      }
-
       const payload = {
         ...formData,
         ...quantities,
+        size: String(formData.size || ''),
+        termsAccepted: acceptedTerms,
         productName: currentProduct?.name || 'Custom Requirements'
       };
-      
-      await api.submitInquiry(payload);
+      const fingerprint = JSON.stringify(payload);
+      if (submissionRef.current?.fingerprint !== fingerprint) submissionRef.current = { id: crypto.randomUUID(), fingerprint };
+      await api.submitInquiry({ ...payload, token, submissionId: submissionRef.current.id });
+      submissionRef.current = null;
       
       showToast('Inquiry Sent Successfully!', 'success');
       setStatus('success');
@@ -172,7 +165,7 @@ export function InquiryPage() {
       });
     } catch (error) {
       console.error('Error:', error);
-      showToast('Connection error. Please try again later!', 'error');
+      showToast(error.message || 'Connection error. Please try again later!', 'error');
       setStatus('idle');
     }
   };

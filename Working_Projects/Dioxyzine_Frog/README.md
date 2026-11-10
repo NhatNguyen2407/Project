@@ -58,6 +58,8 @@ Other integrations may require their own configuration. Add values locally or th
 
 A local frontend does not reproduce the full checkout system by itself. Payment processing uses the Supabase Edge Functions under `supabase/functions/` and requires compatible backend configuration. PayPal is configured for Sandbox testing; a successful Sandbox checkout is not proof of live-payment readiness.
 
+Inquiry submissions use the `submit-inquiry` Edge Function. It verifies reCAPTCHA v3, validates customer fields and derives account ownership before calling a service-role-only save RPC. It reuses `RECAPTCHA_SECRET_KEY`; `RECAPTCHA_ALLOWED_HOSTNAMES` is an optional comma-separated list and defaults to `dioxyzinefrog.vercel.app`. Configure approved local/staging hosts on their own backend. See [TEST_PLAN.md](docs/TEST_PLAN.md) for the coordinated frontend/function/permission rollout and remaining browser checks. Sheets mirroring still uses the existing best-effort client path.
+
 ## Repository map
 
 | Path | Contents |
@@ -66,11 +68,11 @@ A local frontend does not reproduce the full checkout system by itself. Payment 
 | `src/app/components/` | Shared interface, layout, and storefront components |
 | `src/app/context/` | Auth, cart, products, wishlist, and language state |
 | `src/app/service/` | Supabase, API, and media integrations |
-| `supabase/functions/` | Payment creation/capture, account deletion, reCAPTCHA verification |
+| `supabase/functions/` | Payment creation/capture, account deletion, CAPTCHA verification and trusted Inquiry submission; shared count validation |
 | `supabase/migrations/` | Versioned SQL changes tracked in source |
 | `tests/` | Node-based tests for auth, account management, catalog, inquiries, wishlist, tracking, and payments |
 | `scripts/` | Backup inspection, restore preparation, and environment checks |
-| `supabase/tests/` | SQL regression checks for account permissions, deletion, and inquiry quantities |
+| `supabase/tests/` | SQL regression checks for account permissions, deletion, Inquiry quantities and trusted submission/retry/rate limits |
 | `docs/` | Audits, test plan, inventory, preview isolation, recovery notes |
 
 ## Testing and operational cautions

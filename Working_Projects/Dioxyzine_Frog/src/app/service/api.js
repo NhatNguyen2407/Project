@@ -20,30 +20,18 @@ export const api = {
   submitInquiry: async (data) => {
     try {
       const quantities = getInquiryQuantities(data);
-      const { data: { user } } = await supabase.auth.getUser();
+      if (!data.token || !data.submissionId || data.termsAccepted !== true) throw new Error('Please complete security verification and accept the terms.');
+      const { data: saved, error } = await supabase.functions.invoke('submit-inquiry', { body: { ...data, ...quantities }, timeout: 35000 });
+      if (error) {
+        let details;
+        try { details = await error.context?.clone().json(); } catch { /* A transport failure has no JSON response. */ }
+        throw new Error(details?.message || 'Inquiry could not be saved. Please try again.');
+      }
+      if (!saved?.success || saved.id !== data.submissionId.toLowerCase()) throw new Error('Save could not be confirmed. Please retry.');
 
-      const { error } = await supabase
-        .from('inquiries')
-        .insert([
-          {
-            user_id: user ? user.id : null, //import id for display on profile
-            subject: data.subject,
-            customer_name: data.customerName,
-            customer_email: data.customerEmail,
-            contact_info: data.contactInfo,
-            product_name: data.productName,
-            size: data.size || null,
-            quantity: quantities.quantity,
-            accessory_qty: quantities.accessoryQty,
-            image_link: data.imageLink,
-            note: data.note || null
-          }
-        ]);
-
-      if (error) throw error;
-
-      // backup in google sheets
-      const payload = { type: 'inquiry', ...data, ...quantities };
+      // shortcut: Sheets remains best-effort until the backend outbox step.
+      const { token, submissionId, termsAccepted, ...backup } = data;
+      const payload = { type: 'inquiry', ...backup, ...quantities };
       fetch(SCRIPT_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
