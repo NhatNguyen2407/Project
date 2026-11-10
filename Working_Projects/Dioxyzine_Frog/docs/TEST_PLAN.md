@@ -1,6 +1,6 @@
 # Dioxyzine Frog - Baseline and Regression Test Plan
 
-**Created:** 2026-10-14 | **Updated:** 2026-11-09\
+**Created:** 2026-10-14 | **Updated:** 2026-11-10\
 **Scope:** Current four-part functional review, with the older baseline retained below.
 
 ## Storefront review - 2026-11-04
@@ -11,7 +11,7 @@ I am prioritizing functional reliability in this four-part review. On 2026-11-04
 | --- | --- |
 | 1. Products and cart | Functional scope complete; 25 automated tests and production build PASS; hosted checks recorded below; product content and Cut Style classification deferred |
 | 2. Auth, Profile and Wishlist | Complete: 2.1-2.4 implemented; 97 automated checks and SQL account-boundary/rollback checks PASS; five-group manual acceptance reported PASS on 2026-11-07 |
-| 3. Inquiry and Admin | In progress: 3.1 accepted; 3.2 signed-in list/details confirmed; 3.3 status/review persistence, product create/edit/delete and cover/Gallery saves verified on 2026-11-09; remaining controlled checks and trusted Inquiry submission pending |
+| 3. Inquiry and Admin | In progress: 3.1 accepted; 3.2 signed-in list/details confirmed; 3.3 status/review persistence, product create/edit/delete, cover/Gallery saves, duplicate-ID rejection and Promo creation/deactivation verified or user-accepted through 2026-11-10; remaining controlled checks and trusted Inquiry submission pending |
 | 4. PayPal Sandbox | Not tested in this review |
 
 | Part 1 issue | Change | Verification / remaining work |
@@ -93,7 +93,7 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 
 **Recovery:** the migration adds a private function and one Auth deletion trigger without rewriting existing rows. If deletion needs to be paused, deploy a handler returning 503 before reverting related code; do not restore the previous partial-anonymization pipeline. Database rollback removes the new trigger/function, but cannot restore an account the user has already deliberately deleted.
 
-**Next checkpoint:** Part 2 and the Part 3.1 quantity correction are accepted; the user confirmed the basic Part 3.2 Admin view. Validate the confirmed-save behavior in 3.3, then continue the remaining Inquiry/Admin review, including the trusted Inquiry submission boundary. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
+**Next checkpoint:** Parts 1 and 2 are complete within the current functional scope. Part 3.1 is accepted, the basic Part 3.2 Admin view is confirmed, and the main product/Promo/status/review-save cases in 3.3 have passed the recorded checks. Next, verify review visibility and the saved reply on the public product page. Continue the trusted Inquiry submission boundary and controlled email/Sheets failure checks before closing Part 3. Product content and Cut Style classification remain deferred; Part 4 PayPal Sandbox has not started in this review.
 
 ## Part 3 review - 2026-11-07
 
@@ -142,8 +142,8 @@ The checklist below is retained for regression testing. Use controlled inboxes a
 
 1. User-reported PASS: Completed remained after F5 on 2026-11-09. Retain Pending to Confirmed on a Sandbox order as another regression case; it was not separately reported. Shipping/email verification requires a controlled test recipient and remains separate.
 2. User-reported PASS on 2026-11-09: the edited review reply, Hide state and Show state each persisted after reload. Retain blank-reply rejection and public visibility as separate regression checks; these were not reported.
-3. Product create/edit/delete and cover-image save: user-reported PASS, supported by screenshots, the earlier deletion check, and scoped database/Storage verification on 2026-11-09. The edited test product retained price `2`, stock `0` and its uploaded cover. Gallery add/save/clear is confirmed by paired database/Storage reads: two saved image URLs with both objects present, then zero Gallery URLs after clearing, with the cover retained. Gallery rendering after reload and duplicate-ID rejection remain separate pending browser checks. The user can remove the retained test product after verification; cleanup is not yet confirmed. Clearing Gallery removes its saved references; physical deletion of the uploaded files was not tested.
-4. Promo creation: user-reported PASS; a scoped read confirmed the supplied code's discount and limit, with its active flag enabled. Disabling/reloading and applying the discount at Checkout were not separately established by this verification.
+3. Product create/edit/delete and cover-image save: user-reported PASS, supported by screenshots, the earlier deletion check, and scoped database/Storage verification on 2026-11-09. The edited test product retained price `2`, stock `0` and its uploaded cover. Gallery add/save/clear is confirmed by paired database/Storage reads: two saved image URLs with both objects present, then zero Gallery URLs after clearing, with the cover retained. Duplicate-ID rejection was confirmed by the user on 2026-11-10; a scoped read retained the original title and price after the rejected creation attempt. Gallery rendering after reload remains a separate browser regression check. The user can remove the retained test product after verification; cleanup is not yet confirmed. Clearing Gallery removes its saved references; physical deletion of the uploaded files was not tested.
+4. Promo creation and deactivation: user-reported PASS; scoped reads confirmed the supplied code's discount and limit, initially enabled, then `is_active = false` after the user disabled it. This follow-up is recorded on 2026-11-10 and closes the pending saved-deactivation check. Applying or rejecting the code at Checkout remains separate Part 4 acceptance.
 
 ## 0. Testing safeguards
 
